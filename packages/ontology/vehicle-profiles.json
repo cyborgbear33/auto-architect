@@ -1,0 +1,34 @@
+{
+  "vehicles": {
+    "veh:jeep-renegade-2015-latitude": {
+      "make": "Jeep",
+      "model": "Renegade",
+      "year": 2015,
+      "trim": "Latitude",
+      "engineFamily": "fca-tigershark-2.4",
+      "obdProtocol": "ISO 15765-4 (CAN, 500 kbps)",
+      "notes": "2.4L Tigershark MultiAir2 (sales code ED6/ED8/EDD/EDE range). In scope for Customer Satisfaction Notifications W80 (oil consumption inspection) and W84 (PCM reprogramming) — see known-campaigns.json."
+    },
+    "veh:silverado-tbd": {
+      "make": "Chevrolet",
+      "model": "Silverado",
+      "year": null,
+      "trim": null,
+      "engineFamily": "gm-ecotec3-tbd",
+      "obdProtocol": null,
+      "notes": "Stub profile proving the multi-vehicle extension point. Fill in year/trim/VIN and confirm the real GM engine family (e.g. EcoTec3 5.3L / 6.2L / Duramax) once the truck is available; add any GM-specific cartridge beside fca-tigershark-2.4.ts without touching the generic base TBox."
+    }
+  },
+  "engineFamilies": {
+    "fca-tigershark-2.4": {
+      "label": "FCA Tigershark 2.4L MultiAir2 (Jeep Renegade / Compass, Fiat 500X, Ram ProMaster City)",
+      "view": "fca-tigershark-2.4",
+      "cartridges": ["misfire", "lean-fuel", "evap", "cam-crank-correlation", "fca-tigershark-2.4"]
+    },
+    "gm-ecotec3-tbd": {
+      "label": "GM EcoTec3 family (stub — confirm exact engine once Silverado is added)",
+      "view": "generic",
+      "cartridges": ["misfire", "lean-fuel", "evap", "cam-crank-correlation"]
+    }
+  }
+}

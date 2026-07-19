@@ -1,0 +1,58 @@
+import { getEngineFamilyCartridges } from "@auto/ontology";
+import { misfireCartridge } from "./misfire.ts";
+import { leanFuelCartridge } from "./lean-fuel.ts";
+import { evapCartridge } from "./evap.ts";
+import { camCrankCorrelationCartridge } from "./cam-crank-correlation.ts";
+import { fcaTigershark24Cartridge } from "./fca-tigershark-2.4.ts";
+import { gmEcotec3StubCartridge } from "./gm-ecotec3-stub.ts";
+import type { Cartridge, FramingResult, VehicleView } from "./types.ts";
+
+/** Every cartridge known to the app, keyed by name (packages/ontology/vehicle-profiles.json references these names). */
+export const cartridgeRegistry: Record<string, Cartridge> = {
+  [misfireCartridge.name]: misfireCartridge,
+  [leanFuelCartridge.name]: leanFuelCartridge,
+  [evapCartridge.name]: evapCartridge,
+  [camCrankCorrelationCartridge.name]: camCrankCorrelationCartridge,
+  [fcaTigershark24Cartridge.name]: fcaTigershark24Cartridge,
+  [gmEcotec3StubCartridge.name]: gmEcotec3StubCartridge,
+};
+
+export const allCartridges: Cartridge[] = Object.values(cartridgeRegistry);
+
+/**
+ * Resolve the cartridges (and therefore the classes) that apply to a vehicle,
+ * purely from its engine family — the direct analogue of garden's `views.*`
+ * TBox slices, applied per-vehicle instead of per-call-type. A Silverado
+ * never loads Tigershark-only classes, and vice versa.
+ */
+export function resolveCartridgesForEngineFamily(engineFamilyId: string): Cartridge[] {
+  const names = getEngineFamilyCartridges(engineFamilyId);
+  return names.map((name) => {
+    const cartridge = cartridgeRegistry[name];
+    if (!cartridge) throw new Error(`Unknown cartridge "${name}" referenced by engine family "${engineFamilyId}"`);
+    return cartridge;
+  });
+}
+
+/** All DL classes any resolved cartridge's framing rules can trigger — used by classify/lint. */
+export function classesForCartridges(cartridges: Cartridge[]): string[] {
+  const out = new Set<string>();
+  for (const c of cartridges) for (const cls of c.requires.classes) out.add(cls);
+  return [...out];
+}
+
+/**
+ * Turn a proven fault class into a diagnostic Problem draft, by asking every
+ * resolved cartridge's framing rules for the highest-priority match. Returns
+ * `null` when no loaded cartridge frames that class (e.g. it's a raw
+ * Symptom/Condition, not a fault syndrome — those never get framed).
+ */
+export function draftForClass(vehicle: VehicleView, className: string, cartridges: Cartridge[]): FramingResult | null {
+  let best: { priority: number; build: (v: VehicleView) => FramingResult } | undefined;
+  for (const cartridge of cartridges) {
+    for (const rule of cartridge.framing) {
+      if (rule.whenClass === className && (!best || rule.priority > best.priority)) best = rule;
+    }
+  }
+  return best ? best.build(vehicle) : null;
+}

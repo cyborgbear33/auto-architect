@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install LOGOS engine from a pinable tag
+        run: |
+          python -m pip install -U pip
+          python -m pip install "logos[schema] @ git+https://github.com/cyborgbear33/metalanguage.git@logos-v0.1.0#subdirectory=engine"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: Test (TS packages/apps)
+        run: pnpm -r test
+
+      - name: Build web UI
+        run: pnpm --filter @auto/web-ui build
+
+      - name: Install obd-gateway (Python) deps
+        run: python -m pip install -r apps/obd-gateway/requirements-dev.txt
+
+      - name: Test obd-gateway (Python)
+        run: python -m pytest apps/obd-gateway
+
+  ontology-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install LOGOS engine from a pinable tag
+        run: |
+          python -m pip install -U pip
+          python -m pip install "logos[schema] @ git+https://github.com/cyborgbear33/metalanguage.git@logos-v0.1.0#subdirectory=engine"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Hard-fail ontology lint (well-formedness + catalog/cartridge parity)
+        run: pnpm lint:ontology
+        env:
+          LOGOS_PYTHON_BIN: python

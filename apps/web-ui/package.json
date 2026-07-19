@@ -1,0 +1,36 @@
+{
+  "name": "@auto/web-ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "React UI for auto-architect. TanStack Query owns server state (vehicles, DTCs, recognition, problems); Redux owns durable client-only UI state (selected vehicle, debug mode).",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@auto/semantic-types": "workspace:*",
+    "@reduxjs/toolkit": "^2.5.0",
+    "@tanstack/react-query": "^5.62.11",
+    "@tanstack/react-router": "^1.95.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-redux": "^9.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  }
+}

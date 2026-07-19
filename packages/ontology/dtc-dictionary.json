@@ -1,0 +1,31 @@
+{
+  "disclaimer": "SAE-generic (Pxxxx, digit 2 = 0) codes and their meanings are standardized (SAE J2012) and safe to treat as universal. Manufacturer-enhanced codes (digit 2 = 1, e.g. FCA P1xxx) are NOT reproduced here beyond what public TSB summaries describe, and must be verified against a real service manual / AlfaOBD readout before acting — do not treat this dictionary as authoritative for enhanced codes.",
+  "codes": {
+    "P0300": { "description": "Random/Multiple Cylinder Misfire Detected", "concept": "CylinderMisfire", "sae": true },
+    "P0301": { "description": "Cylinder 1 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
+    "P0302": { "description": "Cylinder 2 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
+    "P0303": { "description": "Cylinder 3 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
+    "P0304": { "description": "Cylinder 4 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
+    "P0016": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 1 Sensor A)", "concept": "CamCrankCorrelation", "sae": true },
+    "P0017": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 1 Sensor B)", "concept": "CamCrankCorrelation", "sae": true },
+    "P0018": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 2 Sensor A)", "concept": "CamCrankCorrelation", "sae": true },
+    "P0171": { "description": "System Too Lean (Bank 1)", "concept": "LeanCodeBank1", "sae": true },
+    "P0174": { "description": "System Too Lean (Bank 2)", "concept": "LeanCodeBank2", "sae": true },
+    "P0442": { "description": "Evaporative Emission System Leak Detected (Small Leak)", "concept": "EvapCodeSmall", "sae": true },
+    "P0455": { "description": "Evaporative Emission System Leak Detected (Large Leak)", "concept": "EvapCodeLarge", "sae": true },
+    "P0011": {
+      "description": "Intake Camshaft Position Timing Over-Advanced (Bank 1)",
+      "concept": "MultiAirFault",
+      "sae": true,
+      "engineFamily": "fca-tigershark-2.4",
+      "note": "Standard SAE cam-timing code that commonly trips on MultiAir electrohydraulic valve actuation faults. Per TSB 05047457A, rule out low oil / wrong viscosity / dirty oil / a clogged oil-galley screen BEFORE condemning the MultiAir actuator."
+    },
+    "P0014": {
+      "description": "Exhaust Camshaft Position Timing Over-Advanced (Bank 1)",
+      "concept": "MultiAirFault",
+      "sae": true,
+      "engineFamily": "fca-tigershark-2.4",
+      "note": "See P0011 note — same TSB 05047457A pre-check order applies."
+    }
+  }
+}

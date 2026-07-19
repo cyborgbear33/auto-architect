@@ -1,0 +1,32 @@
+{
+  "name": "auto-architect",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Ontology-first vehicle diagnostics system. The ontology owns fault meaning; OBDLink MX+ reports validated observations; the API classifies and ranks; the UI explains and audits. Reuses the LOGOS reasoning engine from the sibling metalanguage repo.",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "setup:solver": "node scripts/setup-solver.mjs",
+    "lint:ontology": "node scripts/lint-ontology.mjs",
+    "dev:api": "pnpm --filter @auto/api dev",
+    "dev:api:memory": "STORAGE_DRIVER=memory pnpm dev:api",
+    "dev:ui": "pnpm --filter @auto/web-ui dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "obd-gateway:install": "cd apps/obd-gateway && ../../.venv/bin/pip install -r requirements-dev.txt",
+    "obd-gateway:test": "cd apps/obd-gateway && ../../.venv/bin/python3 -m pytest",
+    "obd-gateway:scan": "cd apps/obd-gateway && ../../.venv/bin/python3 -m obd_gateway scan",
+    "obd-gateway:watch": "cd apps/obd-gateway && ../../.venv/bin/python3 -m obd_gateway watch",
+    "postinstall": "node scripts/setup-solver.mjs --check"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

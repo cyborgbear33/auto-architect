@@ -1,0 +1,31 @@
+{
+  "name": "@auto/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Fastify diagnostic API: vehicle-profile-aware recognition, policy safety holds, ranked next-step solving, and the mutation gate for logging repairs.",
+  "main": "./src/server.ts",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.1",
+    "@auto/cartridges": "workspace:*",
+    "@auto/logos-bridge": "workspace:*",
+    "@auto/ontology": "workspace:*",
+    "@auto/semantic-types": "workspace:*",
+    "@auto/validation": "workspace:*",
+    "fastify": "^5.2.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

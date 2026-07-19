@@ -1,0 +1,79 @@
+[
+  {
+    "id": "ontology",
+    "kind": "Ontology",
+    "subtypes": {
+      "Engine": "IndependentContinuant",
+      "Symptom": "IndependentContinuant",
+      "Condition": "IndependentContinuant",
+      "CylinderMisfire": "Symptom",
+      "HighLoad": "Condition"
+    },
+    "roles": {
+      "hasDtc": { "domain": "Engine", "range": "Symptom" },
+      "hasCondition": { "domain": "Engine", "range": "Condition" }
+    },
+    "classes": {
+      "MisfireUnderLoad": { "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad" }
+    }
+  },
+  {
+    "id": "R_stop_driving",
+    "kind": "Rule",
+    "if": "MisfireUnderLoad(x)",
+    "then": "Ought(StopDrivingAndDiagnose(owner, x))",
+    "priority": 10,
+    "logic": "FOL⊗ML",
+    "level": "L2"
+  },
+  {
+    "id": "C_a1",
+    "kind": "Claim",
+    "formula": "Engine(jeep_renegade_engine)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.99,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  },
+  {
+    "id": "C_a2",
+    "kind": "Claim",
+    "formula": "CylinderMisfire(p0304)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.95,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  },
+  {
+    "id": "C_a3",
+    "kind": "Claim",
+    "formula": "hasDtc(jeep_renegade_engine, p0304)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.95,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  },
+  {
+    "id": "C_a4",
+    "kind": "Claim",
+    "formula": "HighLoad(high_load_1)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.9,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  },
+  {
+    "id": "C_a5",
+    "kind": "Claim",
+    "formula": "hasCondition(jeep_renegade_engine, high_load_1)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.9,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  }
+]

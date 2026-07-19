@@ -1,0 +1,41 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "Trend": "IndependentContinuant",
+    "CylinderMisfire": "Symptom",
+    "CamCrankCorrelation": "Symptom",
+    "LeanCodeBank1": "Symptom",
+    "LeanCodeBank2": "Symptom",
+    "EvapCodeSmall": "Symptom",
+    "EvapCodeLarge": "Symptom",
+    "MultiAirFault": "Symptom",
+    "HighLoad": "Condition",
+    "PositiveFuelTrim": "Condition",
+    "LowOilPressure": "Condition",
+    "OilLevelDecline": "Trend"
+  },
+  "roles": {
+    "hasDtc": { "domain": "Engine", "range": "Symptom" },
+    "hasCondition": { "domain": "Engine", "range": "Condition" },
+    "hasTrend": { "domain": "Engine", "range": "Trend" }
+  },
+  "classes": {
+    "MisfireUnderLoad": { "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad" },
+    "MultiAirOilStarvation": { "equivalentTo": "Engine ⊓ ∃hasDtc.MultiAirFault ⊓ ∃hasCondition.LowOilPressure" }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": ["Engine"],
+      "p0304": ["CylinderMisfire"],
+      "high_load_1": ["HighLoad"]
+    },
+    "roles": [
+      ["hasDtc", "jeep_renegade_engine", "p0304"],
+      ["hasCondition", "jeep_renegade_engine", "high_load_1"]
+    ]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": ["MisfireUnderLoad", "MultiAirOilStarvation"]
+}
