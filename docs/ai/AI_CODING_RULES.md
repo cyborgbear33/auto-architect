@@ -87,6 +87,11 @@ Prefer these before inventing new ones:
 9. **Ground DTC/PID meaning in real standards** (SAE J1979 / J2012, ISO 15031,
    cited TSBs) — never invent descriptions. See
    [`HARDWARE_STANDARDS.md`](HARDWARE_STANDARDS.md).
+10. **Keep `packages/logos-bridge` in sync with garden-architect's copy.**
+    `bridge.ts` / `serve-client.ts` / `errors.ts` are a shared, domain-agnostic
+    seam by design — port real fixes/protocol changes both ways. Run
+    `pnpm check:bridge-drift` (advisory) when you touch these files. See
+    [`TESTING_DEV_GUIDE.md`](TESTING_DEV_GUIDE.md).
 
 ---
 

@@ -78,3 +78,12 @@ jobs:
         run: pnpm lint:ontology
         env:
           LOGOS_PYTHON_BIN: python
+
+      # Real-LOGOS smoke: exercises the actual `python3 -m logos realize|reason`
+      # subprocess against the checked-in misfire fixtures, plus the schema
+      # fail-fast path — catches @auto/logos-bridge <-> engine wire drift that
+      # FakeLogosBridge-based unit tests cannot see. Self-skips outside this job.
+      - name: Real-LOGOS integration tests (logos-bridge)
+        run: pnpm --filter @auto/logos-bridge test
+        env:
+          LOGOS_PYTHON_BIN: python

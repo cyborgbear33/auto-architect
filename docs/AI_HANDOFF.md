@@ -68,6 +68,17 @@ cartridge addition, not a rewrite.
 3. `obd-gateway` never imports the bridge or classifies faults — it only POSTs
    validated observations (same edge rule as garden's edge-gateway).
 
+**Keeping the seam in sync:** `@auto/logos-bridge` and `@garden/logos-bridge`
+are two independent copies of the same domain-agnostic transport/salvage
+logic (`bridge.ts`, `serve-client.ts`, `errors.ts`), not a shared package —
+there is currently no automated way to catch one side fixing a real LOGOS
+wire bug and forgetting to port it to the other. `pnpm check:bridge-drift`
+(also the last, advisory-only step of `pnpm healthcheck`) diffs those files
+against a garden-architect checkout next to this repo as a reminder, not a
+gate. If this project and garden-architect both stabilize further, consider
+extracting a real shared `@seam/logos-bridge-core` package instead of two
+hand-synced copies — tracked in `FUTURE_FEATURES.md`.
+
 ---
 
 ## 3. Setup / configuration
@@ -149,6 +160,8 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Generic cartridges (misfire, lean, EVAP, cam/crank) | shipped | `packages/cartridges/src/*.ts` |
 | FCA MultiAir cartridge + GM EcoTec3 stub | shipped | `fca-tigershark-2.4.ts`, `gm-ecotec3-stub.ts` |
 | `@auto/logos-bridge` + `FakeLogosBridge` | shipped | `packages/logos-bridge` |
+| Real-LOGOS integration tests (realize/reason/schema), run for real in CI | shipped | `packages/logos-bridge/src/*-integration.test.ts`, `.github/workflows/ci.yml` |
+| logos-bridge drift check vs garden-architect (advisory) | shipped | `scripts/check-bridge-drift.mjs` |
 | Fastify API (vehicles, observations, recognition, actions) | shipped | `apps/api` |
 | In-memory store + seed Jeep | shipped | `apps/api/src/store` |
 | Policy safety hold (`clear-codes-and-drive`) | shipped | `PolicyService` + Diagnosis UI |

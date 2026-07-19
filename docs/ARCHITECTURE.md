@@ -218,10 +218,16 @@ Operator detail: [`apps/obd-gateway/README.md`](../apps/obd-gateway/README.md).
 - Lint/format: Biome (`pnpm lint`) — see `docs/ai/CODE_STANDARDS.md`
 - Python: pytest (`pnpm obd-gateway:test`)
 - Ontology: `pnpm lint:ontology` (LOGOS well-formedness + catalog/cartridge parity)
-- One-shot local gate: `pnpm healthcheck` (typecheck + biome + tests + ontology + gateway + UI build)
+- Real-LOGOS smoke: `packages/logos-bridge/src/*-integration.test.ts` (realize/reason/schema
+  against the checked-in fixtures) — self-skip without LOGOS, run for real in the
+  `ontology-lint` CI job right after ontology lint
+- Bridge-drift (advisory): `pnpm check:bridge-drift` vs garden-architect's `@garden/logos-bridge`
+- One-shot local gate: `pnpm healthcheck` (typecheck + biome + tests + ontology + gateway + UI build + drift check)
 - CI: `.github/workflows/ci.yml` — `verify` + `ontology-lint` jobs
 
 Unit tests that need LOGOS behavior without Python inject `FakeLogosBridge`.
+The integration tests above are the exception — they run the real subprocess
+specifically to catch wire drift `FakeLogosBridge` cannot see.
 
 ---
 

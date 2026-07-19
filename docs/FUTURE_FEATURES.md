@@ -54,7 +54,7 @@ When proposing a new feature:
 | Continuous drive session recorder (watch → session object) | planned | medium | `watch` posts batches; a first-class DriveSession would group them for journals. | obd-gateway watch, ObservationsService, Journal UI |
 | Android/companion read-only client | planned | low | Nice for under-hood use; web-ui first. | API read endpoints only |
 | Export diagnostic report (Markdown / print-to-PDF) | planned | medium | Compose recognition + ranked actions + decisions into a shareable shop note. | DecisionRecord, verbalize, Journal |
-| Real-LOGOS integration tests in CI (beyond ontology-lint) | planned | medium | Unit tests use FakeLogosBridge; one smoke realize/reason/solve job against real LOGOS would catch wire drift. | fixtures under `packages/ontology/fixtures`, CI |
+| Extract a real shared `@seam/logos-bridge-core` package instead of two hand-synced copies | planned | low | `pnpm check:bridge-drift` is an advisory reminder, not a fix — a real shared package would remove the sync burden entirely once both apps' bridge needs stabilize. | `packages/logos-bridge`, garden-architect's `@garden/logos-bridge`, `scripts/check-bridge-drift.mjs` |
 | Policy library expansion (e.g. forbid clear-codes under LowOilPressureStallRisk) | planned | medium | Only clear-codes-and-drive + misfire is wired as the demo hold. | `PolicyService`, reason fixtures |
 | Ontology browser page (read-only TBox / views / DTC dictionary) | planned | low | Useful for debugging; garden has a full Ontology page — keep auto's lighter. | `@auto/ontology` loaders, new route |
 | Multi-vehicle comparison dashboard | planned | low | Only valuable once ≥2 real vehicles exist. | VehicleSwitcher, recognition summaries |
@@ -81,6 +81,8 @@ When proposing a new feature:
 | FakeLogosBridge unit tests across API services | 2026-07 | `packages/logos-bridge`, `apps/api/src/services/*.test.ts` |
 | Public GitHub repo | 2026-07 | https://github.com/cyborgbear33/auto-architect |
 | Project documentation set (handoff, architecture, AI guides, backlog) | 2026-07 | `docs/` |
+| Real-LOGOS integration tests in CI (realize/reason/schema, beyond ontology-lint) | 2026-07 | `packages/logos-bridge/src/{realize,reason,schema}-integration.test.ts`, `.github/workflows/ci.yml`, `TESTING_DEV_GUIDE.md` |
+| Advisory logos-bridge drift check vs garden-architect | 2026-07 | `scripts/check-bridge-drift.mjs`, `pnpm check:bridge-drift`, wired into `pnpm healthcheck` |
 
 ---
 

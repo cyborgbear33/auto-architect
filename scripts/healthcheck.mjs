@@ -51,6 +51,8 @@ function step(name, fn) {
     console.log(yellow(`⊘ ${name}: skipped${outcome.detail ? ` — ${outcome.detail}` : ""}`));
   } else if (outcome.ok) {
     console.log(green(`✓ ${name}`));
+  } else if (outcome.advisory) {
+    console.log(yellow(`⚠ ${name}: advisory — see output above (does not fail healthcheck)`));
   } else {
     console.log(red(`✗ ${name}`));
     if (outcome.detail) console.log(outcome.detail);
@@ -117,13 +119,31 @@ step("web-ui build", () => {
   return { ok: r.ok, detail: r.ok ? undefined : "web-ui build failed" };
 });
 
+// Advisory only: garden-architect's logos-bridge twin may not be checked out
+// next to this repo (never on CI), and drift is informational, not a bug by
+// itself — see scripts/check-bridge-drift.mjs. Never contributes to `failed`.
+step("logos-bridge seam drift vs garden-architect (advisory)", () => {
+  const r = run("node", ["scripts/check-bridge-drift.mjs", "--quiet"]);
+  process.stdout.write(r.stdout);
+  process.stderr.write(r.stderr);
+  // check-bridge-drift.mjs always exits 0 by design (it's a reminder, not a
+  // gate) — this step is unconditionally advisory, never part of `failed`.
+  return { ok: true, advisory: true };
+});
+
 console.log(cyan("\n── summary ──────────────────────────────"));
 let failed = 0;
 for (const r of results) {
-  const mark = r.skipped ? yellow("SKIP") : r.ok ? green("PASS") : red("FAIL");
+  const mark = r.skipped
+    ? yellow("SKIP")
+    : r.advisory
+      ? yellow("INFO")
+      : r.ok
+        ? green("PASS")
+        : red("FAIL");
   const extra = r.skipped && r.detail ? ` (${r.detail})` : "";
   console.log(`  ${mark}  ${r.name}${extra}`);
-  if (!r.ok && !r.skipped) failed += 1;
+  if (!r.ok && !r.skipped && !r.advisory) failed += 1;
 }
 
 if (failed > 0) {
