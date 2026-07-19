@@ -1,5 +1,4 @@
 import pytest
-
 from obd_gateway.batch import build_observation_batch, parse_manual_pids
 
 

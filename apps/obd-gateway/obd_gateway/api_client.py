@@ -4,6 +4,7 @@ in obd-gateway — it never calls the LOGOS bridge and never writes to a
 store directly, matching the "edge devices only report validated
 observations" rule (see docs/AI_HANDOFF.md).
 """
+
 from __future__ import annotations
 
 import logging
@@ -23,7 +24,9 @@ class ApiClientError(RuntimeError):
 
 
 class ApiClient:
-    def __init__(self, base_url: str, timeout_seconds: float = 10.0, session: requests.Session | None = None):
+    def __init__(
+        self, base_url: str, timeout_seconds: float = 10.0, session: requests.Session | None = None
+    ):
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
         self.session = session or requests.Session()

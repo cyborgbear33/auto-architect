@@ -4,10 +4,11 @@ touches hardware — everything downstream of `read_*` deals in plain
 dicts/tuples so `batch.py` and the CLI stay unit-testable without an
 OBDLink MX+ plugged in.
 """
+
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import obd
@@ -19,7 +20,7 @@ logger = logging.getLogger("obd_gateway.client")
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 class ObdGatewayClient:
@@ -35,7 +36,11 @@ class ObdGatewayClient:
     def connect(self) -> None:
         if self._connection is not None:
             return
-        logger.info("connecting to OBD adapter port=%s protocol=%s", self.config.obd_port, self.config.obd_protocol)
+        logger.info(
+            "connecting to OBD adapter port=%s protocol=%s",
+            self.config.obd_port,
+            self.config.obd_protocol,
+        )
         self._connection = obd.OBD(
             portstr=self.config.obd_port,
             baudrate=self.config.obd_baudrate,
@@ -65,7 +70,9 @@ class ObdGatewayClient:
         conn = self._require_connection()
         supported_keys, unsupported_keys = resolve_pid_keys(pid_keys)
         for key in unsupported_keys:
-            logger.warning("skipping %s — not a standard Mode 01 PID, pass it via --manual-pid instead", key)
+            logger.warning(
+                "skipping %s — not a standard Mode 01 PID, pass it via --manual-pid instead", key
+            )
 
         readings: list[dict[str, Any]] = []
         for key in supported_keys:
@@ -98,7 +105,9 @@ class ObdGatewayClient:
             pending = conn.query(obd.commands.GET_CURRENT_DTC)
             if not pending.is_null():
                 for code, description in pending.value:
-                    dtcs.append({"code": code, "status": "pending", "description": description or None})
+                    dtcs.append(
+                        {"code": code, "status": "pending", "description": description or None}
+                    )
         return dtcs
 
     def read_vin(self) -> str | None:

@@ -43,6 +43,12 @@ jobs:
       - name: Install obd-gateway (Python) deps
         run: python -m pip install -r apps/obd-gateway/requirements-dev.txt
 
+      - name: Lint obd-gateway (Ruff)
+        run: |
+          cd apps/obd-gateway
+          python -m ruff check .
+          python -m ruff format --check .
+
       - name: Test obd-gateway (Python)
         run: python -m pytest apps/obd-gateway
 

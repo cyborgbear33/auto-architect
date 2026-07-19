@@ -3,6 +3,7 @@ Keep the gateway command map aligned with the thin SAE pid-dictionary seed
 owned by packages/ontology. Ontology is the source of truth for units /
 J1979 metadata; python-OBD command binding stays here.
 """
+
 from __future__ import annotations
 
 import json
@@ -29,7 +30,9 @@ def test_seed_mode01_pids_are_in_standard_commands():
     for key, entry in _load_pid_seed().items():
         if entry.get("manualOnly"):
             continue
-        assert key in STANDARD_PID_COMMANDS, f"seed Mode 01 PID {key} missing from STANDARD_PID_COMMANDS"
+        assert key in STANDARD_PID_COMMANDS, (
+            f"seed Mode 01 PID {key} missing from STANDARD_PID_COMMANDS"
+        )
 
 
 def test_seed_manual_pids_are_in_manual_only():

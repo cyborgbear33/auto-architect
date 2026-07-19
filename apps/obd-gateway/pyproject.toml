@@ -1,0 +1,15 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["obd_gateway", "tests"]
+
+[tool.ruff.lint]
+# Mirror Biome's "basic rules must hold" bar for the Python edge.
+# E501 is left to the formatter + human judgment (CLI help / reason strings
+# often exceed 100 cols without harming readability).
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

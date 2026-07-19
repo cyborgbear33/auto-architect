@@ -21,7 +21,14 @@ def test_dry_run_simulate_scan_prints_batch_with_manual_and_simulated_dtcs(capsy
     batch = json.loads(capsys.readouterr().out)
     assert batch["vehicleId"] == "veh:jeep-renegade-2015-latitude"
     assert batch["source"] == "simulated"
-    assert batch["pids"] == [{"pid": "OIL_PRESSURE_PSI", "value": 8.0, "unit": "psi", "timestamp": batch["pids"][0]["timestamp"]}]
+    assert batch["pids"] == [
+        {
+            "pid": "OIL_PRESSURE_PSI",
+            "value": 8.0,
+            "unit": "psi",
+            "timestamp": batch["pids"][0]["timestamp"],
+        }
+    ]
     assert batch["dtcs"] == [{"code": "P0304", "status": "stored"}]
 
 

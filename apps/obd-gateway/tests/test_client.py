@@ -3,8 +3,8 @@ Tests client.py against a FakeConnection double — no real ELM327/OBDLink
 hardware needed, same "fake the boundary, not the logic" pattern as
 FakeLogosBridge in @auto/logos-bridge.
 """
-import obd
 
+import obd
 from obd_gateway.client import ObdGatewayClient
 from obd_gateway.config import GatewayConfig
 
@@ -50,7 +50,9 @@ def test_read_pids_skips_unsupported_and_null_readings():
 def test_read_pids_unwraps_pint_quantity_magnitude_and_units():
     ureg = obd.Unit
     quantity = 82.5 * ureg.percent
-    fake = FakeConnection(supported={obd.commands.ENGINE_LOAD}, responses={obd.commands.ENGINE_LOAD: quantity})
+    fake = FakeConnection(
+        supported={obd.commands.ENGINE_LOAD}, responses={obd.commands.ENGINE_LOAD: quantity}
+    )
     client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
     readings = client.read_pids(("ENGINE_LOAD",))
     assert readings[0]["value"] == 82.5
@@ -67,7 +69,11 @@ def test_read_dtcs_tags_stored_and_pending():
     )
     client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
     dtcs = client.read_dtcs()
-    assert {"code": "P0304", "status": "stored", "description": "Cylinder 4 Misfire Detected"} in dtcs
+    assert {
+        "code": "P0304",
+        "status": "stored",
+        "description": "Cylinder 4 Misfire Detected",
+    } in dtcs
     assert {"code": "P0171", "status": "pending", "description": "System Too Lean"} in dtcs
 
 
@@ -75,6 +81,6 @@ def test_read_pids_requires_connection_first():
     client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"))
     try:
         client.read_pids(("RPM",))
-        assert False, "expected RuntimeError"
+        raise AssertionError("expected RuntimeError")
     except RuntimeError as exc:
         assert "connect()" in str(exc)

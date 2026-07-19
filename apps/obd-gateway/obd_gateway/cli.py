@@ -12,6 +12,7 @@ skip the hardware connection entirely (only manual-pids/DTCs go in the
 batch) — mirrors garden-architect's edge-gateway `simulate.ts`, useful for
 demoing or testing the API against a batch shape with no adapter plugged in.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -30,12 +31,20 @@ logger = logging.getLogger("obd_gateway.cli")
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="obd-gateway", description="auto-architect OBD-II edge gateway")
-    parser.add_argument("--vehicle-id", help="vehicle profile id, e.g. veh:jeep-renegade-2015-latitude")
+    parser = argparse.ArgumentParser(
+        prog="obd-gateway", description="auto-architect OBD-II edge gateway"
+    )
+    parser.add_argument(
+        "--vehicle-id", help="vehicle profile id, e.g. veh:jeep-renegade-2015-latitude"
+    )
     parser.add_argument("--api-base-url", help="API base URL (default http://localhost:4100)")
-    parser.add_argument("--port", dest="obd_port", help="serial/BT device path for the adapter, e.g. /dev/rfcomm0")
+    parser.add_argument(
+        "--port", dest="obd_port", help="serial/BT device path for the adapter, e.g. /dev/rfcomm0"
+    )
     parser.add_argument("--baudrate", dest="obd_baudrate", type=int)
-    parser.add_argument("--protocol", dest="obd_protocol", help="force an OBD protocol id instead of auto-detect")
+    parser.add_argument(
+        "--protocol", dest="obd_protocol", help="force an OBD protocol id instead of auto-detect"
+    )
     parser.add_argument(
         "--pids",
         help=f"comma-separated PID keys to poll (default: {','.join(DEFAULT_PIDS)})",
@@ -49,19 +58,29 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--odometer-miles", type=float, default=None)
     parser.add_argument("--no-dtcs", action="store_true", help="skip reading DTCs this cycle")
-    parser.add_argument("--dry-run", action="store_true", help="print the batch instead of POSTing it")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="print the batch instead of POSTing it"
+    )
     parser.add_argument(
         "--simulate",
         action="store_true",
         help="skip the OBD hardware connection entirely — batch is built only from --manual-pid/DTCs",
     )
-    parser.add_argument("--simulate-dtc", action="append", default=[], metavar="CODE:STATUS", help="e.g. P0304:stored (repeatable, only with --simulate)")
+    parser.add_argument(
+        "--simulate-dtc",
+        action="append",
+        default=[],
+        metavar="CODE:STATUS",
+        help="e.g. P0304:stored (repeatable, only with --simulate)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true")
 
     sub = parser.add_subparsers(dest="mode", required=True)
     sub.add_parser("scan", help="one-shot: read once, post once, exit")
     watch = sub.add_parser("watch", help="continuous-poll mode for drives")
-    watch.add_argument("--interval", type=float, default=None, help="seconds between polls (default from config)")
+    watch.add_argument(
+        "--interval", type=float, default=None, help="seconds between polls (default from config)"
+    )
     return parser
 
 
@@ -93,7 +112,12 @@ def _parse_simulated_dtcs(pairs: list[str]) -> list[dict[str, str]]:
     return dtcs
 
 
-def run_once(config: GatewayConfig, client: ObdGatewayClient | None, api: ApiClient | None, args: argparse.Namespace) -> dict:
+def run_once(
+    config: GatewayConfig,
+    client: ObdGatewayClient | None,
+    api: ApiClient | None,
+    args: argparse.Namespace,
+) -> dict:
     manual_pids = parse_manual_pids(args.manual_pid)
     if client is None:
         pid_readings: list[dict] = []
@@ -113,13 +137,21 @@ def run_once(config: GatewayConfig, client: ObdGatewayClient | None, api: ApiCli
         print(json.dumps(batch, indent=2))
     else:
         result = api.post_observation_batch(config.vehicle_id, batch)
-        logger.info("posted batch: %d pids, %d dtcs -> %s", len(batch.get("pids", [])), len(batch.get("dtcs", [])), result)
+        logger.info(
+            "posted batch: %d pids, %d dtcs -> %s",
+            len(batch.get("pids", [])),
+            len(batch.get("dtcs", [])),
+            result,
+        )
     return batch
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
-    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+    )
 
     config = _config_from_args(args)
     try:

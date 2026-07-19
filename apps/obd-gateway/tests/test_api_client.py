@@ -1,5 +1,4 @@
 import pytest
-
 from obd_gateway.api_client import ApiClient, ApiClientError
 
 
@@ -31,7 +30,10 @@ def test_post_observation_batch_urlencodes_vehicle_id_and_returns_json():
     client = ApiClient("http://localhost:4100", session=session)
     result = client.post_observation_batch("veh:jeep-renegade-2015-latitude", {"vehicleId": "x"})
     assert result == {"accepted": True}
-    assert session.last_request["url"] == "http://localhost:4100/api/vehicles/veh%3Ajeep-renegade-2015-latitude/observations"
+    assert (
+        session.last_request["url"]
+        == "http://localhost:4100/api/vehicles/veh%3Ajeep-renegade-2015-latitude/observations"
+    )
 
 
 def test_post_observation_batch_raises_on_http_error_with_body():

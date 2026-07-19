@@ -6,7 +6,7 @@
  *
  * Usage:
  *   pnpm healthcheck           # full suite
- *   pnpm healthcheck --fast    # skip obd-gateway tests + web-ui build
+ *   pnpm healthcheck --fast    # skip obd-gateway lint/tests + web-ui build
  *
  * Env:
  *   LOGOS_PYTHON_BIN   python for ontology / logos-bridge (default: .venv/bin/python3
@@ -156,6 +156,23 @@ async function main() {
       ok: r.ok,
       detail: r.ok ? undefined : "logos ontology well-formedness failed",
     };
+  });
+
+  step("obd-gateway lint (ruff)", () => {
+    if (FAST) {
+      return { ok: true, skipped: true, detail: "--fast" };
+    }
+    if (!existsSync(venvPython)) {
+      return {
+        ok: true,
+        skipped: true,
+        detail: ".venv missing — run pnpm obd-gateway:install",
+      };
+    }
+    const r = run("pnpm", ["obd-gateway:lint"]);
+    process.stdout.write(r.stdout);
+    process.stderr.write(r.stderr);
+    return { ok: r.ok, detail: r.ok ? undefined : "obd-gateway ruff failed" };
   });
 
   step("obd-gateway tests", () => {

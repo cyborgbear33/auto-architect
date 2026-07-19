@@ -3,14 +3,15 @@ Pure, hardware-free functions that assemble an `Observation` batch dict
 matching `ObservationBatchSchema` (packages/validation/src/index.ts). Kept
 separate from client.py so these are trivially unit-testable.
 """
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def parse_manual_pids(pairs: list[str]) -> list[dict[str, Any]]:
@@ -19,7 +20,9 @@ def parse_manual_pids(pairs: list[str]) -> list[dict[str, Any]]:
     readings: list[dict[str, Any]] = []
     for pair in pairs:
         if "=" not in pair:
-            raise ValueError(f"--manual-pid must look like KEY=VALUE or KEY=VALUE:UNIT, got {pair!r}")
+            raise ValueError(
+                f"--manual-pid must look like KEY=VALUE or KEY=VALUE:UNIT, got {pair!r}"
+            )
         key, rest = pair.split("=", 1)
         unit = None
         if ":" in rest:
@@ -28,7 +31,9 @@ def parse_manual_pids(pairs: list[str]) -> list[dict[str, Any]]:
             value = float(rest)
         except ValueError as exc:
             raise ValueError(f"--manual-pid value must be numeric, got {pair!r}") from exc
-        readings.append({"pid": key.strip().upper(), "value": value, "unit": unit, "timestamp": now_iso()})
+        readings.append(
+            {"pid": key.strip().upper(), "value": value, "unit": unit, "timestamp": now_iso()}
+        )
     return readings
 
 

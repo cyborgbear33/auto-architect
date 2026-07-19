@@ -62,8 +62,18 @@ Style baseline:
 - double quotes
 - recommended linter rules
 
-Do not add ESLint or Prettier alongside Biome. Python edge lint is backlog
-(Ruff — see `FUTURE_FEATURES.md`).
+Do not add ESLint or Prettier alongside Biome.
+
+### Python (`apps/obd-gateway`)
+
+Ruff owns lint + format for the edge (see `apps/obd-gateway/pyproject.toml`):
+
+```bash
+pnpm obd-gateway:lint       # check
+pnpm obd-gateway:lint:fix  # apply fixes + format
+```
+
+Wired into `pnpm healthcheck` and CI `verify`. Do not add flake8/black alongside Ruff.
 
 ---
 

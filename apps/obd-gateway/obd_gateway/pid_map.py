@@ -16,6 +16,7 @@ fca-tigershark-2.4.ts, `OIL_LEVEL_PCT` in forecast.ts). Those are
 intentionally left out of STANDARD_PID_COMMANDS — obd-gateway supports
 `--manual-pid KEY=VALUE` for exactly this case; see README.md.
 """
+
 from __future__ import annotations
 
 import obd

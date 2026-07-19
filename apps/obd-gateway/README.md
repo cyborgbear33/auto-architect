@@ -22,11 +22,12 @@ produces a near-empty batch, never a synthesized "all clear."
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 ```
 
-For development/tests:
+For development/tests (from repo root):
 
 ```bash
-../../.venv/bin/pip install -r requirements-dev.txt
-../../.venv/bin/python3 -m pytest
+pnpm obd-gateway:install   # pytest + ruff into the shared .venv
+pnpm obd-gateway:lint      # Ruff check + format --check
+pnpm obd-gateway:test      # pytest
 ```
 
 ## Usage

@@ -4,13 +4,14 @@
 
 ```bash
 pnpm healthcheck             # one-shot summary of everything below
-pnpm healthcheck --fast      # skip obd-gateway tests + web-ui build
+pnpm healthcheck --fast      # skip obd-gateway lint/tests + web-ui build
 pnpm -r typecheck
 pnpm lint                    # Biome check
 pnpm -r test                 # all TS packages/apps (vitest)
 pnpm lint:ontology           # LOGOS well-formedness + narrow catalog/cartridge parity
 pnpm lint:ontology --wellformed-only   # logos ontology --json only (healthcheck uses this)
 pnpm lint:ontology --check   # soft-skip well-formedness if logos missing; still run parity
+pnpm obd-gateway:lint        # Ruff check + format --check
 pnpm obd-gateway:test        # pytest
 pnpm --filter @auto/web-ui build
 pnpm check:bridge-drift      # advisory: logos-bridge vs garden-architect's copy
@@ -20,7 +21,7 @@ CI (`.github/workflows/ci.yml`):
 
 | Job | What |
 |---|---|
-| `verify` | typecheck, biome, `pnpm -r test` (Fake/self-skip LOGOS), web-ui build, pytest — **no** LOGOS install |
+| `verify` | typecheck, biome, `pnpm -r test` (Fake/self-skip LOGOS), web-ui build, Ruff + pytest — **no** LOGOS install |
 | `ontology-lint` | install LOGOS → hard `pnpm lint:ontology` → logos-bridge real-engine tests |
 
 ## Required test layers
@@ -44,9 +45,10 @@ CI + `pnpm healthcheck` enforce these.
 1. **typecheck ∥ biome** (parallel)
 2. **`pnpm -r test`** (includes ontology parity, API smoke, logos-bridge integration if logos is on `LOGOS_PYTHON_BIN`)
 3. **`pnpm lint:ontology --wellformed-only`** — unique LOGOS `ontology --json` gate (parity already covered by step 2)
-4. **obd-gateway pytest** (skipped with `--fast` or missing `.venv`)
-5. **web-ui build** (skipped with `--fast`)
-6. **bridge-drift** (advisory only)
+4. **obd-gateway Ruff** (skipped with `--fast` or missing `.venv`)
+5. **obd-gateway pytest** (skipped with `--fast` or missing `.venv`)
+6. **web-ui build** (skipped with `--fast`)
+7. **bridge-drift** (advisory only)
 
 If `LOGOS_PYTHON_BIN` is unset and `.venv/bin/python3` exists, healthcheck sets
 `LOGOS_PYTHON_BIN` to that path automatically (same Python obd-gateway uses).

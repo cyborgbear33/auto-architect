@@ -57,7 +57,6 @@ When proposing a new feature:
 | Extract a real shared `@seam/logos-bridge-core` package instead of two hand-synced copies | planned | low | `pnpm check:bridge-drift` is an advisory reminder, not a fix — a real shared package would remove the sync burden entirely once both apps' bridge needs stabilize. | `packages/logos-bridge`, garden-architect's `@garden/logos-bridge`, `scripts/check-bridge-drift.mjs` |
 | Coverage thresholds (vitest coverage / codecov) | planned | low | Deferred until Postgres + shared UI packages land — prefer honest test-layer matrix over vanity %. | `TESTING_DEV_GUIDE.md`, CI |
 | Policy library expansion (e.g. forbid clear-codes under LowOilPressureStallRisk) | planned | medium | Only clear-codes-and-drive + misfire is wired as the demo hold. Start with one additional reason fixture so the safety-hold pattern isn't a one-off. | `PolicyService`, reason fixtures, `packages/ontology/fixtures` |
-| Ruff lint/format for `obd-gateway` (Python) — wire into healthcheck | planned | medium (preliminary) | Biome covers TS/JS only; Ruff gives the Python edge the same "basic rules must hold" gate before edge work expands. | `apps/obd-gateway`, CI, `pnpm healthcheck` |
 | Ontology browser page (read-only TBox / views / DTC dictionary) | planned | low | Useful for debugging; garden has a full Ontology page — keep auto's lighter. | `@auto/ontology` loaders, new route |
 | Multi-vehicle comparison dashboard | planned | low | Only valuable once ≥2 real vehicles exist. | VehicleSwitcher, recognition summaries |
 
@@ -87,6 +86,7 @@ When proposing a new feature:
 | Advisory logos-bridge drift check vs garden-architect | 2026-07 | `scripts/check-bridge-drift.mjs`, `pnpm check:bridge-drift`, wired into `pnpm healthcheck` |
 | Shared `@auto/api-client` (typed fetch, ApiError, queryKeys; web-ui migrated) | 2026-07 | `packages/api-client`, `API_CLIENT_DEV_GUIDE.md`, `apps/web-ui/src/lib/api.ts` |
 | Thin SAE PID/DTC seed (cartridge + DEFAULT_PIDS units/hex; P0019) | 2026-07 | `pid-dictionary.json`, `dtc-dictionary.json`, `HARDWARE_STANDARDS.md`, gateway `test_pid_seed.py` |
+| Ruff lint/format for `obd-gateway` (wired into healthcheck + CI) | 2026-07 | `apps/obd-gateway/pyproject.toml`, `pnpm obd-gateway:lint`, `CODE_STANDARDS.md` |
 
 ---
 

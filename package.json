@@ -24,6 +24,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "obd-gateway:install": "cd apps/obd-gateway && ../../.venv/bin/pip install -r requirements-dev.txt",
+    "obd-gateway:lint": "cd apps/obd-gateway && ../../.venv/bin/ruff check . && ../../.venv/bin/ruff format --check .",
+    "obd-gateway:lint:fix": "cd apps/obd-gateway && ../../.venv/bin/ruff check --fix . && ../../.venv/bin/ruff format .",
     "obd-gateway:test": "cd apps/obd-gateway && ../../.venv/bin/python3 -m pytest",
     "obd-gateway:scan": "cd apps/obd-gateway && ../../.venv/bin/python3 -m obd_gateway scan",
     "obd-gateway:watch": "cd apps/obd-gateway && ../../.venv/bin/python3 -m obd_gateway watch",
