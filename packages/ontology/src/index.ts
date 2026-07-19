@@ -11,6 +11,7 @@ import type { ZodError } from "zod";
 import dlOntologyJson from "../dl-ontology.json" with { type: "json" };
 import dtcDictionaryJson from "../dtc-dictionary.json" with { type: "json" };
 import knownCampaignsJson from "../known-campaigns.json" with { type: "json" };
+import pidDictionaryJson from "../pid-dictionary.json" with { type: "json" };
 import vehicleProfilesJson from "../vehicle-profiles.json" with { type: "json" };
 import {
   type LintableOntology,
@@ -21,6 +22,8 @@ import {
 import {
   DtcDictionaryFileSchema,
   KnownCampaignsFileSchema,
+  type PidDictionaryEntry,
+  PidDictionaryFileSchema,
   type VehicleProfilesFile,
   VehicleProfilesFileSchema,
 } from "./schemas.ts";
@@ -35,6 +38,9 @@ export type {
 export {
   DtcDictionaryFileSchema,
   KnownCampaignsFileSchema,
+  type PidDictionaryEntry,
+  PidDictionaryEntrySchema,
+  PidDictionaryFileSchema,
   VehicleProfilesFileSchema,
 } from "./schemas.ts";
 export { lintOntology };
@@ -50,11 +56,13 @@ export interface DtcDictionaryEntry {
 }
 
 const dtcDictionaryFile = DtcDictionaryFileSchema.parse(dtcDictionaryJson);
+const pidDictionaryFile = PidDictionaryFileSchema.parse(pidDictionaryJson);
 const vehicleProfilesFile: VehicleProfilesFile =
   VehicleProfilesFileSchema.parse(vehicleProfilesJson);
 const knownCampaignsFile = KnownCampaignsFileSchema.parse(knownCampaignsJson);
 
 const dtcDictionary: Record<string, DtcDictionaryEntry> = dtcDictionaryFile.codes;
+const pidDictionary: Record<string, PidDictionaryEntry> = pidDictionaryFile.pids;
 
 export function lookupDtc(code: string): DtcDictionaryEntry | undefined {
   return dtcDictionary[code.toUpperCase()];
@@ -62,6 +70,24 @@ export function lookupDtc(code: string): DtcDictionaryEntry | undefined {
 
 export function allDtcCodes(): string[] {
   return Object.keys(dtcDictionary);
+}
+
+/** Concepts covered by at least one DTC dictionary row. */
+export function dtcConceptsCovered(): string[] {
+  return [...new Set(Object.values(dtcDictionary).map((e) => e.concept))].sort();
+}
+
+export function lookupPid(key: string): PidDictionaryEntry | undefined {
+  return pidDictionary[key];
+}
+
+export function allPidKeys(): string[] {
+  return Object.keys(pidDictionary);
+}
+
+/** Canonical unit for a seeded PID key, if present. */
+export function unitForPid(key: string): string | undefined {
+  return pidDictionary[key]?.unit;
 }
 
 export function listVehicleProfiles(): VehicleProfile[] {
@@ -152,6 +178,8 @@ export function runOntologyLint(
   const schemaErrors: OntologyLintIssue[] = [];
   const dtcParsed = DtcDictionaryFileSchema.safeParse(dtcDictionaryJson);
   if (!dtcParsed.success) schemaErrors.push(...zodIssues("dtc-dictionary.json", dtcParsed.error));
+  const pidParsed = PidDictionaryFileSchema.safeParse(pidDictionaryJson);
+  if (!pidParsed.success) schemaErrors.push(...zodIssues("pid-dictionary.json", pidParsed.error));
   const profilesParsed = VehicleProfilesFileSchema.safeParse(vehicleProfilesJson);
   if (!profilesParsed.success) {
     schemaErrors.push(...zodIssues("vehicle-profiles.json", profilesParsed.error));
@@ -164,6 +192,7 @@ export function runOntologyLint(
   if (
     schemaErrors.length > 0 ||
     !dtcParsed.success ||
+    !pidParsed.success ||
     !profilesParsed.success ||
     !campaignsParsed.success
   ) {

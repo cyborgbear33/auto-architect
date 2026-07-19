@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "The ontology owns fault meaning: the DL TBox (dl-ontology.json), the vehicle-profile registry, the DTC dictionary, and known manufacturer campaigns.",
+  "description": "The ontology owns fault meaning: the DL TBox (dl-ontology.json), the vehicle-profile registry, the DTC/PID dictionaries, and known manufacturer campaigns.",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -11,6 +11,7 @@
     "./dl-ontology.json": "./dl-ontology.json",
     "./vehicle-profiles.json": "./vehicle-profiles.json",
     "./dtc-dictionary.json": "./dtc-dictionary.json",
+    "./pid-dictionary.json": "./pid-dictionary.json",
     "./known-campaigns.json": "./known-campaigns.json"
   },
   "scripts": {

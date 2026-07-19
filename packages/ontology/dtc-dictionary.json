@@ -9,6 +9,7 @@
     "P0016": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 1 Sensor A)", "concept": "CamCrankCorrelation", "sae": true },
     "P0017": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 1 Sensor B)", "concept": "CamCrankCorrelation", "sae": true },
     "P0018": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 2 Sensor A)", "concept": "CamCrankCorrelation", "sae": true },
+    "P0019": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 2 Sensor B)", "concept": "CamCrankCorrelation", "sae": true },
     "P0171": { "description": "System Too Lean (Bank 1)", "concept": "LeanCodeBank1", "sae": true },
     "P0174": { "description": "System Too Lean (Bank 2)", "concept": "LeanCodeBank2", "sae": true },
     "P0442": { "description": "Evaporative Emission System Leak Detected (Small Leak)", "concept": "EvapCodeSmall", "sae": true },

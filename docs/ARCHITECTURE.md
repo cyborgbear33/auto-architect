@@ -110,6 +110,7 @@ the store. Handlers do not mutate state except via `ActionService`.
 | `packages/ontology/dl-ontology.json` | DL TBox: classes, roles, views |
 | `packages/ontology/vehicle-profiles.json` | Vehicle → engine family → view + cartridges |
 | `packages/ontology/dtc-dictionary.json` | Curated DTC → description / concept |
+| `packages/ontology/pid-dictionary.json` | Thin SAE J1979 seed: units + Mode 01 hex |
 | `packages/ontology/known-campaigns.json` | W80 / W84 / TSB 05047457A matcher inputs |
 
 **Views:**

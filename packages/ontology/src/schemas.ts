@@ -18,6 +18,43 @@ export const DtcDictionaryFileSchema = z.object({
   codes: z.record(DtcDictionaryEntrySchema),
 });
 
+/** Thin SAE J1979 seed rows — not a full PID table. */
+export const PidDictionaryEntrySchema = z
+  .object({
+    description: z.string().min(1),
+    unit: z.string().min(1),
+    sae: z.boolean(),
+    mode: z.enum(["01"]).optional(),
+    pidHex: z
+      .string()
+      .regex(/^0x[0-9A-Fa-f]{2}$/, "expected Mode 01 hex like 0x04")
+      .optional(),
+    manualOnly: z.boolean().optional(),
+    note: z.string().optional(),
+  })
+  .superRefine((entry, ctx) => {
+    if (entry.manualOnly) {
+      if (entry.mode !== undefined || entry.pidHex !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "manualOnly PIDs must not claim Mode 01 mode/pidHex",
+        });
+      }
+      return;
+    }
+    if (entry.mode === undefined || entry.pidHex === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "standard Mode 01 PIDs require mode and pidHex",
+      });
+    }
+  });
+
+export const PidDictionaryFileSchema = z.object({
+  disclaimer: z.string().optional(),
+  pids: z.record(PidDictionaryEntrySchema),
+});
+
 export const VehicleProfileEntrySchema = z.object({
   make: z.string().min(1),
   model: z.string().min(1),
@@ -62,5 +99,7 @@ export const KnownCampaignsFileSchema = z.object({
 });
 
 export type DtcDictionaryFile = z.infer<typeof DtcDictionaryFileSchema>;
+export type PidDictionaryFile = z.infer<typeof PidDictionaryFileSchema>;
+export type PidDictionaryEntry = z.infer<typeof PidDictionaryEntrySchema>;
 export type VehicleProfilesFile = z.infer<typeof VehicleProfilesFileSchema>;
 export type KnownCampaignsFile = z.infer<typeof KnownCampaignsFileSchema>;

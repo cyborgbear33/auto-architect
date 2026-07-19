@@ -71,11 +71,20 @@ Rough shape:
 
 - Mode 01 PID keys in `apps/obd-gateway/obd_gateway/pid_map.py` should track
   stable SAE / `python-OBD` names (`ENGINE_LOAD`, `SHORT_FUEL_TRIM_1`, …).
-- Units belong with the reading (%, °C, kPa, RPM) — UI and observations both.
+- **Units + J1979 metadata** for the thin seed live in
+  `packages/ontology/pid-dictionary.json` (canonical `unit`, optional `mode` /
+  `pidHex`). Runtime readings may still carry python-OBD pint strings; the
+  dictionary is what UI/gauges trust when no live read is available yet.
 - PIDs that are not universal Mode 01 on every ECU stay in `MANUAL_ONLY_PIDS`
-  and arrive via `--manual-pid` until a verified source exists.
-- Adding a PID: map → validate schema → cartridge threshold → UI units
-  (see `OBD_EDGE_CONTRACT.md` §7).
+  (`manualOnly: true` in the dictionary) and arrive via `--manual-pid`.
+- Adding a PID: dictionary row → `pid_map.py` command (or manual) → cartridge
+  threshold → UI units (see `OBD_EDGE_CONTRACT.md` §7).
+
+### Thin seed scope (shipped)
+
+Seed only what cartridges already perceive, plus gateway `DEFAULT_PIDS` and the
+manual oil keys used by MultiAir / oil-level forecast. Do **not** paste a full
+J1979 table here — that is the separate comprehensive KB backlog item.
 
 ---
 
@@ -84,7 +93,8 @@ Rough shape:
 | Artifact | Must be grounded in |
 |---|---|
 | `dtc-dictionary.json` rows | J2012 / ISO 15031-6 (generic) or real TSB/manual (enhanced) |
-| `pid_map.py` keys | J1979 / `python-OBD` command names |
+| `pid-dictionary.json` rows | J1979 / ISO 15031-5 (Mode 01) or documented manual source |
+| `pid_map.py` keys | Same keys as the dictionary; python-OBD command binding only |
 | DL fault classes | Real diagnostic meaning; SAE-portable classes in `generic` view |
 | OEM classes / cartridges | Engine-family view + documented OEM procedure |
 
@@ -101,7 +111,7 @@ The ontology owns *meaning*; standards own *whether that meaning is real*.
    `FUTURE_FEATURES.md` non-goals / backlog, do not sneak into `obd-gateway`.
 4. **J1939 is a separate bus model** — do not stretch passenger OBD cartridges
    to cover it; add an explicit extension path when needed.
-5. **Full PID/DTC knowledge base is backlog** — this doc defines *how* to grow
-   it; seeding the comprehensive tables is the high-priority item in
-   [`FUTURE_FEATURES.md`](../FUTURE_FEATURES.md) ("Comprehensive SAE/ISO-grounded
-   PID & DTC knowledge base").
+5. **Full PID/DTC knowledge base is backlog** — the thin seed in
+   `pid-dictionary.json` / cartridge-used DTC rows is the starter set; growing
+   to a comprehensive SAE/ISO table remains the high-priority item in
+   [`FUTURE_FEATURES.md`](../FUTURE_FEATURES.md).

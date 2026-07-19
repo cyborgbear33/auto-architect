@@ -5,7 +5,9 @@ import {
   getEngineFamilyView,
   getVehicleProfile,
   lookupDtc,
+  lookupPid,
   tsbsForEngineFamily,
+  unitForPid,
 } from "./index.ts";
 
 describe("ontology registries", () => {
@@ -25,8 +27,34 @@ describe("ontology registries", () => {
     expect(lookupDtc("p0304")?.concept).toBe("CylinderMisfire");
   });
 
+  it("covers the full P0016–P0019 cam/crank correlation family", () => {
+    for (const code of ["P0016", "P0017", "P0018", "P0019"]) {
+      expect(lookupDtc(code)?.concept).toBe("CamCrankCorrelation");
+    }
+  });
+
   it("returns undefined for an unknown DTC", () => {
     expect(lookupDtc("P9999")).toBeUndefined();
+  });
+
+  it("seeds cartridge and default-poll PIDs with units and Mode 01 hex", () => {
+    expect(lookupPid("ENGINE_LOAD")).toMatchObject({
+      unit: "percent",
+      mode: "01",
+      pidHex: "0x04",
+      sae: true,
+    });
+    expect(unitForPid("LONG_FUEL_TRIM_1")).toBe("percent");
+    expect(lookupPid("OIL_PRESSURE_PSI")).toMatchObject({
+      unit: "psi",
+      manualOnly: true,
+      sae: false,
+    });
+    expect(lookupPid("RPM")?.pidHex).toBe("0x0C");
+  });
+
+  it("returns undefined for an unknown PID key", () => {
+    expect(lookupPid("NOT_A_REAL_PID")).toBeUndefined();
   });
 
   it("matches W80/W84 campaigns to the Tigershark engine family within the year range", () => {

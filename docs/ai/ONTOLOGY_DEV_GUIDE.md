@@ -9,6 +9,7 @@ How meaning is defined in `@auto/ontology`.
 | `dl-ontology.json` | DL TBox: subtypes, roles, classes, views, notes |
 | `vehicle-profiles.json` | Vehicles + engine families → view + cartridge list |
 | `dtc-dictionary.json` | Curated DTC → description / semantic concept |
+| `pid-dictionary.json` | Thin SAE J1979 seed: units + Mode 01 hex for cartridge/default PIDs |
 | `known-campaigns.json` | Recalls / TSBs (W80, W84, MultiAir TSB, …) |
 | `fixtures/*.json` | Hand-built realize / reason proofs for LOGOS |
 
@@ -39,11 +40,13 @@ Add a role only when a real perception edge needs it; keep the role set small.
 OEM-specific classes belong in an OEM view, not in `generic`, unless they are
 truly SAE-portable.
 
-## DTC dictionary discipline
+## DTC / PID dictionary discipline
 
-- Every concept referenced by the dictionary should exist in the TBox (or be a
+- Every concept referenced by the DTC dictionary should exist in the TBox (or be a
   clearly non-class annotation — prefer class-linked concepts).
-- `pnpm lint:ontology` fails on catalog ↔ DL ↔ cartridge drift.
+- Every PID key a cartridge `requires` (and gateway `DEFAULT_PIDS`) must have a
+  `pid-dictionary.json` row with a canonical `unit`.
+- `pnpm lint:ontology` / cartridge parity tests fail on catalog ↔ DL ↔ cartridge drift.
 - Prefer real TSB/recall grounding over inventing descriptions.
 - Ground SAE-generic codes in SAE J2012 / ISO 15031-6 wording; never guess
   manufacturer-enhanced meanings. See [`HARDWARE_STANDARDS.md`](HARDWARE_STANDARDS.md).

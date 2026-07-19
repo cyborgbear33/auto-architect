@@ -1,5 +1,6 @@
-import { runOntologyLint } from "@auto/ontology";
+import { dtcConceptsCovered, lookupPid, runOntologyLint } from "@auto/ontology";
 import { describe, expect, it } from "vitest";
+import { perceivedDtcConcepts } from "./perception.ts";
 import { allCartridges } from "./registry.ts";
 
 /**
@@ -19,5 +20,24 @@ describe("ontology ↔ cartridge parity", () => {
     });
     expect(result.errors, JSON.stringify(result.errors, null, 2)).toEqual([]);
     expect(result.ok).toBe(true);
+  });
+
+  it("every DTC concept cartridges perceive has ≥1 dtc-dictionary row", () => {
+    const covered = new Set(dtcConceptsCovered());
+    const perceived = perceivedDtcConcepts(allCartridges);
+    expect(perceived.length).toBeGreaterThan(0);
+    for (const concept of perceived) {
+      expect(covered.has(concept), `missing DTC rows for concept ${concept}`).toBe(true);
+    }
+  });
+
+  it("every cartridge-required PID is in the thin SAE pid-dictionary with a unit", () => {
+    const pids = [...new Set(allCartridges.flatMap((c) => c.requires.pids ?? []))];
+    expect(pids.length).toBeGreaterThan(0);
+    for (const key of pids) {
+      const entry = lookupPid(key);
+      expect(entry, `pid-dictionary missing ${key}`).toBeDefined();
+      expect(entry?.unit.length).toBeGreaterThan(0);
+    }
   });
 });

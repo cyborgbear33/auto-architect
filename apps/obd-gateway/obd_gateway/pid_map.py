@@ -6,6 +6,10 @@ python-OBD's `obd.commands.*` constants.
 Kept as a plain dict, not a class, so it's trivially unit-testable and
 inspectable without a hardware connection.
 
+Canonical units + J1979 Mode 01 metadata for the thin SAE seed live in
+`packages/ontology/pid-dictionary.json` (see `tests/test_pid_seed.py`). This
+module only binds keys to python-OBD commands.
+
 Some fault classes need PIDs standard Mode 01 does not universally expose on
 every ECU (documented per-cartridge, e.g. `OIL_PRESSURE_PSI` in
 fca-tigershark-2.4.ts, `OIL_LEVEL_PCT` in forecast.ts). Those are

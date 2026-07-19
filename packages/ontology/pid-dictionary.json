@@ -1,0 +1,97 @@
+{
+  "disclaimer": "Thin SAE J1979 seed: Mode 01 PIDs cartridges already perceive, plus the gateway DEFAULT_PIDS set used for live polling, and manual-only oil keys used by MultiAir / oil-level forecast. Units are canonical UI/observation strings. This is not a full J1979 table — expand only with cited standard rows (see HARDWARE_STANDARDS.md). Hex IDs are SAE Mode 01 PID numbers; python-OBD command names are the keys.",
+  "pids": {
+    "ENGINE_LOAD": {
+      "description": "Calculated engine load value",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x04"
+    },
+    "LONG_FUEL_TRIM_1": {
+      "description": "Long term fuel trim — Bank 1",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x07"
+    },
+    "LONG_FUEL_TRIM_2": {
+      "description": "Long term fuel trim — Bank 2",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x09"
+    },
+    "SHORT_FUEL_TRIM_1": {
+      "description": "Short term fuel trim — Bank 1",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x06"
+    },
+    "SHORT_FUEL_TRIM_2": {
+      "description": "Short term fuel trim — Bank 2",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x08"
+    },
+    "RPM": {
+      "description": "Engine RPM",
+      "unit": "rpm",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x0C"
+    },
+    "SPEED": {
+      "description": "Vehicle speed",
+      "unit": "km/h",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x0D",
+      "note": "SAE J1979 reports km/h; UI may convert for display."
+    },
+    "COOLANT_TEMP": {
+      "description": "Engine coolant temperature",
+      "unit": "celsius",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x05"
+    },
+    "INTAKE_TEMP": {
+      "description": "Intake air temperature",
+      "unit": "celsius",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x0F"
+    },
+    "THROTTLE_POS": {
+      "description": "Throttle position",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x11"
+    },
+    "CONTROL_MODULE_VOLTAGE": {
+      "description": "Control module voltage",
+      "unit": "volt",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x42"
+    },
+    "OIL_PRESSURE_PSI": {
+      "description": "Engine oil pressure (manual / gauge)",
+      "unit": "psi",
+      "sae": false,
+      "manualOnly": true,
+      "note": "Not a universal Mode 01 PID on most MY2015 Tigershark ECUs — pass via --manual-pid. Used by fca-tigershark-2.4 MultiAir perception."
+    },
+    "OIL_LEVEL_PCT": {
+      "description": "Engine oil level (manual / dipstick or dash)",
+      "unit": "percent",
+      "sae": false,
+      "manualOnly": true,
+      "note": "Not a Mode 01 PID — pass via --manual-pid. Used by ForecastService oil-level trend."
+    }
+  }
+}

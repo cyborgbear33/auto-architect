@@ -93,10 +93,11 @@ bug: recognition will run the wrong engine-family cartridges.
 
 When adding a PID:
 
-1. Map it in `pid_map.py` (or mark manual-only)
-2. Ensure the API/observation schema accepts it
-3. Only then add cartridge perception thresholds
-4. Document units in UI copy
+1. Add a row to `packages/ontology/pid-dictionary.json` (unit + Mode 01 hex, or `manualOnly`)
+2. Map it in `pid_map.py` (or mark manual-only)
+3. Ensure the API/observation schema accepts it
+4. Only then add cartridge perception thresholds
+5. Use the dictionary unit in UI / gauges (do not invent a parallel unit string)
 
 When tempted to decode OEM enhanced CAN: put that behind an explicit future
 feature and keep standard OBD as the supported path. See `FUTURE_FEATURES.md`

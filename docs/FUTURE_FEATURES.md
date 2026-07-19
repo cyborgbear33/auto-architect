@@ -36,7 +36,6 @@ When proposing a new feature:
 | Postgres persistence for vehicles, observations, problems, decisions | planned | high | In-memory store resets on every `tsx watch` restart; blocks real drive logging and repair history. | `apps/api/src/store`, garden's Drizzle/Postgres patterns |
 | Durable observation history + freeze-frame retention | planned | high | Needed for trend/forecast credibility and post-repair verification. | `ObservationsService`, Mode 01/02/03 batches |
 | Shared `@auto/ui-components` (status pills, empty/error states, evidence panels) | planned | medium | Prevents per-page inventing of trust/evidence UI; matches garden. | `UX_GUIDELINES`, Diagnosis/Dashboard patterns |
-| Thin SAE PID/DTC seed slice (cartridge-used codes/PIDs only) | planned | high (preliminary) | Full knowledge base is large; seed units + J1979/J2012 rows for PIDs/DTCs cartridges already perceive before Postgres/gauges. | `dtc-dictionary.json`, `pid_map.py`, `HARDWARE_STANDARDS.md` |
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | planned | high (operator validation) | Catches adapter/port/path issues CI never sees; validate Jeep path before deep feature work. | `apps/obd-gateway`, Dashboard, real adapter |
 | Port logos-bridge seam drift vs garden (one-time sync pass) | planned | medium (preliminary) | `pnpm check:bridge-drift` already flags structural drift — port intentional transport/salvage fixes both ways before they diverge further. | `packages/logos-bridge`, garden `@garden/logos-bridge`, `scripts/check-bridge-drift.mjs` |
 | Live gauge view (RPM, load, fuel trim, coolant) with units | planned | high (operator UX) | Dashboard today is DTC/recognition-first; operators expect live PIDs during a drive. | `ObservationsService` latest PIDs, web-ui Dashboard |
@@ -87,6 +86,7 @@ When proposing a new feature:
 | Real-LOGOS integration tests in CI (realize/reason/schema, beyond ontology-lint) | 2026-07 | `packages/logos-bridge/src/{realize,reason,schema}-integration.test.ts`, `.github/workflows/ci.yml`, `TESTING_DEV_GUIDE.md` |
 | Advisory logos-bridge drift check vs garden-architect | 2026-07 | `scripts/check-bridge-drift.mjs`, `pnpm check:bridge-drift`, wired into `pnpm healthcheck` |
 | Shared `@auto/api-client` (typed fetch, ApiError, queryKeys; web-ui migrated) | 2026-07 | `packages/api-client`, `API_CLIENT_DEV_GUIDE.md`, `apps/web-ui/src/lib/api.ts` |
+| Thin SAE PID/DTC seed (cartridge + DEFAULT_PIDS units/hex; P0019) | 2026-07 | `pid-dictionary.json`, `dtc-dictionary.json`, `HARDWARE_STANDARDS.md`, gateway `test_pid_seed.py` |
 
 ---
 
