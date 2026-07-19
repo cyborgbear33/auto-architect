@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
-import { ApiError, api } from "../lib/api.ts";
+import { ApiError, api, queryKeys } from "../lib/api.ts";
 
 const STATUS_STYLES: Record<string, string> = {
   open: "bg-slate-100 text-slate-700 border-slate-200",
@@ -37,11 +37,11 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
   >(null);
 
   const recognitionQ = useQuery({
-    queryKey: ["recognition", vehicleId],
+    queryKey: queryKeys.recognition(vehicleId),
     queryFn: () => api.getRecognition(vehicleId),
   });
   const problemsQ = useQuery({
-    queryKey: ["problems", vehicleId],
+    queryKey: queryKeys.problems(vehicleId),
     queryFn: () => api.listProblems(vehicleId),
   });
 
@@ -53,7 +53,7 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
   const createProblem = useMutation({
     mutationFn: (triggeredByClass: string) =>
       api.createDiagnosticProblem({ vehicleId, triggeredByClass }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["problems", vehicleId] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.problems(vehicleId) }),
   });
 
   const clearCodes = useMutation({

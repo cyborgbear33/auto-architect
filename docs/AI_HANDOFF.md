@@ -169,6 +169,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Policy safety hold (`clear-codes-and-drive`) | shipped | `PolicyService` + Diagnosis UI |
 | Oil-level trend forecast | shipped | `ForecastService` |
 | React UI (5 routes) | shipped | `apps/web-ui` |
+| `@auto/api-client` (typed fetch + queryKeys; web-ui thin re-export) | shipped | `packages/api-client`, `API_CLIENT_DEV_GUIDE.md` |
 | Python obd-gateway (`scan` / `watch` / `--simulate`) | shipped | `apps/obd-gateway` |
 | Ontology lint CI | shipped | `scripts/lint-ontology.mjs`, `.github/workflows/ci.yml` |
 | Postgres persistence | **not yet** | see `FUTURE_FEATURES.md` |

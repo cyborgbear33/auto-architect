@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError, api } from "../lib/api.ts";
+import { ApiError, createApiClient } from "./index.ts";
 
 function mockFetchOnce(status: number, body: unknown) {
   vi.stubGlobal(
@@ -14,7 +14,9 @@ function mockFetchOnce(status: number, body: unknown) {
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("api client", () => {
+describe("@auto/api-client", () => {
+  const api = createApiClient({ baseUrl: "" });
+
   it("GETs and unwraps the vehicles list", async () => {
     mockFetchOnce(200, { vehicles: [{ id: "veh:x" }] });
     const vehicles = await api.listVehicles();
@@ -29,6 +31,14 @@ describe("api client", () => {
       "/api/vehicles/veh%3Ajeep-renegade-2015-latitude/dtcs",
       expect.anything(),
     );
+  });
+
+  it("omits content-type on POST with no body", async () => {
+    mockFetchOnce(200, { recommendations: [] });
+    await api.refreshRecommendations("veh:x");
+    const init = vi.mocked(fetch).mock.calls[0]?.[1] as RequestInit;
+    const headers = init.headers as Record<string, string> | undefined;
+    expect(headers?.["content-type"]).toBeUndefined();
   });
 
   it("throws ApiError with the server's message/code/details on a non-2xx response", async () => {

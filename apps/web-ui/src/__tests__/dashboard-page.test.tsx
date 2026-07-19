@@ -21,51 +21,57 @@ vi.mock("../store/index.ts", () => ({
 
 afterEach(() => resetMockUiState());
 
-vi.mock("../lib/api.ts", () => ({
-  api: {
-    listVehicles: vi.fn().mockResolvedValue([
-      {
+vi.mock("../lib/api.ts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../lib/api.ts")>();
+  return {
+    ...actual,
+    api: {
+      listVehicles: vi.fn().mockResolvedValue([
+        {
+          id: "veh:jeep-renegade-2015-latitude",
+          make: "Jeep",
+          model: "Renegade",
+          year: 2015,
+          trim: "Latitude",
+          engineFamily: "fca-tigershark-2.4",
+        },
+      ]),
+      getVehicle: vi.fn().mockResolvedValue({
         id: "veh:jeep-renegade-2015-latitude",
         make: "Jeep",
         model: "Renegade",
         year: 2015,
         trim: "Latitude",
         engineFamily: "fca-tigershark-2.4",
-      },
-    ]),
-    getVehicle: vi.fn().mockResolvedValue({
-      id: "veh:jeep-renegade-2015-latitude",
-      make: "Jeep",
-      model: "Renegade",
-      year: 2015,
-      trim: "Latitude",
-      engineFamily: "fca-tigershark-2.4",
-    }),
-    getDtcs: vi
-      .fn()
-      .mockResolvedValue([{ code: "P0304", status: "stored", description: "Cylinder 4 Misfire" }]),
-    getForecast: vi.fn().mockResolvedValue({ declining: false, series: [] }),
-    getRecognition: vi.fn().mockResolvedValue({
-      individual: "veh:jeep-renegade-2015-latitude",
-      member: ["Engine", "MisfireUnderLoad"],
-      mostSpecific: ["MisfireUnderLoad"],
-      undecided: [],
-    }),
-    getRecommendations: vi.fn().mockResolvedValue([
-      {
-        id: "rec:1",
-        vehicleId: "veh:jeep-renegade-2015-latitude",
-        title: "Jeep Renegade: cylinder misfire under load",
-        priority: "high",
-        status: "new",
-        reason: "a sustained misfire can destroy the catalytic converter",
-        generatedFromClasses: ["MisfireUnderLoad"],
-        createdAt: "2026-01-01T00:00:00Z",
-      },
-    ]),
-    refreshRecommendations: vi.fn(),
-  },
-}));
+      }),
+      getDtcs: vi
+        .fn()
+        .mockResolvedValue([
+          { code: "P0304", status: "stored", description: "Cylinder 4 Misfire" },
+        ]),
+      getForecast: vi.fn().mockResolvedValue({ declining: false, series: [] }),
+      getRecognition: vi.fn().mockResolvedValue({
+        individual: "veh:jeep-renegade-2015-latitude",
+        member: ["Engine", "MisfireUnderLoad"],
+        mostSpecific: ["MisfireUnderLoad"],
+        undecided: [],
+      }),
+      getRecommendations: vi.fn().mockResolvedValue([
+        {
+          id: "rec:1",
+          vehicleId: "veh:jeep-renegade-2015-latitude",
+          title: "Jeep Renegade: cylinder misfire under load",
+          priority: "high",
+          status: "new",
+          reason: "a sustained misfire can destroy the catalytic converter",
+          generatedFromClasses: ["MisfireUnderLoad"],
+          createdAt: "2026-01-01T00:00:00Z",
+        },
+      ]),
+      refreshRecommendations: vi.fn(),
+    },
+  };
+});
 
 import { Dashboard } from "../routes/Dashboard.tsx";
 

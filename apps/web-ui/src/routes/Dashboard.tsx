@@ -6,7 +6,7 @@ import {
   useSelectedVehicleId,
   vehicleLabel,
 } from "../components/Layout.tsx";
-import { api } from "../lib/api.ts";
+import { api, queryKeys } from "../lib/api.ts";
 import { useAppSelector } from "../store/index.ts";
 
 const URGENCY_STYLES: Record<string, string> = {
@@ -37,20 +37,23 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
   const qc = useQueryClient();
 
   const vehicleQ = useQuery({
-    queryKey: ["vehicle", vehicleId],
+    queryKey: queryKeys.vehicle(vehicleId),
     queryFn: () => api.getVehicle(vehicleId),
   });
-  const dtcsQ = useQuery({ queryKey: ["dtcs", vehicleId], queryFn: () => api.getDtcs(vehicleId) });
+  const dtcsQ = useQuery({
+    queryKey: queryKeys.dtcs(vehicleId),
+    queryFn: () => api.getDtcs(vehicleId),
+  });
   const forecastQ = useQuery({
-    queryKey: ["forecast", vehicleId],
+    queryKey: queryKeys.forecast(vehicleId),
     queryFn: () => api.getForecast(vehicleId),
   });
   const recognitionQ = useQuery({
-    queryKey: ["recognition", vehicleId],
+    queryKey: queryKeys.recognition(vehicleId),
     queryFn: () => api.getRecognition(vehicleId),
   });
   const recommendationsQ = useQuery({
-    queryKey: ["recommendations", vehicleId],
+    queryKey: queryKeys.recommendations(vehicleId),
     queryFn: () => api.getRecommendations(vehicleId),
   });
 
@@ -66,7 +69,7 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
             type="button"
             onClick={async () => {
               await api.refreshRecommendations(vehicleId);
-              qc.invalidateQueries({ queryKey: ["recommendations", vehicleId] });
+              qc.invalidateQueries({ queryKey: queryKeys.recommendations(vehicleId) });
             }}
             className="rounded-md bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700"
           >

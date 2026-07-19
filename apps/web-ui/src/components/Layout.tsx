@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { api } from "../lib/api.ts";
+import { api, queryKeys } from "../lib/api.ts";
 import { useAppDispatch, useAppSelector } from "../store/index.ts";
 import { selectVehicle, setDebugMode } from "../store/uiSlice.ts";
 
@@ -53,7 +53,7 @@ export function VehicleSwitcher() {
   const dispatch = useAppDispatch();
   const selected = useAppSelector((s) => s.ui.selectedVehicleId);
   const vehiclesQ = useQuery({
-    queryKey: ["vehicles"],
+    queryKey: queryKeys.vehicles(),
     queryFn: () => api.listVehicles(),
     retry: false,
   });

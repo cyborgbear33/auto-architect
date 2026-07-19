@@ -12,10 +12,10 @@ see [`UX_GUIDELINES.md`](UX_GUIDELINES.md).
 - Tailwind CSS v4 (`@tailwindcss/vite`)
 - Vitest + Testing Library + jsdom
 
-There is **no** `@auto/ui-components` or `@auto/api-client` package yet. Keep the
-local `src/lib/api.ts` thin and typed against `@auto/semantic-types`. When those
-packages are added (see `FUTURE_FEATURES.md`), migrate rather than inventing a
-third client.
+`@auto/api-client` owns fetch, `ApiError`, and `queryKeys`. `src/lib/api.ts` is
+a thin Vite-configured singleton — import from there (or the package) and do
+not invent a second client. Shared presentational pieces still live locally
+until `@auto/ui-components` lands (see `FUTURE_FEATURES.md`).
 
 ## State ownership
 
@@ -43,12 +43,9 @@ When adding a route:
 
 ## API client rules
 
-`src/lib/api.ts`:
+See [`API_CLIENT_DEV_GUIDE.md`](API_CLIENT_DEV_GUIDE.md). In the UI:
 
-- Use `fetch` with structured `ApiError`
-- Send `Content-Type: application/json` **only when there is a body** — Fastify
-  rejects empty-body requests that claim JSON
-- Encode path segments (`encodeURIComponent`) for semantic ids
+- Import `api`, `ApiError`, `queryKeys` from `src/lib/api.ts`
 - Do not catch-and-swallow policy errors; let the page render the message
 
 ## Data loading patterns
@@ -56,13 +53,13 @@ When adding a route:
 ```tsx
 const vehicleId = useAppSelector((s) => s.ui.selectedVehicleId);
 const q = useQuery({
-  queryKey: ["recognition", vehicleId],
+  queryKey: queryKeys.recognition(vehicleId),
   queryFn: () => api.getRecognition(vehicleId),
   enabled: Boolean(vehicleId),
 });
 ```
 
-- Key by resource + `vehicleId`
+- Use `queryKeys.*` — never invent parallel string keys
 - Gate with `enabled` when no vehicle selected
 - Invalidate related queries after mutations (create problem, solve, log repair)
 - For live / polled PIDs (gauges, watch-mode dashboards), use
@@ -71,7 +68,7 @@ const q = useQuery({
 
 ## Testing
 
-- Mock `../lib/api` (or `../../lib/api`) with `vi.mock`
+- Mock `../lib/api` with `vi.mock` + `importOriginal` so `queryKeys` stays real
 - Hoist error classes with `vi.hoisted` when needed
 - Scope ambiguous text with `within(section)`
 - Prefer `findBy*` for async-loaded content

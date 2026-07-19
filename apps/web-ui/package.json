@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@auto/api-client": "workspace:*",
     "@auto/semantic-types": "workspace:*",
     "@reduxjs/toolkit": "^2.5.0",
     "@tanstack/react-query": "^5.62.11",

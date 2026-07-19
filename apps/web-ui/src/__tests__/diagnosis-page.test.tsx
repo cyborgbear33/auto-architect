@@ -40,29 +40,33 @@ const { FakeApiError } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("../lib/api.ts", () => ({
-  ApiError: FakeApiError,
-  api: {
-    getRecognition: vi.fn().mockResolvedValue({
-      individual: "veh:jeep-renegade-2015-latitude",
-      member: ["Engine", "MisfireUnderLoad"],
-      mostSpecific: ["MisfireUnderLoad"],
-      undecided: [],
-    }),
-    listProblems: vi.fn().mockResolvedValue([]),
-    createDiagnosticProblem: vi.fn().mockResolvedValue({
-      id: "problem:1",
-      vehicleId: "veh:jeep-renegade-2015-latitude",
-      status: "open",
-      statement: { currentState: "a", desiredState: "b", gap: "c" },
-      actions: [],
-      triggeredByClass: "MisfireUnderLoad",
-      createdAt: "2026-01-01T00:00:00Z",
-      updatedAt: "2026-01-01T00:00:00Z",
-    }),
-    requestClearCodesAndDrive: vi.fn(),
-  },
-}));
+vi.mock("../lib/api.ts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../lib/api.ts")>();
+  return {
+    ...actual,
+    ApiError: FakeApiError,
+    api: {
+      getRecognition: vi.fn().mockResolvedValue({
+        individual: "veh:jeep-renegade-2015-latitude",
+        member: ["Engine", "MisfireUnderLoad"],
+        mostSpecific: ["MisfireUnderLoad"],
+        undecided: [],
+      }),
+      listProblems: vi.fn().mockResolvedValue([]),
+      createDiagnosticProblem: vi.fn().mockResolvedValue({
+        id: "problem:1",
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        status: "open",
+        statement: { currentState: "a", desiredState: "b", gap: "c" },
+        actions: [],
+        triggeredByClass: "MisfireUnderLoad",
+        createdAt: "2026-01-01T00:00:00Z",
+        updatedAt: "2026-01-01T00:00:00Z",
+      }),
+      requestClearCodesAndDrive: vi.fn(),
+    },
+  };
+});
 
 import { api } from "../lib/api.ts";
 import { Diagnosis } from "../routes/Diagnosis.tsx";

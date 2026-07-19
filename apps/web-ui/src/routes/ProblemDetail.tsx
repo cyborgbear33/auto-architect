@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "../components/Layout.tsx";
-import { api } from "../lib/api.ts";
+import { api, queryKeys } from "../lib/api.ts";
 import { useAppSelector } from "../store/index.ts";
 
 const KIND_EXPLANATIONS: Record<string, string> = {
@@ -27,13 +27,13 @@ export function ProblemDetail() {
   } | null>(null);
 
   const problemQ = useQuery({
-    queryKey: ["problem", problemId],
+    queryKey: queryKeys.problem(problemId),
     queryFn: () => api.getProblem(problemId),
   });
 
   const solve = useMutation({
     mutationFn: () => api.solveDiagnosticProblem(problemId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["problem", problemId] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.problem(problemId) }),
   });
 
   const logRepair = useMutation({
@@ -47,8 +47,10 @@ export function ProblemDetail() {
         outcomeStatus: input.outcome as "worked" | "partial" | "failed" | "inconclusive",
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["problem", problemId] });
-      qc.invalidateQueries({ queryKey: ["decisions"] });
+      qc.invalidateQueries({ queryKey: queryKeys.problem(problemId) });
+      if (problem?.vehicleId) {
+        qc.invalidateQueries({ queryKey: queryKeys.decisions(problem.vehicleId) });
+      }
       setLogForm(null);
     },
   });

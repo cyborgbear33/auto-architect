@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
-import { api } from "../lib/api.ts";
+import { api, queryKeys } from "../lib/api.ts";
 
 const OUTCOME_STYLES: Record<string, string> = {
   worked: "bg-green-100 text-green-800 border-green-200",
@@ -18,7 +18,7 @@ export function Journal() {
 
 function VehicleJournal({ vehicleId }: { vehicleId: string }) {
   const decisionsQ = useQuery({
-    queryKey: ["decisions", vehicleId],
+    queryKey: queryKeys.decisions(vehicleId),
     queryFn: () => api.listDecisions(vehicleId),
   });
 

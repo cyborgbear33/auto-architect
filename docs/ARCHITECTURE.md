@@ -47,6 +47,7 @@ packages/
   logos-bridge/   Node ↔ LOGOS seam (+ FakeLogosBridge)
   cartridges/     perception + framing (generic + engine-family)
   game-theory/    pure decision/zero-sum/cooperative math
+  api-client/     typed UI↔API bridge + TanStack queryKeys
 ```
 
 Dependency direction (nothing points "up" toward an app):
@@ -59,7 +60,7 @@ semantic-types ← ontology ← validation
    logos-bridge
         ↑
      apps/api
-apps/web-ui ← (semantic-types; thin local fetch client)
+apps/web-ui ← api-client ← semantic-types
 apps/obd-gateway ← (HTTP only; no TS packages)
 ```
 

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
-import { api } from "../lib/api.ts";
+import { api, queryKeys } from "../lib/api.ts";
 
 export function Campaigns() {
   const vehicleId = useSelectedVehicleId();
@@ -10,7 +10,7 @@ export function Campaigns() {
 
 function VehicleCampaigns({ vehicleId }: { vehicleId: string }) {
   const campaignsQ = useQuery({
-    queryKey: ["campaigns", vehicleId],
+    queryKey: queryKeys.campaigns(vehicleId),
     queryFn: () => api.getCampaigns(vehicleId),
   });
 

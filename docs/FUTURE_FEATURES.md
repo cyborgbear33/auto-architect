@@ -35,8 +35,10 @@ When proposing a new feature:
 |---|---|---|---|---|
 | Postgres persistence for vehicles, observations, problems, decisions | planned | high | In-memory store resets on every `tsx watch` restart; blocks real drive logging and repair history. | `apps/api/src/store`, garden's Drizzle/Postgres patterns |
 | Durable observation history + freeze-frame retention | planned | high | Needed for trend/forecast credibility and post-repair verification. | `ObservationsService`, Mode 01/02/03 batches |
-| Typed `@auto/api-client` package | planned | medium | UI currently uses a thin local `fetch` helper; garden's client package is the proven pattern. | `apps/web-ui/src/lib/api.ts`, `@auto/semantic-types` |
 | Shared `@auto/ui-components` (status pills, empty/error states, evidence panels) | planned | medium | Prevents per-page inventing of trust/evidence UI; matches garden. | `UX_GUIDELINES`, Diagnosis/Dashboard patterns |
+| Thin SAE PID/DTC seed slice (cartridge-used codes/PIDs only) | planned | high (preliminary) | Full knowledge base is large; seed units + J1979/J2012 rows for PIDs/DTCs cartridges already perceive before Postgres/gauges. | `dtc-dictionary.json`, `pid_map.py`, `HARDWARE_STANDARDS.md` |
+| Live OBDLink MX+ dry-run (scan/watch → Dashboard) | planned | high (operator validation) | Catches adapter/port/path issues CI never sees; validate Jeep path before deep feature work. | `apps/obd-gateway`, Dashboard, real adapter |
+| Port logos-bridge seam drift vs garden (one-time sync pass) | planned | medium (preliminary) | `pnpm check:bridge-drift` already flags structural drift — port intentional transport/salvage fixes both ways before they diverge further. | `packages/logos-bridge`, garden `@garden/logos-bridge`, `scripts/check-bridge-drift.mjs` |
 | Live gauge view (RPM, load, fuel trim, coolant) with units | planned | high (operator UX) | Dashboard today is DTC/recognition-first; operators expect live PIDs during a drive. | `ObservationsService` latest PIDs, web-ui Dashboard |
 | Mode 06 monitor results UI | planned | medium | API already exposes `/mode06`; UI does not surface it. | `GET /api/vehicles/:id/mode06` |
 | Freeze-frame detail panel next to misfire/load evidence | planned | medium | Freeze-frame is half the story for `MisfireUnderLoad`. | `GET .../freeze-frame`, Diagnosis/ProblemDetail |
@@ -49,14 +51,14 @@ When proposing a new feature:
 | Comprehensive SAE/ISO-grounded PID & DTC knowledge base (full J1979 PID table + broad generic P/B/C/U DTC coverage) | planned | high | Vital shared knowledge base for operators *and* ontology/perception; large undertaking — land guidance + quality gates first (`HARDWARE_STANDARDS.md`), then seed curated tables without inventing meanings. | `dtc-dictionary.json`, `pid_map.py`, ontology lint, `HARDWARE_STANDARDS.md` |
 | Fill GM EcoTec3 / Silverado engine-family cartridge | planned | high when truck available | Stub proves the extension point; real DTCs/TSBs needed before claiming support. | `gm-ecotec3-stub.ts`, `vehicle-profiles.json`, new DL view if needed |
 | SAE J1939 heavy-duty CAN support (PGN model) | planned | low | Distinct bus architecture from passenger OBD; only if a class-3+ diesel vehicle is added. | new edge path / ontology view — do not stretch Mode 01 cartridges |
-| Ruff lint/format for `obd-gateway` (Python) | planned | low | Biome covers TS/JS only; Ruff would give the Python edge the same "basic rules must hold" gate. | `apps/obd-gateway`, CI, `pnpm healthcheck` |
 | Bluetooth auto-discovery / preferred adapter profile for OBDLink MX+ | planned | medium | Manual port config works; discovery reduces friction on laptop + phone docks. | `obd_gateway/config.py`, `client.py` |
 | Continuous drive session recorder (watch → session object) | planned | medium | `watch` posts batches; a first-class DriveSession would group them for journals. | obd-gateway watch, ObservationsService, Journal UI |
 | Android/companion read-only client | planned | low | Nice for under-hood use; web-ui first. | API read endpoints only |
 | Export diagnostic report (Markdown / print-to-PDF) | planned | medium | Compose recognition + ranked actions + decisions into a shareable shop note. | DecisionRecord, verbalize, Journal |
 | Extract a real shared `@seam/logos-bridge-core` package instead of two hand-synced copies | planned | low | `pnpm check:bridge-drift` is an advisory reminder, not a fix — a real shared package would remove the sync burden entirely once both apps' bridge needs stabilize. | `packages/logos-bridge`, garden-architect's `@garden/logos-bridge`, `scripts/check-bridge-drift.mjs` |
 | Coverage thresholds (vitest coverage / codecov) | planned | low | Deferred until Postgres + shared UI packages land — prefer honest test-layer matrix over vanity %. | `TESTING_DEV_GUIDE.md`, CI |
-| Policy library expansion (e.g. forbid clear-codes under LowOilPressureStallRisk) | planned | medium | Only clear-codes-and-drive + misfire is wired as the demo hold. | `PolicyService`, reason fixtures |
+| Policy library expansion (e.g. forbid clear-codes under LowOilPressureStallRisk) | planned | medium | Only clear-codes-and-drive + misfire is wired as the demo hold. Start with one additional reason fixture so the safety-hold pattern isn't a one-off. | `PolicyService`, reason fixtures, `packages/ontology/fixtures` |
+| Ruff lint/format for `obd-gateway` (Python) — wire into healthcheck | planned | medium (preliminary) | Biome covers TS/JS only; Ruff gives the Python edge the same "basic rules must hold" gate before edge work expands. | `apps/obd-gateway`, CI, `pnpm healthcheck` |
 | Ontology browser page (read-only TBox / views / DTC dictionary) | planned | low | Useful for debugging; garden has a full Ontology page — keep auto's lighter. | `@auto/ontology` loaders, new route |
 | Multi-vehicle comparison dashboard | planned | low | Only valuable once ≥2 real vehicles exist. | VehicleSwitcher, recognition summaries |
 
@@ -84,6 +86,7 @@ When proposing a new feature:
 | Project documentation set (handoff, architecture, AI guides, backlog) | 2026-07 | `docs/` |
 | Real-LOGOS integration tests in CI (realize/reason/schema, beyond ontology-lint) | 2026-07 | `packages/logos-bridge/src/{realize,reason,schema}-integration.test.ts`, `.github/workflows/ci.yml`, `TESTING_DEV_GUIDE.md` |
 | Advisory logos-bridge drift check vs garden-architect | 2026-07 | `scripts/check-bridge-drift.mjs`, `pnpm check:bridge-drift`, wired into `pnpm healthcheck` |
+| Shared `@auto/api-client` (typed fetch, ApiError, queryKeys; web-ui migrated) | 2026-07 | `packages/api-client`, `API_CLIENT_DEV_GUIDE.md`, `apps/web-ui/src/lib/api.ts` |
 
 ---
 
