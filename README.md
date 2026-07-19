@@ -55,7 +55,22 @@ pnpm lint:ontology           # LOGOS well-formedness + catalog/cartridge parity 
 
 CI (`.github/workflows/ci.yml`) runs all of the above, plus a production build of the web UI.
 
+## Documentation
+
+| Doc | Use |
+|---|---|
+| [`docs/AI_HANDOFF.md`](docs/AI_HANDOFF.md) | **Start here** — orientation for humans and AI agents |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | As-built service graph and contracts |
+| [`docs/FUTURE_FEATURES.md`](docs/FUTURE_FEATURES.md) | Canonical backlog (planned ↔ implemented) |
+| [`docs/ai/README_FOR_AI.md`](docs/ai/README_FOR_AI.md) | Coding-rules read order |
+| [`docs/ai/OBD_EDGE_CONTRACT.md`](docs/ai/OBD_EDGE_CONTRACT.md) | OBD-II / CANBUS edge rules |
+| [`docs/LESSON_AGENT_DETERMINISTIC_APPS.md`](docs/LESSON_AGENT_DETERMINISTIC_APPS.md) | Pointer to the metalanguage lesson |
+
+Guidance is layered: shared propose/dispose fundamentals → auto product guides → OBD-specific contract.
+
 ## Adding a second vehicle (e.g. a Silverado)
+
+See [`docs/ai/ADD_A_VEHICLE.md`](docs/ai/ADD_A_VEHICLE.md). Short version:
 
 1. Research the real engine family (e.g. EcoTec3 5.3L) and its documented fault codes/TSBs.
 2. Add any engine-family-specific DL classes to `packages/ontology/dl-ontology.json` behind a new view (mirror `fca-tigershark-2.4`).
@@ -64,3 +79,7 @@ CI (`.github/workflows/ci.yml`) runs all of the above, plus a production build o
 5. Run `pnpm lint:ontology` — it will catch any class the cartridge references that the ontology doesn't declare.
 
 No changes to the generic TBox, generic cartridges, API services, or UI are required.
+
+## Repository
+
+https://github.com/cyborgbear33/auto-architect

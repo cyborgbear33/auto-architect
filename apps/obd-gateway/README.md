@@ -7,10 +7,11 @@ enhanced-FCA-CAN reverse engineering. It reads standard Mode 01 PIDs and
 Mode 03/07 DTCs and POSTs validated `Observation` batches to
 `POST /api/vehicles/:id/observations`.
 
-Per the layering rule in `docs/AI_HANDOFF.md`: **obd-gateway never imports
-the LOGOS bridge and never writes to a store directly.** It only ever
-reports what it actually measured — an empty scan produces a near-empty
-batch, never a synthesized "all clear."
+Per the layering rule in [`docs/AI_HANDOFF.md`](../../docs/AI_HANDOFF.md) and
+the normative [`docs/ai/OBD_EDGE_CONTRACT.md`](../../docs/ai/OBD_EDGE_CONTRACT.md):
+**obd-gateway never imports the LOGOS bridge and never writes to a store
+directly.** It only ever reports what it actually measured — an empty scan
+produces a near-empty batch, never a synthesized "all clear."
 
 ## Install
 
