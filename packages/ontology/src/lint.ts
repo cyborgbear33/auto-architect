@@ -8,9 +8,12 @@
  * shaped (garden-architect's taxon registry) and doesn't fit this domain's
  * fault-class/DTC catalog — so this is a small, honest, vehicle-domain
  * version of the same idea: every DTC dictionary entry must resolve to a
- * declared class, every view must reference real classes, and cartridges
- * must never require a class the ontology doesn't declare.
+ * declared class, every view must reference real classes, cartridges must
+ * never require a class the ontology doesn't declare, and vehicle profiles
+ * must resolve engineFamily → view → known cartridge names.
  */
+
+import type { VehicleProfilesFile } from "./schemas.ts";
 
 export interface OntologyLintIssue {
   code: string;
@@ -42,6 +45,12 @@ export interface LintOntologyParams {
   /** Union of every registered cartridge's `requires.classes` — checked so a
    *  cartridge can never silently reference a class the ontology dropped. */
   cartridgeRequiredClasses?: string[];
+  /** Parsed vehicle-profiles.json — when present, engineFamily/view/cartridge
+   *  wiring is checked. */
+  vehicleProfiles?: VehicleProfilesFile;
+  /** Names of every cartridge in `packages/cartridges` registry — when present
+   *  with vehicleProfiles, every family `cartridges[]` entry must resolve. */
+  registeredCartridgeNames?: string[];
 }
 
 function ok(errors: OntologyLintIssue[], warnings: OntologyLintIssue[]): OntologyLintResult {
@@ -54,12 +63,15 @@ export function lintOntology(params: LintOntologyParams): OntologyLintResult {
     dtcDictionary,
     allowNonDtcSymptoms = [],
     cartridgeRequiredClasses = [],
+    vehicleProfiles,
+    registeredCartridgeNames,
   } = params;
   const errors: OntologyLintIssue[] = [];
   const warnings: OntologyLintIssue[] = [];
 
   const declaredSubtypes = new Set(Object.keys(ontology.subtypes));
   const declaredClasses = new Set(Object.keys(ontology.classes));
+  const declaredViews = new Set(Object.keys(ontology.views));
   const symptomSubtypes = new Set(
     Object.entries(ontology.subtypes)
       .filter(([, parent]) => parent === "Symptom")
@@ -120,6 +132,40 @@ export function lintOntology(params: LintOntologyParams): OntologyLintResult {
         code: "cartridge_requires_unknown_class",
         message: `A cartridge requires class "${className}", which is not declared anywhere in dl-ontology.json`,
       });
+    }
+  }
+
+  // 6. Vehicle profile registry wiring (when profiles are supplied).
+  if (vehicleProfiles) {
+    const familyIds = new Set(Object.keys(vehicleProfiles.engineFamilies));
+    const cartridgeNames = registeredCartridgeNames ? new Set(registeredCartridgeNames) : undefined;
+
+    for (const [vehicleId, vehicle] of Object.entries(vehicleProfiles.vehicles)) {
+      if (!familyIds.has(vehicle.engineFamily)) {
+        errors.push({
+          code: "vehicle_unknown_engine_family",
+          message: `Vehicle "${vehicleId}" references engineFamily "${vehicle.engineFamily}", which is not declared in vehicle-profiles.json engineFamilies`,
+        });
+      }
+    }
+
+    for (const [familyId, family] of Object.entries(vehicleProfiles.engineFamilies)) {
+      if (!declaredViews.has(family.view)) {
+        errors.push({
+          code: "engine_family_unknown_view",
+          message: `Engine family "${familyId}" references view "${family.view}", which is not declared in dl-ontology.json views`,
+        });
+      }
+      if (cartridgeNames) {
+        for (const name of family.cartridges) {
+          if (!cartridgeNames.has(name)) {
+            errors.push({
+              code: "engine_family_unknown_cartridge",
+              message: `Engine family "${familyId}" lists cartridge "${name}", which is not in the cartridge registry`,
+            });
+          }
+        }
+      }
     }
   }
 

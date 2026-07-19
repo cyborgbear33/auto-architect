@@ -60,13 +60,24 @@ python3 -m logos reason  packages/ontology/fixtures/misfire_reason_fixture.json 
 Only after realize/reason behave as intended should you wire cartridge framing
 or UI copy.
 
+## Registry schemas
+
+`vehicle-profiles.json`, `dtc-dictionary.json`, and `known-campaigns.json` are
+Zod-validated (`packages/ontology/src/schemas.ts`). `runOntologyLint` also
+checks engineFamily → ontology view → registered cartridge name wiring.
+`tsc` alone does **not** prove registry shape — always keep lint green.
+
 ## Lint
 
 ```bash
-pnpm lint:ontology
+pnpm lint:ontology                  # well-formedness + narrow parity vitest
+pnpm lint:ontology --wellformed-only
+pnpm lint:ontology --check          # soft-skip well-formedness if logos missing; still run parity
 ```
 
 Runs:
 
-1. LOGOS well-formedness (`logos ontology --json`)
-2. TypeScript catalog/cartridge parity tests (`@auto/ontology` + `@auto/cartridges`)
+1. LOGOS well-formedness (`logos ontology --json`) — unless `--wellformed-only`
+   skipped logos under `--check`, or healthcheck already covered parity
+2. Narrow TypeScript parity: `@auto/ontology` `lint.test.ts` + `fixtures.test.ts`,
+   `@auto/cartridges` `ontology-lint.test.ts` (not the full package suites)

@@ -7,11 +7,23 @@
  */
 
 import type { EngineFamily, KnownCampaign, VehicleProfile } from "@auto/semantic-types";
+import type { ZodError } from "zod";
 import dlOntologyJson from "../dl-ontology.json" with { type: "json" };
 import dtcDictionaryJson from "../dtc-dictionary.json" with { type: "json" };
 import knownCampaignsJson from "../known-campaigns.json" with { type: "json" };
 import vehicleProfilesJson from "../vehicle-profiles.json" with { type: "json" };
-import { type LintableOntology, lintOntology, type OntologyLintResult } from "./lint.ts";
+import {
+  type LintableOntology,
+  lintOntology,
+  type OntologyLintIssue,
+  type OntologyLintResult,
+} from "./lint.ts";
+import {
+  DtcDictionaryFileSchema,
+  KnownCampaignsFileSchema,
+  type VehicleProfilesFile,
+  VehicleProfilesFileSchema,
+} from "./schemas.ts";
 
 export type {
   LintableDtcDictionary,
@@ -20,6 +32,11 @@ export type {
   OntologyLintIssue,
   OntologyLintResult,
 } from "./lint.ts";
+export {
+  DtcDictionaryFileSchema,
+  KnownCampaignsFileSchema,
+  VehicleProfilesFileSchema,
+} from "./schemas.ts";
 export { lintOntology };
 
 export const dlOntology: Record<string, unknown> = dlOntologyJson;
@@ -32,10 +49,12 @@ export interface DtcDictionaryEntry {
   note?: string;
 }
 
-const dtcDictionary: Record<string, DtcDictionaryEntry> = dtcDictionaryJson.codes as Record<
-  string,
-  DtcDictionaryEntry
->;
+const dtcDictionaryFile = DtcDictionaryFileSchema.parse(dtcDictionaryJson);
+const vehicleProfilesFile: VehicleProfilesFile =
+  VehicleProfilesFileSchema.parse(vehicleProfilesJson);
+const knownCampaignsFile = KnownCampaignsFileSchema.parse(knownCampaignsJson);
+
+const dtcDictionary: Record<string, DtcDictionaryEntry> = dtcDictionaryFile.codes;
 
 export function lookupDtc(code: string): DtcDictionaryEntry | undefined {
   return dtcDictionary[code.toUpperCase()];
@@ -44,24 +63,6 @@ export function lookupDtc(code: string): DtcDictionaryEntry | undefined {
 export function allDtcCodes(): string[] {
   return Object.keys(dtcDictionary);
 }
-
-interface VehicleProfilesFile {
-  vehicles: Record<
-    string,
-    {
-      make: string;
-      model: string;
-      year: number | null;
-      trim: string | null;
-      engineFamily: string;
-      obdProtocol?: string | null;
-      notes?: string;
-    }
-  >;
-  engineFamilies: Record<string, { label: string; view: string; cartridges: string[] }>;
-}
-
-const vehicleProfilesFile = vehicleProfilesJson as VehicleProfilesFile;
 
 export function listVehicleProfiles(): VehicleProfile[] {
   return Object.entries(vehicleProfilesFile.vehicles).map(([id, v]) => ({ id, ...v }));
@@ -95,16 +96,14 @@ export function listEngineFamilies(): EngineFamily[] {
   }));
 }
 
-const knownCampaigns: KnownCampaign[] = [
-  ...knownCampaignsJson.campaigns.map((c) => ({
-    id: c.id,
-    title: c.title,
-    engineFamily: c.engineFamily,
-    yearRange: c.yearRange as [number, number],
-    summary: c.summary,
-    reference: c.reference,
-  })),
-];
+const knownCampaigns: KnownCampaign[] = knownCampaignsFile.campaigns.map((c) => ({
+  id: c.id,
+  title: c.title,
+  engineFamily: c.engineFamily,
+  yearRange: c.yearRange,
+  summary: c.summary,
+  reference: c.reference,
+}));
 
 export function campaignsForEngineFamily(
   engineFamilyId: string,
@@ -130,22 +129,52 @@ export interface TsbEntry {
 }
 
 export function tsbsForEngineFamily(engineFamilyId: string): TsbEntry[] {
-  return (knownCampaignsJson.tsbs as TsbEntry[]).filter((t) => t.engineFamily === engineFamilyId);
+  return knownCampaignsFile.tsbs.filter((t) => t.engineFamily === engineFamilyId);
+}
+
+function zodIssues(prefix: string, err: ZodError): OntologyLintIssue[] {
+  return err.issues.map((issue) => ({
+    code: "registry_schema_invalid",
+    message: `${prefix}: ${issue.path.join(".") || "<root>"} — ${issue.message}`,
+  }));
 }
 
 /**
  * Runs auto-architect's own catalog ↔ DL contract lint against the real,
- * source-controlled registries. `cartridgeRequiredClasses` is optional
- * because @auto/ontology cannot depend on @auto/cartridges (wrong
- * direction) — callers that have it (scripts/lint-ontology.mjs, or a test in
- * @auto/cartridges) pass it in explicitly.
+ * source-controlled registries. `cartridgeRequiredClasses` /
+ * `registeredCartridgeNames` are optional because @auto/ontology cannot
+ * depend on @auto/cartridges (wrong direction) — callers that have them
+ * (tests in @auto/cartridges) pass them in explicitly.
  */
 export function runOntologyLint(
-  opts: { cartridgeRequiredClasses?: string[] } = {},
+  opts: { cartridgeRequiredClasses?: string[]; registeredCartridgeNames?: string[] } = {},
 ): OntologyLintResult {
+  const schemaErrors: OntologyLintIssue[] = [];
+  const dtcParsed = DtcDictionaryFileSchema.safeParse(dtcDictionaryJson);
+  if (!dtcParsed.success) schemaErrors.push(...zodIssues("dtc-dictionary.json", dtcParsed.error));
+  const profilesParsed = VehicleProfilesFileSchema.safeParse(vehicleProfilesJson);
+  if (!profilesParsed.success) {
+    schemaErrors.push(...zodIssues("vehicle-profiles.json", profilesParsed.error));
+  }
+  const campaignsParsed = KnownCampaignsFileSchema.safeParse(knownCampaignsJson);
+  if (!campaignsParsed.success) {
+    schemaErrors.push(...zodIssues("known-campaigns.json", campaignsParsed.error));
+  }
+
+  if (
+    schemaErrors.length > 0 ||
+    !dtcParsed.success ||
+    !profilesParsed.success ||
+    !campaignsParsed.success
+  ) {
+    return { ok: false, errors: schemaErrors, warnings: [] };
+  }
+
   return lintOntology({
     ontology: dlOntologyJson as unknown as LintableOntology,
-    dtcDictionary: dtcDictionaryJson as { codes: Record<string, { concept: string }> },
+    dtcDictionary: dtcParsed.data,
+    vehicleProfiles: profilesParsed.data,
     cartridgeRequiredClasses: opts.cartridgeRequiredClasses,
+    registeredCartridgeNames: opts.registeredCartridgeNames,
   });
 }

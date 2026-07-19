@@ -87,13 +87,70 @@ describe("lintOntology (unit, synthetic ontology)", () => {
       }),
     ]);
   });
+
+  it("errors when a vehicle references an undeclared engine family", () => {
+    const result = lintOntology({
+      ontology: baseOntology,
+      dtcDictionary: baseDict,
+      vehicleProfiles: {
+        vehicles: {
+          "veh:x": {
+            make: "X",
+            model: "Y",
+            year: 2015,
+            trim: null,
+            engineFamily: "missing-family",
+          },
+        },
+        engineFamilies: {
+          real: { label: "Real", view: "generic", cartridges: [] },
+        },
+      },
+    });
+    expect(result.errors).toEqual([
+      expect.objectContaining({ code: "vehicle_unknown_engine_family" }),
+    ]);
+  });
+
+  it("errors when an engine family references an undeclared view", () => {
+    const result = lintOntology({
+      ontology: baseOntology,
+      dtcDictionary: baseDict,
+      vehicleProfiles: {
+        vehicles: {},
+        engineFamilies: {
+          fam: { label: "Fam", view: "no-such-view", cartridges: [] },
+        },
+      },
+    });
+    expect(result.errors).toEqual([
+      expect.objectContaining({ code: "engine_family_unknown_view" }),
+    ]);
+  });
+
+  it("errors when an engine family lists an unregistered cartridge name", () => {
+    const result = lintOntology({
+      ontology: baseOntology,
+      dtcDictionary: baseDict,
+      vehicleProfiles: {
+        vehicles: {},
+        engineFamilies: {
+          fam: { label: "Fam", view: "generic", cartridges: ["ghost-cart"] },
+        },
+      },
+      registeredCartridgeNames: ["misfire"],
+    });
+    expect(result.errors).toEqual([
+      expect.objectContaining({ code: "engine_family_unknown_cartridge" }),
+    ]);
+  });
 });
 
-describe("runOntologyLint (integration, the real dl-ontology.json + dtc-dictionary.json)", () => {
-  // Cartridge-inclusive parity (requires.classes) is checked one level up, in
-  // @auto/cartridges — this package cannot depend on @auto/cartridges (wrong
-  // direction: cartridges already depends on ontology).
-  it("is clean with no cartridge classes supplied", () => {
+describe("runOntologyLint (integration, the real registries)", () => {
+  // Cartridge-inclusive parity (requires.classes + cartridge names) is checked
+  // one level up in @auto/cartridges — this package cannot depend on
+  // @auto/cartridges (wrong direction: cartridges already depends on ontology).
+  it("is clean with no cartridge classes supplied (schema + profile→view wiring)", () => {
     const result = runOntologyLint();
     expect(result.errors, JSON.stringify(result.errors, null, 2)).toEqual([]);
     expect(result.ok).toBe(true);

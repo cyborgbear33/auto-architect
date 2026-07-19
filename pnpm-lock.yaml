@@ -165,6 +165,9 @@ importers:
       '@auto/semantic-types':
         specifier: workspace:*
         version: link:../semantic-types
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
     devDependencies:
       typescript:
         specifier: ^5.7.3

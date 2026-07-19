@@ -9,10 +9,14 @@ import { allCartridges } from "./registry.ts";
  * in @auto/ontology) because ontology cannot depend on cartridges.
  */
 describe("ontology ↔ cartridge parity", () => {
-  it("every registered cartridge only requires classes the ontology actually declares", () => {
+  it("every registered cartridge only requires classes the ontology actually declares, and every engine-family cartridge name resolves", () => {
     const cartridgeRequiredClasses = [...new Set(allCartridges.flatMap((c) => c.requires.classes))];
+    const registeredCartridgeNames = allCartridges.map((c) => c.name);
     expect(cartridgeRequiredClasses.length).toBeGreaterThan(0);
-    const result = runOntologyLint({ cartridgeRequiredClasses });
+    const result = runOntologyLint({
+      cartridgeRequiredClasses,
+      registeredCartridgeNames,
+    });
     expect(result.errors, JSON.stringify(result.errors, null, 2)).toEqual([]);
     expect(result.ok).toBe(true);
   });

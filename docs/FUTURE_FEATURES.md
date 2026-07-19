@@ -55,6 +55,7 @@ When proposing a new feature:
 | Android/companion read-only client | planned | low | Nice for under-hood use; web-ui first. | API read endpoints only |
 | Export diagnostic report (Markdown / print-to-PDF) | planned | medium | Compose recognition + ranked actions + decisions into a shareable shop note. | DecisionRecord, verbalize, Journal |
 | Extract a real shared `@seam/logos-bridge-core` package instead of two hand-synced copies | planned | low | `pnpm check:bridge-drift` is an advisory reminder, not a fix — a real shared package would remove the sync burden entirely once both apps' bridge needs stabilize. | `packages/logos-bridge`, garden-architect's `@garden/logos-bridge`, `scripts/check-bridge-drift.mjs` |
+| Coverage thresholds (vitest coverage / codecov) | planned | low | Deferred until Postgres + shared UI packages land — prefer honest test-layer matrix over vanity %. | `TESTING_DEV_GUIDE.md`, CI |
 | Policy library expansion (e.g. forbid clear-codes under LowOilPressureStallRisk) | planned | medium | Only clear-codes-and-drive + misfire is wired as the demo hold. | `PolicyService`, reason fixtures |
 | Ontology browser page (read-only TBox / views / DTC dictionary) | planned | low | Useful for debugging; garden has a full Ontology page — keep auto's lighter. | `@auto/ontology` loaders, new route |
 | Multi-vehicle comparison dashboard | planned | low | Only valuable once ≥2 real vehicles exist. | VehicleSwitcher, recognition summaries |

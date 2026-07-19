@@ -214,20 +214,22 @@ Operator detail: [`apps/obd-gateway/README.md`](../apps/obd-gateway/README.md).
 
 ## 10. Testing & CI
 
-- TypeScript: Vitest per package (`pnpm -r test`)
+- TypeScript: Vitest per package (`pnpm -r test`) — includes API HTTP smoke
+  (`apps/api/src/app.smoke.test.ts`) and ontology Zod/registry parity
 - Lint/format: Biome (`pnpm lint`) — see `docs/ai/CODE_STANDARDS.md`
 - Python: pytest (`pnpm obd-gateway:test`)
-- Ontology: `pnpm lint:ontology` (LOGOS well-formedness + catalog/cartridge parity)
-- Real-LOGOS smoke: `packages/logos-bridge/src/*-integration.test.ts` (realize/reason/schema
-  against the checked-in fixtures) — self-skip without LOGOS, run for real in the
-  `ontology-lint` CI job right after ontology lint
+- Ontology: `pnpm lint:ontology` (LOGOS well-formedness + narrow parity vitest);
+  healthcheck uses `--wellformed-only` after `pnpm -r test` already covered parity
+- Real-LOGOS smoke: `packages/logos-bridge/src/*-integration.test.ts` — self-skip
+  without LOGOS; CI runs them for real only in the `ontology-lint` job
+  (`verify` deliberately omits the LOGOS install)
 - Bridge-drift (advisory): `pnpm check:bridge-drift` vs garden-architect's `@garden/logos-bridge`
-- One-shot local gate: `pnpm healthcheck` (typecheck + biome + tests + ontology + gateway + UI build + drift check)
-- CI: `.github/workflows/ci.yml` — `verify` + `ontology-lint` jobs
+- One-shot local gate: `pnpm healthcheck` (typecheck∥biome + tests + well-formedness +
+  gateway + UI build + drift check; auto-sets `LOGOS_PYTHON_BIN` to `.venv` when present)
+- CI: `.github/workflows/ci.yml` — `verify` (Fake path) + `ontology-lint` (real LOGOS)
 
 Unit tests that need LOGOS behavior without Python inject `FakeLogosBridge`.
-The integration tests above are the exception — they run the real subprocess
-specifically to catch wire drift `FakeLogosBridge` cannot see.
+Required layers are listed in `docs/ai/TESTING_DEV_GUIDE.md`.
 
 ---
 

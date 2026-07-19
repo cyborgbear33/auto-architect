@@ -8,15 +8,48 @@ pnpm healthcheck --fast      # skip obd-gateway tests + web-ui build
 pnpm -r typecheck
 pnpm lint                    # Biome check
 pnpm -r test                 # all TS packages/apps (vitest)
-pnpm lint:ontology           # LOGOS well-formedness + catalog/cartridge parity
+pnpm lint:ontology           # LOGOS well-formedness + narrow catalog/cartridge parity
+pnpm lint:ontology --wellformed-only   # logos ontology --json only (healthcheck uses this)
+pnpm lint:ontology --check   # soft-skip well-formedness if logos missing; still run parity
 pnpm obd-gateway:test        # pytest
 pnpm --filter @auto/web-ui build
 pnpm check:bridge-drift      # advisory: logos-bridge vs garden-architect's copy
 ```
 
-CI runs the same set in `.github/workflows/ci.yml` (`verify` + `ontology-lint`,
-the latter now also running the real-LOGOS `logos-bridge` integration tests
-below — not just the ontology well-formedness/parity checks its name implies).
+CI (`.github/workflows/ci.yml`):
+
+| Job | What |
+|---|---|
+| `verify` | typecheck, biome, `pnpm -r test` (Fake/self-skip LOGOS), web-ui build, pytest — **no** LOGOS install |
+| `ontology-lint` | install LOGOS → hard `pnpm lint:ontology` → logos-bridge real-engine tests |
+
+## Required test layers
+
+When you change a seam, cover the matching layer. Docs alone are not enough —
+CI + `pnpm healthcheck` enforce these.
+
+| Layer | Where | When required |
+|---|---|---|
+| **Unit (FakeLogosBridge)** | `apps/api/src/services/*.test.ts`, package `*.test.ts` | Any service / cartridge / bridge unit logic |
+| **Ontology parity (Python-free)** | `@auto/ontology` lint + Zod registries; `@auto/cartridges` `ontology-lint.test.ts` | Ontology JSON, DTC dictionary, vehicle profiles, cartridge `requires` / names |
+| **Real-LOGOS smoke** | `packages/logos-bridge/src/*-integration.test.ts` | Wire contract, fixtures, `LOGOS_MIN_ENGINE_VERSION` bumps |
+| **HTTP smoke** | `apps/api/src/app.smoke.test.ts` (`buildApp` + `inject`) | Route registration / `buildApp` / seed wiring |
+| **Gateway (pytest)** | `apps/obd-gateway/tests/` | Edge payload, CLI, pid_map |
+| **UI (RTL, mocked api)** | `apps/web-ui/src/__tests__/` | Page interaction; never invent fault classes client-side |
+
+**Not required yet:** coverage % thresholds (deferred until Postgres / shared UI packages land). Prefer honest layers over a vanity number.
+
+## Healthcheck steps
+
+1. **typecheck ∥ biome** (parallel)
+2. **`pnpm -r test`** (includes ontology parity, API smoke, logos-bridge integration if logos is on `LOGOS_PYTHON_BIN`)
+3. **`pnpm lint:ontology --wellformed-only`** — unique LOGOS `ontology --json` gate (parity already covered by step 2)
+4. **obd-gateway pytest** (skipped with `--fast` or missing `.venv`)
+5. **web-ui build** (skipped with `--fast`)
+6. **bridge-drift** (advisory only)
+
+If `LOGOS_PYTHON_BIN` is unset and `.venv/bin/python3` exists, healthcheck sets
+`LOGOS_PYTHON_BIN` to that path automatically (same Python obd-gateway uses).
 
 ## TypeScript
 
@@ -25,6 +58,7 @@ below — not just the ontology well-formedness/parity checks its name implies).
   realizer/reasoner/solver stubs
 - Do not require a live LOGOS process for package unit tests
 - Keep garden's habit: test the mutation gate and policy fail-closed paths
+- Route / `buildApp` changes: keep `app.smoke.test.ts` green
 
 ## FakeLogosBridge
 
@@ -66,6 +100,10 @@ python3 -m logos realize packages/ontology/fixtures/misfire_realize_fixture.json
 python3 -m logos reason  packages/ontology/fixtures/misfire_reason_fixture.json --json
 ```
 
+Registry shape is Zod-validated (`packages/ontology/src/schemas.ts`) and
+`runOntologyLint` checks engineFamily → view → cartridge-name wiring. Fixture
+file presence is asserted in `packages/ontology/src/fixtures.test.ts`.
+
 ## Real-LOGOS integration tests (the CI smoke)
 
 `packages/logos-bridge/src/{realize,reason,schema}-integration.test.ts` load
@@ -77,11 +115,8 @@ fails, so:
 
 - **Locally**: they run for free whenever you have LOGOS installed (part of
   `pnpm -r test` / `pnpm --filter @auto/logos-bridge test`).
-- **In CI**: the `ontology-lint` job (the only job with LOGOS installed) runs
-  `pnpm --filter @auto/logos-bridge test` with `LOGOS_PYTHON_BIN: python`
-  right after the hard-fail ontology lint step — so they always execute for
-  real in CI, not just skip. This is what catches `@auto/logos-bridge` <->
-  engine wire drift that `FakeLogosBridge`-based unit tests cannot see.
+- **In CI**: only the `ontology-lint` job installs LOGOS and runs these for
+  real (the `verify` job deliberately omits the install so they self-skip).
 
 When you touch the wire contract (`types.ts`, `bridge.ts`, `serve-client.ts`)
 or bump `LOGOS_MIN_ENGINE_VERSION`, these are the tests that actually prove it
@@ -116,5 +151,5 @@ Or equivalently:
 1. `pnpm -r typecheck`
 2. `pnpm lint`
 3. `pnpm -r test`
-4. `pnpm lint:ontology` if ontology/cartridges touched
+4. `pnpm lint:ontology` if ontology/cartridges touched (or `--wellformed-only` if parity already ran)
 5. `pnpm obd-gateway:test` if gateway touched

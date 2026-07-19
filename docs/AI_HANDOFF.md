@@ -160,7 +160,9 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Generic cartridges (misfire, lean, EVAP, cam/crank) | shipped | `packages/cartridges/src/*.ts` |
 | FCA MultiAir cartridge + GM EcoTec3 stub | shipped | `fca-tigershark-2.4.ts`, `gm-ecotec3-stub.ts` |
 | `@auto/logos-bridge` + `FakeLogosBridge` | shipped | `packages/logos-bridge` |
-| Real-LOGOS integration tests (realize/reason/schema), run for real in CI | shipped | `packages/logos-bridge/src/*-integration.test.ts`, `.github/workflows/ci.yml` |
+| Real-LOGOS integration tests (realize/reason/schema), run for real in CI | shipped | `packages/logos-bridge/src/*-integration.test.ts`, `ontology-lint` CI job only |
+| Ontology Zod registries + engineFamily→view→cartridge lint | shipped | `packages/ontology/src/schemas.ts`, `lint.ts` |
+| API HTTP smoke (`buildApp` + inject) | shipped | `apps/api/src/app.smoke.test.ts` |
 | logos-bridge drift check vs garden-architect (advisory) | shipped | `scripts/check-bridge-drift.mjs` |
 | Fastify API (vehicles, observations, recognition, actions) | shipped | `apps/api` |
 | In-memory store + seed Jeep | shipped | `apps/api/src/store` |

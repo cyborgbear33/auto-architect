@@ -123,9 +123,13 @@ See [`ADD_A_VEHICLE.md`](ADD_A_VEHICLE.md).
 ## 6. Testing expectations
 
 - API service logic: unit test with `FakeLogosBridge`.
-- Cartridges: perception tests + ontology-lint integration test.
+- Route / `buildApp` changes: keep `apps/api/src/app.smoke.test.ts` green.
+- Cartridges: perception tests + ontology-lint integration test (classes + names).
+- Ontology registries: Zod shape + engineFamily → view → cartridge wiring via
+  `runOntologyLint` (never invent DTC/PID meanings — see HARDWARE_STANDARDS).
 - Gateway: pytest with fakes (no hardware required).
 - UI: React Testing Library; mock `api` module; await async finds.
 - Prefer failing closed on safety holds.
+- Before finishing meaningful work: `pnpm healthcheck` green.
 
-See [`TESTING_DEV_GUIDE.md`](TESTING_DEV_GUIDE.md).
+See [`TESTING_DEV_GUIDE.md`](TESTING_DEV_GUIDE.md) for the required-layer matrix.

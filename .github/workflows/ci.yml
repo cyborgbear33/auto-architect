@@ -6,6 +6,8 @@ on:
   pull_request:
 
 jobs:
+  # Unit / FakeLogosBridge path — no LOGOS install. logos-bridge *-integration
+  # tests self-skip here; the ontology-lint job is the sole real-engine gate.
   verify:
     runs-on: ubuntu-latest
     steps:
@@ -23,11 +25,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Install LOGOS engine from a pinable tag
-        run: |
-          python -m pip install -U pip
-          python -m pip install "logos[schema] @ git+https://github.com/cyborgbear33/metalanguage.git@logos-v0.1.0#subdirectory=engine"
 
       - run: pnpm install --frozen-lockfile
 
@@ -49,6 +46,7 @@ jobs:
       - name: Test obd-gateway (Python)
         run: python -m pytest apps/obd-gateway
 
+  # Real LOGOS: well-formedness + narrow parity + logos-bridge integration smoke.
   ontology-lint:
     runs-on: ubuntu-latest
     steps:
@@ -74,7 +72,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Hard-fail ontology lint (well-formedness + catalog/cartridge parity)
+      - name: Hard-fail ontology lint (well-formedness + narrow catalog/cartridge parity)
         run: pnpm lint:ontology
         env:
           LOGOS_PYTHON_BIN: python
@@ -82,7 +80,8 @@ jobs:
       # Real-LOGOS smoke: exercises the actual `python3 -m logos realize|reason`
       # subprocess against the checked-in misfire fixtures, plus the schema
       # fail-fast path — catches @auto/logos-bridge <-> engine wire drift that
-      # FakeLogosBridge-based unit tests cannot see. Self-skips outside this job.
+      # FakeLogosBridge-based unit tests cannot see. Sole CI job that runs these
+      # for real (verify deliberately omits the logos install).
       - name: Real-LOGOS integration tests (logos-bridge)
         run: pnpm --filter @auto/logos-bridge test
         env:
