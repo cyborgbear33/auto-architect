@@ -45,6 +45,8 @@ truly SAE-portable.
   clearly non-class annotation — prefer class-linked concepts).
 - `pnpm lint:ontology` fails on catalog ↔ DL ↔ cartridge drift.
 - Prefer real TSB/recall grounding over inventing descriptions.
+- Ground SAE-generic codes in SAE J2012 / ISO 15031-6 wording; never guess
+  manufacturer-enhanced meanings. See [`HARDWARE_STANDARDS.md`](HARDWARE_STANDARDS.md).
 
 ## Proving a class before wiring UI
 

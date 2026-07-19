@@ -11,9 +11,9 @@
  * Ported unchanged from @garden/logos-bridge/serve-client.ts — the serve
  * transport protocol is domain-agnostic.
  */
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { createInterface, type Interface } from "node:readline";
+import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { createInterface, type Interface } from "node:readline";
 import {
   LogosNotAvailableError,
   LogosProtocolError,
@@ -277,7 +277,11 @@ export function createLogosServeClient(config: LogosServeClientConfig = {}): Log
       enqueue({ command: "ping" }, defaultTimeout)
         .then((reply) => {
           proc.off("exit", onEarlyExit);
-          if (!reply.ok || reply.exit_code !== 0 || !(reply.result as { pong?: boolean } | undefined)?.pong) {
+          if (
+            !reply.ok ||
+            reply.exit_code !== 0 ||
+            !(reply.result as { pong?: boolean } | undefined)?.pong
+          ) {
             throw new LogosNotAvailableError("LOGOS serve ping failed.", { reply });
           }
           finishOk();

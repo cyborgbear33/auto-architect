@@ -26,42 +26,42 @@ import {
 } from "./errors.ts";
 import {
   createLogosServeClient,
-  payloadFromServeReply,
   type LogosServeClient,
+  payloadFromServeReply,
 } from "./serve-client.ts";
 import {
   assertWireMetaCompatible,
-  solutionFromWire,
-  toWireProblem,
-  realizeResultFromWire,
-  toRealizeFile,
-  reviseResultFromWire,
-  toReviseFile,
-  forecastResultFromWire,
-  toForecastFile,
-  reasonResultFromWire,
-  toReasonFile,
-  verbalizeResultFromWire,
-  toVerbalizeArgs,
-  strategizeResultFromWire,
-  toStrategizeFile,
-  ontologyLintResultFromWire,
-  toOntologyLintFile,
-  type LogosProblemInput,
-  type RealizeInput,
-  type RealizeResult,
-  type ReviseInput,
-  type ReviseResult,
   type ForecastInput,
   type ForecastResult,
-  type ReasonInput,
-  type ReasonResult,
-  type VerbalizeInput,
-  type VerbalizeResult,
-  type StrategizeInput,
-  type StrategizeResult,
+  forecastResultFromWire,
+  type LogosProblemInput,
   type OntologyLintInput,
   type OntologyLintResult,
+  ontologyLintResultFromWire,
+  type RealizeInput,
+  type RealizeResult,
+  type ReasonInput,
+  type ReasonResult,
+  type ReviseInput,
+  type ReviseResult,
+  realizeResultFromWire,
+  reasonResultFromWire,
+  reviseResultFromWire,
+  type StrategizeInput,
+  type StrategizeResult,
+  solutionFromWire,
+  strategizeResultFromWire,
+  toForecastFile,
+  toOntologyLintFile,
+  toRealizeFile,
+  toReasonFile,
+  toReviseFile,
+  toStrategizeFile,
+  toVerbalizeArgs,
+  toWireProblem,
+  type VerbalizeInput,
+  type VerbalizeResult,
+  verbalizeResultFromWire,
 } from "./types.ts";
 
 export type LogosTransport = "subprocess" | "serve";
@@ -88,7 +88,10 @@ export interface LogosBridge {
   /** Solve an abstract game (decision-under-uncertainty and/or cooperative) and report degeneracy. */
   strategize(input: StrategizeInput, opts?: { timeoutMs?: number }): Promise<StrategizeResult>;
   /** Lint ontology structure + optional registry ↔ engine-family parity (shared engine contract). */
-  ontologyLint(input: OntologyLintInput, opts?: { timeoutMs?: number }): Promise<OntologyLintResult>;
+  ontologyLint(
+    input: OntologyLintInput,
+    opts?: { timeoutMs?: number },
+  ): Promise<OntologyLintResult>;
   /** Tear down a warm serve daemon when transport is `serve`. No-op for subprocess. */
   close?(): Promise<void>;
 }
@@ -207,9 +210,12 @@ function parseJsonStdout(stdout: string, label: string, exitCode: number | null 
   try {
     raw = JSON.parse(stdout);
   } catch {
-    throw new LogosProtocolError(`LOGOS ${label} produced non-JSON output; check version compatibility.`, {
-      stdout: stdout.slice(0, 500),
-    });
+    throw new LogosProtocolError(
+      `LOGOS ${label} produced non-JSON output; check version compatibility.`,
+      {
+        stdout: stdout.slice(0, 500),
+      },
+    );
   }
   throwIfSchemaValidationFailed(raw, exitCode);
   assertWireMetaCompatible(raw);
@@ -237,7 +243,10 @@ function translateExecError(err: ExecFailure, pythonBin: string, timeoutMs: numb
   throw new LogosSolveError("LOGOS solve failed.", exitCode, stderr);
 }
 
-function verbalizeServeInput(input: VerbalizeInput): { input: unknown; args: Record<string, unknown> } {
+function verbalizeServeInput(input: VerbalizeInput): {
+  input: unknown;
+  args: Record<string, unknown>;
+} {
   if (input.controlledEnglish !== undefined) {
     return { input: { controlled_english: input.controlledEnglish, ce: true }, args: { ce: true } };
   }
@@ -256,7 +265,9 @@ export function createLogosBridge(config: LogosBridgeConfig = {}): LogosBridge {
   const exec = config.exec ?? defaultExec;
   const transport = resolveTransport(config);
   const serveClient: LogosServeClient | null =
-    transport === "serve" ? createLogosServeClient({ pythonBin, timeoutMs: config.timeoutMs }) : null;
+    transport === "serve"
+      ? createLogosServeClient({ pythonBin, timeoutMs: config.timeoutMs })
+      : null;
 
   /** Run `logos <sub> - --json` with JSON on stdin (no temp files). */
   async function runJson(
@@ -310,7 +321,9 @@ export function createLogosBridge(config: LogosBridgeConfig = {}): LogosBridge {
   async function realizeOne(input: RealizeInput, timeoutMs: number): Promise<RealizeResult> {
     const file = toRealizeFile(input);
     if (serveClient) {
-      return realizeResultFromWire(await viaServe("realize", file, realizeServeArgs(input), timeoutMs, false));
+      return realizeResultFromWire(
+        await viaServe("realize", file, realizeServeArgs(input), timeoutMs, false),
+      );
     }
     const { stdout, exitCode } = await runJson("realize", file, timeoutMs, false);
     return realizeResultFromWire(parseJsonStdout(stdout, "realize", exitCode));
@@ -328,7 +341,12 @@ export function createLogosBridge(config: LogosBridgeConfig = {}): LogosBridge {
   ): Promise<RealizeResult[] | null> {
     const calls = inputs.map((inp, i) => {
       const args = realizeServeArgs(inp);
-      return { id: String(i), command: "realize", input: toRealizeFile(inp), ...(args ? { args } : {}) };
+      return {
+        id: String(i),
+        command: "realize",
+        input: toRealizeFile(inp),
+        ...(args ? { args } : {}),
+      };
     });
 
     let results: unknown[];
@@ -337,8 +355,13 @@ export function createLogosBridge(config: LogosBridgeConfig = {}): LogosBridge {
       const payload = reply.result as { results?: unknown[] } | undefined;
       if (!payload?.results) {
         // Old serve daemon without `batch` → signal fallback; anything else is a real failure.
-        if (typeof reply.error === "string" && /unknown command:\s*batch/i.test(reply.error)) return null;
-        throw new LogosSolveError("LOGOS batch failed via serve.", reply.exit_code ?? null, reply.error ?? "");
+        if (typeof reply.error === "string" && /unknown command:\s*batch/i.test(reply.error))
+          return null;
+        throw new LogosSolveError(
+          "LOGOS batch failed via serve.",
+          reply.exit_code ?? null,
+          reply.error ?? "",
+        );
       }
       results = payload.results;
     } else {
@@ -371,7 +394,11 @@ export function createLogosBridge(config: LogosBridgeConfig = {}): LogosBridge {
     return results.map((r, i) => {
       const entry = (r ?? {}) as { id?: string; result?: unknown; error?: string };
       if (entry.result === undefined) {
-        throw new LogosSolveError(`LOGOS batch item ${entry.id ?? i} (realize) failed.`, null, entry.error ?? "");
+        throw new LogosSolveError(
+          `LOGOS batch item ${entry.id ?? i} (realize) failed.`,
+          null,
+          entry.error ?? "",
+        );
       }
       return realizeResultFromWire(entry.result);
     });
@@ -422,7 +449,9 @@ export function createLogosBridge(config: LogosBridgeConfig = {}): LogosBridge {
       const timeoutMs = opts?.timeoutMs ?? config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
       const file = toForecastFile(input);
       if (serveClient) {
-        return forecastResultFromWire(await viaServe("forecast", file, undefined, timeoutMs, false));
+        return forecastResultFromWire(
+          await viaServe("forecast", file, undefined, timeoutMs, false),
+        );
       }
       const { stdout, exitCode } = await runJson("forecast", file, timeoutMs, false);
       return forecastResultFromWire(parseJsonStdout(stdout, "forecast", exitCode));
@@ -459,7 +488,9 @@ export function createLogosBridge(config: LogosBridgeConfig = {}): LogosBridge {
       const timeoutMs = opts?.timeoutMs ?? config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
       if (serveClient) {
         const { input: serveInput, args } = verbalizeServeInput(input);
-        return verbalizeResultFromWire(await viaServe("verbalize", serveInput, args, timeoutMs, true));
+        return verbalizeResultFromWire(
+          await viaServe("verbalize", serveInput, args, timeoutMs, true),
+        );
       }
       // verbalize takes the text as an argv arg (not a file); execFile keeps it
       // injection-safe. Exit 1 (unfaithful / parse error) still carries valid JSON.
@@ -467,7 +498,8 @@ export function createLogosBridge(config: LogosBridgeConfig = {}): LogosBridge {
       let stdout = "";
       let exitCode = 0;
       try {
-        stdout = (await exec(pythonBin, args, { timeout: timeoutMs, maxBuffer: MAX_BUFFER })).stdout;
+        stdout = (await exec(pythonBin, args, { timeout: timeoutMs, maxBuffer: MAX_BUFFER }))
+          .stdout;
       } catch (execErr) {
         const e = execErr as ExecFailure;
         const out = typeof e.stdout === "string" ? e.stdout : "";
@@ -493,7 +525,10 @@ export function createLogosBridge(config: LogosBridgeConfig = {}): LogosBridge {
       const timeoutMs = opts?.timeoutMs ?? config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
       const file = toStrategizeFile(input);
       if (serveClient) {
-        return strategizeResultFromWire(await viaServe("strategize", file, undefined, timeoutMs, true), input);
+        return strategizeResultFromWire(
+          await viaServe("strategize", file, undefined, timeoutMs, true),
+          input,
+        );
       }
       // strategize --json exits 1 on escalate — salvage it.
       const { stdout, exitCode } = await runJson("strategize", file, timeoutMs, true);
@@ -504,7 +539,9 @@ export function createLogosBridge(config: LogosBridgeConfig = {}): LogosBridge {
       const timeoutMs = opts?.timeoutMs ?? config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
       const file = toOntologyLintFile(input);
       if (serveClient) {
-        return ontologyLintResultFromWire(await viaServe("ontology-lint", file, undefined, timeoutMs, true));
+        return ontologyLintResultFromWire(
+          await viaServe("ontology-lint", file, undefined, timeoutMs, true),
+        );
       }
       // ontology-lint --json exits 1 when ok:false but still emits structured JSON — salvage it.
       const { stdout, exitCode } = await runJson("ontology-lint", file, timeoutMs, true);

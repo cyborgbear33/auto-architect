@@ -9,8 +9,18 @@ import { mapBridgeError } from "../lib/bridge-errors.ts";
  * `if (class === "...")` in a route handler) to add a new safety hold.
  */
 const SAFETY_RULES: ReasonRule[] = [
-  { id: "R_forbid_clear_misfire", if: "MisfireUnderLoad(x)", then: "Forbid(ClearCodesAndDrive(x))", priority: 10 },
-  { id: "R_ought_stop_misfire", if: "MisfireUnderLoad(x)", then: "Ought(StopDrivingAndDiagnose(x))", priority: 10 },
+  {
+    id: "R_forbid_clear_misfire",
+    if: "MisfireUnderLoad(x)",
+    then: "Forbid(ClearCodesAndDrive(x))",
+    priority: 10,
+  },
+  {
+    id: "R_ought_stop_misfire",
+    if: "MisfireUnderLoad(x)",
+    then: "Ought(StopDrivingAndDiagnose(x))",
+    priority: 10,
+  },
   {
     id: "R_forbid_clear_camcrank",
     if: "CamCrankCorrelationFault(x)",
@@ -87,16 +97,22 @@ export class PolicyService {
       throw mapBridgeError(err);
     }
 
-    const obligations = reasonResult.derived.filter((d) => d.formula.startsWith("Ought(")).map((d) => d.formula);
+    const obligations = reasonResult.derived
+      .filter((d) => d.formula.startsWith("Ought("))
+      .map((d) => d.formula);
     const forbidden: PolicyEvaluation["forbidden"] = [];
     for (const [actionTag, formulaName] of Object.entries(ACTION_FORMULAS)) {
       const hit = reasonResult.derived.find((d) => d.formula === `Forbid(${formulaName}(${atom}))`);
-      if (hit) forbidden.push({ action: actionTag, reason: `blocked by ${hit.ruleId}: ${hit.formula}` });
+      if (hit)
+        forbidden.push({ action: actionTag, reason: `blocked by ${hit.ruleId}: ${hit.formula}` });
     }
     return { vehicleId, obligations, forbidden, reasonResult };
   }
 
-  isActionForbidden(evaluation: PolicyEvaluation, actionTag: string): { forbidden: boolean; reason?: string } {
+  isActionForbidden(
+    evaluation: PolicyEvaluation,
+    actionTag: string,
+  ): { forbidden: boolean; reason?: string } {
     const hit = evaluation.forbidden.find((f) => f.action === actionTag);
     return hit ? { forbidden: true, reason: hit.reason } : { forbidden: false };
   }

@@ -43,6 +43,10 @@ Apply the same universal rules garden uses:
 - Fitts's Law — primary actions obvious; destructive actions separated
 - Jakob's Law — familiar patterns for lists, forms, status, empty/error states
 - Gestalt — group evidence with the claim it supports
+- **Doherty Threshold** — keep live telemetry feeling responsive (perceived
+  latency under ~400ms where practical; avoid full-panel loading flashes on poll)
+- **Progressive disclosure** — operator-readable defaults; raw Mode 06 / DL ids /
+  proof internals behind Debug mode (already practiced — name it when extending)
 
 Organize around: What codes are active? What fault class is proven? What should
 I do next? Why? What is forbidden? What did I already try?
@@ -95,7 +99,35 @@ These rules are domain-specific and take precedence over generic dashboard habit
 
 ---
 
-## 6. Page jobs (one job each)
+## 6. Live / adaptive data UX
+
+Forward guidance for Live gauge view, Mode 06 UI, and freeze-frame panels
+(planned in `FUTURE_FEATURES.md`). These rules apply whenever the UI shows
+streaming or polled OBD evidence:
+
+1. **Staleness is first-class.** Show age-of-reading (or "stale / disconnected"),
+   not only the numeric value. A quiet gauge with old data is worse than an
+   empty state that says the adapter stopped.
+2. **Adapt to the vehicle.** Gauges and PID rows should reflect what the selected
+   vehicle's engine-family cartridges actually perceive — not a wall of every
+   J1979 PID. `MANUAL_ONLY_PIDS` get a distinct "manual entry" treatment vs live.
+3. **Thresholds come from perception, not decoration.** Out-of-range coloring must
+   track real cartridge / diagnostic thresholds. Never rely on color alone —
+   pair with a label or icon.
+4. **Prefer instrument-cluster familiarity.** Arcs/bars/numeric readouts over
+   novel dashboard widgets (Jakob's Law).
+5. **Operator vs Debug layering for Mode 06.** Pass/fail (and plain names) for
+   operators; raw TID/CID / min-max values behind Debug mode — same pattern as
+   recognition class ids on the Dashboard.
+6. **Adapter identity near the live panel.** Connection / simulate / live source
+   should be visible next to the telemetry itself, not only as a global banner
+   (extends §5 rule 7).
+7. **Smooth refetch.** Live polls must not flash the whole section empty — see
+   `placeholderData: keepPreviousData` in [`UI_DEV_GUIDE.md`](UI_DEV_GUIDE.md).
+
+---
+
+## 7. Page jobs (one job each)
 
 | Page | One job |
 |---|---|
@@ -109,7 +141,7 @@ Do not turn Dashboard into a second Diagnosis page.
 
 ---
 
-## 7. Recommendations & explainability
+## 8. Recommendations & explainability
 
 A recommendation should answer:
 
@@ -124,7 +156,7 @@ Prefer fields already on `@auto/semantic-types` `Recommendation` /
 
 ---
 
-## 8. States
+## 9. States
 
 Every data-backed section needs intentional:
 
@@ -137,7 +169,7 @@ Never leave a blank white panel with no explanation.
 
 ---
 
-## 9. Content / writing
+## 10. Content / writing
 
 - Prefer shop language: "Cylinder 4 misfire under load", not `MisfireUnderLoad`
   as the only label (show the id in Debug mode).
@@ -148,7 +180,7 @@ Never leave a blank white panel with no explanation.
 
 ---
 
-## 10. Review checklist (before merging UI)
+## 11. Review checklist (before merging UI)
 
 - [ ] Page has one primary job
 - [ ] Selected vehicle is obvious
@@ -156,5 +188,6 @@ Never leave a blank white panel with no explanation.
 - [ ] No fake "Healthy" when undecided
 - [ ] Policy blocks show operator-readable reasons
 - [ ] Empty / loading / error states exist
+- [ ] Live / polled sections show staleness and avoid loading flashes
 - [ ] Debug mode does not become the only way to use the page
 - [ ] Tests cover the happy path + at least one policy/error path when relevant

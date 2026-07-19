@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../lib/api.ts";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
+import { api } from "../lib/api.ts";
 
 export function Campaigns() {
   const vehicleId = useSelectedVehicleId();
@@ -9,15 +9,25 @@ export function Campaigns() {
 }
 
 function VehicleCampaigns({ vehicleId }: { vehicleId: string }) {
-  const campaignsQ = useQuery({ queryKey: ["campaigns", vehicleId], queryFn: () => api.getCampaigns(vehicleId) });
+  const campaignsQ = useQuery({
+    queryKey: ["campaigns", vehicleId],
+    queryFn: () => api.getCampaigns(vehicleId),
+  });
 
   return (
     <div>
-      <PageHeader title="Recalls & TSBs" subtitle="Matched against this vehicle's engine family + model year" />
+      <PageHeader
+        title="Recalls & TSBs"
+        subtitle="Matched against this vehicle's engine family + model year"
+      />
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">Recalls / Customer Satisfaction Notifications</h2>
-        {campaignsQ.data?.campaigns.length === 0 && <p className="text-sm text-slate-400">No matching campaigns found for this vehicle.</p>}
+        <h2 className="mb-3 text-sm font-semibold text-slate-700">
+          Recalls / Customer Satisfaction Notifications
+        </h2>
+        {campaignsQ.data?.campaigns.length === 0 && (
+          <p className="text-sm text-slate-400">No matching campaigns found for this vehicle.</p>
+        )}
         <ul className="space-y-3">
           {campaignsQ.data?.campaigns.map((c) => (
             <li key={c.id} className="rounded-md border border-slate-200 p-3 text-sm">
@@ -38,7 +48,9 @@ function VehicleCampaigns({ vehicleId }: { vehicleId: string }) {
 
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="mb-3 text-sm font-semibold text-slate-700">Technical Service Bulletins</h2>
-        {campaignsQ.data?.tsbs.length === 0 && <p className="text-sm text-slate-400">No matching TSBs found for this engine family.</p>}
+        {campaignsQ.data?.tsbs.length === 0 && (
+          <p className="text-sm text-slate-400">No matching TSBs found for this engine family.</p>
+        )}
         <ul className="space-y-3">
           {campaignsQ.data?.tsbs.map((t) => (
             <li key={t.id} className="rounded-md border border-slate-200 p-3 text-sm">

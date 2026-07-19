@@ -1,13 +1,13 @@
-import { beforeEach, describe, expect, it } from "vitest";
 import { FakeLogosBridge, type ReasonResult } from "@auto/logos-bridge";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createMemoryStore, type Store } from "../store/index.ts";
 import { seed } from "../store/seed.ts";
-import { VehicleService } from "./vehicle.ts";
-import { ForecastService } from "./forecast.ts";
-import { RecognitionService } from "./recognition.ts";
-import { PolicyService } from "./policy.ts";
-import { SolverService } from "./solver.ts";
 import { ActionService } from "./actions.ts";
+import { ForecastService } from "./forecast.ts";
+import { PolicyService } from "./policy.ts";
+import { RecognitionService } from "./recognition.ts";
+import { SolverService } from "./solver.ts";
+import { VehicleService } from "./vehicle.ts";
 
 const JEEP = "veh:jeep-renegade-2015-latitude";
 
@@ -41,7 +41,10 @@ function forbidWhenMisfire(): (input: { facts: Array<{ formula: string }> }) => 
 async function makeCtx() {
   const store: Store = createMemoryStore();
   await seed(store);
-  const realizer = (input: { individual: string; abox: { concepts: Record<string, string[]> } }) => {
+  const realizer = (input: {
+    individual: string;
+    abox: { concepts: Record<string, string[]> };
+  }) => {
     const hasMisfire = Object.values(input.abox.concepts).flat().includes("CylinderMisfire");
     return {
       individual: input.individual,
@@ -50,7 +53,13 @@ async function makeCtx() {
       undecided: [],
     };
   };
-  const bridge = new FakeLogosBridge(undefined, realizer, undefined, undefined, forbidWhenMisfire());
+  const bridge = new FakeLogosBridge(
+    undefined,
+    realizer,
+    undefined,
+    undefined,
+    forbidWhenMisfire(),
+  );
   const vehicles = new VehicleService(store);
   const forecast = new ForecastService(store, bridge);
   const recognition = new RecognitionService(store, bridge, vehicles, forecast);

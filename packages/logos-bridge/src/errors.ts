@@ -71,7 +71,11 @@ export class LogosInputError extends LogosBridgeError {
     readonly exitCode: number | null = null,
     details?: unknown,
   ) {
-    super(message, { errorCode, exitCode, ...(details && typeof details === "object" ? details : {}) });
+    super(message, {
+      errorCode,
+      exitCode,
+      ...(details && typeof details === "object" ? details : {}),
+    });
     this.name = "LogosInputError";
   }
 }
@@ -111,9 +115,7 @@ export function throwIfStructuredFailure(raw: unknown, exitCode: number | null =
 
   if (code === LOGOS_ERROR_CODES.schemaValidationFailed) {
     const schema = typeof r.schema === "string" ? r.schema : "unknown";
-    const shapeErrors = Array.isArray(r.shape_errors)
-      ? r.shape_errors.map((e) => String(e))
-      : [];
+    const shapeErrors = Array.isArray(r.shape_errors) ? r.shape_errors.map((e) => String(e)) : [];
     throw new LogosSchemaError(
       typeof r.message === "string" && r.message
         ? r.message
@@ -131,9 +133,7 @@ export function throwIfStructuredFailure(raw: unknown, exitCode: number | null =
     code === LOGOS_ERROR_CODES.internalError
   ) {
     const message =
-      typeof r.message === "string" && r.message
-        ? r.message
-        : `LOGOS failure: ${code}`;
+      typeof r.message === "string" && r.message ? r.message : `LOGOS failure: ${code}`;
     throw new LogosInputError(message, code, exitCode, r);
   }
 }

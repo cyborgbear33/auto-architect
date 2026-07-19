@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { lintOntology } from "./lint.ts";
 import { runOntologyLint } from "./index.ts";
+import { lintOntology } from "./lint.ts";
 
 describe("lintOntology (unit, synthetic ontology)", () => {
   const baseOntology = {
@@ -24,7 +24,10 @@ describe("lintOntology (unit, synthetic ontology)", () => {
     });
     expect(result.ok).toBe(false);
     expect(result.errors).toEqual([
-      expect.objectContaining({ code: "dtc_unresolved_concept", message: expect.stringContaining("P9999") }),
+      expect.objectContaining({
+        code: "dtc_unresolved_concept",
+        message: expect.stringContaining("P9999"),
+      }),
     ]);
   });
 
@@ -34,7 +37,10 @@ describe("lintOntology (unit, synthetic ontology)", () => {
       dtcDictionary: baseDict,
     });
     expect(result.errors).toEqual([
-      expect.objectContaining({ code: "view_references_unknown_class", message: expect.stringContaining("Ghost") }),
+      expect.objectContaining({
+        code: "view_references_unknown_class",
+        message: expect.stringContaining("Ghost"),
+      }),
     ]);
   });
 
@@ -58,7 +64,11 @@ describe("lintOntology (unit, synthetic ontology)", () => {
 
   it("warns on a declared class that no view includes", () => {
     const result = lintOntology({
-      ontology: { ...baseOntology, classes: { ...baseOntology.classes, Unreachable: {} }, views: { generic: { classes: ["Bar"] } } },
+      ontology: {
+        ...baseOntology,
+        classes: { ...baseOntology.classes, Unreachable: {} },
+        views: { generic: { classes: ["Bar"] } },
+      },
       dtcDictionary: baseDict,
     });
     expect(result.warnings).toEqual([expect.objectContaining({ code: "class_not_in_any_view" })]);
@@ -71,7 +81,10 @@ describe("lintOntology (unit, synthetic ontology)", () => {
       cartridgeRequiredClasses: ["Bar", "SomeUnknownClass"],
     });
     expect(result.errors).toEqual([
-      expect.objectContaining({ code: "cartridge_requires_unknown_class", message: expect.stringContaining("SomeUnknownClass") }),
+      expect.objectContaining({
+        code: "cartridge_requires_unknown_class",
+        message: expect.stringContaining("SomeUnknownClass"),
+      }),
     ]);
   });
 });

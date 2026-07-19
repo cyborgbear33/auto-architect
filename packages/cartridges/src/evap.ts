@@ -7,7 +7,8 @@ function smallLeakPlaybook(): CandidateAction[] {
   return [
     {
       id: "check-gas-cap",
-      description: "check the gas cap seal and that it clicks fully closed — the single most common small-leak cause",
+      description:
+        "check the gas cap seal and that it clicks fully closed — the single most common small-leak cause",
       impact: 0.3,
       confidence: 0.6,
       infoGain: 0.3,
@@ -19,7 +20,8 @@ function smallLeakPlaybook(): CandidateAction[] {
     },
     {
       id: "smoke-test-evap-small",
-      description: "smoke-test the EVAP system to visually find the small leak (fill neck, hoses, canister seams)",
+      description:
+        "smoke-test the EVAP system to visually find the small leak (fill neck, hoses, canister seams)",
       impact: 0.6,
       confidence: 0.8,
       infoGain: 0.9,
@@ -35,7 +37,8 @@ function largeLeakPlaybook(): CandidateAction[] {
   return [
     {
       id: "smoke-test-evap-large",
-      description: "smoke-test the EVAP system — a large leak is usually visible immediately (disconnected hose, cracked canister, stuck-open purge/vent valve)",
+      description:
+        "smoke-test the EVAP system — a large leak is usually visible immediately (disconnected hose, cracked canister, stuck-open purge/vent valve)",
       impact: 0.7,
       confidence: 0.85,
       infoGain: 0.9,
@@ -64,13 +67,16 @@ function evapDraft(size: "small" | "large"): (vehicle: VehicleView) => FramingRe
       currentState: `an evaporative emission system ${size} leak DTC is active`,
       desiredState: "no EVAP leak DTC across a full drive cycle",
       gap: "the physical leak location has not yet been found",
-      whyItMatters: "fails emissions testing and (for large leaks) risks fuel vapor escaping to atmosphere",
+      whyItMatters:
+        "fails emissions testing and (for large leaks) risks fuel vapor escaping to atmosphere",
       urgency: "low",
     },
     gapType: "causal",
     desiredState: {
-      successCriteria: "no EVAP leak DTC across a full drive cycle including a completed EVAP monitor",
-      measurement: "rescan after the repair and confirm the EVAP monitor completes without a new leak DTC",
+      successCriteria:
+        "no EVAP leak DTC across a full drive cycle including a completed EVAP monitor",
+      measurement:
+        "rescan after the repair and confirm the EVAP monitor completes without a new leak DTC",
     },
     actions: size === "small" ? smallLeakPlaybook() : largeLeakPlaybook(),
   });

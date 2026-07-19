@@ -1,10 +1,10 @@
-import { allCartridges, resolveCartridgesForEngineFamily, type Cartridge } from "@auto/cartridges";
+import { allCartridges, type Cartridge, resolveCartridgesForEngineFamily } from "@auto/cartridges";
 import { getEngineFamily, getEngineFamilyView, listEngineFamilies } from "@auto/ontology";
 import type { EngineFamily, VehicleProfile } from "@auto/semantic-types";
 import type { CreateVehicleInput } from "@auto/validation";
-import type { Store } from "../store/index.ts";
-import { newId } from "../lib/ids.ts";
 import { notFound, validationError } from "../lib/errors.ts";
+import { newId } from "../lib/ids.ts";
+import type { Store } from "../store/index.ts";
 
 /**
  * The vehicle-profile axis: which engine family a vehicle belongs to, and
@@ -53,7 +53,10 @@ export class VehicleService {
 
   engineFamilyOf(vehicle: VehicleProfile): EngineFamily {
     const family = getEngineFamily(vehicle.engineFamily);
-    if (!family) throw validationError(`Vehicle "${vehicle.id}" references unknown engine family "${vehicle.engineFamily}".`);
+    if (!family)
+      throw validationError(
+        `Vehicle "${vehicle.id}" references unknown engine family "${vehicle.engineFamily}".`,
+      );
     return family;
   }
 

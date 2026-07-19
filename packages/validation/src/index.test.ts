@@ -38,7 +38,11 @@ describe("CreateDiagnosticProblemSchema", () => {
 describe("LogRepairSchema", () => {
   it("requires a rationale and decidedBy", () => {
     expect(() =>
-      LogRepairSchema.parse({ vehicleId: "veh:x", problemId: "problem:1", actionId: "swap-coil-plug" }),
+      LogRepairSchema.parse({
+        vehicleId: "veh:x",
+        problemId: "problem:1",
+        actionId: "swap-coil-plug",
+      }),
     ).toThrow();
   });
 });

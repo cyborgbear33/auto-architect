@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { createLogosBridge, type ExecFn } from "./bridge.ts";
 import { LogosNotAvailableError, LogosSchemaError, LogosTimeoutError } from "./errors.ts";
 
-function fakeExec(handler: (args: string[], input?: string) => { stdout?: string; error?: Record<string, unknown> }): ExecFn {
+function fakeExec(
+  handler: (args: string[], input?: string) => { stdout?: string; error?: Record<string, unknown> },
+): ExecFn {
   return async (_bin, args, opts) => {
     const { stdout, error } = handler(args, opts.input);
     if (error) {
@@ -36,7 +38,10 @@ describe("createLogosBridge (subprocess transport)", () => {
       };
     });
     const bridge = createLogosBridge({ exec });
-    const result = await bridge.solve({ id: "problem:1", statement: { currentState: "a", desiredState: "b", gap: "c" } });
+    const result = await bridge.solve({
+      id: "problem:1",
+      statement: { currentState: "a", desiredState: "b", gap: "c" },
+    });
     expect(result.problemId).toBe("problem:1");
     expect((sentPayload as { id: string }).id).toBe("PRB_problem:1");
   });
@@ -45,7 +50,10 @@ describe("createLogosBridge (subprocess transport)", () => {
     const exec = fakeExec(() => ({ error: { code: "ENOENT" } }));
     const bridge = createLogosBridge({ exec });
     await expect(
-      bridge.solve({ id: "problem:1", statement: { currentState: "a", desiredState: "b", gap: "c" } }),
+      bridge.solve({
+        id: "problem:1",
+        statement: { currentState: "a", desiredState: "b", gap: "c" },
+      }),
     ).rejects.toBeInstanceOf(LogosNotAvailableError);
   });
 
@@ -53,7 +61,10 @@ describe("createLogosBridge (subprocess transport)", () => {
     const exec = fakeExec(() => ({ error: { killed: true, signal: "SIGTERM" } }));
     const bridge = createLogosBridge({ exec });
     await expect(
-      bridge.solve({ id: "problem:1", statement: { currentState: "a", desiredState: "b", gap: "c" } }),
+      bridge.solve({
+        id: "problem:1",
+        statement: { currentState: "a", desiredState: "b", gap: "c" },
+      }),
     ).rejects.toBeInstanceOf(LogosTimeoutError);
   });
 
@@ -70,7 +81,10 @@ describe("createLogosBridge (subprocess transport)", () => {
     }));
     const bridge = createLogosBridge({ exec });
     try {
-      await bridge.solve({ id: "problem:1", statement: { currentState: "a", desiredState: "b", gap: "c" } });
+      await bridge.solve({
+        id: "problem:1",
+        statement: { currentState: "a", desiredState: "b", gap: "c" },
+      });
       throw new Error("expected to throw");
     } catch (err) {
       expect(err).toBeInstanceOf(LogosSchemaError);
@@ -84,11 +98,20 @@ describe("createLogosBridge (subprocess transport)", () => {
       const payload = JSON.parse(input!);
       expect(payload.individual).toBe("veh:x");
       return {
-        stdout: JSON.stringify({ individual: "veh:x", member: ["Engine"], most_specific: ["Engine"], undecided: [] }),
+        stdout: JSON.stringify({
+          individual: "veh:x",
+          member: ["Engine"],
+          most_specific: ["Engine"],
+          undecided: [],
+        }),
       };
     });
     const bridge = createLogosBridge({ exec });
-    const result = await bridge.realize({ ontology: { subtypes: {} }, abox: { concepts: {}, roles: [] }, individual: "veh:x" });
+    const result = await bridge.realize({
+      ontology: { subtypes: {} },
+      abox: { concepts: {}, roles: [] },
+      individual: "veh:x",
+    });
     expect(result.member).toEqual(["Engine"]);
     expect(result.mostSpecific).toEqual(["Engine"]);
   });

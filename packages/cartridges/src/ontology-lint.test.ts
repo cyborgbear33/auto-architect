@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { runOntologyLint } from "@auto/ontology";
+import { describe, expect, it } from "vitest";
 import { allCartridges } from "./registry.ts";
 
 /**

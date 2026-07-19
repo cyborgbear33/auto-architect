@@ -27,7 +27,8 @@ function playbook(): CandidateAction[] {
   return [
     {
       id: "check-oil-level",
-      description: "check engine oil level on the dipstick — TSB 05047457A step 1: rule out low oil before anything else",
+      description:
+        "check engine oil level on the dipstick — TSB 05047457A step 1: rule out low oil before anything else",
       impact: 0.4,
       confidence: 0.8,
       infoGain: 0.6,
@@ -39,7 +40,8 @@ function playbook(): CandidateAction[] {
     },
     {
       id: "verify-oil-viscosity",
-      description: "verify the installed oil matches OEM-specified viscosity/weight — TSB 05047457A step 2",
+      description:
+        "verify the installed oil matches OEM-specified viscosity/weight — TSB 05047457A step 2",
       impact: 0.3,
       confidence: 0.6,
       infoGain: 0.5,
@@ -50,7 +52,8 @@ function playbook(): CandidateAction[] {
     },
     {
       id: "check-oil-filter-spec",
-      description: "verify the oil filter meets OEM spec (some aftermarket filters restrict flow) — TSB 05047457A step 3",
+      description:
+        "verify the oil filter meets OEM spec (some aftermarket filters restrict flow) — TSB 05047457A step 3",
       impact: 0.2,
       confidence: 0.5,
       infoGain: 0.4,
@@ -61,7 +64,8 @@ function playbook(): CandidateAction[] {
     },
     {
       id: "inspect-oil-contamination",
-      description: "inspect oil for dirty/deteriorated condition or contamination (coolant/fuel intrusion) — TSB 05047457A step 4-5",
+      description:
+        "inspect oil for dirty/deteriorated condition or contamination (coolant/fuel intrusion) — TSB 05047457A step 4-5",
       impact: 0.4,
       confidence: 0.5,
       infoGain: 0.6,
@@ -72,7 +76,8 @@ function playbook(): CandidateAction[] {
     },
     {
       id: "check-oil-galley-screen",
-      description: "check the oil galley screen/filter feeding the MultiAir unit for a clog — TSB 05047457A step 6, the last oil-side check",
+      description:
+        "check the oil galley screen/filter feeding the MultiAir unit for a clog — TSB 05047457A step 6, the last oil-side check",
       impact: 0.5,
       confidence: 0.5,
       infoGain: 0.7,
@@ -83,7 +88,8 @@ function playbook(): CandidateAction[] {
     },
     {
       id: "inspect-multiair-actuator",
-      description: "only after every oil-side cause above is ruled out: inspect/replace the MultiAir solenoid actuator itself",
+      description:
+        "only after every oil-side cause above is ruled out: inspect/replace the MultiAir solenoid actuator itself",
       impact: 0.7,
       confidence: 0.4,
       infoGain: 0.5,
@@ -100,16 +106,21 @@ function draft(vehicle: VehicleView): FramingResult {
   return {
     label: `${vehicle.label}: MultiAir fault under low oil pressure`,
     statement: {
-      currentState: "a MultiAir-adjacent camshaft-timing DTC is active together with low oil pressure evidence",
-      desiredState: "normal oil pressure, MultiAir fault DTC cleared, and confirmed root cause (oil-side vs. actuator)",
+      currentState:
+        "a MultiAir-adjacent camshaft-timing DTC is active together with low oil pressure evidence",
+      desiredState:
+        "normal oil pressure, MultiAir fault DTC cleared, and confirmed root cause (oil-side vs. actuator)",
       gap: "TSB 05047457A's oil-side pre-checks have not yet been completed — do not condemn the MultiAir actuator first",
-      whyItMatters: "this engine family has documented oil-consumption campaigns (W80/W84); low oil can both trigger this fault and, if ignored, risk a stall",
+      whyItMatters:
+        "this engine family has documented oil-consumption campaigns (W80/W84); low oil can both trigger this fault and, if ignored, risk a stall",
       urgency: "high",
     },
     gapType: "causal",
     desiredState: {
-      successCriteria: "oil pressure reads normal, the MultiAir fault DTC does not return, and the TSB 05047457A oil-side pre-checks are documented as completed",
-      measurement: "confirm oil level/viscosity/condition per TSB 05047457A, then rescan after the repair and a drive cycle",
+      successCriteria:
+        "oil pressure reads normal, the MultiAir fault DTC does not return, and the TSB 05047457A oil-side pre-checks are documented as completed",
+      measurement:
+        "confirm oil level/viscosity/condition per TSB 05047457A, then rescan after the repair and a drive cycle",
     },
     actions: playbook(),
   };
@@ -118,7 +129,12 @@ function draft(vehicle: VehicleView): FramingResult {
 export const fcaTigershark24Cartridge: Cartridge = {
   name: "fca-tigershark-2.4",
   perception: [
-    { dtcConcept: "MultiAirFault", concept: "MultiAirFault", as: "symptom", slot: "multiair-fault" },
+    {
+      dtcConcept: "MultiAirFault",
+      concept: "MultiAirFault",
+      as: "symptom",
+      slot: "multiair-fault",
+    },
     {
       pid: "OIL_PRESSURE_PSI",
       when: { lt: LOW_OIL_PRESSURE_PSI },

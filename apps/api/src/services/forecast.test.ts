@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { FakeLogosBridge } from "@auto/logos-bridge";
+import { describe, expect, it } from "vitest";
 import { createMemoryStore } from "../store/index.ts";
 import { ForecastService, OIL_LEVEL_PID } from "./forecast.ts";
 
@@ -14,23 +14,18 @@ describe("ForecastService", () => {
 
   it("flags a declining trend when `forecast` reports willCross while falling", async () => {
     const store = createMemoryStore();
-    const bridge = new FakeLogosBridge(
-      undefined,
-      undefined,
-      undefined,
-      (input) => ({
-        n: input.series.length,
-        threshold: input.threshold,
-        current: input.series[input.series.length - 1]?.value ?? null,
-        slopePerHour: -0.5,
-        intercept: null,
-        rSquared: 0.9,
-        direction: "falling",
-        willCross: true,
-        hoursToThreshold: 40,
-        crossAtHours: 40,
-      }),
-    );
+    const bridge = new FakeLogosBridge(undefined, undefined, undefined, (input) => ({
+      n: input.series.length,
+      threshold: input.threshold,
+      current: input.series[input.series.length - 1]?.value ?? null,
+      slopePerHour: -0.5,
+      intercept: null,
+      rSquared: 0.9,
+      direction: "falling",
+      willCross: true,
+      hoursToThreshold: 40,
+      crossAtHours: 40,
+    }));
     const forecast = new ForecastService(store, bridge);
     await store.observations.record({
       vehicleId: JEEP,

@@ -1,10 +1,10 @@
 import type {
   DecisionRecord,
+  DiagnosticProblem,
   DtcObservation,
   FreezeFrame,
   Mode06Result,
   ObservationBatch,
-  DiagnosticProblem,
   Recommendation,
   VehicleProfile,
 } from "@auto/semantic-types";

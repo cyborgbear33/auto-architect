@@ -101,3 +101,6 @@ When adding a PID:
 When tempted to decode OEM enhanced CAN: put that behind an explicit future
 feature and keep standard OBD as the supported path. See `FUTURE_FEATURES.md`
 non-goals.
+
+Standards grounding (J1979 PIDs, J2012 DTCs, ISO 15765-4, UDS, J1939):
+[`HARDWARE_STANDARDS.md`](HARDWARE_STANDARDS.md).

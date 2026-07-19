@@ -65,6 +65,9 @@ const q = useQuery({
 - Key by resource + `vehicleId`
 - Gate with `enabled` when no vehicle selected
 - Invalidate related queries after mutations (create problem, solve, log repair)
+- For live / polled PIDs (gauges, watch-mode dashboards), use
+  `placeholderData: keepPreviousData` (TanStack Query v5) so refetch does not
+  flash empty loading states — see `UX_GUIDELINES.md` §6
 
 ## Testing
 

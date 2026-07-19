@@ -7,16 +7,17 @@
  * `@garden/semantic-types` -> `@auto/semantic-types`. The wire contract itself
  * (LOGOS's actual protocol) is unchanged — the engine is domain-agnostic.
  */
+
+import type { CooperativeAnalysis, CriterionResult, DecisionAnalysis } from "@auto/game-theory";
 import type {
   CandidateAction,
   CausalModel,
   DesiredStateSpec,
   DiagnosticSolution,
+  GapType,
   ProblemStatement,
   ProblemType,
-  GapType,
 } from "@auto/semantic-types";
-import type { CooperativeAnalysis, CriterionResult, DecisionAnalysis } from "@auto/game-theory";
 import { LogosProtocolError } from "./errors.ts";
 
 /** Breaking bumps only — additive payload fields do not change this. */
@@ -73,7 +74,10 @@ export function assertWireMetaCompatible(raw: unknown): LogosWireMeta {
       { meta },
     );
   }
-  if (meta.engineVersion !== undefined && compareEngineVersion(meta.engineVersion, LOGOS_MIN_ENGINE_VERSION) < 0) {
+  if (
+    meta.engineVersion !== undefined &&
+    compareEngineVersion(meta.engineVersion, LOGOS_MIN_ENGINE_VERSION) < 0
+  ) {
     throw new LogosProtocolError(
       `LOGOS engine_version "${meta.engineVersion}" is below minimum "${LOGOS_MIN_ENGINE_VERSION}". Upgrade the metalanguage engine (e.g. pin logos-v${LOGOS_MIN_ENGINE_VERSION}) or lower LOGOS_MIN_ENGINE_VERSION.`,
       { meta },
@@ -127,7 +131,8 @@ export function toWireProblem(input: LogosProblemInput): Record<string, unknown>
   const c = input.causalModel;
   return compact({
     // Omit when missing so LOGOS schema fail-fast reports required `id` (exit 2).
-    id: typeof input.id === "string" && input.id.length > 0 ? toLogosProblemId(input.id) : undefined,
+    id:
+      typeof input.id === "string" && input.id.length > 0 ? toLogosProblemId(input.id) : undefined,
     kind: "Problem",
     level: "L1",
     statement: s
@@ -368,7 +373,9 @@ export interface OntologyLintResult {
 }
 
 /** Neutral empty result for FakeLogosBridge / stubs. */
-export function emptyOntologyLintResult(over: Partial<OntologyLintResult> = {}): OntologyLintResult {
+export function emptyOntologyLintResult(
+  over: Partial<OntologyLintResult> = {},
+): OntologyLintResult {
   return {
     ok: true,
     plantParent: "Engine",
@@ -631,12 +638,14 @@ export function reasonResultFromWire(raw: unknown): ReasonResult {
   const limits = (r.limits ?? null) as Record<string, unknown> | null;
   const scope = (r.scope ?? null) as Record<string, unknown> | null;
   return {
-    derived: (r.derived ?? []).map((c: { formula: string; rule_id: string; facts: string[]; confidence: number }) => ({
-      formula: c.formula,
-      ruleId: c.rule_id,
-      facts: c.facts ?? [],
-      confidence: c.confidence,
-    })),
+    derived: (r.derived ?? []).map(
+      (c: { formula: string; rule_id: string; facts: string[]; confidence: number }) => ({
+        formula: c.formula,
+        ruleId: c.rule_id,
+        facts: c.facts ?? [],
+        confidence: c.confidence,
+      }),
+    ),
     resolutions: r.resolutions ?? [],
     unresolved: r.unresolved ?? [],
     defeated: r.defeated ?? [],
@@ -831,10 +840,12 @@ export function solutionFromWire(raw: unknown): DiagnosticSolution {
       action: actionFromWire(x.action),
       score: x.score,
     })),
-    disqualified: (r.disqualified ?? []).map((x: { action_id: string; violated_constraints: string[] }) => ({
-      actionId: x.action_id,
-      violatedConstraints: x.violated_constraints ?? [],
-    })),
+    disqualified: (r.disqualified ?? []).map(
+      (x: { action_id: string; violated_constraints: string[] }) => ({
+        actionId: x.action_id,
+        violatedConstraints: x.violated_constraints ?? [],
+      }),
+    ),
     recommended: r.recommended ?? null,
     kind: r.kind,
     rationale: r.rationale ?? "",

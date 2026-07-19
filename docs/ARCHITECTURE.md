@@ -215,8 +215,10 @@ Operator detail: [`apps/obd-gateway/README.md`](../apps/obd-gateway/README.md).
 ## 10. Testing & CI
 
 - TypeScript: Vitest per package (`pnpm -r test`)
+- Lint/format: Biome (`pnpm lint`) — see `docs/ai/CODE_STANDARDS.md`
 - Python: pytest (`pnpm obd-gateway:test`)
 - Ontology: `pnpm lint:ontology` (LOGOS well-formedness + catalog/cartridge parity)
+- One-shot local gate: `pnpm healthcheck` (typecheck + biome + tests + ontology + gateway + UI build)
 - CI: `.github/workflows/ci.yml` — `verify` + `ontology-lint` jobs
 
 Unit tests that need LOGOS behavior without Python inject `FakeLogosBridge`.

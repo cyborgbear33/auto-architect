@@ -20,12 +20,14 @@ Before making changes, read files in this order:
 
 1. `docs/ai/GLOBAL_DEV_GUIDE.md`
 2. `docs/ai/AI_CODING_RULES.md`
-3. `docs/ai/ONTOLOGY_DEV_GUIDE.md`
-4. Domain-specific guide for the change:
+3. `docs/ai/CODE_STANDARDS.md` — TS strictness, Biome, `pnpm healthcheck` DoD
+4. `docs/ai/ONTOLOGY_DEV_GUIDE.md`
+5. Domain-specific guide for the change:
    - `UI_DEV_GUIDE.md` — technical/architectural rules for the web-ui
    - `UX_GUIDELINES.md` — design/usability standard (IA, evidence, trust). Read before ANY web-ui page/component change
    - `API_DEV_GUIDE.md` — Fastify routes, ActionService gate
    - `OBD_EDGE_CONTRACT.md` — OBD-II / CANBUS edge rules (read before touching `apps/obd-gateway`)
+   - `HARDWARE_STANDARDS.md` — SAE/ISO/CAN grounding (J1979, J2012, UDS, J1939)
    - `ADD_A_CARTRIDGE.md` — recipe for a new diagnostic domain
    - `ADD_A_VEHICLE.md` — recipe for a new vehicle / engine family
    - `TESTING_DEV_GUIDE.md` — FakeLogosBridge, vitest, pytest

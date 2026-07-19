@@ -1,14 +1,14 @@
 import type { LogosBridge } from "@auto/logos-bridge";
 import type { Store } from "../store/index.ts";
-import { VehicleService } from "./vehicle.ts";
-import { ForecastService } from "./forecast.ts";
-import { RecognitionService } from "./recognition.ts";
-import { PolicyService } from "./policy.ts";
-import { SolverService } from "./solver.ts";
 import { ActionService } from "./actions.ts";
-import { ObservationService } from "./observations.ts";
-import { RecommendationService } from "./recommendations.ts";
 import { CampaignService } from "./campaigns.ts";
+import { ForecastService } from "./forecast.ts";
+import { ObservationService } from "./observations.ts";
+import { PolicyService } from "./policy.ts";
+import { RecognitionService } from "./recognition.ts";
+import { RecommendationService } from "./recommendations.ts";
+import { SolverService } from "./solver.ts";
+import { VehicleService } from "./vehicle.ts";
 
 export interface Services {
   store: Store;
@@ -35,17 +35,29 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
   const recommendations = new RecommendationService(store, vehicles, recognition);
   const campaigns = new CampaignService(vehicles);
 
-  return { store, bridge, vehicles, forecast, recognition, policy, solver, actions, observations, recommendations, campaigns };
+  return {
+    store,
+    bridge,
+    vehicles,
+    forecast,
+    recognition,
+    policy,
+    solver,
+    actions,
+    observations,
+    recommendations,
+    campaigns,
+  };
 }
 
 export {
-  VehicleService,
-  ForecastService,
-  RecognitionService,
-  PolicyService,
-  SolverService,
   ActionService,
-  ObservationService,
-  RecommendationService,
   CampaignService,
+  ForecastService,
+  ObservationService,
+  PolicyService,
+  RecognitionService,
+  RecommendationService,
+  SolverService,
+  VehicleService,
 };

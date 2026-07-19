@@ -1,13 +1,13 @@
 import { draftForClass } from "@auto/cartridges";
 import type { DecisionRecord, DiagnosticProblem } from "@auto/semantic-types";
 import type { CreateDiagnosticProblemInput, LogRepairInput } from "@auto/validation";
-import type { Store } from "../store/index.ts";
-import type { VehicleService } from "./vehicle.ts";
-import type { RecognitionService } from "./recognition.ts";
-import type { PolicyService } from "./policy.ts";
-import type { SolverService } from "./solver.ts";
-import { newId, nowIso } from "../lib/ids.ts";
 import { notFound, policyBlocked, validationError } from "../lib/errors.ts";
+import { newId, nowIso } from "../lib/ids.ts";
+import type { Store } from "../store/index.ts";
+import type { PolicyService } from "./policy.ts";
+import type { RecognitionService } from "./recognition.ts";
+import type { SolverService } from "./solver.ts";
+import type { VehicleService } from "./vehicle.ts";
 
 /**
  * The mutation gate. Every state-changing operation in auto-architect goes
@@ -38,7 +38,9 @@ export class ActionService {
       const cartridges = this.vehicles.cartridgesFor(vehicle);
       const vehicleView = {
         vehicleId: vehicle.id,
-        label: `${vehicle.year ?? ""} ${vehicle.make} ${vehicle.model} ${vehicle.trim ?? ""}`.replace(/\s+/g, " ").trim(),
+        label: `${vehicle.year ?? ""} ${vehicle.make} ${vehicle.model} ${vehicle.trim ?? ""}`
+          .replace(/\s+/g, " ")
+          .trim(),
         engineFamily: vehicle.engineFamily,
         dtcs: await this.store.observations.latestDtcs(vehicle.id),
         pids: await this.store.observations.latestPids(vehicle.id),
@@ -102,7 +104,9 @@ export class ActionService {
    * not a UI suggestion. Throws `policyBlocked` (403) when a dangerous fault
    * class is currently proven for this vehicle.
    */
-  async requestClearCodesAndDrive(vehicleId: string): Promise<{ allowed: true; obligations: string[] }> {
+  async requestClearCodesAndDrive(
+    vehicleId: string,
+  ): Promise<{ allowed: true; obligations: string[] }> {
     const recognition = await this.recognition.recognize(vehicleId);
     const evaluation = await this.policy.evaluate(vehicleId, recognition.member);
     const check = this.policy.isActionForbidden(evaluation, "clear-codes-and-drive");
@@ -122,7 +126,13 @@ export class ActionService {
 
     const now = nowIso();
     const outcome = input.outcomeStatus
-      ? { status: input.outcomeStatus, recordedAt: now, recordedBy: input.decidedBy, action: input.actionId, note: input.note }
+      ? {
+          status: input.outcomeStatus,
+          recordedAt: now,
+          recordedBy: input.decidedBy,
+          action: input.actionId,
+          note: input.note,
+        }
       : undefined;
 
     await this.store.problems.update(input.problemId, {

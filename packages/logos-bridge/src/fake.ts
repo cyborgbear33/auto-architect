@@ -10,25 +10,35 @@
  * Not an edge-hardware substitute: production and obd-gateway integration
  * tests always use the real bridge (`createLogosBridge`); Fake is unit-tests-only.
  */
-import type { CandidateAction, DiagnosticSolution, ProblemType, RankedAction } from "@auto/semantic-types";
-import { analyzeCooperative, analyzeDecision, type CharacteristicFunction } from "@auto/game-theory";
+
+import {
+  analyzeCooperative,
+  analyzeDecision,
+  type CharacteristicFunction,
+} from "@auto/game-theory";
+import type {
+  CandidateAction,
+  DiagnosticSolution,
+  ProblemType,
+  RankedAction,
+} from "@auto/semantic-types";
 import type { LogosBridge } from "./bridge.ts";
 import type {
-  LogosProblemInput,
-  RealizeInput,
-  RealizeResult,
-  ReviseInput,
-  ReviseResult,
   ForecastInput,
   ForecastResult,
-  ReasonInput,
-  ReasonResult,
-  VerbalizeInput,
-  VerbalizeResult,
-  StrategizeInput,
-  StrategizeResult,
+  LogosProblemInput,
   OntologyLintInput,
   OntologyLintResult,
+  RealizeInput,
+  RealizeResult,
+  ReasonInput,
+  ReasonResult,
+  ReviseInput,
+  ReviseResult,
+  StrategizeInput,
+  StrategizeResult,
+  VerbalizeInput,
+  VerbalizeResult,
 } from "./types.ts";
 import { emptyOntologyLintResult, emptyReasonResult } from "./types.ts";
 
@@ -43,7 +53,10 @@ function priority(a: CandidateAction): number {
   const reversibility = a.reversibility ?? 0.5;
   const alignment = a.alignment ?? 1;
   const num =
-    Math.max(impact, 0) * Math.max(confidence, 0) * Math.max(infoGain, EPS) * Math.max(alignment, EPS);
+    Math.max(impact, 0) *
+    Math.max(confidence, 0) *
+    Math.max(infoGain, EPS) *
+    Math.max(alignment, EPS);
   const den = Math.max(cost, EPS) * Math.max(risk, EPS) * Math.max(1 - reversibility, EPS);
   return num / den;
 }
@@ -119,7 +132,8 @@ function defaultResponder(input: LogosProblemInput): DiagnosticSolution {
     } else {
       recommended = null;
       kind = "escalate";
-      rationale = "dangerous situation with no stabilizing action available — escalate (FakeLogosBridge)";
+      rationale =
+        "dangerous situation with no stabilizing action available — escalate (FakeLogosBridge)";
       escalations.push("stabilize gate: no safe stabilizing action on hand");
     }
   } else if (goalUnclear) {
@@ -217,7 +231,11 @@ function defaultStrategizer(input: StrategizeInput): StrategizeResult {
 
   const decision = input.decision
     ? analyzeDecision(
-        { actions: input.decision.actions, states: input.decision.states, payoffs: input.decision.payoffs },
+        {
+          actions: input.decision.actions,
+          states: input.decision.states,
+          payoffs: input.decision.payoffs,
+        },
         { hurwiczAlpha: input.decision.hurwiczAlpha ?? 0.5 },
       )
     : null;
@@ -234,7 +252,8 @@ function defaultStrategizer(input: StrategizeInput): StrategizeResult {
   let cooperative = null;
   if (input.cooperative) {
     const table = new Map<string, number>();
-    for (const c of input.cooperative.coalitions) table.set([...c.members].sort().join("|"), c.value);
+    for (const c of input.cooperative.coalitions)
+      table.set([...c.members].sort().join("|"), c.value);
     const v: CharacteristicFunction = (members) => table.get([...members].sort().join("|")) ?? 0;
     cooperative = analyzeCooperative(input.cooperative.players, v);
     if (!cooperative.shapleyInCore) {
@@ -244,7 +263,9 @@ function defaultStrategizer(input: StrategizeInput): StrategizeResult {
       escalate = true;
     }
     if (!cooperative.superadditive) {
-      degeneracy.push("grand coalition is not superadditive: some split is worth more than staying together");
+      degeneracy.push(
+        "grand coalition is not superadditive: some split is worth more than staying together",
+      );
     }
   }
 
@@ -266,7 +287,8 @@ export class FakeLogosBridge implements LogosBridge {
     private reasoner: (input: ReasonInput) => ReasonResult = defaultReasoner,
     private verbalizer: (input: VerbalizeInput) => VerbalizeResult = defaultVerbalizer,
     private strategizer: (input: StrategizeInput) => StrategizeResult = defaultStrategizer,
-    private linter: (input: OntologyLintInput) => OntologyLintResult = () => emptyOntologyLintResult(),
+    private linter: (input: OntologyLintInput) => OntologyLintResult = () =>
+      emptyOntologyLintResult(),
   ) {}
 
   async solve(input: LogosProblemInput): Promise<DiagnosticSolution> {

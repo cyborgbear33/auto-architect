@@ -96,7 +96,10 @@ pnpm install                       # also runs scripts/setup-solver.mjs --check
 **Run & verify:**
 
 ```bash
+pnpm healthcheck             # one-shot: typecheck + biome + tests + ontology + gateway + UI build
+# or discrete:
 pnpm -r typecheck
+pnpm lint
 pnpm -r test
 pnpm lint:ontology
 pnpm obd-gateway:test
@@ -180,6 +183,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | [`ai/README_FOR_AI.md`](ai/README_FOR_AI.md) | Read order for coding |
 | [`ai/GLOBAL_DEV_GUIDE.md`](ai/GLOBAL_DEV_GUIDE.md) | Stack + monorepo invariants |
 | [`ai/AI_CODING_RULES.md`](ai/AI_CODING_RULES.md) | Ontology-first coding rules |
+| [`ai/CODE_STANDARDS.md`](ai/CODE_STANDARDS.md) | TS / Biome / `pnpm healthcheck` DoD |
 | [`ai/UX_GUIDELINES.md`](ai/UX_GUIDELINES.md) | Product UX / trust / IA |
 | [`ai/UI_DEV_GUIDE.md`](ai/UI_DEV_GUIDE.md) | React/TanStack technical rules |
 | [`ai/API_DEV_GUIDE.md`](ai/API_DEV_GUIDE.md) | Fastify routes + ActionService gate |
@@ -187,6 +191,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | [`ai/ADD_A_CARTRIDGE.md`](ai/ADD_A_CARTRIDGE.md) | Extend a diagnostic domain |
 | [`ai/ADD_A_VEHICLE.md`](ai/ADD_A_VEHICLE.md) | Add Silverado (or any next car) |
 | [`ai/OBD_EDGE_CONTRACT.md`](ai/OBD_EDGE_CONTRACT.md) | OBD-II / CANBUS edge rules |
+| [`ai/HARDWARE_STANDARDS.md`](ai/HARDWARE_STANDARDS.md) | SAE/ISO/CAN grounding reference |
 | [`ai/TESTING_DEV_GUIDE.md`](ai/TESTING_DEV_GUIDE.md) | Vitest / pytest / FakeLogosBridge |
 | [`ai/DOCUMENTATION_DEV_GUIDE.md`](ai/DOCUMENTATION_DEV_GUIDE.md) | How to maintain docs |
 | [`../apps/obd-gateway/README.md`](../apps/obd-gateway/README.md) | Gateway CLI / install |

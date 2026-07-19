@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { api, ApiError } from "../lib/api.ts";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { ApiError, api } from "../lib/api.ts";
 
 function mockFetchOnce(status: number, body: unknown) {
   vi.stubGlobal(
@@ -32,7 +32,9 @@ describe("api client", () => {
   });
 
   it("throws ApiError with the server's message/code/details on a non-2xx response", async () => {
-    mockFetchOnce(403, { error: { message: "blocked by policy", code: "POLICY_BLOCKED", details: { obligations: [] } } });
+    mockFetchOnce(403, {
+      error: { message: "blocked by policy", code: "POLICY_BLOCKED", details: { obligations: [] } },
+    });
     await expect(api.requestClearCodesAndDrive("veh:x")).rejects.toMatchObject({
       message: "blocked by policy",
       statusCode: 403,

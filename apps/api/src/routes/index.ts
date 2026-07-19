@@ -1,12 +1,12 @@
-import type { FastifyInstance } from "fastify";
 import {
   CreateDiagnosticProblemSchema,
   CreateVehicleSchema,
   LogRepairSchema,
   ObservationBatchSchema,
 } from "@auto/validation";
-import type { Services } from "../services/index.ts";
+import type { FastifyInstance } from "fastify";
 import { notFound } from "../lib/errors.ts";
+import type { Services } from "../services/index.ts";
 
 /**
  * All API routes. Reads use resource endpoints; state changes use action
@@ -14,12 +14,18 @@ import { notFound } from "../lib/errors.ts";
  * mutation gate — never a direct store write from a handler.
  */
 export async function registerRoutes(app: FastifyInstance, s: Services): Promise<void> {
-  app.get("/health", async () => ({ status: "ok", storage: s.store.constructor.name, time: new Date().toISOString() }));
+  app.get("/health", async () => ({
+    status: "ok",
+    storage: s.store.constructor.name,
+    time: new Date().toISOString(),
+  }));
 
   // --- vehicles --------------------------------------------------------------
   app.get("/api/vehicles", async () => ({ vehicles: await s.vehicles.list() }));
 
-  app.get("/api/engine-families", async () => ({ engineFamilies: s.vehicles.listEngineFamilies() }));
+  app.get("/api/engine-families", async () => ({
+    engineFamilies: s.vehicles.listEngineFamilies(),
+  }));
 
   app.post("/api/vehicles", async (req, reply) => {
     const input = CreateVehicleSchema.parse(req.body);

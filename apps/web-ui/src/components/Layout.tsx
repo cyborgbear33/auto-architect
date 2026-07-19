@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
-import { Link, Outlet } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { Link, Outlet } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
+import { api } from "../lib/api.ts";
 import { useAppDispatch, useAppSelector } from "../store/index.ts";
 import { selectVehicle, setDebugMode } from "../store/uiSlice.ts";
-import { api } from "../lib/api.ts";
 
 const NAV_ITEMS: Array<{ to: string; label: string }> = [
   { to: "/", label: "Dashboard" },
@@ -52,7 +52,11 @@ export function Layout() {
 export function VehicleSwitcher() {
   const dispatch = useAppDispatch();
   const selected = useAppSelector((s) => s.ui.selectedVehicleId);
-  const vehiclesQ = useQuery({ queryKey: ["vehicles"], queryFn: () => api.listVehicles(), retry: false });
+  const vehiclesQ = useQuery({
+    queryKey: ["vehicles"],
+    queryFn: () => api.listVehicles(),
+    retry: false,
+  });
   const vehicles = vehiclesQ.data ?? [];
 
   // Reconcile the current selection against the actual vehicle list exactly
@@ -67,7 +71,8 @@ export function VehicleSwitcher() {
     if (!stillValid && firstId) dispatch(selectVehicle(firstId));
   }, [selected, vehicles, vehiclesQ.isSuccess, dispatch]);
 
-  if (vehiclesQ.isLoading) return <div className="mt-1 text-xs text-slate-400">Loading vehicles…</div>;
+  if (vehiclesQ.isLoading)
+    return <div className="mt-1 text-xs text-slate-400">Loading vehicles…</div>;
 
   return (
     <div className="mt-1.5">
@@ -88,7 +93,12 @@ export function VehicleSwitcher() {
   );
 }
 
-export function vehicleLabel(v: { year: number | null; make: string; model: string; trim: string | null }): string {
+export function vehicleLabel(v: {
+  year: number | null;
+  make: string;
+  model: string;
+  trim: string | null;
+}): string {
   return [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
 }
 
@@ -135,7 +145,8 @@ export function useSelectedVehicleId(): string {
 export function EmptyVehicleState() {
   return (
     <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-      No vehicle selected. Pick one from the sidebar, or add one via <code>POST /api/vehicles</code>.
+      No vehicle selected. Pick one from the sidebar, or add one via <code>POST /api/vehicles</code>
+      .
     </div>
   );
 }

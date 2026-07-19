@@ -84,6 +84,9 @@ Prefer these before inventing new ones:
 7. **Keep logos-bridge the only snake_case boundary.**
 8. **Do not skip ontology lint** after changing classes, views, DTC concepts, or
    cartridge `requires`.
+9. **Ground DTC/PID meaning in real standards** (SAE J1979 / J2012, ISO 15031,
+   cited TSBs) — never invent descriptions. See
+   [`HARDWARE_STANDARDS.md`](HARDWARE_STANDARDS.md).
 
 ---
 

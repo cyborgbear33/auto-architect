@@ -49,7 +49,12 @@ function ok(errors: OntologyLintIssue[], warnings: OntologyLintIssue[]): Ontolog
 }
 
 export function lintOntology(params: LintOntologyParams): OntologyLintResult {
-  const { ontology, dtcDictionary, allowNonDtcSymptoms = [], cartridgeRequiredClasses = [] } = params;
+  const {
+    ontology,
+    dtcDictionary,
+    allowNonDtcSymptoms = [],
+    cartridgeRequiredClasses = [],
+  } = params;
   const errors: OntologyLintIssue[] = [];
   const warnings: OntologyLintIssue[] = [];
 

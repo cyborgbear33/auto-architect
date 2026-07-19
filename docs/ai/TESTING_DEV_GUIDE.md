@@ -3,7 +3,10 @@
 ## Commands
 
 ```bash
+pnpm healthcheck             # one-shot summary of everything below
+pnpm healthcheck --fast      # skip obd-gateway tests + web-ui build
 pnpm -r typecheck
+pnpm lint                    # Biome check
 pnpm -r test                 # all TS packages/apps (vitest)
 pnpm lint:ontology           # LOGOS well-formedness + catalog/cartridge parity
 pnpm obd-gateway:test        # pytest
@@ -64,9 +67,16 @@ A fuller real-LOGOS CI smoke job is backlog (`FUTURE_FEATURES.md`).
 
 ## What "green" means
 
-Before merging meaningful changes:
+Before merging meaningful changes, prefer:
+
+```bash
+pnpm healthcheck
+```
+
+Or equivalently:
 
 1. `pnpm -r typecheck`
-2. `pnpm -r test`
-3. `pnpm lint:ontology` if ontology/cartridges touched
-4. `pnpm obd-gateway:test` if gateway touched
+2. `pnpm lint`
+3. `pnpm -r test`
+4. `pnpm lint:ontology` if ontology/cartridges touched
+5. `pnpm obd-gateway:test` if gateway touched

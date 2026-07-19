@@ -13,7 +13,9 @@ describe("runPerception", () => {
     );
 
     expect(abox.concepts["veh:jeep-renegade-2015-latitude"]).toEqual(["Engine"]);
-    expect(abox.concepts["veh:jeep-renegade-2015-latitude:cylinder-misfire"]).toEqual(["CylinderMisfire"]);
+    expect(abox.concepts["veh:jeep-renegade-2015-latitude:cylinder-misfire"]).toEqual([
+      "CylinderMisfire",
+    ]);
     expect(abox.concepts["veh:jeep-renegade-2015-latitude:high-load"]).toEqual(["HighLoad"]);
     expect(abox.roles).toContainEqual([
       "hasDtc",
@@ -29,7 +31,12 @@ describe("runPerception", () => {
 
   it("does not assert HighLoad below the threshold", () => {
     const cartridges = resolveCartridgesForEngineFamily("fca-tigershark-2.4");
-    const abox = runPerception("veh:x", [{ code: "P0304", status: "stored" }], { ENGINE_LOAD: 40 }, cartridges);
+    const abox = runPerception(
+      "veh:x",
+      [{ code: "P0304", status: "stored" }],
+      { ENGINE_LOAD: 40 },
+      cartridges,
+    );
     expect(abox.concepts["veh:x:high-load"]).toBeUndefined();
   });
 

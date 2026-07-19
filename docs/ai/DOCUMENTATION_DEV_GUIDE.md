@@ -23,8 +23,8 @@ How to create and maintain Markdown in `docs/` for auto-architect.
 Keep three layers distinct:
 
 1. **Fundamental** — propose/dispose, ontology-owns-meaning, ActionService gate, lesson pointer (`LESSON_AGENT_DETERMINISTIC_APPS.md`)
-2. **Product (auto)** — AI coding rules, UX/UI/API/ontology guides with automotive vocabulary
-3. **OBD/CANBUS** — `OBD_EDGE_CONTRACT.md` and gateway README
+2. **Product (auto)** — AI coding rules, code standards, UX/UI/API/ontology guides with automotive vocabulary
+3. **OBD/CANBUS** — `OBD_EDGE_CONTRACT.md`, `HARDWARE_STANDARDS.md`, and gateway README
 
 Do not mix OEM wiring tips into the fundamental lesson pointer.
 

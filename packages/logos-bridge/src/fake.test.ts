@@ -7,8 +7,24 @@ const baseInput: LogosProblemInput = {
   statement: { currentState: "a", desiredState: "b", gap: "c" },
   desiredState: { successCriteria: "the fault clears" },
   actions: [
-    { id: "cheap-test", impact: 0.5, confidence: 0.7, infoGain: 0.9, cost: 0.1, risk: 0.1, reversibility: 1 },
-    { id: "expensive-repair", impact: 0.9, confidence: 0.5, infoGain: 0.1, cost: 0.8, risk: 0.3, reversibility: 0.5 },
+    {
+      id: "cheap-test",
+      impact: 0.5,
+      confidence: 0.7,
+      infoGain: 0.9,
+      cost: 0.1,
+      risk: 0.1,
+      reversibility: 1,
+    },
+    {
+      id: "expensive-repair",
+      impact: 0.9,
+      confidence: 0.5,
+      infoGain: 0.1,
+      cost: 0.8,
+      risk: 0.3,
+      reversibility: 0.5,
+    },
   ],
 };
 
@@ -18,7 +34,10 @@ describe("FakeLogosBridge.solve", () => {
     const result = await bridge.solve({
       ...baseInput,
       problemType: "Stability",
-      actions: [...baseInput.actions!, { id: "stop-now", tags: ["stabilize", "safety"], confidence: 0.9 }],
+      actions: [
+        ...baseInput.actions!,
+        { id: "stop-now", tags: ["stabilize", "safety"], confidence: 0.9 },
+      ],
     });
     expect(result.kind).toBe("stabilize-first");
     expect(result.recommended).toBe("stop-now");

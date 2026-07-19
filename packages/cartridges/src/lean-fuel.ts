@@ -57,13 +57,15 @@ function leanDraft(bank: 1 | 2): (vehicle: VehicleView) => FramingResult {
       currentState: `bank ${bank} is running lean with sustained positive long-term fuel trim`,
       desiredState: `bank ${bank} fuel trim back within normal range and lean DTC cleared`,
       gap: "the source of the unmetered air or fuel shortfall on this bank is not yet isolated",
-      whyItMatters: "a persistent lean condition risks misfire, catalyst damage, and poor fuel economy",
+      whyItMatters:
+        "a persistent lean condition risks misfire, catalyst damage, and poor fuel economy",
       urgency: "medium",
     },
     gapType: "causal",
     desiredState: {
       successCriteria: `bank ${bank} long-term fuel trim returns to normal range and the lean DTC does not return after a drive cycle`,
-      measurement: "monitor long-term fuel trim on the affected bank and rescan for the lean DTC after the repair",
+      measurement:
+        "monitor long-term fuel trim on the affected bank and rescan for the lean DTC after the repair",
     },
     actions: leanPlaybook(bank),
   });
@@ -74,15 +76,33 @@ export const leanFuelCartridge: Cartridge = {
   perception: [
     { dtcConcept: "LeanCodeBank1", concept: "LeanCodeBank1", as: "symptom", slot: "lean-bank1" },
     { dtcConcept: "LeanCodeBank2", concept: "LeanCodeBank2", as: "symptom", slot: "lean-bank2" },
-    { pid: "LONG_FUEL_TRIM_1", when: { gt: POSITIVE_TRIM_PCT }, concept: "PositiveFuelTrim", as: "condition", slot: "positive-trim-1" },
-    { pid: "LONG_FUEL_TRIM_2", when: { gt: POSITIVE_TRIM_PCT }, concept: "PositiveFuelTrim", as: "condition", slot: "positive-trim-2" },
+    {
+      pid: "LONG_FUEL_TRIM_1",
+      when: { gt: POSITIVE_TRIM_PCT },
+      concept: "PositiveFuelTrim",
+      as: "condition",
+      slot: "positive-trim-1",
+    },
+    {
+      pid: "LONG_FUEL_TRIM_2",
+      when: { gt: POSITIVE_TRIM_PCT },
+      concept: "PositiveFuelTrim",
+      as: "condition",
+      slot: "positive-trim-2",
+    },
   ],
   framing: [
     { whenClass: "LeanFuelBank1", priority: 80, build: leanDraft(1) },
     { whenClass: "LeanFuelBank2", priority: 80, build: leanDraft(2) },
   ],
   requires: {
-    classes: ["LeanCodeBank1", "LeanCodeBank2", "PositiveFuelTrim", "LeanFuelBank1", "LeanFuelBank2"],
+    classes: [
+      "LeanCodeBank1",
+      "LeanCodeBank2",
+      "PositiveFuelTrim",
+      "LeanFuelBank1",
+      "LeanFuelBank2",
+    ],
     dtcConcepts: ["LeanCodeBank1", "LeanCodeBank2"],
     pids: ["LONG_FUEL_TRIM_1", "LONG_FUEL_TRIM_2"],
   },

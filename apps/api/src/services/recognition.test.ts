@@ -1,19 +1,17 @@
-import { beforeEach, describe, expect, it } from "vitest";
 import { FakeLogosBridge, type RealizeInput, type RealizeResult } from "@auto/logos-bridge";
+import { beforeEach, describe, expect, it } from "vitest";
+import type { Store } from "../store/index.ts";
 import { createMemoryStore } from "../store/index.ts";
 import { seed } from "../store/seed.ts";
-import { VehicleService } from "./vehicle.ts";
 import { ForecastService } from "./forecast.ts";
 import { RecognitionService } from "./recognition.ts";
-import type { Store } from "../store/index.ts";
+import { VehicleService } from "./vehicle.ts";
 
 const JEEP = "veh:jeep-renegade-2015-latitude";
 
 function makeServices(realizer?: (input: RealizeInput) => RealizeResult) {
   const store: Store = createMemoryStore();
-  const bridge = realizer
-    ? new FakeLogosBridge(undefined, realizer)
-    : new FakeLogosBridge();
+  const bridge = realizer ? new FakeLogosBridge(undefined, realizer) : new FakeLogosBridge();
   const vehicles = new VehicleService(store);
   const forecast = new ForecastService(store, bridge);
   const recognition = new RecognitionService(store, bridge, vehicles, forecast);
@@ -28,8 +26,12 @@ describe("RecognitionService", () => {
       individual: input.individual,
       // Echo back whatever the ABox actually asserts a fault syndrome from,
       // so the test can assert perception really reached the bridge call.
-      member: Object.values(input.abox.concepts).flat().includes("CylinderMisfire") ? ["MisfireUnderLoad"] : [],
-      mostSpecific: Object.values(input.abox.concepts).flat().includes("CylinderMisfire") ? ["MisfireUnderLoad"] : [],
+      member: Object.values(input.abox.concepts).flat().includes("CylinderMisfire")
+        ? ["MisfireUnderLoad"]
+        : [],
+      mostSpecific: Object.values(input.abox.concepts).flat().includes("CylinderMisfire")
+        ? ["MisfireUnderLoad"]
+        : [],
       undecided: [],
     }));
     await seed(ctx.store);
@@ -54,6 +56,8 @@ describe("RecognitionService", () => {
   });
 
   it("404s for an unknown vehicle", async () => {
-    await expect(ctx.recognition.recognize("veh:does-not-exist")).rejects.toMatchObject({ statusCode: 404 });
+    await expect(ctx.recognition.recognize("veh:does-not-exist")).rejects.toMatchObject({
+      statusCode: 404,
+    });
   });
 });

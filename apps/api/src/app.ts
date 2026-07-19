@@ -1,9 +1,9 @@
-import Fastify, { type FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
+import Fastify, { type FastifyInstance } from "fastify";
 import { ZodError } from "zod";
-import type { Services } from "./services/index.ts";
-import { registerRoutes } from "./routes/index.ts";
 import { AppError } from "./lib/errors.ts";
+import { registerRoutes } from "./routes/index.ts";
+import type { Services } from "./services/index.ts";
 
 export async function buildApp(services: Services): Promise<FastifyInstance> {
   const app = Fastify({ logger: false });
@@ -28,7 +28,9 @@ export async function buildApp(services: Services): Promise<FastifyInstance> {
   });
 
   app.setNotFoundHandler((req, reply) => {
-    reply.code(404).send({ error: { code: "ROUTE_NOT_FOUND", message: `No route for ${req.method} ${req.url}` } });
+    reply.code(404).send({
+      error: { code: "ROUTE_NOT_FOUND", message: `No route for ${req.method} ${req.url}` },
+    });
   });
 
   await registerRoutes(app, services);

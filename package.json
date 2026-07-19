@@ -10,7 +10,11 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "setup:solver": "node scripts/setup-solver.mjs",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
     "lint:ontology": "node scripts/lint-ontology.mjs",
+    "healthcheck": "node scripts/healthcheck.mjs",
     "dev:api": "pnpm --filter @auto/api dev",
     "dev:api:memory": "STORAGE_DRIVER=memory pnpm dev:api",
     "dev:ui": "pnpm --filter @auto/web-ui dev",
@@ -25,6 +29,7 @@
     "postinstall": "node scripts/setup-solver.mjs --check"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.4",
     "@types/node": "^22.10.5",
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"

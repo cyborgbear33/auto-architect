@@ -20,7 +20,8 @@
  */
 
 // Strict indexed accessors (repo enables noUncheckedIndexedAccess).
-const cell = (payoffs: number[][], i: number, j: number): number => (payoffs[i] as number[])[j] as number;
+const cell = (payoffs: number[][], i: number, j: number): number =>
+  (payoffs[i] as number[])[j] as number;
 const rowAt = (payoffs: number[][], i: number): number[] => payoffs[i] as number[];
 
 // ---------------------------------------------------------------------------
@@ -76,7 +77,8 @@ function argBest(metric: number[], higherIsBetter: boolean, eps = 1e-9): number[
 }
 
 function assertMatrix(m: DecisionMatrix): void {
-  if (m.actions.length === 0 || m.states.length === 0) throw new Error("DecisionMatrix needs >=1 action and >=1 state");
+  if (m.actions.length === 0 || m.states.length === 0)
+    throw new Error("DecisionMatrix needs >=1 action and >=1 state");
   if (m.payoffs.length !== m.actions.length) throw new Error("payoffs rows must match actions");
   for (const row of m.payoffs) {
     if (row.length !== m.states.length) throw new Error("payoffs cols must match states");
@@ -164,7 +166,10 @@ export function dominatedActions(m: DecisionMatrix): number[] {
 }
 
 /** Run all decision criteria and synthesize a consensus pick. */
-export function analyzeDecision(m: DecisionMatrix, opts: { hurwiczAlpha?: number } = {}): DecisionAnalysis {
+export function analyzeDecision(
+  m: DecisionMatrix,
+  opts: { hurwiczAlpha?: number } = {},
+): DecisionAnalysis {
   const hurwiczAlpha = opts.hurwiczAlpha ?? 0.5;
   const criteria = [maximin(m), minimaxRegret(m), hurwicz(m, hurwiczAlpha), laplace(m)];
 
@@ -186,7 +191,9 @@ export function analyzeDecision(m: DecisionMatrix, opts: { hurwiczAlpha?: number
     }
   }
   const first = criteria[0] as CriterionResult;
-  const unanimous = criteria.every((c) => c.bestActions.length === 1 && c.bestActions[0] === first.bestActions[0]);
+  const unanimous = criteria.every(
+    (c) => c.bestActions.length === 1 && c.bestActions[0] === first.bestActions[0],
+  );
 
   return {
     matrix: m,
@@ -289,9 +296,13 @@ function factorial(n: number): number {
 }
 
 /** Exact Shapley value via the subset formula (feasible for small n). */
-export function shapleyValues(players: string[], v: CharacteristicFunction): Record<string, number> {
+export function shapleyValues(
+  players: string[],
+  v: CharacteristicFunction,
+): Record<string, number> {
   const n = players.length;
-  if (n > MAX_PLAYERS) throw new Error(`shapleyValues supports up to ${MAX_PLAYERS} players (got ${n})`);
+  if (n > MAX_PLAYERS)
+    throw new Error(`shapleyValues supports up to ${MAX_PLAYERS} players (got ${n})`);
   const nFact = factorial(n);
   const phi: Record<string, number> = Object.fromEntries(players.map((p) => [p, 0]));
 
@@ -310,9 +321,13 @@ export function shapleyValues(players: string[], v: CharacteristicFunction): Rec
   return phi;
 }
 
-export function analyzeCooperative(players: string[], v: CharacteristicFunction): CooperativeAnalysis {
+export function analyzeCooperative(
+  players: string[],
+  v: CharacteristicFunction,
+): CooperativeAnalysis {
   const n = players.length;
-  if (n > MAX_PLAYERS) throw new Error(`analyzeCooperative supports up to ${MAX_PLAYERS} players (got ${n})`);
+  if (n > MAX_PLAYERS)
+    throw new Error(`analyzeCooperative supports up to ${MAX_PLAYERS} players (got ${n})`);
   const grandValue = v(players);
   const shapley = shapleyValues(players, v);
 
@@ -333,5 +348,12 @@ export function analyzeCooperative(players: string[], v: CharacteristicFunction)
     if (value > shapleyShare + eps) blockingCoalitions.push({ members: S, value, shapleyShare });
   }
 
-  return { players, grandValue, shapley, superadditive, blockingCoalitions, shapleyInCore: blockingCoalitions.length === 0 };
+  return {
+    players,
+    grandValue,
+    shapley,
+    superadditive,
+    blockingCoalitions,
+    shapleyInCore: blockingCoalitions.length === 0,
+  };
 }

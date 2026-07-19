@@ -5,7 +5,14 @@ import {
   LogosSchemaError,
   LogosTimeoutError,
 } from "@auto/logos-bridge";
-import { AppError, unavailable, solverError, solverSchemaError, solverTimeout, validationError } from "./errors.ts";
+import {
+  type AppError,
+  solverError,
+  solverSchemaError,
+  solverTimeout,
+  unavailable,
+  validationError,
+} from "./errors.ts";
 
 /**
  * Map a LOGOS bridge failure to the right HTTP-flavored AppError. Shared by
@@ -25,7 +32,11 @@ export function mapBridgeError(err: unknown): AppError {
   if (err instanceof LogosInputError) {
     return validationError(
       err.message,
-      { errorCode: err.errorCode, exitCode: err.exitCode, ...(err.details && typeof err.details === "object" ? err.details : {}) },
+      {
+        errorCode: err.errorCode,
+        exitCode: err.exitCode,
+        ...(err.details && typeof err.details === "object" ? err.details : {}),
+      },
       "SOLVER_INPUT_ERROR",
     );
   }

@@ -1,6 +1,6 @@
 import type { LogosBridge } from "@auto/logos-bridge";
-import type { Store } from "../store/index.ts";
 import { mapBridgeError } from "../lib/bridge-errors.ts";
+import type { Store } from "../store/index.ts";
 
 /** The PID obd-gateway/manual entry should log for the oil-consumption trend. */
 export const OIL_LEVEL_PID = "OIL_LEVEL_PCT";
@@ -40,7 +40,8 @@ export class ForecastService {
         threshold: OIL_LEVEL_ADD_MARK_PCT,
       });
       const declining =
-        result.direction === "falling" && (result.willCross || (result.current ?? Infinity) <= OIL_LEVEL_ADD_MARK_PCT);
+        result.direction === "falling" &&
+        (result.willCross || (result.current ?? Infinity) <= OIL_LEVEL_ADD_MARK_PCT);
       return { declining, series };
     } catch (err) {
       throw mapBridgeError(err);

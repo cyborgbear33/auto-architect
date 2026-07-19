@@ -47,13 +47,16 @@ Then open http://localhost:5173 — the Dashboard should show DTC `P0304` and th
 ## Testing
 
 ```bash
+pnpm healthcheck             # one-shot: typecheck + biome + tests + ontology + gateway + UI build
+# or discrete:
 pnpm -r typecheck            # every TS package/app
+pnpm lint                    # Biome format/lint
 pnpm -r test                 # every TS package/app (vitest)
 pnpm obd-gateway:test        # Python (pytest)
 pnpm lint:ontology           # LOGOS well-formedness + catalog/cartridge parity (hard-fails; requires LOGOS)
 ```
 
-CI (`.github/workflows/ci.yml`) runs all of the above, plus a production build of the web UI.
+CI (`.github/workflows/ci.yml`) runs typecheck, Biome, tests, ontology lint, and a production build of the web UI.
 
 ## Documentation
 
@@ -64,9 +67,11 @@ CI (`.github/workflows/ci.yml`) runs all of the above, plus a production build o
 | [`docs/FUTURE_FEATURES.md`](docs/FUTURE_FEATURES.md) | Canonical backlog (planned ↔ implemented) |
 | [`docs/ai/README_FOR_AI.md`](docs/ai/README_FOR_AI.md) | Coding-rules read order |
 | [`docs/ai/OBD_EDGE_CONTRACT.md`](docs/ai/OBD_EDGE_CONTRACT.md) | OBD-II / CANBUS edge rules |
+| [`docs/ai/HARDWARE_STANDARDS.md`](docs/ai/HARDWARE_STANDARDS.md) | SAE/ISO/CAN grounding (J1979, J2012, UDS, J1939) |
+| [`docs/ai/CODE_STANDARDS.md`](docs/ai/CODE_STANDARDS.md) | TS / Biome / `pnpm healthcheck` |
 | [`docs/LESSON_AGENT_DETERMINISTIC_APPS.md`](docs/LESSON_AGENT_DETERMINISTIC_APPS.md) | Pointer to the metalanguage lesson |
 
-Guidance is layered: shared propose/dispose fundamentals → auto product guides → OBD-specific contract.
+Guidance is layered: shared propose/dispose fundamentals → auto product guides → OBD/hardware standards.
 
 ## Adding a second vehicle (e.g. a Silverado)
 

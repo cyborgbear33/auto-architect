@@ -1,7 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import {
+  EmptyVehicleState,
+  PageHeader,
+  useSelectedVehicleId,
+  vehicleLabel,
+} from "../components/Layout.tsx";
 import { api } from "../lib/api.ts";
-import { EmptyVehicleState, PageHeader, useSelectedVehicleId, vehicleLabel } from "../components/Layout.tsx";
 import { useAppSelector } from "../store/index.ts";
 
 const URGENCY_STYLES: Record<string, string> = {
@@ -13,7 +18,9 @@ const URGENCY_STYLES: Record<string, string> = {
 
 function Pill({ children, tone = "normal" }: { children: React.ReactNode; tone?: string }) {
   return (
-    <span className={`inline-block rounded-full border px-2 py-0.5 text-xs font-medium ${URGENCY_STYLES[tone] ?? URGENCY_STYLES.normal}`}>
+    <span
+      className={`inline-block rounded-full border px-2 py-0.5 text-xs font-medium ${URGENCY_STYLES[tone] ?? URGENCY_STYLES.normal}`}
+    >
       {children}
     </span>
   );
@@ -29,10 +36,19 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
   const debugMode = useAppSelector((s) => s.ui.debugMode);
   const qc = useQueryClient();
 
-  const vehicleQ = useQuery({ queryKey: ["vehicle", vehicleId], queryFn: () => api.getVehicle(vehicleId) });
+  const vehicleQ = useQuery({
+    queryKey: ["vehicle", vehicleId],
+    queryFn: () => api.getVehicle(vehicleId),
+  });
   const dtcsQ = useQuery({ queryKey: ["dtcs", vehicleId], queryFn: () => api.getDtcs(vehicleId) });
-  const forecastQ = useQuery({ queryKey: ["forecast", vehicleId], queryFn: () => api.getForecast(vehicleId) });
-  const recognitionQ = useQuery({ queryKey: ["recognition", vehicleId], queryFn: () => api.getRecognition(vehicleId) });
+  const forecastQ = useQuery({
+    queryKey: ["forecast", vehicleId],
+    queryFn: () => api.getForecast(vehicleId),
+  });
+  const recognitionQ = useQuery({
+    queryKey: ["recognition", vehicleId],
+    queryFn: () => api.getRecognition(vehicleId),
+  });
   const recommendationsQ = useQuery({
     queryKey: ["recommendations", vehicleId],
     queryFn: () => api.getRecommendations(vehicleId),
@@ -63,13 +79,30 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         <section className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">
           <h2 className="mb-3 text-sm font-semibold text-slate-700">Active DTCs</h2>
           {dtcsQ.isLoading && <p className="text-sm text-slate-400">Loading…</p>}
-          {dtcsQ.data?.length === 0 && <p className="text-sm text-slate-400">No DTCs on file. Nothing to report — not the same as "healthy".</p>}
+          {dtcsQ.data?.length === 0 && (
+            <p className="text-sm text-slate-400">
+              No DTCs on file. Nothing to report — not the same as "healthy".
+            </p>
+          )}
           <ul className="space-y-1.5">
             {dtcsQ.data?.map((dtc) => (
-              <li key={`${dtc.code}-${dtc.status}`} className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm">
+              <li
+                key={`${dtc.code}-${dtc.status}`}
+                className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm"
+              >
                 <span className="font-mono font-semibold text-slate-800">{dtc.code}</span>
                 <span className="text-slate-500">{dtc.description ?? "—"}</span>
-                <Pill tone={dtc.status === "permanent" ? "critical" : dtc.status === "pending" ? "low" : "high"}>{dtc.status}</Pill>
+                <Pill
+                  tone={
+                    dtc.status === "permanent"
+                      ? "critical"
+                      : dtc.status === "pending"
+                        ? "low"
+                        : "high"
+                  }
+                >
+                  {dtc.status}
+                </Pill>
               </li>
             ))}
           </ul>
@@ -78,14 +111,17 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         <section className="rounded-lg border border-slate-200 bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-slate-700">Oil-level trend</h2>
           {forecastQ.data && forecastQ.data.series.length < 2 ? (
-            <p className="text-sm text-slate-400">Not enough oil-level samples yet to forecast (need ≥2).</p>
+            <p className="text-sm text-slate-400">
+              Not enough oil-level samples yet to forecast (need ≥2).
+            </p>
           ) : (
             <div>
               <Pill tone={forecastQ.data?.declining ? "high" : "normal"}>
                 {forecastQ.data?.declining ? "Declining toward ADD mark" : "Stable"}
               </Pill>
               <p className="mt-2 text-xs text-slate-400">
-                {forecastQ.data?.series.length ?? 0} sample(s) logged. Automated version of the W80 1500–1700 mile dealer test.
+                {forecastQ.data?.series.length ?? 0} sample(s) logged. Automated version of the W80
+                1500–1700 mile dealer test.
               </p>
             </div>
           )}
@@ -93,9 +129,14 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
       </div>
 
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">Proven fault classes (LOGOS realize)</h2>
+        <h2 className="mb-3 text-sm font-semibold text-slate-700">
+          Proven fault classes (LOGOS realize)
+        </h2>
         {recognitionQ.data?.mostSpecific.length === 0 ? (
-          <p className="text-sm text-slate-400">Nothing proven from current evidence. That is an honest "not yet classified" — never a synthesized "Healthy".</p>
+          <p className="text-sm text-slate-400">
+            Nothing proven from current evidence. That is an honest "not yet classified" — never a
+            synthesized "Healthy".
+          </p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {recognitionQ.data?.mostSpecific.map((cls) => (
@@ -106,16 +147,23 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
           </div>
         )}
         {debugMode && recognitionQ.data?.undecided && recognitionQ.data.undecided.length > 0 && (
-          <p className="mt-2 text-xs text-slate-400">Undecided (insufficient evidence either way): {recognitionQ.data.undecided.join(", ")}</p>
+          <p className="mt-2 text-xs text-slate-400">
+            Undecided (insufficient evidence either way): {recognitionQ.data.undecided.join(", ")}
+          </p>
         )}
-        <Link to="/diagnosis" className="mt-3 inline-block text-sm font-medium text-sky-700 hover:underline">
+        <Link
+          to="/diagnosis"
+          className="mt-3 inline-block text-sm font-medium text-sky-700 hover:underline"
+        >
           Go to full diagnosis →
         </Link>
       </section>
 
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="mb-3 text-sm font-semibold text-slate-700">Recommendations</h2>
-        {recommendationsQ.data?.length === 0 && <p className="text-sm text-slate-400">No open recommendations.</p>}
+        {recommendationsQ.data?.length === 0 && (
+          <p className="text-sm text-slate-400">No open recommendations.</p>
+        )}
         <ul className="space-y-2">
           {recommendationsQ.data?.map((rec) => (
             <li key={rec.id} className="rounded-md bg-slate-50 px-3 py-2 text-sm">

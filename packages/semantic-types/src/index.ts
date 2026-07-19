@@ -117,7 +117,13 @@ export type GapType =
   | "value"
   | "constraint";
 
-export type SolutionKind = "act" | "measure-first" | "stabilize-first" | "clarify-values" | "escalate" | "none";
+export type SolutionKind =
+  | "act"
+  | "measure-first"
+  | "stabilize-first"
+  | "clarify-values"
+  | "escalate"
+  | "none";
 
 export type OutcomeStatus = "worked" | "partial" | "failed" | "inconclusive";
 
@@ -257,7 +263,14 @@ export interface Recognition {
 
 // --- Recommendations & decision journal -----------------------------------
 
-export type RecommendationStatus = "new" | "viewed" | "accepted" | "rejected" | "expired" | "converted_to_repair" | "dismissed";
+export type RecommendationStatus =
+  | "new"
+  | "viewed"
+  | "accepted"
+  | "rejected"
+  | "expired"
+  | "converted_to_repair"
+  | "dismissed";
 
 export interface Recommendation {
   id: SemanticId;

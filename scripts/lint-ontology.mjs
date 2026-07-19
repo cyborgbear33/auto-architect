@@ -42,10 +42,17 @@ function run(cmd, args, opts = {}) {
     env: { ...process.env, ...opts.env },
     stdio: ["ignore", "pipe", "pipe"],
   });
-  return { ok: r.status === 0, status: r.status ?? 1, stdout: r.stdout ?? "", stderr: r.stderr ?? "" };
+  return {
+    ok: r.status === 0,
+    status: r.status ?? 1,
+    stdout: r.stdout ?? "",
+    stderr: r.stderr ?? "",
+  };
 }
 
-console.log(cyan(`\nauto-architect ontology lint  (python: ${PY}${CHECK_ONLY ? ", --check" : ""})`));
+console.log(
+  cyan(`\nauto-architect ontology lint  (python: ${PY}${CHECK_ONLY ? ", --check" : ""})`),
+);
 
 // --- 1. Real LOGOS well-formedness -----------------------------------------
 const help = run(PY, ["-m", "logos", "--help"]);

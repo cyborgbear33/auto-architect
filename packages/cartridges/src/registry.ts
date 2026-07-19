@@ -1,10 +1,10 @@
 import { getEngineFamilyCartridges } from "@auto/ontology";
-import { misfireCartridge } from "./misfire.ts";
-import { leanFuelCartridge } from "./lean-fuel.ts";
-import { evapCartridge } from "./evap.ts";
 import { camCrankCorrelationCartridge } from "./cam-crank-correlation.ts";
+import { evapCartridge } from "./evap.ts";
 import { fcaTigershark24Cartridge } from "./fca-tigershark-2.4.ts";
 import { gmEcotec3StubCartridge } from "./gm-ecotec3-stub.ts";
+import { leanFuelCartridge } from "./lean-fuel.ts";
+import { misfireCartridge } from "./misfire.ts";
 import type { Cartridge, FramingResult, VehicleView } from "./types.ts";
 
 /** Every cartridge known to the app, keyed by name (packages/ontology/vehicle-profiles.json references these names). */
@@ -29,7 +29,10 @@ export function resolveCartridgesForEngineFamily(engineFamilyId: string): Cartri
   const names = getEngineFamilyCartridges(engineFamilyId);
   return names.map((name) => {
     const cartridge = cartridgeRegistry[name];
-    if (!cartridge) throw new Error(`Unknown cartridge "${name}" referenced by engine family "${engineFamilyId}"`);
+    if (!cartridge)
+      throw new Error(
+        `Unknown cartridge "${name}" referenced by engine family "${engineFamilyId}"`,
+      );
     return cartridge;
   });
 }
@@ -47,7 +50,11 @@ export function classesForCartridges(cartridges: Cartridge[]): string[] {
  * `null` when no loaded cartridge frames that class (e.g. it's a raw
  * Symptom/Condition, not a fault syndrome — those never get framed).
  */
-export function draftForClass(vehicle: VehicleView, className: string, cartridges: Cartridge[]): FramingResult | null {
+export function draftForClass(
+  vehicle: VehicleView,
+  className: string,
+  cartridges: Cartridge[],
+): FramingResult | null {
   let best: { priority: number; build: (v: VehicleView) => FramingResult } | undefined;
   for (const cartridge of cartridges) {
     for (const rule of cartridge.framing) {

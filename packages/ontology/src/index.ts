@@ -5,15 +5,22 @@
  * TBox, which vehicle maps to which engine family, DTC descriptions, and
  * known manufacturer campaigns.
  */
+
+import type { EngineFamily, KnownCampaign, VehicleProfile } from "@auto/semantic-types";
 import dlOntologyJson from "../dl-ontology.json" with { type: "json" };
-import vehicleProfilesJson from "../vehicle-profiles.json" with { type: "json" };
 import dtcDictionaryJson from "../dtc-dictionary.json" with { type: "json" };
 import knownCampaignsJson from "../known-campaigns.json" with { type: "json" };
-import type { EngineFamily, KnownCampaign, VehicleProfile } from "@auto/semantic-types";
-import { lintOntology, type LintableOntology, type OntologyLintResult } from "./lint.ts";
+import vehicleProfilesJson from "../vehicle-profiles.json" with { type: "json" };
+import { type LintableOntology, lintOntology, type OntologyLintResult } from "./lint.ts";
 
+export type {
+  LintableDtcDictionary,
+  LintableOntology,
+  LintOntologyParams,
+  OntologyLintIssue,
+  OntologyLintResult,
+} from "./lint.ts";
 export { lintOntology };
-export type { LintableOntology, OntologyLintResult, OntologyLintIssue, LintableDtcDictionary, LintOntologyParams } from "./lint.ts";
 
 export const dlOntology: Record<string, unknown> = dlOntologyJson;
 
@@ -99,7 +106,10 @@ const knownCampaigns: KnownCampaign[] = [
   })),
 ];
 
-export function campaignsForEngineFamily(engineFamilyId: string, year?: number | null): KnownCampaign[] {
+export function campaignsForEngineFamily(
+  engineFamilyId: string,
+  year?: number | null,
+): KnownCampaign[] {
   return knownCampaigns.filter((c) => {
     if (c.engineFamily !== engineFamilyId) return false;
     if (year == null) return true;
@@ -130,7 +140,9 @@ export function tsbsForEngineFamily(engineFamilyId: string): TsbEntry[] {
  * direction) — callers that have it (scripts/lint-ontology.mjs, or a test in
  * @auto/cartridges) pass it in explicitly.
  */
-export function runOntologyLint(opts: { cartridgeRequiredClasses?: string[] } = {}): OntologyLintResult {
+export function runOntologyLint(
+  opts: { cartridgeRequiredClasses?: string[] } = {},
+): OntologyLintResult {
   return lintOntology({
     ontology: dlOntologyJson as unknown as LintableOntology,
     dtcDictionary: dtcDictionaryJson as { codes: Record<string, { concept: string }> },

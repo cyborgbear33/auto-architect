@@ -1,4 +1,4 @@
-import { campaignsForEngineFamily, tsbsForEngineFamily, type TsbEntry } from "@auto/ontology";
+import { campaignsForEngineFamily, type TsbEntry, tsbsForEngineFamily } from "@auto/ontology";
 import type { KnownCampaign } from "@auto/semantic-types";
 import type { VehicleService } from "./vehicle.ts";
 

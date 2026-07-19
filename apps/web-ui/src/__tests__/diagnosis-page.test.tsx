@@ -1,10 +1,12 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, within, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import type React from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+    <a href={to}>{children}</a>
+  ),
 }));
 
 const { mockUiState, resetMockUiState } = vi.hoisted(() => {
@@ -15,7 +17,8 @@ const { mockUiState, resetMockUiState } = vi.hoisted(() => {
 
 vi.mock("../store/index.ts", () => ({
   useAppDispatch: () => vi.fn(),
-  useAppSelector: (selector: (s: { ui: typeof mockUiState }) => unknown) => selector({ ui: mockUiState }),
+  useAppSelector: (selector: (s: { ui: typeof mockUiState }) => unknown) =>
+    selector({ ui: mockUiState }),
 }));
 
 afterEach(() => {
@@ -61,8 +64,8 @@ vi.mock("../lib/api.ts", () => ({
   },
 }));
 
-import { Diagnosis } from "../routes/Diagnosis.tsx";
 import { api } from "../lib/api.ts";
+import { Diagnosis } from "../routes/Diagnosis.tsx";
 
 function renderDiagnosis() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -90,7 +93,10 @@ describe("Diagnosis", () => {
   });
 
   it("shows a green allowed message when clear-codes-and-drive is not blocked", async () => {
-    vi.mocked(api.requestClearCodesAndDrive).mockResolvedValueOnce({ allowed: true, obligations: [] });
+    vi.mocked(api.requestClearCodesAndDrive).mockResolvedValueOnce({
+      allowed: true,
+      obligations: [],
+    });
     renderDiagnosis();
     fireEvent.click(await screen.findByRole("button", { name: "Request: clear codes and drive" }));
     expect(await screen.findByText(/Allowed\./)).toBeInTheDocument();
@@ -102,6 +108,8 @@ describe("Diagnosis", () => {
     );
     renderDiagnosis();
     fireEvent.click(await screen.findByRole("button", { name: "Request: clear codes and drive" }));
-    expect(await screen.findByText(/Blocked: blocked by R_forbid_clear_misfire/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Blocked: blocked by R_forbid_clear_misfire/),
+    ).toBeInTheDocument();
   });
 });

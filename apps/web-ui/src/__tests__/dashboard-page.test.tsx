@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
+import { render, screen, within } from "@testing-library/react";
+import type React from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
@@ -15,7 +15,8 @@ const { mockUiState, resetMockUiState } = vi.hoisted(() => {
 
 vi.mock("../store/index.ts", () => ({
   useAppDispatch: () => vi.fn(),
-  useAppSelector: (selector: (s: { ui: typeof mockUiState }) => unknown) => selector({ ui: mockUiState }),
+  useAppSelector: (selector: (s: { ui: typeof mockUiState }) => unknown) =>
+    selector({ ui: mockUiState }),
 }));
 
 afterEach(() => resetMockUiState());
@@ -23,7 +24,14 @@ afterEach(() => resetMockUiState());
 vi.mock("../lib/api.ts", () => ({
   api: {
     listVehicles: vi.fn().mockResolvedValue([
-      { id: "veh:jeep-renegade-2015-latitude", make: "Jeep", model: "Renegade", year: 2015, trim: "Latitude", engineFamily: "fca-tigershark-2.4" },
+      {
+        id: "veh:jeep-renegade-2015-latitude",
+        make: "Jeep",
+        model: "Renegade",
+        year: 2015,
+        trim: "Latitude",
+        engineFamily: "fca-tigershark-2.4",
+      },
     ]),
     getVehicle: vi.fn().mockResolvedValue({
       id: "veh:jeep-renegade-2015-latitude",
@@ -33,7 +41,9 @@ vi.mock("../lib/api.ts", () => ({
       trim: "Latitude",
       engineFamily: "fca-tigershark-2.4",
     }),
-    getDtcs: vi.fn().mockResolvedValue([{ code: "P0304", status: "stored", description: "Cylinder 4 Misfire" }]),
+    getDtcs: vi
+      .fn()
+      .mockResolvedValue([{ code: "P0304", status: "stored", description: "Cylinder 4 Misfire" }]),
     getForecast: vi.fn().mockResolvedValue({ declining: false, series: [] }),
     getRecognition: vi.fn().mockResolvedValue({
       individual: "veh:jeep-renegade-2015-latitude",

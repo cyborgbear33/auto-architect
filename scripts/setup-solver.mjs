@@ -19,8 +19,8 @@
  */
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const CHECK_ONLY = process.argv.includes("--check");
 const PY = process.env.LOGOS_PYTHON_BIN || "python3";
@@ -34,7 +34,13 @@ const red = (s) => `\x1b[31m${s}\x1b[0m`;
 
 function run(cmd, args) {
   const r = spawnSync(cmd, args, { encoding: "utf8" });
-  return { ok: r.status === 0, status: r.status, stdout: r.stdout ?? "", stderr: r.stderr ?? "", error: r.error };
+  return {
+    ok: r.status === 0,
+    status: r.status,
+    stdout: r.stdout ?? "",
+    stderr: r.stderr ?? "",
+    error: r.error,
+  };
 }
 
 function done(fatalMessage) {
@@ -50,7 +56,9 @@ function done(fatalMessage) {
   process.exit(0);
 }
 
-console.log(cyan(`\nLOGOS engine setup  (mode: ${CHECK_ONLY ? "check" : "install"}, python: ${PY})`));
+console.log(
+  cyan(`\nLOGOS engine setup  (mode: ${CHECK_ONLY ? "check" : "install"}, python: ${PY})`),
+);
 
 const ver = run(PY, ["-c", "import sys; print('.'.join(map(str, sys.version_info[:3])))"]);
 if (!ver.ok) {
@@ -80,7 +88,8 @@ if (PIP_SPEC) {
     done("pip install failed (see output above).");
   }
 } else {
-  const enginePath = process.env.LOGOS_ENGINE_PATH || resolve(repoRoot, "..", "metalanguage", "engine");
+  const enginePath =
+    process.env.LOGOS_ENGINE_PATH || resolve(repoRoot, "..", "metalanguage", "engine");
   if (!existsSync(resolve(enginePath, "pyproject.toml"))) {
     done(
       `LOGOS engine not found at ${enginePath} (no pyproject.toml).\n` +

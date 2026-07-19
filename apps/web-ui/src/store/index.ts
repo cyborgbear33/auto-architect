@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { useDispatch, useSelector, type TypedUseSelectorHook } from "react-redux";
-import { uiReducer, initialUiState } from "./uiSlice.ts";
+import { type TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { loadPersistedUiState, persistUiState, pickPersistedFields } from "./persistence.ts";
+import { initialUiState, uiReducer } from "./uiSlice.ts";
 
 /** Build a fresh store hydrated from whatever's persisted (or defaults, if
  *  nothing is / storage is unavailable) and wired to keep persisting on

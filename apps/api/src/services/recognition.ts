@@ -1,11 +1,11 @@
 import { runPerception } from "@auto/cartridges";
-import { dlOntology } from "@auto/ontology";
 import type { LogosBridge } from "@auto/logos-bridge";
+import { dlOntology } from "@auto/ontology";
 import type { Recognition } from "@auto/semantic-types";
-import type { Store } from "../store/index.ts";
-import type { VehicleService } from "./vehicle.ts";
-import type { ForecastService } from "./forecast.ts";
 import { mapBridgeError } from "../lib/bridge-errors.ts";
+import type { Store } from "../store/index.ts";
+import type { ForecastService } from "./forecast.ts";
+import type { VehicleService } from "./vehicle.ts";
 
 /**
  * Structural recognition: turns a vehicle's latest OBD-II evidence into DL

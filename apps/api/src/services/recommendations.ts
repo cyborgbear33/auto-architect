@@ -1,9 +1,9 @@
 import { draftForClass } from "@auto/cartridges";
 import type { Recommendation } from "@auto/semantic-types";
-import type { Store } from "../store/index.ts";
-import type { VehicleService } from "./vehicle.ts";
-import type { RecognitionService } from "./recognition.ts";
 import { newId, nowIso } from "../lib/ids.ts";
+import type { Store } from "../store/index.ts";
+import type { RecognitionService } from "./recognition.ts";
+import type { VehicleService } from "./vehicle.ts";
 
 const URGENCY_TO_PRIORITY: Record<string, Recommendation["priority"]> = {
   critical: "critical",
@@ -33,12 +33,16 @@ export class RecommendationService {
 
     const existing = await this.store.recommendations.listByVehicle(vehicleId);
     const openClasses = new Set(
-      existing.filter((r) => r.status === "new" || r.status === "viewed").flatMap((r) => r.generatedFromClasses),
+      existing
+        .filter((r) => r.status === "new" || r.status === "viewed")
+        .flatMap((r) => r.generatedFromClasses),
     );
 
     const vehicleView = {
       vehicleId,
-      label: `${vehicle.year ?? ""} ${vehicle.make} ${vehicle.model} ${vehicle.trim ?? ""}`.replace(/\s+/g, " ").trim(),
+      label: `${vehicle.year ?? ""} ${vehicle.make} ${vehicle.model} ${vehicle.trim ?? ""}`
+        .replace(/\s+/g, " ")
+        .trim(),
       engineFamily: vehicle.engineFamily,
       dtcs: await this.store.observations.latestDtcs(vehicleId),
       pids: await this.store.observations.latestPids(vehicleId),
