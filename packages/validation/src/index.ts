@@ -152,6 +152,21 @@ export const CreateVehicleSchema = z.object({
 });
 export type CreateVehicleInput = z.infer<typeof CreateVehicleSchema>;
 
+export const RecommendationStatusSchema = z.enum([
+  "new",
+  "viewed",
+  "accepted",
+  "rejected",
+  "expired",
+  "converted_to_repair",
+  "dismissed",
+]);
+
+export const MarkRecommendationStatusSchema = z.object({
+  status: RecommendationStatusSchema,
+});
+export type MarkRecommendationStatusInput = z.infer<typeof MarkRecommendationStatusSchema>;
+
 /** Portable garage JSON dump (export / import). Nested entities are lightly gated. */
 export const GarageDumpSchema = z.object({
   format: z.literal("auto-architect.garage"),

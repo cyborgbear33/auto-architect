@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
+  useNavigate: () => vi.fn(),
 }));
 
 const { mockUiState, resetMockUiState } = vi.hoisted(() => {
@@ -136,11 +137,16 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
           status: "new",
           reason: "a sustained misfire can destroy the catalytic converter",
           confidence: 0.82,
+          cost: 0.25,
+          risk: 0.1,
+          suggestedActionId: "swap-coil-plug",
           generatedFromClasses: ["MisfireUnderLoad"],
           createdAt: "2026-01-01T00:00:00Z",
         },
       ]),
       refreshRecommendations: vi.fn(),
+      markRecommendationStatus: vi.fn(),
+      convertRecommendation: vi.fn(),
     },
   };
 });
@@ -197,7 +203,7 @@ describe("Dashboard", () => {
     expect(section.queryByText("Healthy")).not.toBeInTheDocument();
   });
 
-  it("shows recommendation cards with priority", async () => {
+  it("shows recommendation cards with priority, cost/risk, and lifecycle actions", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
@@ -208,6 +214,12 @@ describe("Dashboard", () => {
     const section = within(heading.closest("section")!);
     expect(await section.findByText(/cylinder misfire under load/)).toBeInTheDocument();
     expect(section.getByText("high")).toBeInTheDocument();
+    expect(section.getByText(/conf 82%/)).toBeInTheDocument();
+    expect(section.getByText(/cost 25%/)).toBeInTheDocument();
+    expect(section.getByText(/risk 10%/)).toBeInTheDocument();
+    expect(section.getByRole("button", { name: "Accept" })).toBeInTheDocument();
+    expect(section.getByRole("button", { name: "Dismiss" })).toBeInTheDocument();
+    expect(section.getByRole("button", { name: "Convert to case" })).toBeInTheDocument();
   });
 
   it("shows an empty-vehicle state when nothing is selected", async () => {

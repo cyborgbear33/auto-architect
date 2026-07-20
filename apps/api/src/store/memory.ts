@@ -220,6 +220,9 @@ function createRecommendationRepository(): RecommendationRepository {
       byId.set(rec.id, rec);
       return rec;
     },
+    async get(id) {
+      return byId.get(id);
+    },
     async listByVehicle(vehicleId) {
       return [...byId.values()].filter((r) => r.vehicleId === vehicleId);
     },

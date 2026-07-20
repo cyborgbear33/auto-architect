@@ -279,10 +279,12 @@ export class AutoApiClient {
     this.request<Recognition>(`/api/vehicles/${enc(vehicleId)}/recognition`);
 
   // --- recommendations -------------------------------------------------------
-  getRecommendations = (vehicleId: string) =>
-    this.request<{ recommendations: Recommendation[] }>(
-      `/api/vehicles/${enc(vehicleId)}/recommendations`,
+  getRecommendations = (vehicleId: string, opts?: { openOnly?: boolean }) => {
+    const q = opts?.openOnly ? "?open=1" : "";
+    return this.request<{ recommendations: Recommendation[] }>(
+      `/api/vehicles/${enc(vehicleId)}/recommendations${q}`,
     ).then((r) => r.recommendations);
+  };
   refreshRecommendations = (vehicleId: string) =>
     this.request<{ recommendations: Recommendation[] }>(
       `/api/vehicles/${enc(vehicleId)}/recommendations/refresh`,
@@ -293,6 +295,11 @@ export class AutoApiClient {
       method: "POST",
       body: JSON.stringify({ status }),
     });
+  convertRecommendation = (id: string) =>
+    this.request<{ recommendation: Recommendation; problem: DiagnosticProblem }>(
+      `/api/recommendations/${enc(id)}/convert`,
+      { method: "POST" },
+    );
 
   // --- recall / TSB matcher ---------------------------------------------------
   getCampaigns = (vehicleId: string) =>

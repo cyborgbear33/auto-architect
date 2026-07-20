@@ -4,6 +4,7 @@ import {
   EndDriveSessionSchema,
   GarageDumpSchema,
   LogRepairSchema,
+  MarkRecommendationStatusSchema,
   ObservationBatchSchema,
   ProblemIdActionSchema,
   SimulateDriveSessionSchema,
@@ -198,7 +199,12 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
   // --- recommendations ---------------------------------------------------------
   app.get("/api/vehicles/:id/recommendations", async (req) => {
     const { id } = req.params as { id: string };
-    return { recommendations: await s.recommendations.list(id) };
+    const { open } = req.query as { open?: string };
+    const list =
+      open === "1" || open === "true"
+        ? await s.recommendations.listOpen(id)
+        : await s.recommendations.list(id);
+    return { recommendations: list };
   });
 
   app.post("/api/vehicles/:id/recommendations/refresh", async (req) => {
@@ -208,8 +214,15 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
 
   app.post("/api/recommendations/:id/status", async (req) => {
     const { id } = req.params as { id: string };
-    const { status } = req.body as { status: string };
-    return s.recommendations.markStatus(id, status as never);
+    const { status } = MarkRecommendationStatusSchema.parse(req.body);
+    return s.recommendations.markStatus(id, status);
+  });
+
+  app.post("/api/recommendations/:id/convert", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const result = await s.recommendations.convertToRepair(id);
+    reply.code(201);
+    return result;
   });
 
   // --- recall / TSB matcher ----------------------------------------------------

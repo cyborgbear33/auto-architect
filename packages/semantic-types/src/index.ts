@@ -395,6 +395,12 @@ export interface Recommendation {
   status: RecommendationStatus;
   reason: string;
   confidence?: number;
+  /** Rough playbook cost 0–1 from the top suggested action (R2). */
+  cost?: number;
+  /** Rough playbook risk 0–1 from the top suggested action (R2). */
+  risk?: number;
+  /** Action id whose cost/risk were copied onto the card. */
+  suggestedActionId?: string;
   generatedFromClasses: string[];
   generatedByProblem?: SemanticId;
   createdAt: IsoTimestamp;

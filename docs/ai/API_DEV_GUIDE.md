@@ -49,7 +49,7 @@ allowed to append evidence; it still does not classify).
 | `CaseTimelineService` | no | Derive case narrative from problems + decisions |
 | `GarageExportService` | no (import mutates store) | JSON garage dump/restore + CSV tables |
 | `CampaignService` | no | Match `known-campaigns.json` |
-| `RecommendationService` | no (uses recognition outputs) | List / refresh / status |
+| `RecommendationService` | no (uses recognition outputs) | List / refresh / status / convert→ActionService |
 | `VehicleService` | no | Profiles + engine-family resolution |
 
 Inject `LogosBridge` (or `FakeLogosBridge` in tests) from `services/index.ts`.

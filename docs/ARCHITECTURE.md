@@ -191,7 +191,8 @@ Action / mutation:
 - `POST /api/garage/import` — merge JSON dump (dedupe observation batches)
 - `POST /api/vehicles/:id/actions/clear-codes-and-drive` (policy-gated)
 - `POST /api/vehicles/:id/recommendations/refresh`
-- `POST /api/recommendations/:id/status`
+- `POST /api/recommendations/:id/status` — Zod-validated lifecycle status
+- `POST /api/recommendations/:id/convert` — open case via ActionService + mark converted
 
 No auth today. No OpenAPI export yet (garden has it; auto deferred).
 

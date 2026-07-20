@@ -184,6 +184,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Evidence source labeling (live / sim / manual) | shipped | `GET .../evidence-provenance`, Dashboard/Diagnosis badges |
 | Solution history rollup (“what worked before”) | shipped | `GET .../solution-history`, Diagnosis/ProblemDetail panel |
 | Outcome → confidence calibration | shipped | `calibration.ts` → draft/solve/recommendation refresh |
+| Recommendation richness + lifecycle (R2/R3) | shipped | cost/risk; accept/dismiss/convert; `RecommendationPanel` |
 | Recognition narration (verbalize / ontology notes) | shipped | `Recognition.narration`, Dashboard/Diagnosis |
 | Freeze-frame + Mode 06 UI | shipped | `EvidencePanels` on Dashboard |
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |

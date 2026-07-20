@@ -58,6 +58,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     vehicles,
     recognition,
     solutionHistory,
+    actions,
   );
   const campaigns = new CampaignService(vehicles);
   const reports = new ReportService(

@@ -384,8 +384,15 @@ function composeMarkdown(input: {
     lines.push("None open.");
   } else {
     for (const r of input.recommendations) {
-      const conf = r.confidence !== undefined ? ` · conf ${(r.confidence * 100).toFixed(0)}%` : "";
-      lines.push(`- **${r.title}** (${r.priority}${conf}) — ${r.reason}`);
+      const bits: string[] = [r.priority];
+      if (r.confidence !== undefined) bits.push(`conf ${(r.confidence * 100).toFixed(0)}%`);
+      if (r.cost !== undefined) bits.push(`cost ${(r.cost * 100).toFixed(0)}%`);
+      if (r.risk !== undefined) bits.push(`risk ${(r.risk * 100).toFixed(0)}%`);
+      if (r.status !== "new") bits.push(r.status);
+      lines.push(`- **${r.title}** (${bits.join(" · ")}) — ${r.reason}`);
+      if (r.generatedFromClasses.length > 0) {
+        lines.push(`  - Classes: ${r.generatedFromClasses.join(", ")}`);
+      }
     }
   }
   lines.push("");

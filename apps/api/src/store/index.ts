@@ -81,6 +81,7 @@ export interface ProblemRepository {
 
 export interface RecommendationRepository {
   create(rec: Recommendation): Promise<Recommendation>;
+  get(id: string): Promise<Recommendation | undefined>;
   listByVehicle(vehicleId: string): Promise<Recommendation[]>;
   update(id: string, patch: Partial<Recommendation>): Promise<Recommendation>;
 }

@@ -88,6 +88,8 @@ describe("outcome → confidence calibration (integration)", () => {
       decidedBy: "owner",
       outcomeStatus: "worked",
     });
+    // Close the case so refresh can mint a shortlist card for the class again.
+    await services.actions.abandonDiagnosticProblem({ problemId: problem.id });
 
     const recs = await services.recommendations.refresh(JEEP);
     const misfire = recs.find((r) => r.generatedFromClasses.includes("MisfireUnderLoad"));

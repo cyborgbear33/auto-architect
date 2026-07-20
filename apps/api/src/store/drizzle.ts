@@ -301,6 +301,14 @@ export function createDrizzleStore(databaseUrl: string): Store {
       });
       return rec;
     },
+    async get(id) {
+      const [row] = await db
+        .select()
+        .from(t.recommendations)
+        .where(eq(t.recommendations.id, id))
+        .limit(1);
+      return row?.payload;
+    },
     async listByVehicle(vehicleId) {
       const rows = await db
         .select()

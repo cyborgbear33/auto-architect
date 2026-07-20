@@ -13,7 +13,7 @@ export function EvidencePanels({ vehicleId }: { vehicleId: string }) {
   });
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div id="evidence" className="grid scroll-mt-4 grid-cols-1 gap-4 lg:grid-cols-2">
       <section className="rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="mb-2 text-sm font-semibold text-slate-700">Freeze-frame (Mode 02)</h2>
         {ffQ.isLoading && <p className="text-sm text-slate-400">Loading…</p>}

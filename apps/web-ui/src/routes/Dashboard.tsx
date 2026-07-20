@@ -11,6 +11,7 @@ import {
   vehicleLabel,
 } from "../components/Layout.tsx";
 import { LiveGaugeStrip } from "../components/LiveGaugeStrip.tsx";
+import { RecommendationPanel } from "../components/RecommendationPanel.tsx";
 import { ReportDownload } from "../components/ReportDownload.tsx";
 import { api, queryKeys } from "../lib/api.ts";
 import { useAppSelector } from "../store/index.ts";
@@ -67,10 +68,6 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
   const recognitionQ = useQuery({
     queryKey: queryKeys.recognition(vehicleId),
     queryFn: () => api.getRecognition(vehicleId),
-  });
-  const recommendationsQ = useQuery({
-    queryKey: queryKeys.recommendations(vehicleId),
-    queryFn: () => api.getRecommendations(vehicleId),
   });
 
   const vehicle = vehicleQ.data;
@@ -239,30 +236,9 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         <EvidencePanels vehicleId={vehicleId} />
       </div>
 
-      <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">Recommendations</h2>
-        {recommendationsQ.data?.length === 0 && (
-          <p className="text-sm text-slate-400">No open recommendations.</p>
-        )}
-        <ul className="space-y-2">
-          {recommendationsQ.data?.map((rec) => (
-            <li key={rec.id} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-medium text-slate-800">{rec.title}</span>
-                <div className="flex flex-shrink-0 items-center gap-1.5">
-                  {rec.confidence !== undefined && (
-                    <span className="text-xs text-slate-500">
-                      conf {(rec.confidence * 100).toFixed(0)}%
-                    </span>
-                  )}
-                  <Pill tone={rec.priority}>{rec.priority}</Pill>
-                </div>
-              </div>
-              <p className="mt-1 text-xs text-slate-500">{rec.reason}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <div className="mt-4">
+        <RecommendationPanel vehicleId={vehicleId} />
+      </div>
     </div>
   );
 }
