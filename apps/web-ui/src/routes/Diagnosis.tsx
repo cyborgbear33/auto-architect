@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { DiagnosticProblem, ProblemStatus } from "@auto/semantic-types";
 import { useMemo, useState } from "react";
+import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
@@ -85,8 +86,10 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
     return [...list].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }, [problemsQ.data, filter]);
 
-  const invalidateProblems = () =>
-    qc.invalidateQueries({ queryKey: queryKeys.problems(vehicleId) });
+  const invalidateProblems = () => {
+    void qc.invalidateQueries({ queryKey: queryKeys.problems(vehicleId) });
+    void qc.invalidateQueries({ queryKey: queryKeys.caseTimeline(vehicleId) });
+  };
 
   const createProblem = useMutation({
     mutationFn: (triggeredByClass: string) =>
@@ -144,6 +147,14 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
 
       <div className="mb-4">
         <WhatWorkedPanel vehicleId={vehicleId} />
+      </div>
+
+      <div className="mb-4">
+        <CaseTimelinePanel
+          vehicleId={vehicleId}
+          limit={8}
+          title="Recent case activity"
+        />
       </div>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">

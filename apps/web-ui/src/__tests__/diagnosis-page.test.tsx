@@ -60,6 +60,11 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         vehicle: [],
         engineFamilyRollup: [],
       }),
+      getCaseTimeline: vi.fn().mockResolvedValue({
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        problemIdFilter: null,
+        events: [],
+      }),
       listProblems: vi.fn().mockResolvedValue([]),
       createDiagnosticProblem: vi.fn().mockResolvedValue({
         id: "problem:1",

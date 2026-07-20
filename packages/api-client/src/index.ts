@@ -9,6 +9,7 @@
  * auth/tenant headers yet — add them here when Auth lands, not in pages.
  */
 import type {
+  CaseTimeline,
   DecisionRecord,
   DiagnosticProblem,
   DtcObservation,
@@ -150,6 +151,10 @@ export class AutoApiClient {
     const q = faultClass ? `?class=${enc(faultClass)}` : "";
     return this.request<SolutionHistory>(`/api/vehicles/${enc(vehicleId)}/solution-history${q}`);
   };
+  getCaseTimeline = (vehicleId: string, problemId?: string) => {
+    const q = problemId ? `?problemId=${enc(problemId)}` : "";
+    return this.request<CaseTimeline>(`/api/vehicles/${enc(vehicleId)}/case-timeline${q}`);
+  };
   getVehicleReport = (vehicleId: string) =>
     this.request<{
       scope: "vehicle" | "problem";
@@ -284,6 +289,8 @@ export const queryKeys = {
   decisions: (vehicleId: string) => ["decisions", vehicleId] as const,
   solutionHistory: (vehicleId: string, faultClass?: string) =>
     ["solutionHistory", vehicleId, faultClass ?? null] as const,
+  caseTimeline: (vehicleId: string, problemId?: string) =>
+    ["caseTimeline", vehicleId, problemId ?? null] as const,
   vehicleReport: (vehicleId: string) => ["vehicleReport", vehicleId] as const,
   problemReport: (problemId: string) => ["problemReport", problemId] as const,
 };

@@ -2,6 +2,7 @@ import type { LogosBridge } from "@auto/logos-bridge";
 import type { Store } from "../store/index.ts";
 import { ActionService } from "./actions.ts";
 import { CampaignService } from "./campaigns.ts";
+import { CaseTimelineService } from "./case-timeline.ts";
 import { ForecastService } from "./forecast.ts";
 import { ObservationService } from "./observations.ts";
 import { PolicyService } from "./policy.ts";
@@ -25,6 +26,7 @@ export interface Services {
   recommendations: RecommendationService;
   campaigns: CampaignService;
   solutionHistory: SolutionHistoryService;
+  caseTimeline: CaseTimelineService;
   reports: ReportService;
 }
 
@@ -35,6 +37,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
   const policy = new PolicyService(bridge);
   const solver = new SolverService(bridge);
   const solutionHistory = new SolutionHistoryService(store, vehicles);
+  const caseTimeline = new CaseTimelineService(store, vehicles);
   const actions = new ActionService(
     store,
     vehicles,
@@ -73,6 +76,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     recommendations,
     campaigns,
     solutionHistory,
+    caseTimeline,
     reports,
   };
 }
@@ -80,6 +84,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
 export {
   ActionService,
   CampaignService,
+  CaseTimelineService,
   ForecastService,
   ObservationService,
   PolicyService,

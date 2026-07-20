@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useState } from "react";
+import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
 import { PageHeader } from "../components/Layout.tsx";
 import { ReportDownload } from "../components/ReportDownload.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
@@ -47,6 +48,8 @@ export function ProblemDetail() {
     const vehicleId = problemQ.data?.vehicleId;
     if (vehicleId) {
       void qc.invalidateQueries({ queryKey: queryKeys.problems(vehicleId) });
+      void qc.invalidateQueries({ queryKey: queryKeys.caseTimeline(vehicleId) });
+      void qc.invalidateQueries({ queryKey: queryKeys.caseTimeline(vehicleId, problemId) });
     }
   };
 
@@ -189,6 +192,10 @@ export function ProblemDetail() {
 
       <div className="mb-4">
         <WhatWorkedPanel vehicleId={problem.vehicleId} faultClass={problem.triggeredByClass} />
+      </div>
+
+      <div className="mb-4">
+        <CaseTimelinePanel vehicleId={problem.vehicleId} problemId={problem.id} />
       </div>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">

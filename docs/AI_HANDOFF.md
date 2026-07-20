@@ -188,6 +188,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |
 | Problem caseboard + verify-after-repair (P2–P5) | shipped | Diagnosis filters; abandon/escalate/reopen; `worked` → verifying → verify |
+| Case timeline (H2) | shipped | `GET .../case-timeline`, `CaseTimelinePanel` on Diagnosis / ProblemDetail |
 | Policy safety holds (`clear-codes-and-drive` under misfire / MultiAir oil starvation / cam-crank) | shipped | `PolicyService`, reason fixtures, Diagnosis UI |
 | Oil-level trend forecast | shipped | `ForecastService` |
 | React UI (5 routes) | shipped | `apps/web-ui` |

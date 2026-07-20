@@ -60,5 +60,16 @@ describe("API HTTP smoke (buildApp + inject)", () => {
       vehicle: [],
       engineFamilyRollup: [],
     });
+
+    const timeline = await app.inject({
+      method: "GET",
+      url: `/api/vehicles/${id}/case-timeline`,
+    });
+    expect(timeline.statusCode).toBe(200);
+    expect(timeline.json()).toMatchObject({
+      vehicleId: id,
+      problemIdFilter: null,
+      events: [],
+    });
   });
 });

@@ -85,6 +85,12 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     return s.solutionHistory.forVehicle(id, faultClass);
   });
 
+  app.get("/api/vehicles/:id/case-timeline", async (req) => {
+    const { id } = req.params as { id: string };
+    const { problemId } = req.query as { problemId?: string };
+    return s.caseTimeline.forVehicle(id, problemId);
+  });
+
   app.get("/api/vehicles/:id/report", async (req) => {
     const { id } = req.params as { id: string };
     return s.reports.forVehicle(id);

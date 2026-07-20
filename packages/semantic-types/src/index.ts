@@ -389,6 +389,44 @@ export interface SolutionHistory {
   engineFamilyRollup: SolutionRollupBucket[];
 }
 
+/**
+ * Derived case-narrative events from DiagnosticProblem + DecisionRecord.
+ * Not a full audit log — lifecycle flips without durable stamps are best-effort.
+ */
+export type CaseTimelineEventType =
+  | "opened"
+  | "repair_logged"
+  | "verify_started"
+  | "verify_result"
+  | "closed_solved"
+  | "abandoned"
+  | "escalated"
+  | "reopened";
+
+export interface CaseTimelineEvent {
+  id: string;
+  type: CaseTimelineEventType;
+  at: IsoTimestamp;
+  problemId: SemanticId;
+  vehicleId: SemanticId;
+  faultClass?: string;
+  summary: string;
+  actionId?: string;
+  outcomeStatus?: OutcomeStatus;
+  verifyResult?: "passed" | "failed" | "inconclusive";
+  decisionId?: string;
+  reopenedFromId?: SemanticId;
+  note?: string;
+}
+
+/** Chronological case timeline for a vehicle (optionally one problem). */
+export interface CaseTimeline {
+  vehicleId: SemanticId;
+  problemIdFilter: SemanticId | null;
+  /** Oldest → newest. */
+  events: CaseTimelineEvent[];
+}
+
 // --- Known campaigns (TSBs / recalls) -------------------------------------
 
 /** A manufacturer campaign (recall / customer satisfaction notification / TSB). */
