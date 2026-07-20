@@ -29,7 +29,7 @@
       "preset": "recommended",
       "suspicious": {
         "noThenProperty": "off",
-        "noExplicitAny": "warn"
+        "noExplicitAny": "error"
       },
       "style": {
         "noNonNullAssertion": "warn"

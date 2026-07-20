@@ -41,8 +41,16 @@ Conventions already in use:
 - Explicit `.ts` / `.tsx` import extensions where the package uses them
 - camelCase in-app; snake_case only inside `@auto/logos-bridge`
 - Prefer shared types from `@auto/semantic-types` over ad-hoc DTOs
+- **No `any`.** Biome `noExplicitAny` is an error. Untrusted / engine JSON
+  enters as `unknown` and is narrowed (see `asWireObject` in
+  `@auto/logos-bridge`). Prefer `Record<string, unknown>` over
+  `Record<string, any>`.
 
 Prefix intentionally unused parameters with `_` (TypeScript exempts them).
+
+Still warn-only (cleanup over time, not a greenfield gate): Biome
+`noNonNullAssertion`. `exactOptionalPropertyTypes` stays off until optional
+API fields are audited.
 
 ---
 

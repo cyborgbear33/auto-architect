@@ -50,10 +50,24 @@ export function compareEngineVersion(a: string, b: string): number {
   return 0;
 }
 
+/**
+ * Narrow a JSON-ish wire payload to a string-keyed object without using `any`.
+ * Arrays / primitives become `{}` so callers can keep `r.field ?? default` style.
+ */
+function asWireObject(raw: unknown): Record<string, unknown> {
+  if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+    return raw as Record<string, unknown>;
+  }
+  return {};
+}
+
+function asWireArray(raw: unknown): unknown[] {
+  return Array.isArray(raw) ? raw : [];
+}
+
 /** Read protocol metadata when present; missing keys are fine (Fake / old fixtures). */
 export function readWireMeta(raw: unknown): LogosWireMeta {
-  if (typeof raw !== "object" || raw === null) return {};
-  const r = raw as Record<string, unknown>;
+  const r = asWireObject(raw);
   return {
     engineVersion: typeof r.engine_version === "string" ? r.engine_version : undefined,
     schemaVersion: typeof r.schema_version === "string" ? r.schema_version : undefined,
@@ -190,37 +204,22 @@ export function toWireProblem(input: LogosProblemInput): Record<string, unknown>
 
 // --- solve --json output -> DiagnosticSolution -------------------------------
 
-interface WireAction {
-  id: string;
-  description?: string;
-  impact?: number;
-  confidence?: number;
-  info_gain?: number;
-  cost?: number;
-  risk?: number;
-  reversibility?: number;
-  alignment?: number;
-  tags?: string[];
-  violates?: string[];
-  first_step?: string | null;
-  stop_conditions?: string | null;
-}
-
-function actionFromWire(a: WireAction): CandidateAction {
+function actionFromWire(raw: unknown): CandidateAction {
+  const a = asWireObject(raw);
   return {
-    id: a.id,
-    description: a.description,
-    impact: a.impact,
-    confidence: a.confidence,
-    infoGain: a.info_gain,
-    cost: a.cost,
-    risk: a.risk,
-    reversibility: a.reversibility,
-    alignment: a.alignment,
-    tags: a.tags,
-    violates: a.violates,
-    firstStep: a.first_step ?? undefined,
-    stopConditions: a.stop_conditions ?? undefined,
+    id: String(a.id ?? ""),
+    description: typeof a.description === "string" ? a.description : undefined,
+    impact: typeof a.impact === "number" ? a.impact : undefined,
+    confidence: typeof a.confidence === "number" ? a.confidence : undefined,
+    infoGain: typeof a.info_gain === "number" ? a.info_gain : undefined,
+    cost: typeof a.cost === "number" ? a.cost : undefined,
+    risk: typeof a.risk === "number" ? a.risk : undefined,
+    reversibility: typeof a.reversibility === "number" ? a.reversibility : undefined,
+    alignment: typeof a.alignment === "number" ? a.alignment : undefined,
+    tags: Array.isArray(a.tags) ? a.tags.map(String) : undefined,
+    violates: Array.isArray(a.violates) ? a.violates.map(String) : undefined,
+    firstStep: typeof a.first_step === "string" ? a.first_step : undefined,
+    stopConditions: typeof a.stop_conditions === "string" ? a.stop_conditions : undefined,
   };
 }
 
@@ -293,14 +292,14 @@ export function toRealizeFile(input: RealizeInput): Record<string, unknown> {
 }
 
 export function realizeResultFromWire(raw: unknown): RealizeResult {
-  const r = (raw ?? {}) as Record<string, unknown>;
-  const scope = (r.scope ?? null) as Record<string, unknown> | null;
-  const limits = (r.limits ?? null) as Record<string, unknown> | null;
+  const r = asWireObject(raw);
+  const scope = r.scope != null ? asWireObject(r.scope) : null;
+  const limits = r.limits != null ? asWireObject(r.limits) : null;
   return {
     individual: String(r.individual ?? ""),
-    member: (r.member as string[]) ?? [],
-    mostSpecific: (r.most_specific as string[]) ?? [],
-    undecided: Array.isArray(r.undecided) ? (r.undecided as string[]) : [],
+    member: asWireArray(r.member).map(String),
+    mostSpecific: asWireArray(r.most_specific).map(String),
+    undecided: asWireArray(r.undecided).map(String),
     limits: limits
       ? {
           droppedAxioms: limits.dropped_axioms === true,
@@ -417,15 +416,17 @@ export function toOntologyLintFile(input: OntologyLintInput): Record<string, unk
 }
 
 function issueFromWire(raw: unknown): OntologyLintIssue {
-  const r = (raw ?? {}) as Record<string, any>;
+  const r = asWireObject(raw);
   return {
     code: String(r.code ?? ""),
     message: String(r.message ?? ""),
     taxon: typeof r.taxon === "string" ? r.taxon : undefined,
-    families: Array.isArray(r.families) ? r.families : undefined,
-    axis: Array.isArray(r.axis) ? r.axis : undefined,
+    families: Array.isArray(r.families) ? r.families.map(String) : undefined,
+    axis: Array.isArray(r.axis) ? r.axis.map(String) : undefined,
     catalogFamily: typeof r.catalog_family === "string" ? r.catalog_family : undefined,
-    ontologyFamilies: Array.isArray(r.ontology_families) ? r.ontology_families : undefined,
+    ontologyFamilies: Array.isArray(r.ontology_families)
+      ? r.ontology_families.map(String)
+      : undefined,
     id: typeof r.id === "string" ? r.id : undefined,
     count: typeof r.count === "number" ? r.count : undefined,
     min: typeof r.min === "number" ? r.min : undefined,
@@ -433,22 +434,27 @@ function issueFromWire(raw: unknown): OntologyLintIssue {
 }
 
 export function ontologyLintResultFromWire(raw: unknown): OntologyLintResult {
-  const r = (raw ?? {}) as Record<string, any>;
-  const counts = (r.counts ?? {}) as Record<string, any>;
+  const r = asWireObject(raw);
+  const counts = asWireObject(r.counts);
+  const byCodeRaw = asWireObject(counts.by_code);
+  const byCode: Record<string, number> = {};
+  for (const [k, v] of Object.entries(byCodeRaw)) {
+    if (typeof v === "number") byCode[k] = v;
+  }
   return {
     ok: r.ok === true,
     plantParent: typeof r.plant_parent === "string" ? r.plant_parent : "Engine",
-    plantTaxa: Array.isArray(r.plant_taxa) ? r.plant_taxa : [],
+    plantTaxa: asWireArray(r.plant_taxa).map(String),
     plantTaxaCount: typeof r.plant_taxa_count === "number" ? r.plant_taxa_count : 0,
-    families: (r.families ?? {}) as Record<string, string[]>,
-    traits: (r.traits ?? {}) as Record<string, string[]>,
-    catalogConcepts: Array.isArray(r.catalog_concepts) ? r.catalog_concepts : [],
-    errors: (r.errors ?? []).map(issueFromWire),
-    warnings: (r.warnings ?? []).map(issueFromWire),
+    families: asWireObject(r.families) as Record<string, string[]>,
+    traits: asWireObject(r.traits) as Record<string, string[]>,
+    catalogConcepts: asWireArray(r.catalog_concepts).map(String),
+    errors: asWireArray(r.errors).map(issueFromWire),
+    warnings: asWireArray(r.warnings).map(issueFromWire),
     counts: {
       errors: typeof counts.errors === "number" ? counts.errors : 0,
       warnings: typeof counts.warnings === "number" ? counts.warnings : 0,
-      byCode: (counts.by_code ?? {}) as Record<string, number>,
+      byCode,
     },
   };
 }
@@ -478,18 +484,18 @@ export function toReviseFile(input: ReviseInput): Record<string, unknown> {
 }
 
 export function reviseResultFromWire(raw: unknown): ReviseResult {
-  const r = (raw ?? {}) as Record<string, any>;
+  const r = asWireObject(raw);
   return {
     accept: r.accept === true,
-    conflicts: r.conflicts ?? [],
-    wellFormednessIssues: r.wellFormednessIssues ?? [],
-    consistent: r.consistent ?? null,
+    conflicts: asWireArray(r.conflicts).map(String),
+    wellFormednessIssues: asWireArray(r.wellFormednessIssues).map(String),
+    consistent: typeof r.consistent === "boolean" ? r.consistent : null,
     coherent: r.coherent === true,
-    unsatisfiable: r.unsatisfiable ?? [],
-    newUnsatisfiable: r.newUnsatisfiable ?? [],
-    undecided: r.undecided ?? [],
-    explanation: r.explanation ?? "",
-    merged: r.merged ?? {},
+    unsatisfiable: asWireArray(r.unsatisfiable).map(String),
+    newUnsatisfiable: asWireArray(r.newUnsatisfiable).map(String),
+    undecided: asWireArray(r.undecided).map(String),
+    explanation: typeof r.explanation === "string" ? r.explanation : String(r.explanation ?? ""),
+    merged: asWireObject(r.merged),
   };
 }
 
@@ -519,7 +525,7 @@ export function toVerbalizeArgs(input: VerbalizeInput): string[] {
 }
 
 export function verbalizeResultFromWire(raw: unknown): VerbalizeResult {
-  const r = (raw ?? {}) as Record<string, any>;
+  const r = asWireObject(raw);
   if (typeof r.error === "string" && r.fluent === undefined) {
     return {
       formula: "",
@@ -533,12 +539,13 @@ export function verbalizeResultFromWire(raw: unknown): VerbalizeResult {
     };
   }
   return {
-    formula: r.formula ?? "",
-    fluent: r.fluent ?? "",
-    controlled: r.controlled ?? null,
+    formula: typeof r.formula === "string" ? r.formula : String(r.formula ?? ""),
+    fluent: typeof r.fluent === "string" ? r.fluent : String(r.fluent ?? ""),
+    controlled: typeof r.controlled === "string" ? r.controlled : null,
     controllable: r.controllable === true,
-    parsedBack: r.parsed_back ?? null,
-    roundtripEquivalent: r.roundtrip_equivalent ?? null,
+    parsedBack: typeof r.parsed_back === "string" ? r.parsed_back : null,
+    roundtripEquivalent:
+      typeof r.roundtrip_equivalent === "boolean" ? r.roundtrip_equivalent : null,
     faithful: r.faithful === true,
   };
 }
@@ -634,32 +641,50 @@ export function emptyReasonResult(): ReasonResult {
 }
 
 export function reasonResultFromWire(raw: unknown): ReasonResult {
-  const r = (raw ?? {}) as Record<string, any>;
-  const limits = (r.limits ?? null) as Record<string, unknown> | null;
-  const scope = (r.scope ?? null) as Record<string, unknown> | null;
+  const r = asWireObject(raw);
+  const limits = r.limits != null ? asWireObject(r.limits) : null;
+  const scope = r.scope != null ? asWireObject(r.scope) : null;
   return {
-    derived: (r.derived ?? []).map(
-      (c: { formula: string; rule_id: string; facts: string[]; confidence: number }) => ({
-        formula: c.formula,
-        ruleId: c.rule_id,
-        facts: c.facts ?? [],
-        confidence: c.confidence,
-      }),
-    ),
-    resolutions: r.resolutions ?? [],
-    unresolved: r.unresolved ?? [],
-    defeated: r.defeated ?? [],
-    unsafe: r.unsafe ?? [],
-    realized: r.realized ?? [],
+    derived: asWireArray(r.derived).map((item) => {
+      const c = asWireObject(item);
+      return {
+        formula: String(c.formula ?? ""),
+        ruleId: String(c.rule_id ?? ""),
+        facts: asWireArray(c.facts).map(String),
+        confidence: typeof c.confidence === "number" ? c.confidence : 0,
+      };
+    }),
+    resolutions: asWireArray(r.resolutions).map((item) => {
+      const x = asWireObject(item);
+      return {
+        winner: String(x.winner ?? ""),
+        loser: String(x.loser ?? ""),
+        basis: x.basis === "specificity" ? ("specificity" as const) : ("priority" as const),
+        suppressed: String(x.suppressed ?? ""),
+      };
+    }),
+    unresolved: asWireArray(r.unresolved).map(String),
+    defeated: asWireArray(r.defeated).map(String),
+    unsafe: asWireArray(r.unsafe).map(String),
+    realized: asWireArray(r.realized).map((item) => {
+      const x = asWireObject(item);
+      return {
+        individual: String(x.individual ?? ""),
+        class: String(x.class ?? ""),
+        confidence: typeof x.confidence === "number" ? x.confidence : 0,
+        facts: asWireArray(x.facts).map(String),
+      };
+    }),
     rounds: typeof r.rounds === "number" ? r.rounds : 1,
     fixpoint: typeof r.fixpoint === "boolean" ? r.fixpoint : true,
-    realizationNote: r.realization_note ?? null,
-    realizationUndecided: Array.isArray(r.realization_undecided)
-      ? r.realization_undecided.map((u: { individual?: string; class?: string }) => ({
-          individual: String(u.individual ?? ""),
-          class: String(u.class ?? ""),
-        }))
-      : [],
+    realizationNote: typeof r.realization_note === "string" ? r.realization_note : null,
+    realizationUndecided: asWireArray(r.realization_undecided).map((item) => {
+      const u = asWireObject(item);
+      return {
+        individual: String(u.individual ?? ""),
+        class: String(u.class ?? ""),
+      };
+    }),
     limits: limits
       ? {
           droppedAxioms: limits.dropped_axioms === true,
@@ -707,18 +732,25 @@ export function toForecastFile(input: ForecastInput): Record<string, unknown> {
 }
 
 export function forecastResultFromWire(raw: unknown): ForecastResult {
-  const r = (raw ?? {}) as Record<string, any>;
+  const r = asWireObject(raw);
+  const direction = r.direction;
   return {
-    n: r.n ?? 0,
-    threshold: r.threshold,
-    current: r.current ?? null,
-    slopePerHour: r.slope_per_hour ?? null,
-    intercept: r.intercept ?? null,
-    rSquared: r.r_squared ?? null,
-    direction: r.direction ?? "unknown",
+    n: typeof r.n === "number" ? r.n : 0,
+    threshold: typeof r.threshold === "number" ? r.threshold : Number(r.threshold ?? 0),
+    current: typeof r.current === "number" ? r.current : null,
+    slopePerHour: typeof r.slope_per_hour === "number" ? r.slope_per_hour : null,
+    intercept: typeof r.intercept === "number" ? r.intercept : null,
+    rSquared: typeof r.r_squared === "number" ? r.r_squared : null,
+    direction:
+      direction === "falling" ||
+      direction === "rising" ||
+      direction === "flat" ||
+      direction === "unknown"
+        ? direction
+        : "unknown",
     willCross: r.will_cross === true,
-    hoursToThreshold: r.hours_to_threshold ?? null,
-    crossAtHours: r.cross_at_hours ?? null,
+    hoursToThreshold: typeof r.hours_to_threshold === "number" ? r.hours_to_threshold : null,
+    crossAtHours: typeof r.cross_at_hours === "number" ? r.cross_at_hours : null,
   };
 }
 
@@ -755,65 +787,78 @@ export function toStrategizeFile(input: StrategizeInput): Record<string, unknown
   return out;
 }
 
-interface WireCriterion {
-  criterion: CriterionResult["criterion"];
-  metric: number[];
-  higher_is_better: boolean;
-  best_actions: number[];
-  rationale: string;
+function criterionFromWire(raw: unknown): CriterionResult["criterion"] {
+  if (raw === "maximin" || raw === "hurwicz" || raw === "laplace" || raw === "minimax_regret") {
+    return raw;
+  }
+  // Tolerate hyphenated wire spelling if an older engine ever emits it.
+  if (raw === "minimax-regret") return "minimax_regret";
+  return "laplace";
 }
 
 export function strategizeResultFromWire(raw: unknown, input: StrategizeInput): StrategizeResult {
-  const r = (raw ?? {}) as Record<string, any>;
+  const r = asWireObject(raw);
 
   let decision: DecisionAnalysis | null = null;
   if (r.decision && input.decision) {
-    const d = r.decision as Record<string, any>;
+    const d = asWireObject(r.decision);
+    const consensus = asWireObject(d.consensus_pick);
     decision = {
       matrix: {
         actions: input.decision.actions,
         states: input.decision.states,
         payoffs: input.decision.payoffs,
       },
-      criteria: (d.criteria ?? []).map((c: WireCriterion) => ({
-        criterion: c.criterion,
-        metric: c.metric ?? [],
-        higherIsBetter: c.higher_is_better === true,
-        bestActions: c.best_actions ?? [],
-        rationale: c.rationale ?? "",
-      })),
-      dominated: d.dominated ?? [],
+      criteria: asWireArray(d.criteria).map((item) => {
+        const c = asWireObject(item);
+        return {
+          criterion: criterionFromWire(c.criterion),
+          metric: asWireArray(c.metric).map((n) => (typeof n === "number" ? n : Number(n))),
+          higherIsBetter: c.higher_is_better === true,
+          bestActions: asWireArray(c.best_actions).map((n) =>
+            typeof n === "number" ? n : Number(n),
+          ),
+          rationale: typeof c.rationale === "string" ? c.rationale : String(c.rationale ?? ""),
+        };
+      }),
+      dominated: asWireArray(d.dominated).map((n) => (typeof n === "number" ? n : Number(n))),
       consensusPick: {
-        action: d.consensus_pick?.action ?? 0,
-        agreement: d.consensus_pick?.agreement ?? 0,
-        total: d.consensus_pick?.total ?? 0,
+        action: typeof consensus.action === "number" ? consensus.action : 0,
+        agreement: typeof consensus.agreement === "number" ? consensus.agreement : 0,
+        total: typeof consensus.total === "number" ? consensus.total : 0,
       },
       unanimous: d.unanimous === true,
-      hurwiczAlpha: d.hurwicz_alpha ?? 0.5,
+      hurwiczAlpha: typeof d.hurwicz_alpha === "number" ? d.hurwicz_alpha : 0.5,
     };
   }
 
   let cooperative: CooperativeAnalysis | null = null;
   if (r.cooperative && input.cooperative) {
-    const c = r.cooperative as Record<string, any>;
-    const players: string[] = c.players ?? input.cooperative.players;
-    const shapleyList: number[] = c.shapley ?? [];
+    const c = asWireObject(r.cooperative);
+    const players = asWireArray(c.players).map(String);
+    const playersOrInput = players.length > 0 ? players : input.cooperative.players;
+    const shapleyList = asWireArray(c.shapley).map((n) => (typeof n === "number" ? n : Number(n)));
     const shapley: Record<string, number> = {};
-    players.forEach((p, i) => {
+    playersOrInput.forEach((p, i) => {
       shapley[p] = shapleyList[i] ?? 0;
     });
     cooperative = {
-      players,
-      grandValue: c.grand_value ?? 0,
+      players: playersOrInput,
+      grandValue: typeof c.grand_value === "number" ? c.grand_value : 0,
       shapley,
       superadditive: c.superadditive === true,
-      blockingCoalitions: (c.blocking_coalitions ?? []).map(
-        (b: { members: number[]; value: number; shapley_share: number }) => ({
-          members: (b.members ?? []).map((i) => players[i] ?? String(i)),
-          value: b.value,
-          shapleyShare: b.shapley_share,
-        }),
-      ),
+      blockingCoalitions: asWireArray(c.blocking_coalitions).map((item) => {
+        const b = asWireObject(item);
+        return {
+          members: asWireArray(b.members).map((i) => {
+            const idx = typeof i === "number" ? i : Number(i);
+            return playersOrInput[idx] ?? String(i);
+          }),
+          value: typeof b.value === "number" ? b.value : Number(b.value ?? 0),
+          shapleyShare:
+            typeof b.shapley_share === "number" ? b.shapley_share : Number(b.shapley_share ?? 0),
+        };
+      }),
       shapleyInCore: c.shapley_in_core === true,
     };
   }
@@ -821,7 +866,7 @@ export function strategizeResultFromWire(raw: unknown, input: StrategizeInput): 
   return {
     decision,
     cooperative,
-    degeneracy: r.degeneracy ?? [],
+    degeneracy: asWireArray(r.degeneracy).map(String),
     escalate: r.escalate === true,
   };
 }
@@ -831,44 +876,49 @@ export function solutionFromWire(raw: unknown): DiagnosticSolution {
   if (typeof raw !== "object" || raw === null || !("kind" in raw)) {
     throw new LogosProtocolError("LOGOS output missing expected fields (no 'kind').", { raw });
   }
-  const r = raw as Record<string, any>;
+  const r = asWireObject(raw);
+  const kind = r.kind;
+  if (typeof kind !== "string") {
+    throw new LogosProtocolError("LOGOS output missing expected fields (no 'kind').", { raw });
+  }
   return {
-    problemId: typeof r.problem_id === "string" ? fromLogosProblemId(r.problem_id) : r.problem_id,
-    types: r.types ?? [],
-    pattern: r.pattern ?? "",
-    ranked: (r.ranked ?? []).map((x: { action: WireAction; score: number }) => ({
-      action: actionFromWire(x.action),
-      score: x.score,
-    })),
-    disqualified: (r.disqualified ?? []).map(
-      (x: { action_id: string; violated_constraints: string[] }) => ({
-        actionId: x.action_id,
-        violatedConstraints: x.violated_constraints ?? [],
-      }),
-    ),
-    recommended: r.recommended ?? null,
-    kind: r.kind,
-    rationale: r.rationale ?? "",
-    confidence: r.confidence ?? null,
-    certainty: r.certainty ?? "",
-    antiPatterns: r.anti_patterns ?? [],
-    escalations: r.escalations ?? [],
-    counterfactuals: (r.counterfactuals ?? []).map(
-      (c: {
-        action_id: string;
-        score: number;
-        is_top: boolean;
-        rank: number;
-        flips?: unknown[];
-        robustness?: unknown[];
-      }) => ({
-        actionId: c.action_id,
-        score: c.score,
-        isTop: c.is_top,
-        rank: c.rank,
-        ...(c.flips ? { flips: c.flips } : {}),
-        ...(c.robustness ? { robustness: c.robustness } : {}),
-      }),
-    ),
+    problemId:
+      typeof r.problem_id === "string"
+        ? fromLogosProblemId(r.problem_id)
+        : String(r.problem_id ?? ""),
+    types: asWireArray(r.types).map(String) as DiagnosticSolution["types"],
+    pattern: typeof r.pattern === "string" ? r.pattern : String(r.pattern ?? ""),
+    ranked: asWireArray(r.ranked).map((item) => {
+      const x = asWireObject(item);
+      return {
+        action: actionFromWire(x.action),
+        score: typeof x.score === "number" ? x.score : Number(x.score ?? 0),
+      };
+    }),
+    disqualified: asWireArray(r.disqualified).map((item) => {
+      const x = asWireObject(item);
+      return {
+        actionId: String(x.action_id ?? ""),
+        violatedConstraints: asWireArray(x.violated_constraints).map(String),
+      };
+    }),
+    recommended: typeof r.recommended === "string" || r.recommended === null ? r.recommended : null,
+    kind: kind as DiagnosticSolution["kind"],
+    rationale: typeof r.rationale === "string" ? r.rationale : String(r.rationale ?? ""),
+    confidence: typeof r.confidence === "number" ? r.confidence : null,
+    certainty: typeof r.certainty === "string" ? r.certainty : String(r.certainty ?? ""),
+    antiPatterns: asWireArray(r.anti_patterns).map(String),
+    escalations: asWireArray(r.escalations).map(String),
+    counterfactuals: asWireArray(r.counterfactuals).map((item) => {
+      const c = asWireObject(item);
+      return {
+        actionId: String(c.action_id ?? ""),
+        score: typeof c.score === "number" ? c.score : Number(c.score ?? 0),
+        isTop: c.is_top === true,
+        rank: typeof c.rank === "number" ? c.rank : Number(c.rank ?? 0),
+        ...(Array.isArray(c.flips) ? { flips: c.flips } : {}),
+        ...(Array.isArray(c.robustness) ? { robustness: c.robustness } : {}),
+      };
+    }),
   };
 }
