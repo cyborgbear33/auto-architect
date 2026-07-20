@@ -8,7 +8,7 @@ export interface AboxAssertions {
 
 /**
  * A perception rule turns raw OBD-II evidence into ABox edges. Exactly one of
- * `dtcConcept` (DTC-driven) or `pid` (PID-threshold-driven) is set.
+ * `dtcConcept`, `pid`, or `mode06Concept` is set.
  */
 export interface PerceptionRule {
   /** Assert `concept` whenever any active DTC maps (via the dictionary) to this Symptom concept. */
@@ -16,6 +16,11 @@ export interface PerceptionRule {
   /** Assert `concept` when this PID's latest value satisfies `when`. */
   pid?: string;
   when?: { gt?: number; gte?: number; lt?: number; lte?: number };
+  /**
+   * Assert `concept` when any Mode 06 row with `passed: false` maps (via the
+   * Mode 06 dictionary) to this Condition concept. Unknown OBDMIDs never match.
+   */
+  mode06Concept?: string;
   /** The DL concept individual to assert (must already exist in dl-ontology.json). */
   concept: string;
   as: "symptom" | "condition" | "trend";
@@ -64,5 +69,7 @@ export interface Cartridge {
     classes: string[];
     dtcConcepts?: string[];
     pids?: string[];
+    /** Mode 06 Condition concepts this cartridge perceives / frames. */
+    mode06Concepts?: string[];
   };
 }

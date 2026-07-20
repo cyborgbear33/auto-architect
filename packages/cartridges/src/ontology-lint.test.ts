@@ -1,6 +1,11 @@
-import { dtcConceptsCovered, lookupPid, runOntologyLint } from "@auto/ontology";
+import {
+  dtcConceptsCovered,
+  lookupPid,
+  mode06ConceptsCovered,
+  runOntologyLint,
+} from "@auto/ontology";
 import { describe, expect, it } from "vitest";
-import { perceivedDtcConcepts } from "./perception.ts";
+import { perceivedDtcConcepts, perceivedMode06Concepts } from "./perception.ts";
 import { allCartridges } from "./registry.ts";
 
 /**
@@ -38,6 +43,15 @@ describe("ontology ↔ cartridge parity", () => {
       const entry = lookupPid(key);
       expect(entry, `pid-dictionary missing ${key}`).toBeDefined();
       expect(entry?.unit.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("every Mode 06 concept cartridges perceive has ≥1 mode06-dictionary row", () => {
+    const covered = new Set(mode06ConceptsCovered());
+    const perceived = perceivedMode06Concepts(allCartridges);
+    expect(perceived.length).toBeGreaterThan(0);
+    for (const concept of perceived) {
+      expect(covered.has(concept), `missing Mode 06 rows for concept ${concept}`).toBe(true);
     }
   });
 });

@@ -73,6 +73,40 @@ describe("RecognitionService", () => {
     });
   });
 
+  it("folds failed Mode 06 catalyst monitor into the ABox before realize", async () => {
+    let sawFailedCat = false;
+    const realizer = (input: RealizeInput): RealizeResult => {
+      sawFailedCat = Object.values(input.abox.concepts)
+        .flat()
+        .includes("FailedCatalystMonitorBank1");
+      return {
+        individual: input.individual,
+        member: sawFailedCat ? ["CatalystEfficiencyBank1"] : [],
+        mostSpecific: sawFailedCat ? ["CatalystEfficiencyBank1"] : [],
+        undecided: [],
+      };
+    };
+    const store = createMemoryStore();
+    await seed(store);
+    const customBridge = new FakeLogosBridge(undefined, realizer);
+    const vehicles = new VehicleService(store);
+    const forecast = new ForecastService(store, customBridge);
+    const recognition = new RecognitionService(store, customBridge, vehicles, forecast);
+
+    await store.observations.record({
+      vehicleId: JEEP,
+      capturedAt: "2026-01-01T00:00:00Z",
+      source: "manual_entry",
+      mode06: [{ tid: "01", mid: "21", value: 0.8, min: 0, max: 0.5, passed: false }],
+    });
+
+    const result = await recognition.recognize(JEEP);
+    expect(sawFailedCat).toBe(true);
+    expect(result.mostSpecific).toContain("CatalystEfficiencyBank1");
+    const evidence = result.classEvidence?.find((e) => e.className === "CatalystEfficiencyBank1");
+    expect(evidence?.mode06.some((m) => m.mid === "21" && m.passed === false)).toBe(true);
+  });
+
   it("folds RisingFuelTrim trend evidence into the ABox before realize", async () => {
     let sawRisingTrim = false;
     const realizer = (input: RealizeInput): RealizeResult => {

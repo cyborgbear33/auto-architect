@@ -11,6 +11,7 @@ import type { ZodError } from "zod";
 import dlOntologyJson from "../dl-ontology.json" with { type: "json" };
 import dtcDictionaryJson from "../dtc-dictionary.json" with { type: "json" };
 import knownCampaignsJson from "../known-campaigns.json" with { type: "json" };
+import mode06DictionaryJson from "../mode06-dictionary.json" with { type: "json" };
 import pidDictionaryJson from "../pid-dictionary.json" with { type: "json" };
 import vehicleProfilesJson from "../vehicle-profiles.json" with { type: "json" };
 import {
@@ -22,6 +23,8 @@ import {
 import {
   DtcDictionaryFileSchema,
   KnownCampaignsFileSchema,
+  type Mode06DictionaryEntry,
+  Mode06DictionaryFileSchema,
   type PidDictionaryEntry,
   PidDictionaryFileSchema,
   type VehicleProfilesFile,
@@ -38,6 +41,9 @@ export type {
 export {
   DtcDictionaryFileSchema,
   KnownCampaignsFileSchema,
+  type Mode06DictionaryEntry,
+  Mode06DictionaryEntrySchema,
+  Mode06DictionaryFileSchema,
   type PidDictionaryEntry,
   PidDictionaryEntrySchema,
   PidDictionaryFileSchema,
@@ -57,12 +63,24 @@ export interface DtcDictionaryEntry {
 
 const dtcDictionaryFile = DtcDictionaryFileSchema.parse(dtcDictionaryJson);
 const pidDictionaryFile = PidDictionaryFileSchema.parse(pidDictionaryJson);
+const mode06DictionaryFile = Mode06DictionaryFileSchema.parse(mode06DictionaryJson);
 const vehicleProfilesFile: VehicleProfilesFile =
   VehicleProfilesFileSchema.parse(vehicleProfilesJson);
 const knownCampaignsFile = KnownCampaignsFileSchema.parse(knownCampaignsJson);
 
 const dtcDictionary: Record<string, DtcDictionaryEntry> = dtcDictionaryFile.codes;
 const pidDictionary: Record<string, PidDictionaryEntry> = pidDictionaryFile.pids;
+const mode06Dictionary: Record<string, Mode06DictionaryEntry> = mode06DictionaryFile.monitors;
+
+/** Normalize OBDMID / TID hex strings (`$21`, `0x21`, `21`) → 2-digit uppercase hex. */
+export function normalizeMode06Id(raw: string): string {
+  let s = raw.trim().toUpperCase().replace(/^0X/, "").replace(/^\$/, "");
+  if (/^[0-9A-F]+$/.test(s)) {
+    s = s.padStart(2, "0");
+    if (s.length > 2) s = s.slice(-2);
+  }
+  return s;
+}
 
 export function lookupDtc(code: string): DtcDictionaryEntry | undefined {
   return dtcDictionary[code.toUpperCase()];
@@ -88,6 +106,25 @@ export function allPidKeys(): string[] {
 /** Canonical unit for a seeded PID key, if present. */
 export function unitForPid(key: string): string | undefined {
   return pidDictionary[key]?.unit;
+}
+
+export function lookupMode06(mid: string): Mode06DictionaryEntry | undefined {
+  return mode06Dictionary[normalizeMode06Id(mid)];
+}
+
+export function allMode06Mids(): string[] {
+  return Object.keys(mode06Dictionary);
+}
+
+/** Condition concepts covered by at least one Mode 06 dictionary row. */
+export function mode06ConceptsCovered(): string[] {
+  return [
+    ...new Set(
+      Object.values(mode06Dictionary)
+        .map((e) => e.concept)
+        .filter((c): c is string => Boolean(c)),
+    ),
+  ].sort();
 }
 
 export function listVehicleProfiles(): VehicleProfile[] {
@@ -180,6 +217,10 @@ export function runOntologyLint(
   if (!dtcParsed.success) schemaErrors.push(...zodIssues("dtc-dictionary.json", dtcParsed.error));
   const pidParsed = PidDictionaryFileSchema.safeParse(pidDictionaryJson);
   if (!pidParsed.success) schemaErrors.push(...zodIssues("pid-dictionary.json", pidParsed.error));
+  const mode06Parsed = Mode06DictionaryFileSchema.safeParse(mode06DictionaryJson);
+  if (!mode06Parsed.success) {
+    schemaErrors.push(...zodIssues("mode06-dictionary.json", mode06Parsed.error));
+  }
   const profilesParsed = VehicleProfilesFileSchema.safeParse(vehicleProfilesJson);
   if (!profilesParsed.success) {
     schemaErrors.push(...zodIssues("vehicle-profiles.json", profilesParsed.error));
@@ -193,6 +234,7 @@ export function runOntologyLint(
     schemaErrors.length > 0 ||
     !dtcParsed.success ||
     !pidParsed.success ||
+    !mode06Parsed.success ||
     !profilesParsed.success ||
     !campaignsParsed.success
   ) {
@@ -202,6 +244,7 @@ export function runOntologyLint(
   return lintOntology({
     ontology: dlOntologyJson as unknown as LintableOntology,
     dtcDictionary: dtcParsed.data,
+    mode06Dictionary: mode06Parsed.data,
     vehicleProfiles: profilesParsed.data,
     cartridgeRequiredClasses: opts.cartridgeRequiredClasses,
     registeredCartridgeNames: opts.registeredCartridgeNames,

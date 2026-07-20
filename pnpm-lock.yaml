@@ -75,6 +75,9 @@ importers:
       '@auto/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@auto/ontology':
+        specifier: workspace:*
+        version: link:../../packages/ontology
       '@auto/semantic-types':
         specifier: workspace:*
         version: link:../../packages/semantic-types

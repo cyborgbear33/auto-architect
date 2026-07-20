@@ -87,13 +87,33 @@ export const evapCartridge: Cartridge = {
   perception: [
     { dtcConcept: "EvapCodeSmall", concept: "EvapCodeSmall", as: "symptom", slot: "evap-small" },
     { dtcConcept: "EvapCodeLarge", concept: "EvapCodeLarge", as: "symptom", slot: "evap-large" },
+    {
+      mode06Concept: "FailedEvapMonitorSmall",
+      concept: "FailedEvapMonitorSmall",
+      as: "condition",
+      slot: "mode06-evap-small",
+    },
+    {
+      mode06Concept: "FailedEvapMonitorLarge",
+      concept: "FailedEvapMonitorLarge",
+      as: "condition",
+      slot: "mode06-evap-large",
+    },
   ],
   framing: [
     { whenClass: "EvapLeakSmall", priority: 40, build: evapDraft("small") },
     { whenClass: "EvapLeakLarge", priority: 50, build: evapDraft("large") },
   ],
   requires: {
-    classes: ["EvapCodeSmall", "EvapCodeLarge", "EvapLeakSmall", "EvapLeakLarge"],
+    classes: [
+      "EvapCodeSmall",
+      "EvapCodeLarge",
+      "FailedEvapMonitorSmall",
+      "FailedEvapMonitorLarge",
+      "EvapLeakSmall",
+      "EvapLeakLarge",
+    ],
     dtcConcepts: ["EvapCodeSmall", "EvapCodeLarge"],
+    mode06Concepts: ["FailedEvapMonitorSmall", "FailedEvapMonitorLarge"],
   },
 };

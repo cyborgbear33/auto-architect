@@ -62,6 +62,8 @@ Prefer these before inventing new ones:
 `LeanCodeBank1/2`, `RichCodeBank1/2`, `EvapCodeSmall/Large`,
 `CatalystCodeBank1/2`, `O2CircuitBank1/2`, `O2HeaterBank1/2`, `MultiAirFault`,
 `HighLoad`, `PositiveFuelTrim`, `NegativeFuelTrim`, `LowOilPressure`,
+`FailedCatalystMonitorBank1/2`, `FailedEvapMonitorSmall/Large`,
+`FailedO2HeaterMonitorBank1/2`, `FailedMisfireMonitor`,
 `OilLevelDecline`, `RisingFuelTrim`, `FallingFuelTrim`, `RecurringHighLoad`.
 
 **Object / record types (`@auto/semantic-types`):** `VehicleProfile`,

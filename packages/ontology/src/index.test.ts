@@ -5,7 +5,9 @@ import {
   getEngineFamilyView,
   getVehicleProfile,
   lookupDtc,
+  lookupMode06,
   lookupPid,
+  normalizeMode06Id,
   tsbsForEngineFamily,
   unitForPid,
 } from "./index.ts";
@@ -82,6 +84,19 @@ describe("ontology registries", () => {
     expect(lookupDtc("P0150")).toMatchObject({ concept: "O2CircuitBank2", sae: true });
     expect(lookupDtc("P0135")).toMatchObject({ concept: "O2HeaterBank1", sae: true });
     expect(lookupDtc("P0155")).toMatchObject({ concept: "O2HeaterBank2", sae: true });
+  });
+
+  it("maps SAE/ISO Mode 06 OBDMIDs onto Condition concepts (or label-only)", () => {
+    expect(normalizeMode06Id("$21")).toBe("21");
+    expect(lookupMode06("21")).toMatchObject({
+      concept: "FailedCatalystMonitorBank1",
+      sae: true,
+    });
+    expect(lookupMode06("3B")).toMatchObject({ concept: "FailedEvapMonitorSmall", sae: true });
+    expect(lookupMode06("A2")).toMatchObject({ concept: "FailedMisfireMonitor", sae: true });
+    expect(lookupMode06("01")?.concept).toBeUndefined();
+    expect(lookupMode06("01")?.description).toMatch(/Oxygen Sensor/i);
+    expect(lookupMode06("FE")).toBeUndefined();
   });
 
   it("returns undefined for an unknown PID key", () => {

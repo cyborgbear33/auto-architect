@@ -66,9 +66,15 @@ export interface FreezeFrame {
   readings: PidReading[];
 }
 
-/** One row from a Mode 06 on-board monitoring test. */
+/**
+ * One row from a Mode 06 on-board monitoring test (CAN / ISO 15765-4).
+ * `mid` is the SAE/ISO OBDMID (monitor); `tid` is the test within that monitor.
+ * Monitor meaning comes from `mode06-dictionary.json` — never invent TID labels.
+ */
 export interface Mode06Result {
+  /** Test ID within the monitor (standardized or manufacturer-defined). */
   tid: string;
+  /** On-Board Diagnostic Monitor ID (OBDMID), e.g. `"21"` for catalyst bank 1. */
   mid: string;
   value: number;
   min: number | null;
@@ -378,6 +384,8 @@ export interface ClassEvidence {
     thresholdMet?: boolean;
   }>;
   freezeFrames: FreezeFrame[];
+  /** Failed / related Mode 06 rows whose OBDMID concept this class uses (A3). */
+  mode06: Mode06Result[];
 }
 
 export interface Recognition {

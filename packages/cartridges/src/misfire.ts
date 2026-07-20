@@ -98,11 +98,24 @@ export const misfireCartridge: Cartridge = {
       as: "condition",
       slot: "high-load",
     },
+    {
+      mode06Concept: "FailedMisfireMonitor",
+      concept: "FailedMisfireMonitor",
+      as: "condition",
+      slot: "mode06-misfire",
+    },
   ],
   framing: [{ whenClass: "MisfireUnderLoad", priority: 100, build: misfireDraft }],
   requires: {
-    classes: ["CylinderMisfire", "HighLoad", "RecurringHighLoad", "MisfireUnderLoad"],
+    classes: [
+      "CylinderMisfire",
+      "HighLoad",
+      "RecurringHighLoad",
+      "FailedMisfireMonitor",
+      "MisfireUnderLoad",
+    ],
     dtcConcepts: ["CylinderMisfire"],
     pids: [ENGINE_LOAD_PID],
+    mode06Concepts: ["FailedMisfireMonitor"],
   },
 };

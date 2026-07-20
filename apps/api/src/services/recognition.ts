@@ -40,7 +40,8 @@ export class RecognitionService {
     const dtcs = await this.store.observations.latestDtcs(vehicleId);
     const pids = await this.store.observations.latestPids(vehicleId);
     const freezeFrames = await this.store.observations.latestFreezeFrames(vehicleId);
-    const abox = runPerception(vehicleId, dtcs, pids, cartridges);
+    const mode06 = await this.store.observations.latestMode06(vehicleId);
+    const abox = runPerception(vehicleId, dtcs, pids, cartridges, mode06);
 
     // Trend evidence comes from `forecast` over logged series — fold each
     // ontology-backed flag into the ABox before realizing (never invent classes).
@@ -67,6 +68,7 @@ export class RecognitionService {
         dtcs,
         pids,
         freezeFrames,
+        mode06,
       );
       return {
         individual: result.individual,

@@ -1,0 +1,32 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "CatalystCodeBank1": "Symptom",
+    "FailedCatalystMonitorBank1": "Condition",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": { "domain": "Engine", "range": "Symptom" },
+    "hasCondition": { "domain": "Engine", "range": "Condition" }
+  },
+  "classes": {
+    "CatalystEfficiencyBank1": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.CatalystCodeBank1 ⊔ ∃hasCondition.FailedCatalystMonitorBank1)"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": ["Engine"],
+      "mode06_cat_b1": ["FailedCatalystMonitorBank1"]
+    },
+    "roles": [["hasCondition", "jeep_renegade_engine", "mode06_cat_b1"]]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": ["CatalystEfficiencyBank1", "MisfireUnderLoad"]
+}

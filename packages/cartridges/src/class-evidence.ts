@@ -3,8 +3,8 @@
  * requires + current observations. Never invents classes — caller only
  * passes names from realize `mostSpecific`.
  */
-import { lookupDtc, lookupPid } from "@auto/ontology";
-import type { DtcObservation, FreezeFrame } from "@auto/semantic-types";
+import { lookupDtc, lookupMode06, lookupPid } from "@auto/ontology";
+import type { DtcObservation, FreezeFrame, Mode06Result } from "@auto/semantic-types";
 import type { Cartridge } from "./types.ts";
 
 export interface ClassEvidencePid {
@@ -20,6 +20,7 @@ export interface ClassEvidenceBundle {
   dtcs: DtcObservation[];
   pids: ClassEvidencePid[];
   freezeFrames: FreezeFrame[];
+  mode06: Mode06Result[];
 }
 
 function pidMeetsWhen(
@@ -48,17 +49,21 @@ export function composeClassEvidence(
   dtcs: DtcObservation[],
   pids: Record<string, number>,
   freezeFrames: FreezeFrame[],
+  mode06: Mode06Result[] = [],
 ): ClassEvidenceBundle {
   const supporting = cartridgesForClass(className, cartridges);
   const dtcConcepts = new Set<string>();
+  const mode06Concepts = new Set<string>();
   const pidKeys = new Set<string>();
   const pidWhen = new Map<string, { gt?: number; gte?: number; lt?: number; lte?: number }>();
 
   for (const c of supporting) {
     for (const concept of c.requires.dtcConcepts ?? []) dtcConcepts.add(concept);
+    for (const concept of c.requires.mode06Concepts ?? []) mode06Concepts.add(concept);
     for (const pid of c.requires.pids ?? []) pidKeys.add(pid);
     for (const rule of c.perception) {
       if (rule.dtcConcept) dtcConcepts.add(rule.dtcConcept);
+      if (rule.mode06Concept) mode06Concepts.add(rule.mode06Concept);
       if (rule.pid) {
         pidKeys.add(rule.pid);
         if (rule.when) pidWhen.set(rule.pid, rule.when);
@@ -89,11 +94,17 @@ export function composeClassEvidence(
     });
   }
 
+  const supportingMode06 = mode06.filter((row) => {
+    const concept = lookupMode06(row.mid)?.concept;
+    return concept !== undefined && mode06Concepts.has(concept);
+  });
+
   return {
     className,
     dtcs: supportingDtcs,
     pids: supportingPids,
     freezeFrames: supportingFfs,
+    mode06: supportingMode06,
   };
 }
 
@@ -103,8 +114,9 @@ export function composeAllClassEvidence(
   dtcs: DtcObservation[],
   pids: Record<string, number>,
   freezeFrames: FreezeFrame[],
+  mode06: Mode06Result[] = [],
 ): ClassEvidenceBundle[] {
   return classNames.map((className) =>
-    composeClassEvidence(className, cartridges, dtcs, pids, freezeFrames),
+    composeClassEvidence(className, cartridges, dtcs, pids, freezeFrames, mode06),
   );
 }

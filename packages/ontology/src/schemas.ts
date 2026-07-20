@@ -55,6 +55,20 @@ export const PidDictionaryFileSchema = z.object({
   pids: z.record(PidDictionaryEntrySchema),
 });
 
+/** Thin SAE/ISO CAN Mode $06 OBDMID seed — not a full Annex D paste. */
+export const Mode06DictionaryEntrySchema = z.object({
+  description: z.string().min(1),
+  /** Condition subtype asserted when this monitor reports `passed: false`. Omit for label-only rows. */
+  concept: z.string().min(1).optional(),
+  sae: z.boolean(),
+  note: z.string().optional(),
+});
+
+export const Mode06DictionaryFileSchema = z.object({
+  disclaimer: z.string().optional(),
+  monitors: z.record(Mode06DictionaryEntrySchema),
+});
+
 export const VehicleProfileEntrySchema = z.object({
   make: z.string().min(1),
   model: z.string().min(1),
@@ -101,5 +115,7 @@ export const KnownCampaignsFileSchema = z.object({
 export type DtcDictionaryFile = z.infer<typeof DtcDictionaryFileSchema>;
 export type PidDictionaryFile = z.infer<typeof PidDictionaryFileSchema>;
 export type PidDictionaryEntry = z.infer<typeof PidDictionaryEntrySchema>;
+export type Mode06DictionaryFile = z.infer<typeof Mode06DictionaryFileSchema>;
+export type Mode06DictionaryEntry = z.infer<typeof Mode06DictionaryEntrySchema>;
 export type VehicleProfilesFile = z.infer<typeof VehicleProfilesFileSchema>;
 export type KnownCampaignsFile = z.infer<typeof KnownCampaignsFileSchema>;

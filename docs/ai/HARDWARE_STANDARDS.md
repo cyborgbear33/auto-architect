@@ -94,12 +94,36 @@ full J1979 table — that remains the comprehensive KB backlog item.
 
 ---
 
-## 5. How this maps to the ontology
+## 5. Mode 06 (Service $06) — monitor meaning
+
+CAN Mode $06 reports on-board monitor test results. Field convention in this
+repo (`Mode06Result`):
+
+| Field | Meaning |
+|---|---|
+| `mid` | SAE/ISO **OBDMID** (monitor), e.g. `21` = Catalyst Monitor Bank 1 |
+| `tid` | Test ID **within** that monitor (standardized or manufacturer-scaled) |
+
+**Rules:**
+
+- Only name monitors that appear in **ISO 15031-5 / SAE J1979 Annex D** (or a
+  cited OEM chart). Seed lives in `packages/ontology/mode06-dictionary.json`.
+- Unknown OBDMIDs stay unlabeled and never feed recognition.
+- O2 sensor performance monitors (`$01` / `$05`) are label-only until
+  performance fault classes exist — do not map them to circuit DTCs.
+- Legacy TID+CID (pre-CAN) vehicles are out of this thin seed; do not invent
+  manufacturer TID charts.
+
+Failed monitors with a dictionary `concept` assert a **Condition** via
+cartridge perception and may OR into existing fault classes (A3).
+
+## 6. How this maps to the ontology
 
 | Artifact | Must be grounded in |
 |---|---|
 | `dtc-dictionary.json` rows | J2012 / ISO 15031-6 (generic) or real TSB/manual (enhanced) |
 | `pid-dictionary.json` rows | J1979 / ISO 15031-5 (Mode 01) or documented manual source |
+| `mode06-dictionary.json` rows | ISO 15031-5 / SAE J1979 Annex D OBDMIDs (CAN) |
 | `pid_map.py` keys | Same keys as the dictionary; python-OBD command binding only |
 | DL fault classes | Real diagnostic meaning; SAE-portable classes in `generic` view |
 | OEM classes / cartridges | Engine-family view + documented OEM procedure |
@@ -108,7 +132,7 @@ The ontology owns *meaning*; standards own *whether that meaning is real*.
 
 ---
 
-## 6. Hard rules
+## 7. Hard rules
 
 1. **Unknown → do not guess.** Prefer "insufficient evidence" / omit over a
    plausible-sounding wrong description.

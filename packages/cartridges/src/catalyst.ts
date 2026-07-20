@@ -2,8 +2,8 @@ import type { CandidateAction } from "@auto/semantic-types";
 import type { Cartridge, FramingResult, VehicleView } from "./types.ts";
 
 /**
- * SAE-generic catalyst efficiency cartridge: P0420 / P0430.
- * DTC-only — do not gate on CATALYST_TEMP_* or Mode 06 until those meanings are ontologized (A3).
+ * SAE-generic catalyst efficiency cartridge: P0420 / P0430, or failed
+ * Mode 06 catalyst OBDMID $21 / $22 (ISO 15031-5 Annex D).
  */
 
 function catalystPlaybook(bank: 1 | 2): CandidateAction[] {
@@ -70,6 +70,18 @@ export const catalystCartridge: Cartridge = {
       as: "symptom",
       slot: "cat-bank2",
     },
+    {
+      mode06Concept: "FailedCatalystMonitorBank1",
+      concept: "FailedCatalystMonitorBank1",
+      as: "condition",
+      slot: "mode06-cat-b1",
+    },
+    {
+      mode06Concept: "FailedCatalystMonitorBank2",
+      concept: "FailedCatalystMonitorBank2",
+      as: "condition",
+      slot: "mode06-cat-b2",
+    },
   ],
   framing: [
     { whenClass: "CatalystEfficiencyBank1", priority: 45, build: catalystDraft(1) },
@@ -79,9 +91,12 @@ export const catalystCartridge: Cartridge = {
     classes: [
       "CatalystCodeBank1",
       "CatalystCodeBank2",
+      "FailedCatalystMonitorBank1",
+      "FailedCatalystMonitorBank2",
       "CatalystEfficiencyBank1",
       "CatalystEfficiencyBank2",
     ],
     dtcConcepts: ["CatalystCodeBank1", "CatalystCodeBank2"],
+    mode06Concepts: ["FailedCatalystMonitorBank1", "FailedCatalystMonitorBank2"],
   },
 };

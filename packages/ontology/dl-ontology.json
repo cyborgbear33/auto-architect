@@ -25,6 +25,13 @@
     "PositiveFuelTrim": "Condition",
     "NegativeFuelTrim": "Condition",
     "LowOilPressure": "Condition",
+    "FailedCatalystMonitorBank1": "Condition",
+    "FailedCatalystMonitorBank2": "Condition",
+    "FailedEvapMonitorSmall": "Condition",
+    "FailedEvapMonitorLarge": "Condition",
+    "FailedO2HeaterMonitorBank1": "Condition",
+    "FailedO2HeaterMonitorBank2": "Condition",
+    "FailedMisfireMonitor": "Condition",
 
     "OilLevelDecline": "Trend",
     "RisingFuelTrim": "Trend",
@@ -47,7 +54,7 @@
   },
   "classes": {
     "MisfireUnderLoad": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ (∃hasCondition.HighLoad ⊔ ∃hasTrend.RecurringHighLoad)"
+      "equivalentTo": "Engine ⊓ (∃hasDtc.CylinderMisfire ⊔ ∃hasCondition.FailedMisfireMonitor) ⊓ (∃hasCondition.HighLoad ⊔ ∃hasTrend.RecurringHighLoad)"
     },
     "CamCrankCorrelationFault": {
       "equivalentTo": "Engine ⊓ ∃hasDtc.CamCrankCorrelation"
@@ -65,16 +72,16 @@
       "equivalentTo": "Engine ⊓ ∃hasDtc.RichCodeBank2 ⊓ (∃hasCondition.NegativeFuelTrim ⊔ ∃hasTrend.FallingFuelTrim)"
     },
     "EvapLeakSmall": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.EvapCodeSmall"
+      "equivalentTo": "Engine ⊓ (∃hasDtc.EvapCodeSmall ⊔ ∃hasCondition.FailedEvapMonitorSmall)"
     },
     "EvapLeakLarge": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.EvapCodeLarge"
+      "equivalentTo": "Engine ⊓ (∃hasDtc.EvapCodeLarge ⊔ ∃hasCondition.FailedEvapMonitorLarge)"
     },
     "CatalystEfficiencyBank1": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.CatalystCodeBank1"
+      "equivalentTo": "Engine ⊓ (∃hasDtc.CatalystCodeBank1 ⊔ ∃hasCondition.FailedCatalystMonitorBank1)"
     },
     "CatalystEfficiencyBank2": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.CatalystCodeBank2"
+      "equivalentTo": "Engine ⊓ (∃hasDtc.CatalystCodeBank2 ⊔ ∃hasCondition.FailedCatalystMonitorBank2)"
     },
     "O2CircuitFaultBank1": {
       "equivalentTo": "Engine ⊓ ∃hasDtc.O2CircuitBank1"
@@ -83,10 +90,10 @@
       "equivalentTo": "Engine ⊓ ∃hasDtc.O2CircuitBank2"
     },
     "O2HeaterFaultBank1": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.O2HeaterBank1"
+      "equivalentTo": "Engine ⊓ (∃hasDtc.O2HeaterBank1 ⊔ ∃hasCondition.FailedO2HeaterMonitorBank1)"
     },
     "O2HeaterFaultBank2": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.O2HeaterBank2"
+      "equivalentTo": "Engine ⊓ (∃hasDtc.O2HeaterBank2 ⊔ ∃hasCondition.FailedO2HeaterMonitorBank2)"
     },
     "ChronicOilConsumption": {
       "equivalentTo": "Engine ⊓ ∃hasTrend.OilLevelDecline"
@@ -96,20 +103,20 @@
     }
   },
   "notes": {
-    "MisfireUnderLoad": "SAE-generic (any manufacturer): P0300-P0304 + high load now, or recurring high-load samples from forecast.",
+    "MisfireUnderLoad": "SAE-generic: misfire DTC or failed Mode 06 misfire OBDMID ($A1–$A5) + high load now, or recurring high-load samples from forecast.",
     "CamCrankCorrelationFault": "SAE-generic: P0016-P0018 family (cam/crank correlation, timing-chain-adjacent).",
     "LeanFuelBank1": "SAE-generic: P0171 + positive LTFT now, or a rising LTFT trend from forecast.",
     "LeanFuelBank2": "SAE-generic: P0174 + positive LTFT now, or a rising LTFT trend from forecast.",
     "RichFuelBank1": "SAE-generic: P0172 + negative LTFT now, or a falling LTFT trend from forecast.",
     "RichFuelBank2": "SAE-generic: P0175 + negative LTFT now, or a falling LTFT trend from forecast.",
-    "EvapLeakSmall": "SAE-generic: P0442 / P0456.",
-    "EvapLeakLarge": "SAE-generic: P0455.",
-    "CatalystEfficiencyBank1": "SAE-generic: P0420 (DTC-only — no catalyst-temp or Mode 06 gate until A3).",
-    "CatalystEfficiencyBank2": "SAE-generic: P0430 (DTC-only).",
-    "O2CircuitFaultBank1": "SAE-generic: P0130 circuit (DTC-only; voltage-range codes deferred).",
+    "EvapLeakSmall": "SAE-generic: P0442 / P0456, or failed Mode 06 EVAP OBDMID $3B/$3C (ISO 15031-5 Annex D).",
+    "EvapLeakLarge": "SAE-generic: P0455, or failed Mode 06 EVAP OBDMID $39/$3A.",
+    "CatalystEfficiencyBank1": "SAE-generic: P0420, or failed Mode 06 catalyst OBDMID $21.",
+    "CatalystEfficiencyBank2": "SAE-generic: P0430, or failed Mode 06 catalyst OBDMID $22.",
+    "O2CircuitFaultBank1": "SAE-generic: P0130 circuit (DTC-only; O2 sensor performance monitor $01 is label-only until performance classes exist).",
     "O2CircuitFaultBank2": "SAE-generic: P0150 circuit (DTC-only).",
-    "O2HeaterFaultBank1": "SAE-generic: P0135 heater circuit (DTC-only).",
-    "O2HeaterFaultBank2": "SAE-generic: P0155 heater circuit (DTC-only).",
+    "O2HeaterFaultBank1": "SAE-generic: P0135 heater circuit, or failed Mode 06 heater OBDMID $41.",
+    "O2HeaterFaultBank2": "SAE-generic: P0155 heater circuit, or failed Mode 06 heater OBDMID $45.",
     "ChronicOilConsumption": "SAE-generic: fed by `forecast` over logged oil-level/odometer samples, not a DTC.",
     "RisingFuelTrim": "Trend evidence from LONG_FUEL_TRIM series (ForecastService) — pairs with lean DTCs.",
     "FallingFuelTrim": "Trend evidence from LONG_FUEL_TRIM series (ForecastService) — pairs with rich DTCs.",

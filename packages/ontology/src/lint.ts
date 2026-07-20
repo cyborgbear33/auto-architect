@@ -36,9 +36,15 @@ export interface LintableDtcDictionary {
   codes: Record<string, { concept: string }>;
 }
 
+export interface LintableMode06Dictionary {
+  monitors: Record<string, { concept?: string; description: string }>;
+}
+
 export interface LintOntologyParams {
   ontology: LintableOntology;
   dtcDictionary: LintableDtcDictionary;
+  /** Optional Mode 06 OBDMID dictionary — concepts must resolve to Condition subtypes. */
+  mode06Dictionary?: LintableMode06Dictionary;
   /** Declared `Symptom` subtypes that are intentionally NOT DTC-driven (e.g. a
    *  future symptom inferred purely from PID trend, never a stored code). */
   allowNonDtcSymptoms?: string[];
@@ -61,6 +67,7 @@ export function lintOntology(params: LintOntologyParams): OntologyLintResult {
   const {
     ontology,
     dtcDictionary,
+    mode06Dictionary,
     allowNonDtcSymptoms = [],
     cartridgeRequiredClasses = [],
     vehicleProfiles,
@@ -75,6 +82,11 @@ export function lintOntology(params: LintOntologyParams): OntologyLintResult {
   const symptomSubtypes = new Set(
     Object.entries(ontology.subtypes)
       .filter(([, parent]) => parent === "Symptom")
+      .map(([name]) => name),
+  );
+  const conditionSubtypes = new Set(
+    Object.entries(ontology.subtypes)
+      .filter(([, parent]) => parent === "Condition")
       .map(([name]) => name),
   );
 
@@ -99,6 +111,24 @@ export function lintOntology(params: LintOntologyParams): OntologyLintResult {
       code: "orphan_symptom_class",
       message: `Symptom subtype "${symptom}" has no DTC dictionary entry and isn't in allowNonDtcSymptoms — no evidence path can ever assert it`,
     });
+  }
+
+  // 2b. Mode 06 dictionary concepts (when present) must be Condition subtypes.
+  if (mode06Dictionary) {
+    for (const [mid, entry] of Object.entries(mode06Dictionary.monitors)) {
+      if (!entry.concept) continue;
+      if (!conditionSubtypes.has(entry.concept) && !declaredSubtypes.has(entry.concept)) {
+        errors.push({
+          code: "mode06_unresolved_concept",
+          message: `Mode 06 OBDMID ${mid} maps to concept "${entry.concept}", which is not a declared subtype in dl-ontology.json`,
+        });
+      } else if (!conditionSubtypes.has(entry.concept)) {
+        errors.push({
+          code: "mode06_concept_not_condition",
+          message: `Mode 06 OBDMID ${mid} maps to "${entry.concept}", which must be a Condition subtype (failed monitors are conditions, not symptoms)`,
+        });
+      }
+    }
   }
 
   // 3. Every view must only reference declared classes.

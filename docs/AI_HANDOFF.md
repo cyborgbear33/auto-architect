@@ -190,6 +190,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Recognition narration (verbalize / ontology notes) | shipped | `Recognition.narration`, Dashboard/Diagnosis |
 | Evidence panel per proven class (A1) | shipped | `Recognition.classEvidence` + `ClassEvidencePanel` |
 | Rich / catalyst / O2 DTC families | shipped | cartridges + ontology; FallingFuelTrim; DTC-only cat/O2 |
+| Mode 06 meaning → recognition (A3) | shipped | SAE/ISO OBDMID seed; failed monitors → realize; labeled UI |
 | Freeze-frame + Mode 06 UI | shipped | `EvidencePanels` on Dashboard |
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |
@@ -211,7 +212,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Python obd-gateway (`scan` / `watch` / `--simulate`) | shipped | `apps/obd-gateway` |
 | Ontology lint CI | shipped | `scripts/lint-ontology.mjs`, `.github/workflows/ci.yml` |
 | Auth / multi-user | **not yet** | see `FUTURE_FEATURES.md` |
-| Live Mode 06 / freeze-frame UI richness | partial | API endpoints exist; UI is thin |
+| Live Mode 06 / freeze-frame UI richness | partial | OBDMID labels + pass/fail; raw TID/MID behind debug |
 | LLM agent loop (propose-only) | **not yet** | garden has `agent-service`; auto does not |
 
 ---

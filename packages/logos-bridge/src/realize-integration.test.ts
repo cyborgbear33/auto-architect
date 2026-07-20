@@ -9,6 +9,9 @@ import catalystRealizeFixture from "../../ontology/fixtures/catalyst_realize_fix
 import leanRealizeFixture from "../../ontology/fixtures/lean_realize_fixture.json" with {
   type: "json",
 };
+import mode06CatalystRealizeFixture from "../../ontology/fixtures/mode06_catalyst_realize_fixture.json" with {
+  type: "json",
+};
 import misfireRealizeFixture from "../../ontology/fixtures/misfire_realize_fixture.json" with {
   type: "json",
 };
@@ -90,6 +93,13 @@ describe.skipIf(!available)("LOGOS realize real subprocess integration", () => {
   it("proves CatalystEfficiencyBank1 from P0420", async () => {
     const bridge = createLogosBridge();
     const result = await bridge.realize(realizeInputFromFixture(catalystRealizeFixture));
+    expect(result.mostSpecific).toContain("CatalystEfficiencyBank1");
+    expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
+  it("proves CatalystEfficiencyBank1 from failed Mode 06 catalyst monitor alone", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(mode06CatalystRealizeFixture));
     expect(result.mostSpecific).toContain("CatalystEfficiencyBank1");
     expect(result.member).not.toContain("MisfireUnderLoad");
   });

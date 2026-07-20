@@ -1,0 +1,80 @@
+{
+  "disclaimer": "Thin SAE/ISO seed of CAN Mode $06 OBDMIDs (ISO 15031-5 / SAE J1979 Annex D). Keys are OBDMID hex (no $). Test IDs (TIDs) inside a monitor remain manufacturer-scaled — this dictionary only names the monitor. Unknown / legacy TID+CID vehicles stay unlabeled; do not invent OEM mappings.",
+  "monitors": {
+    "01": {
+      "description": "Oxygen Sensor Monitor Bank 1 – Sensor 1",
+      "sae": true,
+      "note": "Label-only for now — sensor-performance classes (P0133 family) are not yet ontologized; do not treat as O2 circuit fault."
+    },
+    "05": {
+      "description": "Oxygen Sensor Monitor Bank 2 – Sensor 1",
+      "sae": true,
+      "note": "Label-only for now — see OBDMID 01 note."
+    },
+    "21": {
+      "description": "Catalyst Monitor Bank 1",
+      "concept": "FailedCatalystMonitorBank1",
+      "sae": true
+    },
+    "22": {
+      "description": "Catalyst Monitor Bank 2",
+      "concept": "FailedCatalystMonitorBank2",
+      "sae": true
+    },
+    "39": {
+      "description": "EVAP Monitor (Cap Off)",
+      "concept": "FailedEvapMonitorLarge",
+      "sae": true
+    },
+    "3A": {
+      "description": "EVAP Monitor (0.090\")",
+      "concept": "FailedEvapMonitorLarge",
+      "sae": true
+    },
+    "3B": {
+      "description": "EVAP Monitor (0.040\")",
+      "concept": "FailedEvapMonitorSmall",
+      "sae": true
+    },
+    "3C": {
+      "description": "EVAP Monitor (0.020\")",
+      "concept": "FailedEvapMonitorSmall",
+      "sae": true
+    },
+    "41": {
+      "description": "Oxygen Sensor Heater Monitor Bank 1 – Sensor 1",
+      "concept": "FailedO2HeaterMonitorBank1",
+      "sae": true
+    },
+    "45": {
+      "description": "Oxygen Sensor Heater Monitor Bank 2 – Sensor 1",
+      "concept": "FailedO2HeaterMonitorBank2",
+      "sae": true
+    },
+    "A1": {
+      "description": "Misfire Monitor General Data",
+      "concept": "FailedMisfireMonitor",
+      "sae": true
+    },
+    "A2": {
+      "description": "Misfire Cylinder 1 Data",
+      "concept": "FailedMisfireMonitor",
+      "sae": true
+    },
+    "A3": {
+      "description": "Misfire Cylinder 2 Data",
+      "concept": "FailedMisfireMonitor",
+      "sae": true
+    },
+    "A4": {
+      "description": "Misfire Cylinder 3 Data",
+      "concept": "FailedMisfireMonitor",
+      "sae": true
+    },
+    "A5": {
+      "description": "Misfire Cylinder 4 Data",
+      "concept": "FailedMisfireMonitor",
+      "sae": true
+    }
+  }
+}

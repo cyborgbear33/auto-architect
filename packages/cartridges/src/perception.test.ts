@@ -53,4 +53,29 @@ describe("runPerception", () => {
     const abox = runPerception("veh:x", [{ code: "P0304", status: "permanent" }], {}, cartridges);
     expect(abox.concepts["veh:x:cylinder-misfire"]).toBeUndefined();
   });
+
+  it("asserts FailedCatalystMonitorBank1 from a failed Mode 06 OBDMID $21", () => {
+    const cartridges = resolveCartridgesForEngineFamily("fca-tigershark-2.4");
+    const abox = runPerception(
+      "veh:x",
+      [],
+      {},
+      cartridges,
+      [{ tid: "01", mid: "21", value: 0.9, min: 0, max: 0.5, passed: false }],
+    );
+    expect(abox.concepts["veh:x:mode06-cat-b1"]).toEqual(["FailedCatalystMonitorBank1"]);
+    expect(abox.roles).toContainEqual(["hasCondition", "veh:x", "veh:x:mode06-cat-b1"]);
+  });
+
+  it("does not invent meaning for unknown Mode 06 OBDMIDs", () => {
+    const cartridges = resolveCartridgesForEngineFamily("fca-tigershark-2.4");
+    const abox = runPerception(
+      "veh:x",
+      [],
+      {},
+      cartridges,
+      [{ tid: "01", mid: "FE", value: 1, min: 0, max: 1, passed: false }],
+    );
+    expect(Object.keys(abox.concepts)).toEqual(["veh:x"]);
+  });
 });

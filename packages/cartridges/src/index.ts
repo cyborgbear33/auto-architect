@@ -13,7 +13,7 @@ export { gmEcotec3StubCartridge } from "./gm-ecotec3-stub.ts";
 export { leanFuelCartridge } from "./lean-fuel.ts";
 export { misfireCartridge } from "./misfire.ts";
 export { o2SensorCartridge } from "./o2-sensor.ts";
-export { perceivedDtcConcepts, runPerception } from "./perception.ts";
+export { perceivedDtcConcepts, perceivedMode06Concepts, runPerception } from "./perception.ts";
 export {
   allCartridges,
   cartridgeRegistry,

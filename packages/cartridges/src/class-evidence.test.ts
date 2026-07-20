@@ -37,6 +37,7 @@ describe("composeClassEvidence", () => {
     );
     expect(bundle.freezeFrames).toHaveLength(1);
     expect(bundle.freezeFrames[0]?.dtc).toBe("P0171");
+    expect(bundle.mode06).toEqual([]);
   });
 
   it("returns empty evidence when no cartridge frames the class", () => {
@@ -44,5 +45,6 @@ describe("composeClassEvidence", () => {
     expect(bundle.dtcs).toEqual([]);
     expect(bundle.pids).toEqual([]);
     expect(bundle.freezeFrames).toEqual([]);
+    expect(bundle.mode06).toEqual([]);
   });
 });

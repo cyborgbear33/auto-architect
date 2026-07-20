@@ -128,6 +128,18 @@ export const o2SensorCartridge: Cartridge = {
       as: "symptom",
       slot: "o2-htr-b2",
     },
+    {
+      mode06Concept: "FailedO2HeaterMonitorBank1",
+      concept: "FailedO2HeaterMonitorBank1",
+      as: "condition",
+      slot: "mode06-o2-htr-b1",
+    },
+    {
+      mode06Concept: "FailedO2HeaterMonitorBank2",
+      concept: "FailedO2HeaterMonitorBank2",
+      as: "condition",
+      slot: "mode06-o2-htr-b2",
+    },
   ],
   framing: [
     { whenClass: "O2CircuitFaultBank1", priority: 55, build: circuitDraft(1) },
@@ -141,11 +153,14 @@ export const o2SensorCartridge: Cartridge = {
       "O2CircuitBank2",
       "O2HeaterBank1",
       "O2HeaterBank2",
+      "FailedO2HeaterMonitorBank1",
+      "FailedO2HeaterMonitorBank2",
       "O2CircuitFaultBank1",
       "O2CircuitFaultBank2",
       "O2HeaterFaultBank1",
       "O2HeaterFaultBank2",
     ],
     dtcConcepts: ["O2CircuitBank1", "O2CircuitBank2", "O2HeaterBank1", "O2HeaterBank2"],
+    mode06Concepts: ["FailedO2HeaterMonitorBank1", "FailedO2HeaterMonitorBank2"],
   },
 };

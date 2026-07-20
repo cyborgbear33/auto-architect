@@ -44,7 +44,7 @@ multi-piece plans live in the next section.
 | Goal | Status | What exists today | Done when | Closing backlog |
 |---|---|---|---|---|
 | **Scanning** — ingest OBD evidence | **partial** | Simulate/API ingest; live gauge strip + FF/Mode06 UI; source labels | Live MX+ path proven; drive sessions; retention policy | Live MX+ dry-run; Drive sessions; Durable observation history |
-| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration + per-class evidence (A1); gateway Mode 01 PID metadata; FF/Mode06 UI | Full J1979/J2012; Mode 06 meaning (A3) | SAE PID/DTC KB expansion |
+| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration + per-class evidence; Mode 06 OBDMID meaning (A3); gateway Mode 01 PID metadata | Full J1979/J2012; broader Mode 06 / O2 performance | SAE PID/DTC KB expansion |
 | **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration on draft/solve + refresh | Family priors polish; counterfactuals UI | Counterfactuals UI; optional LLM advise |
 | **Informing the user** — clear operator surfaces | **partial** | Source badges, narration, FF/Mode06 panels, report export | Live gauges; shared UI package | Live gauges; `@auto/ui-components` |
 | **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert | Deeper campaign→repair playbooks | RecommendationService |
@@ -125,7 +125,7 @@ Expand dictionaries and ontology views so perception has more lawful fuel.
 |---|---|---|---|
 | A1 | Evidence panel per `mostSpecific` class | done | `Recognition.classEvidence` + `ClassEvidencePanel` (no Mode 06 in v1) |
 | A2 | Wire `verbalize` into Recognition API + Diagnosis UI | done | `Recognition.narration` + ontology-note fallback |
-| A3 | Mode 06 as recognition input where ontology allows | todo | Don’t invent monitor meanings |
+| A3 | Mode 06 as recognition input where ontology allows | done | Thin SAE/ISO OBDMID seed → perception → realize; unknown MIDs unlabeled |
 | A4 | Broader curated DTC/PID KB + ontology lint parity | partial | pid_map↔dictionary gate; P0456/P0316; still not full J2012 |
 | A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | Stub ≠ support |
 
@@ -450,6 +450,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Campaign-backed recommendations (R5) | 2026-07 | refresh → campaign/TSB cards; `generatedFromCampaignIds`; manual convert |
 | Evidence panel per proven class (A1) | 2026-07 | `Recognition.classEvidence`; Dashboard/Diagnosis `ClassEvidencePanel` |
 | Rich / catalyst / O2 DTC families | 2026-07 | new ontology + cartridges; FallingFuelTrim; realize fixtures |
+| Mode 06 meaning → recognition (A3) | 2026-07 | `mode06-dictionary.json`; failed monitors feed realize; UI labels |
 
 ---
 

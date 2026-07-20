@@ -1,16 +1,18 @@
+import { lookupMode06 } from "@auto/ontology";
 import type { ClassEvidence } from "@auto/semantic-types";
 
-/** Compact supporting DTCs / PIDs / freeze-frames nested under a proven class (A1). */
+/** Compact supporting DTCs / PIDs / freeze-frames / Mode 06 nested under a proven class. */
 export function ClassEvidencePanel({ evidence }: { evidence: ClassEvidence | undefined }) {
   if (!evidence) return null;
   const empty =
     evidence.dtcs.length === 0 &&
     evidence.pids.length === 0 &&
-    evidence.freezeFrames.length === 0;
+    evidence.freezeFrames.length === 0 &&
+    evidence.mode06.length === 0;
   if (empty) {
     return (
       <p className="mt-1.5 text-xs text-slate-400">
-        No supporting DTC / PID / freeze-frame observations on file for this class.
+        No supporting DTC / PID / freeze-frame / Mode 06 observations on file for this class.
       </p>
     );
   }
@@ -63,6 +65,21 @@ export function ClassEvidencePanel({ evidence }: { evidence: ClassEvidence | und
               </ul>
             </li>
           ))}
+        </ul>
+      )}
+      {evidence.mode06.length > 0 && (
+        <ul className="space-y-0.5">
+          {evidence.mode06.map((m) => {
+            const label = lookupMode06(m.mid)?.description;
+            return (
+              <li key={`${m.mid}:${m.tid}`}>
+                <span className="font-medium text-slate-500">Mode 06 </span>
+                {label ?? `MID ${m.mid}`}
+                {m.passed === false && <span className="ml-1 text-amber-700">fail</span>}
+                {m.passed === true && <span className="ml-1 text-slate-400">pass</span>}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

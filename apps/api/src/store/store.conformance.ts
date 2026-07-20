@@ -99,7 +99,7 @@ export function runStoreConformance(label: string, makeStore: () => Store): void
               ],
             },
           ],
-          mode06: [{ tid: "A1", mid: "01", value: 10, min: 0, max: 100, passed: true }],
+          mode06: [{ tid: "0B", mid: "A1", value: 10, min: 0, max: 100, passed: true }],
         }),
       );
 
