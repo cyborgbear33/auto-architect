@@ -220,6 +220,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Python obd-gateway (`scan` / `watch` / `discover` / `--simulate`) | shipped | `apps/obd-gateway` |
 | Ontology lint CI | shipped | `scripts/lint-ontology.mjs`, `.github/workflows/ci.yml` |
 | Auth / multi-user | **not yet** | see `FUTURE_FEATURES.md` |
+| Cascade prognosis (likely next failures) | **backlogged** | F6–F8 in `FUTURE_FEATURES.md`; research parked; ordinal bands not fake % |
 | Live Mode 06 / freeze-frame UI richness | partial | Edge populates FF + SAE-seed Mode 06; OBDMID labels + pass/fail; raw TID/MID behind debug |
 | LLM agent loop (propose-only) | **not yet** | garden has `agent-service`; auto does not |
 
