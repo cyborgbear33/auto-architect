@@ -382,7 +382,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Feature | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|
 | Expand DTC dictionary beyond Tigershark seed set | partial | medium | Rich/catalyst/O2 circuit+performance+heater + P0457; more P0xxx still open. | `dtc-dictionary.json`, ontology lint |
-| Fill GM EcoTec3 / Silverado engine-family cartridge | planned | high when truck available | Stub only until real DTCs/TSBs. | `gm-ecotec3-stub.ts`, vehicle profiles |
+| Fill GM Vortec 6.0 / Silverado 2500 HD OEM cartridge | planned | high when truck scans available | Profile is 2003 2500 HD gas 6.0L; stub inert until curated GM TSBs. | `gm-vortec-6.0-stub.ts`, vehicle profiles |
 | Bluetooth auto-discovery / MX+ preferred adapter profile | planned | medium | Less friction for scanning. | `obd_gateway/config.py`, `client.py` |
 | Propose-only LLM agent loop (advise pass) | planned | medium | LLM proposes, LOGOS disposes — not required for OBD correctness. | logos-bridge, cartridges, new `apps/agent-service` |
 | OpenAPI 3.1 export from Fastify | planned | low | External tooling once surface stabilizes. | `apps/api` routes |

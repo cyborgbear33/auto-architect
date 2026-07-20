@@ -37,10 +37,17 @@ Two modes:
 ```bash
 # one-shot: connect, read PIDs + DTCs once, POST one batch, exit
 python -m obd_gateway --vehicle-id veh:jeep-renegade-2015-latitude scan
+# gas truck (leave protocol auto-detect — do not force CAN on GMT800):
+python -m obd_gateway --vehicle-id veh:silverado-2500hd-2003 scan
 
 # continuous polling for a drive — repeats scan every --interval seconds
 python -m obd_gateway --vehicle-id veh:jeep-renegade-2015-latitude watch --interval 5
 ```
+
+Use the **same** `--vehicle-id` you have selected in the web UI so recognition
+and recommendations attach to the right profile. Today each `scan`/`watch`
+cycle posts Mode 01 PIDs + Mode 03/07 DTCs; Mode 06 / freeze-frame population
+from the edge is still backlog (API/UI can display them when present).
 
 Try it with no hardware and no API running first:
 

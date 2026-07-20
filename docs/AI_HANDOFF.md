@@ -172,7 +172,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Gateway Mode 01 PID metadata parity (S7 slice) | shipped | All `STANDARD_PID_COMMANDS` seeded; P0456/P0316 on existing concepts |
 | Ruff lint/format for obd-gateway (healthcheck + CI) | shipped | `apps/obd-gateway/pyproject.toml`, `pnpm obd-gateway:lint` |
 | Generic cartridges (misfire, lean, EVAP, cam/crank) | shipped | `packages/cartridges/src/*.ts` |
-| FCA MultiAir cartridge + GM EcoTec3 stub | shipped | `fca-tigershark-2.4.ts`, `gm-ecotec3-stub.ts` |
+| FCA MultiAir cartridge + GM Vortec 6.0 stub | shipped | `fca-tigershark-2.4.ts`, `gm-vortec-6.0-stub.ts`; vehicle `veh:silverado-2500hd-2003` |
 | `@auto/logos-bridge` + `FakeLogosBridge` | shipped | `packages/logos-bridge` |
 | Real-LOGOS integration tests (realize/reason/schema), run for real in CI | shipped | `packages/logos-bridge/src/*-integration.test.ts`, `ontology-lint` CI job only |
 | Ontology Zod registries + engineFamily→view→cartridge lint | shipped | `packages/ontology/src/schemas.ts`, `lint.ts` |
@@ -192,7 +192,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Rich / catalyst / O2 DTC families | shipped | cartridges + ontology; FallingFuelTrim; DTC-only cat/O2 |
 | Mode 06 meaning → recognition (A3) | shipped | SAE/ISO OBDMID seed; failed monitors → realize; labeled UI |
 | O2 performance + A4 SAE seed slice | shipped | P0131–34/P0151–54; Mode 06 $01/$05; O2 voltage PIDs; P0457 |
-| EGR / secondary air / downstream O2 | shipped | cartridges + Mode 06; GM shares SAE set; stub still inert |
+| EGR / secondary air / downstream O2 | shipped | cartridges + Mode 06; Vortec 6.0 shares SAE set; OEM stub still inert |
 | Freeze-frame + Mode 06 UI | shipped | `EvidencePanels` on Dashboard |
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |

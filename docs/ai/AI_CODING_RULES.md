@@ -69,7 +69,7 @@ notably `EgrFlowCode`, `EgrCircuitCode`, `SecondaryAirCode`,
 `DtcObservation`, `PidReading`, `DiagnosticProblem`, `DiagnosticSolution`,
 `Recommendation`, `DecisionRecord`.
 
-**Engine families:** `fca-tigershark-2.4`, `gm-ecotec3-tbd` (stub).
+**Engine families:** `fca-tigershark-2.4`, `gm-vortec-6.0` (SAE set + inert stub).
 
 ---
 

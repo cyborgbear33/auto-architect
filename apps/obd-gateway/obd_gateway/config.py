@@ -66,6 +66,7 @@ class GatewayConfig:
         if not self.vehicle_id:
             raise ValueError(
                 "no vehicle id configured — set AUTO_VEHICLE_ID or pass --vehicle-id "
-                "(e.g. veh:jeep-renegade-2015-latitude; see packages/ontology/vehicle-profiles.json)"
+                "(e.g. veh:jeep-renegade-2015-latitude or veh:silverado-2500hd-2003; "
+                "see packages/ontology/vehicle-profiles.json)"
             )
         return self.vehicle_id

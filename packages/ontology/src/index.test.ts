@@ -20,11 +20,18 @@ describe("ontology registries", () => {
     expect(getEngineFamilyCartridges("fca-tigershark-2.4")).toContain("fca-tigershark-2.4");
   });
 
-  it("resolves the Silverado stub to the generic view with SAE cartridges + inert GM stub", () => {
-    expect(getEngineFamilyView("gm-ecotec3-tbd")).toBe("generic");
-    expect(getEngineFamilyCartridges("gm-ecotec3-tbd")).not.toContain("fca-tigershark-2.4");
-    expect(getEngineFamilyCartridges("gm-ecotec3-tbd")).toEqual(
-      expect.arrayContaining(["egr", "secondary-air", "o2-sensor", "gm-ecotec3-stub"]),
+  it("resolves the 2003 Silverado 2500 HD to Vortec 6.0 with SAE cartridges + inert stub", () => {
+    const truck = getVehicleProfile("veh:silverado-2500hd-2003");
+    expect(truck).toMatchObject({
+      make: "Chevrolet",
+      model: "Silverado 2500 HD",
+      year: 2003,
+      engineFamily: "gm-vortec-6.0",
+    });
+    expect(getEngineFamilyView("gm-vortec-6.0")).toBe("generic");
+    expect(getEngineFamilyCartridges("gm-vortec-6.0")).not.toContain("fca-tigershark-2.4");
+    expect(getEngineFamilyCartridges("gm-vortec-6.0")).toEqual(
+      expect.arrayContaining(["egr", "secondary-air", "o2-sensor", "gm-vortec-6.0-stub"]),
     );
   });
 

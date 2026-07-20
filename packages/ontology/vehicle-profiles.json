@@ -9,14 +9,14 @@
       "obdProtocol": "ISO 15765-4 (CAN, 500 kbps)",
       "notes": "2.4L Tigershark MultiAir2 (sales code ED6/ED8/EDD/EDE range). In scope for Customer Satisfaction Notifications W80 (oil consumption inspection) and W84 (PCM reprogramming) — see known-campaigns.json."
     },
-    "veh:silverado-tbd": {
+    "veh:silverado-2500hd-2003": {
       "make": "Chevrolet",
-      "model": "Silverado",
-      "year": null,
-      "trim": null,
-      "engineFamily": "gm-ecotec3-tbd",
+      "model": "Silverado 2500 HD",
+      "year": 2003,
+      "trim": "2500 HD",
+      "engineFamily": "gm-vortec-6.0",
       "obdProtocol": null,
-      "notes": "Stub profile proving the multi-vehicle extension point. Shares the full SAE-generic cartridge set; OEM-specific depth waits on a real truck (year/trim/VIN + confirmed EcoTec3/Duramax family + GM TSBs). Do not invent GM fault classes in the stub cartridge."
+      "notes": "Unleaded gasoline 6.0L V8 (Vortec 6000 / LQ4-class on GMT800). Confirm exact RPO from VIN/glovebox sticker when convenient. OBD protocol is typically ELM327 auto-detect on this era (often SAE J1850 VPW on GMT800 — do not hard-force CAN). Shares SAE-generic cartridges; OEM-specific depth lives in gm-vortec-6.0-stub once curated TSBs exist. Do not invent GM-enhanced fault classes."
     }
   },
   "engineFamilies": {
@@ -36,8 +36,8 @@
         "fca-tigershark-2.4"
       ]
     },
-    "gm-ecotec3-tbd": {
-      "label": "GM EcoTec3 family (stub — confirm exact engine once Silverado is added)",
+    "gm-vortec-6.0": {
+      "label": "GM Vortec 6.0L V8 (LQ4-class; e.g. 2003 Silverado 2500 HD gas)",
       "view": "generic",
       "cartridges": [
         "misfire",
@@ -49,7 +49,7 @@
         "egr",
         "secondary-air",
         "cam-crank-correlation",
-        "gm-ecotec3-stub"
+        "gm-vortec-6.0-stub"
       ]
     }
   }

@@ -41,11 +41,16 @@ describe("runPerception", () => {
   });
 
   it("only loads Tigershark-only concepts (MultiAirFault) for the fca-tigershark-2.4 engine family", () => {
-    const generic = resolveCartridgesForEngineFamily("gm-ecotec3-tbd");
-    const abox = runPerception("veh:silverado", [{ code: "P0011", status: "stored" }], {}, generic);
-    // P0011 maps to MultiAirFault in the DTC dictionary, but the generic engine
-    // family's cartridges don't include fca-tigershark-2.4, so nothing fires.
-    expect(abox.concepts["veh:silverado:multiair-fault"]).toBeUndefined();
+    const generic = resolveCartridgesForEngineFamily("gm-vortec-6.0");
+    const abox = runPerception(
+      "veh:silverado-2500hd-2003",
+      [{ code: "P0011", status: "stored" }],
+      {},
+      generic,
+    );
+    // P0011 maps to MultiAirFault in the DTC dictionary, but Vortec cartridges
+    // don't include fca-tigershark-2.4, so nothing fires.
+    expect(abox.concepts["veh:silverado-2500hd-2003:multiair-fault"]).toBeUndefined();
   });
 
   it("ignores permanent-only DTCs (not currently active)", () => {

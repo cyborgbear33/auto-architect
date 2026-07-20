@@ -20,7 +20,7 @@ apps/obd-gateway (Python)  --POST Observations-->  apps/api (Fastify)  <--HTTP--
 - **`apps/api`** (Fastify + TypeScript): the deterministic core. `RecognitionService` turns observations into ABox facts and calls LOGOS `realize` to prove fault classes (never synthesizes a fake "Healthy"). `PolicyService` calls `reason` for real safety holds. `SolverService` calls `solve` to rank next actions. `ActionService` is the single mutation gate — every state change goes through it, with an audit trail (`DecisionRecord`).
 - **`apps/web-ui`** (React 19 + Vite + TanStack Router/Query + Redux Toolkit + Tailwind): vehicle picker, live DTC/PID dashboard, a Diagnosis page that drafts/solves `DiagnosticProblem`s and demonstrates the safety-hold policy gate, a recall/TSB matcher, and a decision journal.
 - **`packages/ontology`**: the DL TBox (`dl-ontology.json`) — SAE-generic fault classes (misfire, lean fuel, EVAP leak, cam/crank correlation) in a `generic` view, plus an engine-family-specific view (`fca-tigershark-2.4`) for MultiAir oil-starvation. A vehicle-profile registry (`vehicle-profiles.json`) maps each vehicle to an engine family, which selects both the ontology view and the cartridges to load. Also owns a curated DTC dictionary and known campaigns (TSB 05-047-457A, recalls W80/W84).
-- **`packages/cartridges`**: perception rules (PID/DTC → ABox assertions) and framing rules (proven class → `DiagnosticProblem` draft with a ranked action playbook). Generic cartridges apply to every vehicle; `fca-tigershark-2.4.ts` only loads for that engine family. `gm-ecotec3-stub.ts` is a deliberately inert stub proving a second vehicle (e.g. a Silverado) needs zero changes to the base TBox or generic cartridges.
+- **`packages/cartridges`**: perception rules (PID/DTC → ABox assertions) and framing rules (proven class → `DiagnosticProblem` draft with a ranked action playbook). Generic cartridges apply to every vehicle; `fca-tigershark-2.4.ts` only loads for that engine family. `gm-vortec-6.0-stub.ts` is a deliberately inert stub for the 2003 Silverado 2500 HD (Vortec 6.0) — second vehicle, zero changes to the base TBox or generic cartridges until curated GM TSBs exist.
 - **`packages/logos-bridge`**: the Node↔Python seam to the LOGOS engine (`@auto/logos-bridge`), ported unchanged from garden-architect's `@garden/logos-bridge`. Ships a `FakeLogosBridge` for Python-free unit tests.
 - **`packages/semantic-types`** / **`packages/validation`**: the shared camelCase vocabulary and Zod input contracts every app speaks.
 - **`packages/game-theory`**: pure, dependency-free game-theory core (decision/zero-sum/cooperative analysis) used by `solve`'s ranking, ported unchanged from garden-architect.
@@ -77,17 +77,19 @@ CI (`.github/workflows/ci.yml`) runs typecheck, Biome, tests, ontology lint, and
 
 Guidance is layered: shared propose/dispose fundamentals → auto product guides → OBD/hardware standards.
 
-## Adding a second vehicle (e.g. a Silverado)
+## Adding / deepening a second vehicle (Silverado)
 
-See [`docs/ai/ADD_A_VEHICLE.md`](docs/ai/ADD_A_VEHICLE.md). Short version:
+The 2003 Silverado 2500 HD gas truck is already profiled as
+`veh:silverado-2500hd-2003` → `gm-vortec-6.0`. See
+[`docs/ai/ADD_A_VEHICLE.md`](docs/ai/ADD_A_VEHICLE.md) for OEM-depth steps and
+the live OBD scan operator path. Short version for GM-specific depth:
 
-1. Research the real engine family (e.g. EcoTec3 5.3L) and its documented fault codes/TSBs.
-2. Add any engine-family-specific DL classes to `packages/ontology/dl-ontology.json` behind a new view (mirror `fca-tigershark-2.4`).
-3. Fill in `packages/cartridges/src/gm-ecotec3-stub.ts`'s perception/framing rules (mirror `fca-tigershark-2.4.ts`).
-4. Add the vehicle + engine family to `packages/ontology/vehicle-profiles.json`.
-5. Run `pnpm lint:ontology` — it will catch any class the cartridge references that the ontology doesn't declare.
+1. Confirm RPO / curated TSBs for the Vortec 6.0 (do not invent EcoTec3 codes).
+2. Add OEM DL classes behind a `gm-vortec-6.0` view only if SAE-generic is insufficient.
+3. Fill `packages/cartridges/src/gm-vortec-6.0-stub.ts` (mirror `fca-tigershark-2.4.ts`).
+4. Run `pnpm lint:ontology`.
 
-No changes to the generic TBox, generic cartridges, API services, or UI are required.
+No changes to the generic TBox, generic cartridges, API services, or UI are required for SAE-only coverage.
 
 ## Repository
 

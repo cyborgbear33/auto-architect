@@ -4,7 +4,7 @@ import { catalystCartridge } from "./catalyst.ts";
 import { egrCartridge } from "./egr.ts";
 import { evapCartridge } from "./evap.ts";
 import { fcaTigershark24Cartridge } from "./fca-tigershark-2.4.ts";
-import { gmEcotec3StubCartridge } from "./gm-ecotec3-stub.ts";
+import { gmVortec60StubCartridge } from "./gm-vortec-6.0-stub.ts";
 import { leanFuelCartridge } from "./lean-fuel.ts";
 import { misfireCartridge } from "./misfire.ts";
 import { o2SensorCartridge } from "./o2-sensor.ts";
@@ -24,7 +24,7 @@ export const cartridgeRegistry: Record<string, Cartridge> = {
   [secondaryAirCartridge.name]: secondaryAirCartridge,
   [camCrankCorrelationCartridge.name]: camCrankCorrelationCartridge,
   [fcaTigershark24Cartridge.name]: fcaTigershark24Cartridge,
-  [gmEcotec3StubCartridge.name]: gmEcotec3StubCartridge,
+  [gmVortec60StubCartridge.name]: gmVortec60StubCartridge,
 };
 
 export const allCartridges: Cartridge[] = Object.values(cartridgeRegistry);

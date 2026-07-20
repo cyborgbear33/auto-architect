@@ -124,9 +124,10 @@ the store. Handlers do not mutate state except via `ActionService`.
 - `fca-tigershark-2.4` — generic + `MultiAirOilStarvation`
 
 `VehicleService` resolves a vehicle's engine family, which selects the TBox view
-slice and the cartridge list. Adding a Silverado means filling
-`veh:silverado-tbd` / `gm-ecotec3-tbd` and fleshing `gm-ecotec3-stub.ts` — not
-forking the generic TBox.
+slice and the cartridge list. The 2003 Silverado 2500 HD uses
+`veh:silverado-2500hd-2003` / `gm-vortec-6.0` with an inert
+`gm-vortec-6.0-stub.ts` until curated GM TSBs exist — not forking the generic
+TBox.
 
 ---
 
@@ -138,9 +139,10 @@ Each cartridge in `packages/cartridges` packages:
 2. **Framing** — proven class → `DiagnosticProblem` draft with `desiredState.successCriteria`
    and a ranked candidate-action playbook
 
-Registered today: `misfire`, `lean-fuel`, `evap`, `cam-crank-correlation`,
-`fca-tigershark-2.4`, plus inert `gm-ecotec3-stub`. Catalog/cartridge parity is
-enforced by `pnpm lint:ontology` and `packages/cartridges/src/ontology-lint.test.ts`.
+Registered today: SAE generics (misfire, lean/rich, EVAP, catalyst, O2, EGR,
+secondary air, cam/crank), `fca-tigershark-2.4`, plus inert `gm-vortec-6.0-stub`.
+Catalog/cartridge parity is enforced by `pnpm lint:ontology` and
+`packages/cartridges/src/ontology-lint.test.ts`.
 
 ---
 
