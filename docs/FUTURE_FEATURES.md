@@ -348,7 +348,7 @@ print later. One template, two scopes (vehicle snapshot vs single case).
 | G2b | Garage JSON dump + CSV tables + JSON import | done | `GarageExportService`, Journal panel |
 | G3 | Print-friendly HTML / PDF | done | Report `html` + print CSS; Print button (browser print-to-PDF) |
 | G4 | Include verbalized proofs + campaign refs | done | Narration + campaigns in Markdown |
-| G5 | Optional “attach last drive session summary” | todo | Session model shipped; attach to report next |
+| G5 | Optional “attach last drive session summary” | done | Report `lastSession` + Markdown/HTML section |
 
 **Seams:** recognition, problems, decisions, campaigns, verbalize, Journal.  
 **Anti-patterns:** Editing domain facts inside a report; PDF-only first;
@@ -368,12 +368,12 @@ canonical breakdown; backlog rows are schedulable delivery units.
 |---|---|---|---|---|---|
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | high | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
 | Durable observation history + freeze-frame retention | S5, H3 | done (S5) | high | Prune keeps FF/Mode06/DTCs; hourly PID downsample; H3 still open. | `ObservationService.applyRetention` |
-| Continuous drive session recorder | S4, H3, F4, G5 | done (S4) | medium | Sessions + simulate; live MX+ watch link + H3/F4/G5 remain. | `DriveSessionService`, Dashboard |
+| Continuous drive session recorder | S4, H3, F4, G5 | done (S4/G5) | medium | Sessions + report attach; live MX+ watch link + H3/F4 remain. | `DriveSessionService`, `ReportService` |
 | Problem caseboard + verify-after-repair + reopen | P2–P5, X5 | done | medium | Caseboard + verify-before-solved shipped. | `DiagnosticProblem`, Diagnosis UI |
 | Case timeline (problems + decisions) | H2 | done | medium | Case narrative on Diagnosis / ProblemDetail; Journal stays audit. | `CaseTimelineService` |
 | Recommendation card richness + status lifecycle UI | R2, R3 | planned | medium | Cost/risk; accept/dismiss/convert (confidence shipped). | Dashboard, RecommendationsService |
 | Multi-signal trend expansion (beyond oil) | F3 | done | medium | LTFT + load → realize; coolant UI-only. | ForecastService, recognition |
-| Print/PDF diagnostic report polish | G3, G5 | done (G3) | medium | Print HTML shipped; G5 session summary attach still open. | `ReportService`, `ReportDownload` |
+| Print/PDF diagnostic report polish | G3, G5 | done | medium | Print HTML + last-session summary on reports. | `ReportService`, `ReportDownload` |
 | Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | planned | high | Shared KB; land gates first (`HARDWARE_STANDARDS.md`). | dictionaries, ontology lint |
 | Shared `@auto/ui-components` | I5 | planned | medium | Consistent trust/evidence UI. | `UX_GUIDELINES` |
 
@@ -442,6 +442,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Print-friendly diagnostic report HTML (G3) | 2026-07 | `ReportService` `html` + print CSS, `ReportDownload` Print |
 | Drive sessions + simulated upload (S4) | 2026-07 | `DriveSessionService`, `drive_sessions` table, Dashboard `DriveSessionsPanel` |
 | Observation retention / PID downsample (S5) | 2026-07 | `applyRetention`, `POST .../observations/prune` |
+| Attach last drive session to diagnostic report (G5) | 2026-07 | `DriveSessionSummary`, `ReportService.lastSession` |
 
 ---
 

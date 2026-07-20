@@ -101,6 +101,7 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         generatedAt: "2026-07-19T12:00:00.000Z",
         markdown: "# report",
         html: "<html><body>report</body></html>",
+        lastSession: null,
       }),
       listDriveSessions: vi.fn().mockResolvedValue([]),
       simulateDriveSession: vi.fn(),

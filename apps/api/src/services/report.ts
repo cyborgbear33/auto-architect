@@ -5,6 +5,7 @@
 import type {
   DecisionRecord,
   DiagnosticProblem,
+  DriveSessionSummary,
   EvidenceProvenance,
   Recognition,
   Recommendation,
@@ -12,6 +13,7 @@ import type {
 } from "@auto/semantic-types";
 import type { ActionService } from "./actions.ts";
 import type { CampaignService } from "./campaigns.ts";
+import type { DriveSessionService } from "./drive-sessions.ts";
 import type { ObservationService } from "./observations.ts";
 import type { RecognitionService } from "./recognition.ts";
 import type { RecommendationService } from "./recommendations.ts";
@@ -25,6 +27,8 @@ export interface DiagnosticReport {
   markdown: string;
   /** Print-friendly HTML (same content as markdown) with embedded stylesheet. */
   html: string;
+  /** Most recent drive session rollup, when any session exists. */
+  lastSession: DriveSessionSummary | null;
 }
 
 export class ReportService {
@@ -35,19 +39,28 @@ export class ReportService {
     private recommendations: RecommendationService,
     private actions: ActionService,
     private campaigns: CampaignService,
+    private driveSessions: DriveSessionService,
   ) {}
 
   async forVehicle(vehicleId: string): Promise<DiagnosticReport> {
     const vehicle = await this.vehicles.getOrThrow(vehicleId);
-    const [provenance, recognition, problems, decisions, recommendations, campaignPack] =
-      await Promise.all([
-        this.observations.provenance(vehicleId),
-        this.recognition.recognize(vehicleId),
-        this.actions.listDiagnosticProblems(vehicleId),
-        this.actions.listDecisions(vehicleId),
-        this.recommendations.list(vehicleId),
-        this.campaigns.forVehicle(vehicleId),
-      ]);
+    const [
+      provenance,
+      recognition,
+      problems,
+      decisions,
+      recommendations,
+      campaignPack,
+      lastSession,
+    ] = await Promise.all([
+      this.observations.provenance(vehicleId),
+      this.recognition.recognize(vehicleId),
+      this.actions.listDiagnosticProblems(vehicleId),
+      this.actions.listDecisions(vehicleId),
+      this.recommendations.list(vehicleId),
+      this.campaigns.forVehicle(vehicleId),
+      this.driveSessions.summarizeLast(vehicleId),
+    ]);
     const markdown = composeMarkdown({
       scope: "vehicle",
       vehicle,
@@ -58,18 +71,20 @@ export class ReportService {
       recommendations,
       campaigns: campaignPack.campaigns.map((c) => c.title),
       tsbs: campaignPack.tsbs.map((t) => t.title),
+      lastSession,
     });
-    return wrapReport("vehicle", vehicleId, undefined, markdown);
+    return wrapReport("vehicle", vehicleId, undefined, markdown, lastSession);
   }
 
   async forProblem(problemId: string): Promise<DiagnosticReport> {
     const problem = await this.actions.getDiagnosticProblem(problemId);
     const vehicle = await this.vehicles.getOrThrow(problem.vehicleId);
-    const [provenance, recognition, decisions, recommendations] = await Promise.all([
+    const [provenance, recognition, decisions, recommendations, lastSession] = await Promise.all([
       this.observations.provenance(problem.vehicleId),
       this.recognition.recognize(problem.vehicleId),
       this.actions.listDecisions(problem.vehicleId),
       this.recommendations.list(problem.vehicleId),
+      this.driveSessions.summarizeLast(problem.vehicleId),
     ]);
     const relatedDecisions = decisions.filter((d) => d.problemId === problemId);
     const markdown = composeMarkdown({
@@ -85,8 +100,9 @@ export class ReportService {
       campaigns: [],
       tsbs: [],
       focusProblemId: problemId,
+      lastSession,
     });
-    return wrapReport("problem", problem.vehicleId, problemId, markdown);
+    return wrapReport("problem", problem.vehicleId, problemId, markdown, lastSession);
   }
 }
 
@@ -95,6 +111,7 @@ function wrapReport(
   vehicleId: string,
   problemId: string | undefined,
   markdown: string,
+  lastSession: DriveSessionSummary | null,
 ): DiagnosticReport {
   return {
     scope,
@@ -103,6 +120,7 @@ function wrapReport(
     generatedAt: new Date().toISOString(),
     markdown,
     html: markdownToPrintHtml(markdown),
+    lastSession,
   };
 }
 
@@ -228,6 +246,59 @@ ${htmlBody.join("\n")}
 </html>`;
 }
 
+function formatDuration(sec: number): string {
+  if (sec < 60) return `${sec}s`;
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return s === 0 ? `${m}m` : `${m}m ${s}s`;
+}
+
+function appendLastSessionSection(lines: string[], summary: DriveSessionSummary | null): void {
+  lines.push("## Last drive session");
+  if (!summary) {
+    lines.push("No drive sessions on file.");
+    lines.push("");
+    return;
+  }
+  const s = summary.session;
+  lines.push(`- **Id:** \`${s.id}\``);
+  if (s.label) lines.push(`- **Label:** ${s.label}`);
+  lines.push(`- **Source:** ${s.source}${summary.open ? " (in progress)" : ""}`);
+  lines.push(`- **Started:** ${s.startedAt}`);
+  if (s.endedAt) lines.push(`- **Ended:** ${s.endedAt}`);
+  if (summary.durationSec !== undefined) {
+    lines.push(`- **Duration:** ${formatDuration(summary.durationSec)}`);
+  }
+  lines.push(`- **Batches:** ${summary.batchCount}`);
+  if (s.odometerStartMiles !== undefined || s.odometerEndMiles !== undefined) {
+    const start = s.odometerStartMiles !== undefined ? `${s.odometerStartMiles}` : "?";
+    const end = s.odometerEndMiles !== undefined ? `${s.odometerEndMiles}` : "?";
+    lines.push(`- **Odometer:** ${start} → ${end} mi`);
+  }
+  if (summary.dtcCodes.length > 0) {
+    lines.push(`- **DTCs seen:** ${summary.dtcCodes.join(", ")}`);
+  } else {
+    lines.push("- **DTCs seen:** none");
+  }
+  const peaks: string[] = [];
+  if (summary.maxRpm !== undefined) peaks.push(`RPM ${summary.maxRpm}`);
+  if (summary.maxEngineLoad !== undefined) peaks.push(`load ${summary.maxEngineLoad}%`);
+  if (summary.maxShortFuelTrim1 !== undefined) {
+    peaks.push(`STFT ${summary.maxShortFuelTrim1}%`);
+  }
+  if (peaks.length > 0) lines.push(`- **PID peaks:** ${peaks.join(", ")}`);
+  if (summary.coolantMinC !== undefined && summary.coolantMaxC !== undefined) {
+    lines.push(`- **Coolant:** ${summary.coolantMinC}–${summary.coolantMaxC} °C`);
+  }
+  if (summary.freezeFrameCount > 0) {
+    lines.push(`- **Freeze frames:** ${summary.freezeFrameCount}`);
+  }
+  if (summary.mode06Count > 0) {
+    lines.push(`- **Mode 06 results:** ${summary.mode06Count}`);
+  }
+  lines.push("");
+}
+
 function composeMarkdown(input: {
   scope: "vehicle" | "problem";
   vehicle: VehicleProfile;
@@ -239,6 +310,7 @@ function composeMarkdown(input: {
   campaigns: string[];
   tsbs: string[];
   focusProblemId?: string;
+  lastSession: DriveSessionSummary | null;
 }): string {
   const v = input.vehicle;
   const label = `${v.year ?? ""} ${v.make} ${v.model} ${v.trim ?? ""}`.replace(/\s+/g, " ").trim();
@@ -263,6 +335,8 @@ function composeMarkdown(input: {
     lines.push(`- **Sources seen:** ${input.provenance.sourcesSeen.join(", ")}`);
   }
   lines.push("");
+
+  appendLastSessionSection(lines, input.lastSession);
 
   lines.push("## Proven fault classes");
   if (input.recognition.mostSpecific.length === 0) {

@@ -2,7 +2,12 @@
  * Drive sessions group observation batches from a watch/sim drive.
  * Simulated uploads exercise the path without live MX+ hardware.
  */
-import type { DriveSession, ObservationBatch, RetentionResult } from "@auto/semantic-types";
+import type {
+  DriveSession,
+  DriveSessionSummary,
+  ObservationBatch,
+  RetentionResult,
+} from "@auto/semantic-types";
 import type {
   EndDriveSessionInput,
   SimulateDriveSessionInput,
@@ -30,6 +35,25 @@ export class DriveSessionService {
     const session = await this.store.sessions.get(sessionId);
     if (!session) throw notFound("DriveSession", sessionId);
     return session;
+  }
+
+  /**
+   * Most recent ended session, else the open session, else null.
+   * Used by ReportService (G5) — compose-only.
+   */
+  async summarizeLast(vehicleId: string): Promise<DriveSessionSummary | null> {
+    await this.vehicles.getOrThrow(vehicleId);
+    const sessions = await this.store.sessions.listByVehicle(vehicleId);
+    if (sessions.length === 0) return null;
+    const ended = sessions
+      .filter((s) => s.endedAt)
+      .sort((a, b) => (b.endedAt ?? b.startedAt).localeCompare(a.endedAt ?? a.startedAt));
+    const session = ended[0] ?? sessions.find((s) => !s.endedAt) ?? sessions[0];
+    if (!session) return null;
+    const batches = (await this.store.observations.listBatches(vehicleId)).filter(
+      (b) => b.sessionId === session.id,
+    );
+    return buildSessionSummary(session, batches);
   }
 
   async start(input: StartDriveSessionInput): Promise<DriveSession> {
@@ -124,4 +148,57 @@ export class DriveSessionService {
   async applyRetention(vehicleId: string): Promise<RetentionResult> {
     return this.observations.applyRetention(vehicleId);
   }
+}
+
+function pidMax(batches: ObservationBatch[], pid: string): number | undefined {
+  let max: number | undefined;
+  for (const b of batches) {
+    for (const p of b.pids ?? []) {
+      if (p.pid !== pid) continue;
+      max = max === undefined ? p.value : Math.max(max, p.value);
+    }
+  }
+  return max;
+}
+
+function pidMin(batches: ObservationBatch[], pid: string): number | undefined {
+  let min: number | undefined;
+  for (const b of batches) {
+    for (const p of b.pids ?? []) {
+      if (p.pid !== pid) continue;
+      min = min === undefined ? p.value : Math.min(min, p.value);
+    }
+  }
+  return min;
+}
+
+/** Pure session rollup — exported for unit tests. */
+export function buildSessionSummary(
+  session: DriveSession,
+  batches: ObservationBatch[],
+): DriveSessionSummary {
+  const sorted = [...batches].sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
+  const dtcCodes = [...new Set(sorted.flatMap((b) => (b.dtcs ?? []).map((d) => d.code)))].sort();
+  const freezeFrameCount = sorted.reduce((n, b) => n + (b.freezeFrames?.length ?? 0), 0);
+  const mode06Count = sorted.reduce((n, b) => n + (b.mode06?.length ?? 0), 0);
+  const endMs = session.endedAt ? Date.parse(session.endedAt) : undefined;
+  const startMs = Date.parse(session.startedAt);
+  const durationSec =
+    endMs !== undefined && !Number.isNaN(endMs) && !Number.isNaN(startMs)
+      ? Math.max(0, Math.round((endMs - startMs) / 1000))
+      : undefined;
+  return {
+    session,
+    open: !session.endedAt,
+    durationSec,
+    batchCount: session.batchCount ?? sorted.length,
+    dtcCodes,
+    freezeFrameCount,
+    mode06Count,
+    maxRpm: pidMax(sorted, "RPM"),
+    maxEngineLoad: pidMax(sorted, "ENGINE_LOAD"),
+    maxShortFuelTrim1: pidMax(sorted, "SHORT_FUEL_TRIM_1"),
+    coolantMinC: pidMin(sorted, "COOLANT_TEMP"),
+    coolantMaxC: pidMax(sorted, "COOLANT_TEMP"),
+  };
 }

@@ -13,6 +13,7 @@ import type {
   DecisionRecord,
   DiagnosticProblem,
   DriveSession,
+  DriveSessionSummary,
   DtcObservation,
   EvidenceProvenance,
   FreezeFrame,
@@ -28,6 +29,16 @@ import type {
   SolutionHistory,
   VehicleProfile,
 } from "@auto/semantic-types";
+
+export type DiagnosticReportDto = {
+  scope: "vehicle" | "problem";
+  vehicleId: string;
+  problemId?: string;
+  generatedAt: string;
+  markdown: string;
+  html: string;
+  lastSession: DriveSessionSummary | null;
+};
 
 export class ApiError extends Error {
   constructor(
@@ -123,8 +134,7 @@ export class AutoApiClient {
       let message = text || res.statusText;
       try {
         const body = text ? JSON.parse(text) : undefined;
-        message =
-          (body as { error?: { message?: string } } | undefined)?.error?.message ?? message;
+        message = (body as { error?: { message?: string } } | undefined)?.error?.message ?? message;
       } catch {
         /* raw text error */
       }
@@ -246,23 +256,9 @@ export class AutoApiClient {
   exportTimelineCsv = (vehicleId: string) =>
     this.requestText(`/api/vehicles/${enc(vehicleId)}/export/timeline.csv`);
   getVehicleReport = (vehicleId: string) =>
-    this.request<{
-      scope: "vehicle" | "problem";
-      vehicleId: string;
-      problemId?: string;
-      generatedAt: string;
-      markdown: string;
-      html: string;
-    }>(`/api/vehicles/${enc(vehicleId)}/report`);
+    this.request<DiagnosticReportDto>(`/api/vehicles/${enc(vehicleId)}/report`);
   getProblemReport = (problemId: string) =>
-    this.request<{
-      scope: "vehicle" | "problem";
-      vehicleId: string;
-      problemId?: string;
-      generatedAt: string;
-      markdown: string;
-      html: string;
-    }>(`/api/problems/${enc(problemId)}/report`);
+    this.request<DiagnosticReportDto>(`/api/problems/${enc(problemId)}/report`);
   getFreezeFrames = (vehicleId: string) =>
     this.request<{ freezeFrames: FreezeFrame[] }>(
       `/api/vehicles/${enc(vehicleId)}/freeze-frame`,

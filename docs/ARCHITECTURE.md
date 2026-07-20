@@ -155,7 +155,7 @@ enforced by `pnpm lint:ontology` and `packages/cartridges/src/ontology-lint.test
 | `ActionService` | — | Sole mutation gate + `DecisionRecord` audit |
 | `ObservationService` | — | Ingest batches; provenance; live gauges; retention prune |
 | `DriveSessionService` | — | Start/end/list sessions; simulate upload path |
-| `ReportService` | — | Markdown + print HTML diagnostic reports |
+| `ReportService` | — | Markdown + print HTML diagnostic reports; last session summary (G5) |
 | `CampaignsService` | — | Match vehicle vs known recalls/TSBs |
 | `RecommendationsService` | — | Surface ranked next steps to the UI |
 | `VehicleService` | — | Profiles, engine families, view resolution |
@@ -253,6 +253,6 @@ See [`FUTURE_FEATURES.md`](FUTURE_FEATURES.md) — especially **Product goals**.
 High-level gaps vs a complete garage product:
 
 - Live MX+ dry-run validation (S1); Bluetooth adapter discovery (S6)
-- Odometer on timeline events (H3); session-aware trends (F4); report session attach (G5)
+- Odometer on timeline events (H3); session-aware trends (F4)
 - OBD/CAN log import adapters (ELM, candump, MF4)
 - Auth / multi-user; shared UI package; LLM advise loop; full Silverado cartridge

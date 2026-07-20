@@ -44,7 +44,7 @@ allowed to append evidence; it still does not classify).
 | `ActionService` | via other services | Sole mutation + DecisionRecord |
 | `ObservationService` | no | Append / query batches; provenance; live gauges; retention prune |
 | `DriveSessionService` | no | Start/end/list; simulate session with linked batches |
-| `ReportService` | no | Markdown + print HTML reports (vehicle / problem) |
+| `ReportService` | no | Markdown + print HTML reports; attaches `lastSession` summary |
 | `SolutionHistoryService` | no | Roll up repair outcomes by action / class / family |
 | `CaseTimelineService` | no | Derive case narrative from problems + decisions |
 | `GarageExportService` | no (import mutates store) | JSON garage dump/restore + CSV tables |

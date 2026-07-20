@@ -67,6 +67,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     recommendations,
     actions,
     campaigns,
+    driveSessions,
   );
 
   return {

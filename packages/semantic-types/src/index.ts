@@ -111,6 +111,26 @@ export interface DriveSession {
   batchCount?: number;
 }
 
+/**
+ * Compose-only rollup of a drive session for reports / UI.
+ * Never invents fault classes — only aggregates linked batches.
+ */
+export interface DriveSessionSummary {
+  session: DriveSession;
+  /** Prefer ended sessions; true when summarizing an in-progress watch. */
+  open: boolean;
+  durationSec?: number;
+  batchCount: number;
+  dtcCodes: string[];
+  freezeFrameCount: number;
+  mode06Count: number;
+  maxRpm?: number;
+  maxEngineLoad?: number;
+  maxShortFuelTrim1?: number;
+  coolantMinC?: number;
+  coolantMaxC?: number;
+}
+
 /** Result of applying the observation retention policy. */
 export interface RetentionResult {
   vehicleId: SemanticId;
