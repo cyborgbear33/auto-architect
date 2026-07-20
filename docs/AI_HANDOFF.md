@@ -41,7 +41,8 @@ cartridge addition, not a rewrite.
 **Product reasons (maturity):** scanning, analysis, probabilistic diagnosis,
 informing the operator, recommendations, problem tracking, problem/solution
 history, history-informed future decisions, and reporting. Most are **partial**;
-reporting is **missing**. Summary + ideal solutions (work pieces S1…G5):
+Markdown + print reports shipped (G5 session attach still open). Summary + ideal
+solutions (work pieces S1…G5):
 [`FUTURE_FEATURES.md` § Product goals](FUTURE_FEATURES.md#product-goals-why-this-app-exists)
 and [§ Ideal solutions](FUTURE_FEATURES.md#ideal-solutions-by-goal).
 
@@ -192,6 +193,9 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Durable lifecycle event log | shipped | `lifecycleEvents` on `DiagnosticProblem`; ActionService append-only stamps |
 | Multi-signal trends (F3) | shipped | `ForecastService.summary`; RisingFuelTrim / RecurringHighLoad → realize |
 | Garage JSON + CSV export/import | shipped | `GarageExportService`, Journal Export panel; merge import with batch dedupe |
+| Print-friendly report HTML (G3) | shipped | Report `html` + print CSS; `ReportDownload` Print |
+| Drive sessions + simulate upload (S4) | shipped | `DriveSessionService`, Dashboard `DriveSessionsPanel` |
+| Observation retention (S5) | shipped | Keep DTC/FF/Mode06; hourly downsample of old PID-only batches |
 | Policy safety holds (`clear-codes-and-drive` under misfire / MultiAir oil starvation / cam-crank) | shipped | `PolicyService`, reason fixtures, Diagnosis UI |
 | Oil-level trend forecast | shipped | `ForecastService` |
 | React UI (5 routes) | shipped | `apps/web-ui` |

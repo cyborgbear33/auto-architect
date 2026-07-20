@@ -9,6 +9,7 @@ import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import type {
   DiagnosticProblem,
+  DriveSession,
   DtcObservation,
   FreezeFrame,
   Mode06Result,
@@ -26,6 +27,7 @@ import type {
   ObservationRepository,
   ProblemRepository,
   RecommendationRepository,
+  SessionRepository,
   Store,
   VehicleRepository,
 } from "./index.ts";
@@ -180,6 +182,59 @@ export function createDrizzleStore(databaseUrl: string): Store {
       }
       return [...byPid.values()];
     },
+
+    async replaceAll(vehicleId, next) {
+      await db
+        .delete(t.observationBatches)
+        .where(eq(t.observationBatches.vehicleId, vehicleId));
+      const sorted = [...next].sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
+      for (const batch of sorted) {
+        await observations.record(batch);
+      }
+    },
+  };
+
+  const sessions: SessionRepository = {
+    async create(session) {
+      await db.insert(t.driveSessions).values({
+        id: session.id,
+        vehicleId: session.vehicleId,
+        startedAt: session.startedAt,
+        endedAt: session.endedAt ?? null,
+        payload: session,
+      });
+      return session;
+    },
+    async get(id) {
+      const [row] = await db
+        .select()
+        .from(t.driveSessions)
+        .where(eq(t.driveSessions.id, id))
+        .limit(1);
+      return row?.payload;
+    },
+    async update(id, patch) {
+      const existing = await sessions.get(id);
+      if (!existing) throw notFound("DriveSession", id);
+      const updated: DriveSession = { ...existing, ...patch, id };
+      await db
+        .update(t.driveSessions)
+        .set({
+          startedAt: updated.startedAt,
+          endedAt: updated.endedAt ?? null,
+          payload: updated,
+        })
+        .where(eq(t.driveSessions.id, id));
+      return updated;
+    },
+    async listByVehicle(vehicleId) {
+      const rows = await db
+        .select()
+        .from(t.driveSessions)
+        .where(eq(t.driveSessions.vehicleId, vehicleId))
+        .orderBy(desc(t.driveSessions.startedAt));
+      return rows.map((r) => r.payload);
+    },
   };
 
   async function batchesFor(vehicleId: string): Promise<ObservationBatch[]> {
@@ -291,6 +346,7 @@ export function createDrizzleStore(databaseUrl: string): Store {
     driver: "postgres" as const,
     vehicles,
     observations,
+    sessions,
     problems,
     recommendations,
     decisions,
@@ -299,7 +355,7 @@ export function createDrizzleStore(databaseUrl: string): Store {
     },
     async reset() {
       await sql.unsafe(
-        `TRUNCATE vehicles, observation_batches, problems, recommendations, decisions;`,
+        `TRUNCATE vehicles, observation_batches, drive_sessions, problems, recommendations, decisions;`,
       );
     },
     async close() {

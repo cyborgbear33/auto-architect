@@ -12,6 +12,7 @@ import type {
   CaseTimeline,
   DecisionRecord,
   DiagnosticProblem,
+  DriveSession,
   DtcObservation,
   EvidenceProvenance,
   FreezeFrame,
@@ -20,8 +21,10 @@ import type {
   KnownCampaign,
   LiveGaugeStrip,
   Mode06Result,
+  ObservationBatch,
   Recognition,
   Recommendation,
+  RetentionResult,
   SolutionHistory,
   VehicleProfile,
 } from "@auto/semantic-types";
@@ -179,6 +182,41 @@ export class AutoApiClient {
     this.request<EvidenceProvenance>(`/api/vehicles/${enc(vehicleId)}/evidence-provenance`);
   getLiveGauges = (vehicleId: string) =>
     this.request<LiveGaugeStrip>(`/api/vehicles/${enc(vehicleId)}/live-gauges`);
+  listObservationBatches = (vehicleId: string) =>
+    this.request<{ batches: ObservationBatch[] }>(
+      `/api/vehicles/${enc(vehicleId)}/observation-batches`,
+    ).then((r) => r.batches);
+  pruneObservations = (vehicleId: string) =>
+    this.request<RetentionResult>(`/api/vehicles/${enc(vehicleId)}/observations/prune`, {
+      method: "POST",
+    });
+  listDriveSessions = (vehicleId: string) =>
+    this.request<{ sessions: DriveSession[] }>(`/api/vehicles/${enc(vehicleId)}/sessions`).then(
+      (r) => r.sessions,
+    );
+  startDriveSession = (input: {
+    vehicleId: string;
+    label?: string;
+    source?: ObservationBatch["source"];
+    odometerStartMiles?: number;
+  }) =>
+    this.request<DriveSession>("/api/actions/start-drive-session", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  endDriveSession = (sessionId: string, odometerEndMiles?: number) =>
+    this.request<DriveSession>("/api/actions/end-drive-session", {
+      method: "POST",
+      body: JSON.stringify({ sessionId, odometerEndMiles }),
+    });
+  simulateDriveSession = (vehicleId: string, label?: string) =>
+    this.request<{ session: DriveSession; batches: ObservationBatch[] }>(
+      "/api/actions/simulate-drive-session",
+      {
+        method: "POST",
+        body: JSON.stringify({ vehicleId, label }),
+      },
+    );
   getSolutionHistory = (vehicleId: string, faultClass?: string) => {
     const q = faultClass ? `?class=${enc(faultClass)}` : "";
     return this.request<SolutionHistory>(`/api/vehicles/${enc(vehicleId)}/solution-history${q}`);
@@ -214,6 +252,7 @@ export class AutoApiClient {
       problemId?: string;
       generatedAt: string;
       markdown: string;
+      html: string;
     }>(`/api/vehicles/${enc(vehicleId)}/report`);
   getProblemReport = (problemId: string) =>
     this.request<{
@@ -222,6 +261,7 @@ export class AutoApiClient {
       problemId?: string;
       generatedAt: string;
       markdown: string;
+      html: string;
     }>(`/api/problems/${enc(problemId)}/report`);
   getFreezeFrames = (vehicleId: string) =>
     this.request<{ freezeFrames: FreezeFrame[] }>(
@@ -339,6 +379,8 @@ export const queryKeys = {
   problems: (vehicleId: string) => ["problems", vehicleId] as const,
   problem: (id: string) => ["problem", id] as const,
   decisions: (vehicleId: string) => ["decisions", vehicleId] as const,
+  driveSessions: (vehicleId: string) => ["driveSessions", vehicleId] as const,
+  observationBatches: (vehicleId: string) => ["observationBatches", vehicleId] as const,
   solutionHistory: (vehicleId: string, faultClass?: string) =>
     ["solutionHistory", vehicleId, faultClass ?? null] as const,
   caseTimeline: (vehicleId: string, problemId?: string) =>

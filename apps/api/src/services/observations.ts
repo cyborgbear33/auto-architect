@@ -1,6 +1,12 @@
 import { lookupPid } from "@auto/ontology";
-import type { EvidenceProvenance, LiveGaugeStrip } from "@auto/semantic-types";
+import type {
+  EvidenceProvenance,
+  LiveGaugeStrip,
+  ObservationBatch,
+  RetentionResult,
+} from "@auto/semantic-types";
 import type { ObservationBatchInput } from "@auto/validation";
+import { notFound, validationError } from "../lib/errors.ts";
 import type { Store } from "../store/index.ts";
 import type { VehicleService } from "./vehicle.ts";
 
@@ -15,6 +21,9 @@ export const DEFAULT_LIVE_GAUGE_PIDS = [
 /** Age above this → strip marked stale (live watch should refresh faster). */
 export const LIVE_GAUGE_STALE_AFTER_MS = 15_000;
 
+/** PID-only batches newer than this are kept in full. */
+export const RETAIN_PID_FULL_MS = 30 * 24 * 60 * 60 * 1000;
+
 /** Ingests validated Observation batches from obd-gateway (or manual entry). Never realizes/solves itself. */
 export class ObservationService {
   constructor(
@@ -24,10 +33,22 @@ export class ObservationService {
 
   async record(input: ObservationBatchInput): Promise<void> {
     await this.vehicles.getOrThrow(input.vehicleId); // 404s early on an unknown vehicle
+    if (input.sessionId) {
+      const session = await this.store.sessions.get(input.sessionId);
+      if (!session) throw notFound("DriveSession", input.sessionId);
+      if (session.vehicleId !== input.vehicleId) {
+        throw validationError(`Session "${input.sessionId}" belongs to a different vehicle.`);
+      }
+    }
     await this.store.observations.record(input);
     if (input.odometerMiles !== undefined) {
       await this.vehicles.update(input.vehicleId, { odometerMiles: input.odometerMiles });
     }
+  }
+
+  async listBatches(vehicleId: string): Promise<ObservationBatch[]> {
+    await this.vehicles.getOrThrow(vehicleId);
+    return this.store.observations.listBatches(vehicleId);
   }
 
   async latestDtcs(vehicleId: string) {
@@ -45,6 +66,26 @@ export class ObservationService {
   async provenance(vehicleId: string): Promise<EvidenceProvenance> {
     await this.vehicles.getOrThrow(vehicleId);
     return this.store.observations.provenance(vehicleId);
+  }
+
+  /**
+   * Keep FF/Mode06/DTC evidence forever; downsample older PID-only batches
+   * to at most one sample per hour outside the recent window.
+   */
+  async applyRetention(vehicleId: string, nowMs: number = Date.now()): Promise<RetentionResult> {
+    await this.vehicles.getOrThrow(vehicleId);
+    const before = await this.store.observations.listBatches(vehicleId);
+    const kept = selectBatchesForRetention(before, nowMs);
+    await this.store.observations.replaceAll(vehicleId, kept);
+    const evidence = kept.filter(isEvidenceBatch).length;
+    return {
+      vehicleId,
+      beforeCount: before.length,
+      afterCount: kept.length,
+      removedCount: before.length - kept.length,
+      keptEvidenceBatches: evidence,
+      keptPidBatches: kept.length - evidence,
+    };
   }
 
   /**
@@ -103,4 +144,42 @@ function shortPidLabel(pid: string, description?: string): string {
     SPEED: "Speed",
   };
   return shortcuts[pid] ?? description;
+}
+
+function isEvidenceBatch(b: ObservationBatch): boolean {
+  return (
+    (b.dtcs?.length ?? 0) > 0 || (b.freezeFrames?.length ?? 0) > 0 || (b.mode06?.length ?? 0) > 0
+  );
+}
+
+function hourBucket(iso: string): string {
+  return iso.slice(0, 13); // YYYY-MM-DDTHH
+}
+
+/** Pure retention selection — exported for unit tests. */
+export function selectBatchesForRetention(
+  batches: ObservationBatch[],
+  nowMs: number,
+  retainPidFullMs: number = RETAIN_PID_FULL_MS,
+): ObservationBatch[] {
+  const cutoff = nowMs - retainPidFullMs;
+  const kept: ObservationBatch[] = [];
+  const hourlyPid = new Map<string, ObservationBatch>();
+
+  const sorted = [...batches].sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
+  for (const batch of sorted) {
+    if (isEvidenceBatch(batch)) {
+      kept.push(batch);
+      continue;
+    }
+    const t = Date.parse(batch.capturedAt);
+    if (Number.isNaN(t) || t >= cutoff) {
+      kept.push(batch);
+      continue;
+    }
+    // Older PID-only: keep latest batch per hour.
+    hourlyPid.set(hourBucket(batch.capturedAt), batch);
+  }
+  kept.push(...hourlyPid.values());
+  return kept.sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
 }

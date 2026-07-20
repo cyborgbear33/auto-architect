@@ -9,6 +9,7 @@
 import type {
   DecisionRecord,
   DiagnosticProblem,
+  DriveSession,
   ObservationBatch,
   Recommendation,
   VehicleProfile,
@@ -41,6 +42,20 @@ export const observationBatches = pgTable(
   },
   (t) => ({
     vehicleCapturedIdx: index("obs_batches_vehicle_captured_idx").on(t.vehicleId, t.capturedAt),
+  }),
+);
+
+export const driveSessions = pgTable(
+  "drive_sessions",
+  {
+    id: text("id").primaryKey(),
+    vehicleId: text("vehicle_id").notNull(),
+    startedAt: timestamp("started_at", tz).notNull(),
+    endedAt: timestamp("ended_at", tz),
+    payload: jsonb("payload").$type<DriveSession>().notNull(),
+  },
+  (t) => ({
+    vehicleIdx: index("drive_sessions_vehicle_idx").on(t.vehicleId),
   }),
 );
 
@@ -90,6 +105,7 @@ export const decisions = pgTable(
 export const schema = {
   vehicles,
   observationBatches,
+  driveSessions,
   problems,
   recommendations,
   decisions,

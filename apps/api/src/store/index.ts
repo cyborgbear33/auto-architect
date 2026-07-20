@@ -1,6 +1,7 @@
 import type {
   DecisionRecord,
   DiagnosticProblem,
+  DriveSession,
   DtcObservation,
   EvidenceProvenance,
   FreezeFrame,
@@ -23,6 +24,7 @@ export interface Store {
   readonly driver: "memory" | "postgres";
   vehicles: VehicleRepository;
   observations: ObservationRepository;
+  sessions: SessionRepository;
   problems: ProblemRepository;
   recommendations: RecommendationRepository;
   decisions: DecisionRepository;
@@ -55,6 +57,15 @@ export interface ObservationRepository {
   latestPidReadings(
     vehicleId: string,
   ): Promise<Array<{ pid: string; value: number; timestamp: string }>>;
+  /** Replace the full batch list for a vehicle (retention prune). */
+  replaceAll(vehicleId: string, batches: ObservationBatch[]): Promise<void>;
+}
+
+export interface SessionRepository {
+  create(session: DriveSession): Promise<DriveSession>;
+  get(id: string): Promise<DriveSession | undefined>;
+  update(id: string, patch: Partial<DriveSession>): Promise<DriveSession>;
+  listByVehicle(vehicleId: string): Promise<DriveSession[]>;
 }
 
 export interface ProblemRepository {

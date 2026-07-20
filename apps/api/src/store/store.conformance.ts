@@ -8,6 +8,7 @@
 import type {
   DecisionRecord,
   DiagnosticProblem,
+  DriveSession,
   ObservationBatch,
   Recommendation,
   VehicleProfile,
@@ -121,6 +122,38 @@ export function runStoreConformance(label: string, makeStore: () => Store): void
       expect(pidReadings.find((p) => p.pid === "ENGINE_LOAD")?.value).toBe(85);
     });
 
+    it("replaceAll rewrites observation batches for a vehicle", async () => {
+      await store.vehicles.create(vehicle);
+      await store.observations.record(batch({ capturedAt: "2026-07-19T10:00:00.000Z" }));
+      await store.observations.record(batch({ capturedAt: "2026-07-19T11:00:00.000Z" }));
+      await store.observations.replaceAll(vehicle.id, [
+        batch({ capturedAt: "2026-07-19T12:00:00.000Z", sessionId: "session:kept" }),
+      ]);
+      const batches = await store.observations.listBatches(vehicle.id);
+      expect(batches).toHaveLength(1);
+      expect(batches[0]?.sessionId).toBe("session:kept");
+    });
+
+    it("stores drive sessions and lists them by vehicle", async () => {
+      await store.vehicles.create(vehicle);
+      const session: DriveSession = {
+        id: "session:test-1",
+        vehicleId: vehicle.id,
+        startedAt: "2026-07-19T10:00:00.000Z",
+        source: "simulated",
+        label: "conformance",
+      };
+      await store.sessions.create(session);
+      const ended = await store.sessions.update(session.id, {
+        endedAt: "2026-07-19T11:00:00.000Z",
+        batchCount: 3,
+      });
+      expect(ended.endedAt).toBe("2026-07-19T11:00:00.000Z");
+      expect(ended.batchCount).toBe(3);
+      expect(await store.sessions.get(session.id)).toEqual(ended);
+      expect(await store.sessions.listByVehicle(vehicle.id)).toHaveLength(1);
+    });
+
     it("stores problems and updates status / payload fields", async () => {
       await store.vehicles.create(vehicle);
       const problem: DiagnosticProblem = {
@@ -176,9 +209,16 @@ export function runStoreConformance(label: string, makeStore: () => Store): void
     it("reset() clears all tables / maps", async () => {
       await store.vehicles.create(vehicle);
       await store.observations.record(batch());
+      await store.sessions.create({
+        id: "session:reset",
+        vehicleId: vehicle.id,
+        startedAt: "2026-07-19T10:00:00.000Z",
+        source: "simulated",
+      });
       await store.reset();
       expect(await store.vehicles.list()).toHaveLength(0);
       expect(await store.observations.batchCount(vehicle.id)).toBe(0);
+      expect(await store.sessions.listByVehicle(vehicle.id)).toHaveLength(0);
     });
   });
 }

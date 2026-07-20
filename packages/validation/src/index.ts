@@ -47,12 +47,33 @@ export const ObservationBatchSchema = z.object({
   capturedAt: z.string().min(1),
   source: ObservationSourceSchema,
   odometerMiles: z.number().nonnegative().optional(),
+  sessionId: z.string().min(1).optional(),
   dtcs: z.array(DtcObservationSchema).optional(),
   pids: z.array(PidReadingSchema).optional(),
   freezeFrames: z.array(FreezeFrameSchema).optional(),
   mode06: z.array(Mode06ResultSchema).optional(),
 });
 export type ObservationBatchInput = z.infer<typeof ObservationBatchSchema>;
+
+export const StartDriveSessionSchema = z.object({
+  vehicleId: z.string().min(1),
+  label: z.string().optional(),
+  source: ObservationSourceSchema.optional(),
+  odometerStartMiles: z.number().nonnegative().optional(),
+});
+export type StartDriveSessionInput = z.infer<typeof StartDriveSessionSchema>;
+
+export const EndDriveSessionSchema = z.object({
+  sessionId: z.string().min(1),
+  odometerEndMiles: z.number().nonnegative().optional(),
+});
+export type EndDriveSessionInput = z.infer<typeof EndDriveSessionSchema>;
+
+export const SimulateDriveSessionSchema = z.object({
+  vehicleId: z.string().min(1),
+  label: z.string().optional(),
+});
+export type SimulateDriveSessionInput = z.infer<typeof SimulateDriveSessionSchema>;
 
 export const ProblemStatementSchema = z.object({
   currentState: z.string().min(1),

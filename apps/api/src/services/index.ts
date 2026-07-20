@@ -3,6 +3,7 @@ import type { Store } from "../store/index.ts";
 import { ActionService } from "./actions.ts";
 import { CampaignService } from "./campaigns.ts";
 import { CaseTimelineService } from "./case-timeline.ts";
+import { DriveSessionService } from "./drive-sessions.ts";
 import { ForecastService } from "./forecast.ts";
 import { GarageExportService } from "./garage-export.ts";
 import { ObservationService } from "./observations.ts";
@@ -24,6 +25,7 @@ export interface Services {
   solver: SolverService;
   actions: ActionService;
   observations: ObservationService;
+  driveSessions: DriveSessionService;
   recommendations: RecommendationService;
   campaigns: CampaignService;
   solutionHistory: SolutionHistoryService;
@@ -50,6 +52,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     solutionHistory,
   );
   const observations = new ObservationService(store, vehicles);
+  const driveSessions = new DriveSessionService(store, vehicles, observations);
   const recommendations = new RecommendationService(
     store,
     vehicles,
@@ -76,6 +79,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     solver,
     actions,
     observations,
+    driveSessions,
     recommendations,
     campaigns,
     solutionHistory,
@@ -89,6 +93,7 @@ export {
   ActionService,
   CampaignService,
   CaseTimelineService,
+  DriveSessionService,
   ForecastService,
   GarageExportService,
   ObservationService,

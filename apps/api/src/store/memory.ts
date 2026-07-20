@@ -1,6 +1,7 @@
 import type {
   DecisionRecord,
   DiagnosticProblem,
+  DriveSession,
   DtcObservation,
   FreezeFrame,
   Mode06Result,
@@ -15,6 +16,7 @@ import type {
   ObservationRepository,
   ProblemRepository,
   RecommendationRepository,
+  SessionRepository,
   Store,
   VehicleRepository,
 } from "./index.ts";
@@ -136,6 +138,36 @@ function createObservationRepository(): ObservationRepository {
       }
       return [...byPid.values()];
     },
+
+    async replaceAll(vehicleId, next) {
+      const sorted = [...next].sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
+      batches.set(vehicleId, sorted);
+    },
+  };
+}
+
+function createSessionRepository(): SessionRepository {
+  const byId = new Map<string, DriveSession>();
+  return {
+    async create(session) {
+      byId.set(session.id, session);
+      return session;
+    },
+    async get(id) {
+      return byId.get(id);
+    },
+    async update(id, patch) {
+      const existing = byId.get(id);
+      if (!existing) throw notFound("DriveSession", id);
+      const updated = { ...existing, ...patch, id };
+      byId.set(id, updated);
+      return updated;
+    },
+    async listByVehicle(vehicleId) {
+      return [...byId.values()]
+        .filter((s) => s.vehicleId === vehicleId)
+        .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+    },
   };
 }
 
@@ -216,6 +248,7 @@ function createDecisionRepository(): DecisionRepository {
 export function createMemoryStore(): Store {
   let vehicles = createVehicleRepository();
   let observations = createObservationRepository();
+  let sessions = createSessionRepository();
   let problems = createProblemRepository();
   let recommendations = createRecommendationRepository();
   let decisions = createDecisionRepository();
@@ -227,6 +260,9 @@ export function createMemoryStore(): Store {
     },
     get observations() {
       return observations;
+    },
+    get sessions() {
+      return sessions;
     },
     get problems() {
       return problems;
@@ -243,6 +279,7 @@ export function createMemoryStore(): Store {
     async reset() {
       vehicles = createVehicleRepository();
       observations = createObservationRepository();
+      sessions = createSessionRepository();
       problems = createProblemRepository();
       recommendations = createRecommendationRepository();
       decisions = createDecisionRepository();

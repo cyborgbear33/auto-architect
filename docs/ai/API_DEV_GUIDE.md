@@ -42,7 +42,9 @@ allowed to append evidence; it still does not classify).
 | `SolverService` | `solve` | Requires `desiredState.successCriteria` on problems |
 | `ForecastService` | optional / helpers | Multi-signal trends (`summary`); oil + LTFT + load → realize |
 | `ActionService` | via other services | Sole mutation + DecisionRecord |
-| `ObservationService` | no | Append / query batches; provenance; live gauges |
+| `ObservationService` | no | Append / query batches; provenance; live gauges; retention prune |
+| `DriveSessionService` | no | Start/end/list; simulate session with linked batches |
+| `ReportService` | no | Markdown + print HTML reports (vehicle / problem) |
 | `SolutionHistoryService` | no | Roll up repair outcomes by action / class / family |
 | `CaseTimelineService` | no | Derive case narrative from problems + decisions |
 | `GarageExportService` | no (import mutates store) | JSON garage dump/restore + CSV tables |
@@ -56,7 +58,8 @@ Inject `LogosBridge` (or `FakeLogosBridge` in tests) from `services/index.ts`.
 
 Parse external bodies with `@auto/validation` Zod schemas:
 
-- `ObservationBatchSchema`
+- `ObservationBatchSchema` (optional `sessionId`)
+- `StartDriveSessionSchema` / `EndDriveSessionSchema` / `SimulateDriveSessionSchema`
 - `CreateDiagnosticProblemSchema`
 - `LogRepairSchema`
 - `CreateVehicleSchema`

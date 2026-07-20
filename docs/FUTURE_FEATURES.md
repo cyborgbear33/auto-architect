@@ -98,8 +98,8 @@ into the Journal forever.
 | S1 | Validated live MX+ dry-run on Jeep (scan + watch → Dashboard) | todo | Operator checklist; document ports/adapter quirks |
 | S2 | Live gauge strip (RPM, load, fuel trim, coolant) + stale indicators | done | `GET .../live-gauges`, `LiveGaugeStrip` |
 | S3 | Mode 06 + freeze-frame capture already in batches → **surface in UI** | done | `EvidencePanels` on Dashboard |
-| S4 | DriveSession object (start/stop; batches linked by `sessionId`) | todo | Groups watch streams for history/reports |
-| S5 | Retention policy (keep FF/Mode06 forever; downsample high-rate PIDs) | todo | Part of “durable observation history” |
+| S4 | DriveSession object (start/stop; batches linked by `sessionId`) | done | `DriveSessionService`; simulate path; Dashboard panel |
+| S5 | Retention policy (keep FF/Mode06 forever; downsample high-rate PIDs) | done | `applyRetention` / prune; keep evidence; hourly PID downsample |
 | S6 | Bluetooth / preferred-adapter discovery | todo | Friction reduction after S1 works manually |
 | S7 | SAE PID/DTC dictionary depth for scan interpretation | partial | P0305–08 + more Mode 01 PIDs; still not full J1979 |
 
@@ -262,7 +262,7 @@ are the evidence spine under each event.
 |---|---|---|---|
 | H1 | Durable problem + decision persistence | done | Postgres store |
 | H2 | Case timeline UI (events from problem + decisions) | done | Durable `lifecycleEvents` + decisions; Diagnosis + ProblemDetail |
-| H3 | Attach odometer / session to case events | todo | Needs S4 + observation metadata |
+| H3 | Attach odometer / session to case events | todo | Sessions exist; wire into timeline events |
 | H4 | Filter history by class, status, date, mileage | todo | Caseboard overlap |
 | H5 | Deep link timeline event → evidence batch / freeze-frame | todo | |
 
@@ -319,7 +319,7 @@ ForecastService carefully with ontology backing.
 | F1 | Oil-level trend → recognition evidence | done | ForecastService (narrow) |
 | F2 | Outcome → confidence calibration into refresh + solve priors | done | `calibratePlaybook` |
 | F3 | Multi-signal trends (fuel trim, coolant, load-at-misfire) | done | RisingFuelTrim / RecurringHighLoad → realize; coolant informing-only |
-| F4 | Session-aware trends (per drive, not only global series) | todo | Needs S4 |
+| F4 | Session-aware trends (per drive, not only global series) | todo | Sessions exist; scope forecast series next |
 | F5 | Explainability chip: “priority raised because …” | todo | Informing overlap |
 
 **Seams:** ForecastService, recognition, RecommendationsService, SolverService,
@@ -346,9 +346,9 @@ print later. One template, two scopes (vehicle snapshot vs single case).
 | G1 | Report compose service (vehicle \| problem scope) | done | `ReportService` |
 | G2 | Markdown download / copy | done | `ReportDownload` |
 | G2b | Garage JSON dump + CSV tables + JSON import | done | `GarageExportService`, Journal panel |
-| G3 | Print-friendly HTML / PDF | todo | After Markdown stabilizes |
+| G3 | Print-friendly HTML / PDF | done | Report `html` + print CSS; Print button (browser print-to-PDF) |
 | G4 | Include verbalized proofs + campaign refs | done | Narration + campaigns in Markdown |
-| G5 | Optional “attach last drive session summary” | todo | Needs S4 |
+| G5 | Optional “attach last drive session summary” | todo | Session model shipped; attach to report next |
 
 **Seams:** recognition, problems, decisions, campaigns, verbalize, Journal.  
 **Anti-patterns:** Editing domain facts inside a report; PDF-only first;
@@ -367,13 +367,13 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Feature | Pieces | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|---|
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | high | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
-| Durable observation history + freeze-frame retention | S5, H3 | planned | high | Trends, verify-after-repair, history→decision. | `ObservationsService`, store batches |
-| Continuous drive session recorder | S4, H3, F4, G5 | planned | medium | Groups watch streams for history/reports. | obd-gateway watch, ObservationsService |
+| Durable observation history + freeze-frame retention | S5, H3 | done (S5) | high | Prune keeps FF/Mode06/DTCs; hourly PID downsample; H3 still open. | `ObservationService.applyRetention` |
+| Continuous drive session recorder | S4, H3, F4, G5 | done (S4) | medium | Sessions + simulate; live MX+ watch link + H3/F4/G5 remain. | `DriveSessionService`, Dashboard |
 | Problem caseboard + verify-after-repair + reopen | P2–P5, X5 | done | medium | Caseboard + verify-before-solved shipped. | `DiagnosticProblem`, Diagnosis UI |
 | Case timeline (problems + decisions) | H2 | done | medium | Case narrative on Diagnosis / ProblemDetail; Journal stays audit. | `CaseTimelineService` |
 | Recommendation card richness + status lifecycle UI | R2, R3 | planned | medium | Cost/risk; accept/dismiss/convert (confidence shipped). | Dashboard, RecommendationsService |
 | Multi-signal trend expansion (beyond oil) | F3 | done | medium | LTFT + load → realize; coolant UI-only. | ForecastService, recognition |
-| Print/PDF diagnostic report polish | G3, G5 | planned | medium | Markdown export shipped; print stylesheet next. | `ReportService`, Journal |
+| Print/PDF diagnostic report polish | G3, G5 | done (G3) | medium | Print HTML shipped; G5 session summary attach still open. | `ReportService`, `ReportDownload` |
 | Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | planned | high | Shared KB; land gates first (`HARDWARE_STANDARDS.md`). | dictionaries, ontology lint |
 | Shared `@auto/ui-components` | I5 | planned | medium | Consistent trust/evidence UI. | `UX_GUIDELINES` |
 
@@ -439,6 +439,9 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Durable problem lifecycle event log | 2026-07 | `DiagnosticProblem.lifecycleEvents` stamped by ActionService |
 | Multi-signal trends (F3) | 2026-07 | `ForecastService.summary`, RisingFuelTrim / RecurringHighLoad, Dashboard |
 | Garage JSON dump + CSV export/import | 2026-07 | `GarageExportService`, `GET/POST /api/garage/*`, Journal `DataExportPanel` |
+| Print-friendly diagnostic report HTML (G3) | 2026-07 | `ReportService` `html` + print CSS, `ReportDownload` Print |
+| Drive sessions + simulated upload (S4) | 2026-07 | `DriveSessionService`, `drive_sessions` table, Dashboard `DriveSessionsPanel` |
+| Observation retention / PID downsample (S5) | 2026-07 | `applyRetention`, `POST .../observations/prune` |
 
 ---
 

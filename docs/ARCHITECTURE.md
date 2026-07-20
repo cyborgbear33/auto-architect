@@ -153,7 +153,9 @@ enforced by `pnpm lint:ontology` and `packages/cartridges/src/ontology-lint.test
 | `SolverService` | `solve` | Rank diagnostic/repair actions |
 | `ForecastService` | `forecast` / trend helpers | Oil-level decline → `ChronicOilConsumption` evidence |
 | `ActionService` | — | Sole mutation gate + `DecisionRecord` audit |
-| `ObservationsService` | — | Ingest batches; expose DTCs / freeze frames / Mode 06 |
+| `ObservationService` | — | Ingest batches; provenance; live gauges; retention prune |
+| `DriveSessionService` | — | Start/end/list sessions; simulate upload path |
+| `ReportService` | — | Markdown + print HTML diagnostic reports |
 | `CampaignsService` | — | Match vehicle vs known recalls/TSBs |
 | `RecommendationsService` | — | Surface ranked next steps to the UI |
 | `VehicleService` | — | Profiles, engine families, view resolution |
@@ -173,16 +175,18 @@ Resource reads:
 - `GET /api/vehicles`, `POST /api/vehicles`, `GET /api/vehicles/:id`
 - `GET /api/engine-families`
 - `POST /api/vehicles/:id/observations` (202)
-- `GET /api/vehicles/:id/{dtcs,freeze-frame,mode06,forecast,recognition,recommendations,campaigns,problems,decisions,export}`
+- `GET /api/vehicles/:id/{dtcs,freeze-frame,mode06,forecast,recognition,recommendations,campaigns,problems,decisions,export,sessions,observation-batches,report}`
 - `GET /api/vehicles/:id/export/{observations,dtcs,decisions,problems,timeline}.csv`
 - `GET /api/garage/export` — full garage JSON dump
-- `GET /api/problems/:id`
+- `GET /api/problems/:id`, `GET /api/problems/:id/report`
 
 Action / mutation:
 
 - `POST /api/actions/create-diagnostic-problem`
 - `POST /api/actions/solve-diagnostic-problem`
 - `POST /api/actions/log-repair`
+- `POST /api/actions/{start,end,simulate}-drive-session`
+- `POST /api/vehicles/:id/observations/prune` — retention (keep evidence; downsample old PIDs)
 - `POST /api/garage/import` — merge JSON dump (dedupe observation batches)
 - `POST /api/vehicles/:id/actions/clear-codes-and-drive` (policy-gated)
 - `POST /api/vehicles/:id/recommendations/refresh`
@@ -248,8 +252,7 @@ Required layers are listed in `docs/ai/TESTING_DEV_GUIDE.md`.
 See [`FUTURE_FEATURES.md`](FUTURE_FEATURES.md) — especially **Product goals**.
 High-level gaps vs a complete garage product:
 
-- Live scan UX (MX+ dry-run, gauges, Mode 06 / freeze-frame UI)
-- Outcome-calibrated diagnosis + solution history → better recommendations
-- Odometer/session on timeline events (H3); drive sessions; session-aware trends (F4)
-- Print/PDF report polish (G3); OBD/CAN log import adapters (ELM, candump, MF4)
+- Live MX+ dry-run validation (S1); Bluetooth adapter discovery (S6)
+- Odometer on timeline events (H3); session-aware trends (F4); report session attach (G5)
+- OBD/CAN log import adapters (ELM, candump, MF4)
 - Auth / multi-user; shared UI package; LLM advise loop; full Silverado cartridge

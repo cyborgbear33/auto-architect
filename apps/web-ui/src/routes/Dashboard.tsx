@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { DriveSessionsPanel } from "../components/DriveSessionsPanel.tsx";
 import { EvidencePanels } from "../components/EvidencePanels.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import {
@@ -97,6 +98,10 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         <LiveGaugeStrip vehicleId={vehicleId} />
       </div>
 
+      <div className="mb-4">
+        <DriveSessionsPanel vehicleId={vehicleId} />
+      </div>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <section className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">
           <h2 className="mb-3 text-sm font-semibold text-slate-700">Active DTCs</h2>
@@ -153,13 +158,9 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
                       <p className="mt-0.5 text-xs text-slate-500">{signal.flagReason}</p>
                     )}
                   </div>
-                  <Pill
-                    tone={
-                      signal.flagged ? "high" : signal.flagReason ? "normal" : "low"
-                    }
-                  >
+                  <Pill tone={signal.flagged ? "high" : signal.flagReason ? "normal" : "low"}>
                     {signal.flagged
-                      ? signal.ontologyTrend ?? "flagged"
+                      ? (signal.ontologyTrend ?? "flagged")
                       : signal.series.length < 2
                         ? "need ≥2"
                         : "ok"}

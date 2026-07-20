@@ -1,10 +1,13 @@
 import {
   CreateDiagnosticProblemSchema,
   CreateVehicleSchema,
+  EndDriveSessionSchema,
   GarageDumpSchema,
   LogRepairSchema,
   ObservationBatchSchema,
   ProblemIdActionSchema,
+  SimulateDriveSessionSchema,
+  StartDriveSessionSchema,
 } from "@auto/validation";
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { notFound } from "../lib/errors.ts";
@@ -80,6 +83,39 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
   app.get("/api/vehicles/:id/mode06", async (req) => {
     const { id } = req.params as { id: string };
     return { results: await s.observations.latestMode06(id) };
+  });
+
+  app.get("/api/vehicles/:id/observation-batches", async (req) => {
+    const { id } = req.params as { id: string };
+    return { batches: await s.observations.listBatches(id) };
+  });
+
+  app.post("/api/vehicles/:id/observations/prune", async (req) => {
+    const { id } = req.params as { id: string };
+    return s.observations.applyRetention(id);
+  });
+
+  // --- drive sessions ---------------------------------------------------------
+  app.get("/api/vehicles/:id/sessions", async (req) => {
+    const { id } = req.params as { id: string };
+    return { sessions: await s.driveSessions.list(id) };
+  });
+
+  app.post("/api/actions/start-drive-session", async (req, reply) => {
+    const input = StartDriveSessionSchema.parse(req.body);
+    reply.code(201);
+    return s.driveSessions.start(input);
+  });
+
+  app.post("/api/actions/end-drive-session", async (req) => {
+    const input = EndDriveSessionSchema.parse(req.body);
+    return s.driveSessions.end(input);
+  });
+
+  app.post("/api/actions/simulate-drive-session", async (req, reply) => {
+    const input = SimulateDriveSessionSchema.parse(req.body);
+    reply.code(201);
+    return s.driveSessions.simulate(input);
   });
 
   app.get("/api/vehicles/:id/forecast", async (req) => {

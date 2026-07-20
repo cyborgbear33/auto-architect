@@ -89,10 +89,36 @@ export interface ObservationBatch {
   capturedAt: IsoTimestamp;
   source: ObservationSource;
   odometerMiles?: number;
+  /** Optional link to a DriveSession (watch / simulated drive). */
+  sessionId?: SemanticId;
   dtcs?: DtcObservation[];
   pids?: PidReading[];
   freezeFrames?: FreezeFrame[];
   mode06?: Mode06Result[];
+}
+
+/** One continuous observation window (live watch or simulated drive). */
+export interface DriveSession {
+  id: SemanticId;
+  vehicleId: SemanticId;
+  startedAt: IsoTimestamp;
+  endedAt?: IsoTimestamp;
+  source: ObservationSource;
+  label?: string;
+  odometerStartMiles?: number;
+  odometerEndMiles?: number;
+  /** Set when ended — count of batches linked by sessionId. */
+  batchCount?: number;
+}
+
+/** Result of applying the observation retention policy. */
+export interface RetentionResult {
+  vehicleId: SemanticId;
+  beforeCount: number;
+  afterCount: number;
+  removedCount: number;
+  keptEvidenceBatches: number;
+  keptPidBatches: number;
 }
 
 /**

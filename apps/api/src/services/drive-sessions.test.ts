@@ -1,0 +1,104 @@
+import { FakeLogosBridge } from "@auto/logos-bridge";
+import { beforeEach, describe, expect, it } from "vitest";
+import { createMemoryStore } from "../store/index.ts";
+import { seed } from "../store/seed.ts";
+import { createServices } from "./index.ts";
+import { selectBatchesForRetention } from "./observations.ts";
+
+const JEEP = "veh:jeep-renegade-2015-latitude";
+
+describe("DriveSessionService + retention", () => {
+  const store = createMemoryStore();
+  const services = createServices(store, new FakeLogosBridge());
+
+  beforeEach(async () => {
+    await store.reset();
+    await seed(store);
+  });
+
+  it("simulates a drive session with linked batches", async () => {
+    const { session, batches } = await services.driveSessions.simulate({ vehicleId: JEEP });
+    expect(session.endedAt).toBeTruthy();
+    expect(session.source).toBe("simulated");
+    expect(batches.length).toBeGreaterThanOrEqual(4);
+    expect(batches.every((b) => b.sessionId === session.id)).toBe(true);
+    expect(session.batchCount).toBe(batches.length);
+
+    const listed = await services.driveSessions.list(JEEP);
+    expect(listed.some((s) => s.id === session.id)).toBe(true);
+    expect(await store.observations.batchCount(JEEP)).toBe(batches.length);
+  });
+
+  it("keeps evidence batches and downsamples old PID-only hours", () => {
+    const now = Date.parse("2026-07-01T00:00:00Z");
+    const batches = [
+      {
+        vehicleId: JEEP,
+        capturedAt: "2026-01-01T10:00:00Z",
+        source: "simulated" as const,
+        pids: [{ pid: "RPM", value: 1, timestamp: "2026-01-01T10:00:00Z" }],
+      },
+      {
+        vehicleId: JEEP,
+        capturedAt: "2026-01-01T10:30:00Z",
+        source: "simulated" as const,
+        pids: [{ pid: "RPM", value: 2, timestamp: "2026-01-01T10:30:00Z" }],
+      },
+      {
+        vehicleId: JEEP,
+        capturedAt: "2026-01-01T11:00:00Z",
+        source: "simulated" as const,
+        dtcs: [{ code: "P0304", status: "stored" as const }],
+        pids: [{ pid: "RPM", value: 3, timestamp: "2026-01-01T11:00:00Z" }],
+      },
+      {
+        vehicleId: JEEP,
+        capturedAt: "2026-06-20T12:00:00Z",
+        source: "simulated" as const,
+        pids: [{ pid: "RPM", value: 4, timestamp: "2026-06-20T12:00:00Z" }],
+      },
+    ];
+    const kept = selectBatchesForRetention(batches, now);
+    // Evidence batch always kept; old hour keeps latest (10:30); recent PID kept.
+    expect(kept.some((b) => b.dtcs?.length)).toBe(true);
+    expect(kept.filter((b) => b.capturedAt.startsWith("2026-01-01T10")).length).toBe(1);
+    expect(kept.some((b) => b.pids?.[0]?.value === 2)).toBe(true);
+    expect(kept.some((b) => b.pids?.[0]?.value === 4)).toBe(true);
+  });
+
+  it("applyRetention rewrites store batches", async () => {
+    const old = "2025-01-01T08:00:00Z";
+    await store.observations.record({
+      vehicleId: JEEP,
+      capturedAt: old,
+      source: "simulated",
+      pids: [{ pid: "RPM", value: 1, timestamp: old }],
+    });
+    await store.observations.record({
+      vehicleId: JEEP,
+      capturedAt: "2025-01-01T08:15:00Z",
+      source: "simulated",
+      pids: [{ pid: "RPM", value: 2, timestamp: "2025-01-01T08:15:00Z" }],
+    });
+    await store.observations.record({
+      vehicleId: JEEP,
+      capturedAt: "2025-01-01T09:00:00Z",
+      source: "simulated",
+      freezeFrames: [
+        {
+          dtc: "P0304",
+          readings: [{ pid: "RPM", value: 9, timestamp: "2025-01-01T09:00:00Z" }],
+        },
+      ],
+    });
+
+    const result = await services.observations.applyRetention(
+      JEEP,
+      Date.parse("2026-07-01T00:00:00Z"),
+    );
+    expect(result.beforeCount).toBe(3);
+    expect(result.afterCount).toBe(2);
+    expect(result.keptEvidenceBatches).toBe(1);
+    expect(await store.observations.batchCount(JEEP)).toBe(2);
+  });
+});

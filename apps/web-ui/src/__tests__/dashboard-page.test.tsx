@@ -100,8 +100,17 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         vehicleId: "veh:jeep-renegade-2015-latitude",
         generatedAt: "2026-07-19T12:00:00.000Z",
         markdown: "# report",
+        html: "<html><body>report</body></html>",
       }),
-      getForecast: vi.fn().mockResolvedValue({ declining: false, series: [] }),
+      listDriveSessions: vi.fn().mockResolvedValue([]),
+      simulateDriveSession: vi.fn(),
+      pruneObservations: vi.fn(),
+      getForecast: vi.fn().mockResolvedValue({
+        declining: false,
+        series: [],
+        signals: [],
+        oil: { declining: false, series: [] },
+      }),
       getRecognition: vi.fn().mockResolvedValue({
         individual: "veh:jeep-renegade-2015-latitude",
         member: ["Engine", "MisfireUnderLoad"],
