@@ -8,6 +8,7 @@ import {
   useSelectedVehicleId,
   vehicleLabel,
 } from "../components/Layout.tsx";
+import { LiveGaugeStrip } from "../components/LiveGaugeStrip.tsx";
 import { ReportDownload } from "../components/ReportDownload.tsx";
 import { api, queryKeys } from "../lib/api.ts";
 import { useAppSelector } from "../store/index.ts";
@@ -90,6 +91,10 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
 
       <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
         <EvidenceSourceBadge provenance={provenanceQ.data} />
+      </div>
+
+      <div className="mb-4">
+        <LiveGaugeStrip vehicleId={vehicleId} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

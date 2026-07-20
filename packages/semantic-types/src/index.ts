@@ -101,6 +101,28 @@ export interface EvidenceProvenance {
   sourcesSeen: ObservationSource[];
 }
 
+/** One live-gauge cell: latest PID reading with dictionary metadata + freshness. */
+export interface LiveGaugeReading {
+  pid: string;
+  label: string;
+  value: number | null;
+  unit: string | null;
+  timestamp: IsoTimestamp | null;
+}
+
+/** Dashboard Operate strip — latest gauge PIDs plus strip-level staleness. */
+export interface LiveGaugeStrip {
+  vehicleId: SemanticId;
+  source: ObservationSource | null;
+  capturedAt: IsoTimestamp | null;
+  /** Milliseconds since `capturedAt` (null when no batches). */
+  ageMs: number | null;
+  /** True when age exceeds the live-watch freshness threshold. */
+  stale: boolean;
+  staleAfterMs: number;
+  gauges: LiveGaugeReading[];
+}
+
 // --- Problem/Solution vocabulary (LOGOS-facing) ---------------------------
 
 export type ProblemType =

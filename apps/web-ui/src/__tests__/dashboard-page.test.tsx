@@ -55,6 +55,44 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         batchCount: 1,
         sourcesSeen: ["simulated"],
       }),
+      getLiveGauges: vi.fn().mockResolvedValue({
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        source: "simulated",
+        capturedAt: new Date().toISOString(),
+        ageMs: 500,
+        stale: false,
+        staleAfterMs: 15_000,
+        gauges: [
+          {
+            pid: "RPM",
+            label: "RPM",
+            value: 2100,
+            unit: "rpm",
+            timestamp: new Date().toISOString(),
+          },
+          {
+            pid: "ENGINE_LOAD",
+            label: "Load",
+            value: 42,
+            unit: "percent",
+            timestamp: new Date().toISOString(),
+          },
+          {
+            pid: "SHORT_FUEL_TRIM_1",
+            label: "STFT B1",
+            value: 8.5,
+            unit: "percent",
+            timestamp: new Date().toISOString(),
+          },
+          {
+            pid: "COOLANT_TEMP",
+            label: "Coolant",
+            value: 91,
+            unit: "celsius",
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      }),
       getFreezeFrames: vi.fn().mockResolvedValue([]),
       getMode06: vi.fn().mockResolvedValue([]),
       getVehicleReport: vi.fn().mockResolvedValue({
@@ -119,6 +157,19 @@ describe("Dashboard", () => {
       </QueryClientProvider>,
     );
     expect(await screen.findByText(/Latest evidence: Simulated/)).toBeInTheDocument();
+  });
+
+  it("shows the live gauge strip with units", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <Dashboard />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText("Live gauges")).toBeInTheDocument();
+    expect(await screen.findByText("2100")).toBeInTheDocument();
+    expect(screen.getByText("rpm")).toBeInTheDocument();
+    expect(screen.getByText(/Fresh/)).toBeInTheDocument();
   });
 
   it("shows proven fault classes from recognition, never a synthesized Healthy", async () => {

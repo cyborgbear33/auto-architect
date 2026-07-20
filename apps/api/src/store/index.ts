@@ -49,6 +49,10 @@ export interface ObservationRepository {
   batchCount(vehicleId: string): Promise<number>;
   /** Latest batch source/time + distinct sources seen for this vehicle. */
   provenance(vehicleId: string): Promise<EvidenceProvenance>;
+  /** Latest value+timestamp per PID (most recent batch that contained it). */
+  latestPidReadings(
+    vehicleId: string,
+  ): Promise<Array<{ pid: string; value: number; timestamp: string }>>;
 }
 
 export interface ProblemRepository {

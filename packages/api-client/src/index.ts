@@ -15,6 +15,7 @@ import type {
   EvidenceProvenance,
   FreezeFrame,
   KnownCampaign,
+  LiveGaugeStrip,
   Mode06Result,
   Recognition,
   Recommendation,
@@ -143,6 +144,8 @@ export class AutoApiClient {
     );
   getEvidenceProvenance = (vehicleId: string) =>
     this.request<EvidenceProvenance>(`/api/vehicles/${enc(vehicleId)}/evidence-provenance`);
+  getLiveGauges = (vehicleId: string) =>
+    this.request<LiveGaugeStrip>(`/api/vehicles/${enc(vehicleId)}/live-gauges`);
   getSolutionHistory = (vehicleId: string, faultClass?: string) => {
     const q = faultClass ? `?class=${enc(faultClass)}` : "";
     return this.request<SolutionHistory>(`/api/vehicles/${enc(vehicleId)}/solution-history${q}`);
@@ -249,6 +252,7 @@ export const queryKeys = {
   engineFamilies: () => ["engineFamilies"] as const,
   dtcs: (vehicleId: string) => ["dtcs", vehicleId] as const,
   evidenceProvenance: (vehicleId: string) => ["evidenceProvenance", vehicleId] as const,
+  liveGauges: (vehicleId: string) => ["liveGauges", vehicleId] as const,
   freezeFrames: (vehicleId: string) => ["freezeFrames", vehicleId] as const,
   mode06: (vehicleId: string) => ["mode06", vehicleId] as const,
   forecast: (vehicleId: string) => ["forecast", vehicleId] as const,

@@ -115,6 +115,9 @@ export function runStoreConformance(label: string, makeStore: () => Store): void
       expect(provenance.batchCount).toBe(2);
       expect(provenance.latestSource).toBe("simulated");
       expect(provenance.sourcesSeen).toContain("simulated");
+
+      const pidReadings = await store.observations.latestPidReadings(vehicle.id);
+      expect(pidReadings.find((p) => p.pid === "ENGINE_LOAD")?.value).toBe(85);
     });
 
     it("stores problems and updates status / payload fields", async () => {

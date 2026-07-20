@@ -158,6 +158,23 @@ export function createDrizzleStore(databaseUrl: string): Store {
         sourcesSeen: [...seen],
       };
     },
+
+    async latestPidReadings(vehicleId) {
+      const rows = await db
+        .select()
+        .from(t.observationBatches)
+        .where(eq(t.observationBatches.vehicleId, vehicleId))
+        .orderBy(desc(t.observationBatches.capturedAt));
+      const byPid = new Map<string, { pid: string; value: number; timestamp: string }>();
+      for (const row of rows) {
+        for (const p of row.payload.pids ?? []) {
+          if (!byPid.has(p.pid)) {
+            byPid.set(p.pid, { pid: p.pid, value: p.value, timestamp: p.timestamp });
+          }
+        }
+      }
+      return [...byPid.values()];
+    },
   };
 
   async function batchesFor(vehicleId: string): Promise<ObservationBatch[]> {

@@ -119,6 +119,19 @@ function createObservationRepository(): ObservationRepository {
         sourcesSeen: [...seen],
       };
     },
+
+    async latestPidReadings(vehicleId) {
+      const byPid = new Map<string, { pid: string; value: number; timestamp: string }>();
+      // batchesFor is ascending; walk newest→oldest so first write wins as latest.
+      for (const batch of [...batchesFor(vehicleId)].reverse()) {
+        for (const p of batch.pids ?? []) {
+          if (!byPid.has(p.pid)) {
+            byPid.set(p.pid, { pid: p.pid, value: p.value, timestamp: p.timestamp });
+          }
+        }
+      }
+      return [...byPid.values()];
+    },
   };
 }
 

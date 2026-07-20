@@ -43,7 +43,7 @@ multi-piece plans live in the next section.
 
 | Goal | Status | What exists today | Done when | Closing backlog |
 |---|---|---|---|---|
-| **Scanning** — ingest OBD evidence | **partial** | Gateway `scan`/`watch`/`--simulate`; `POST .../observations`; batches in memory or Postgres | Live MX+ path proven; live gauges; Mode 06 + freeze-frame visible; sessions group a drive | Live MX+ dry-run; Live gauges; Mode 06 UI; Freeze-frame panel; Drive sessions; Durable observation history |
+| **Scanning** — ingest OBD evidence | **partial** | Simulate/API ingest; live gauge strip + FF/Mode06 UI; source labels | Live MX+ path proven; drive sessions; retention policy | Live MX+ dry-run; Drive sessions; Durable observation history |
 | **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration; lean/cam-crank fixtures; FF/Mode06 UI; broader DTC/PID seed | Broader SAE KB; richer evidence adjacency | SAE PID/DTC KB expansion |
 | **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration on draft/solve + refresh | Family priors polish; counterfactuals UI | Counterfactuals UI; optional LLM advise |
 | **Informing the user** — clear operator surfaces | **partial** | Source badges, narration, FF/Mode06 panels, report export | Live gauges; shared UI package | Live gauges; `@auto/ui-components` |
@@ -96,7 +96,7 @@ into the Journal forever.
 | # | Work piece | Status | Notes |
 |---|---|---|---|
 | S1 | Validated live MX+ dry-run on Jeep (scan + watch → Dashboard) | todo | Operator checklist; document ports/adapter quirks |
-| S2 | Live gauge strip (RPM, load, fuel trim, coolant) + stale indicators | todo | Poll latest PIDs; units from PID dictionary |
+| S2 | Live gauge strip (RPM, load, fuel trim, coolant) + stale indicators | done | `GET .../live-gauges`, `LiveGaugeStrip` |
 | S3 | Mode 06 + freeze-frame capture already in batches → **surface in UI** | done | `EvidencePanels` on Dashboard |
 | S4 | DriveSession object (start/stop; batches linked by `sessionId`) | todo | Groups watch streams for history/reports |
 | S5 | Retention policy (keep FF/Mode06 forever; downsample high-rate PIDs) | todo | Part of “durable observation history” |
@@ -182,10 +182,10 @@ Ship `@auto/ui-components` once patterns repeat twice.
 |---|---|---|---|
 | I1 | Goal-grouped nav + vehicle switcher | done | Dashboard / Diagnosis / Campaigns / Journal |
 | I2 | Evidence source labeling (sim / live / manual) everywhere data shows | done | Dashboard + Diagnosis via `GET .../evidence-provenance` |
-| I3 | Live gauges + Mode 06 + freeze-frame panels | partial | FF/Mode06 panels shipped; live gauges still todo |
+| I3 | Live gauges + Mode 06 + freeze-frame panels | done | Gauges + FF/Mode06 on Dashboard |
 | I4 | Verbalized proofs on Diagnosis / ProblemDetail | done | Narration on Dashboard/Diagnosis |
 | I5 | Shared `@auto/ui-components` | todo | Status, empty/error, evidence |
-| I6 | Staleness / “last observation” chrome on Dashboard | todo | Makes scanning honest |
+| I6 | Staleness / “last observation” chrome on Dashboard | done | Fresh/Stale badge on gauge strip |
 
 **Seams:** web-ui pages, `UX_GUIDELINES`, api-client queryKeys.  
 **Anti-patterns:** Flat 17-item nav; theorem-prover chrome in operator mode;
@@ -366,7 +366,6 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Feature | Pieces | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|---|
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | high | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
-| Live gauge view (RPM, load, fuel trim, coolant) + staleness | S2, I3, I6 | planned | high | Operators need live PIDs while diagnosing. | `ObservationsService`, Dashboard |
 | Durable observation history + freeze-frame retention | S5, H3 | planned | high | Trends, verify-after-repair, history→decision. | `ObservationsService`, store batches |
 | Continuous drive session recorder | S4, H3, F4, G5 | planned | medium | Groups watch streams for history/reports. | obd-gateway watch, ObservationsService |
 | Problem caseboard + verify-after-repair + reopen | P2–P5, H2 | planned | medium | Completes problem tracking/history beyond MVP. | `DiagnosticProblem`, Diagnosis UI |
@@ -432,6 +431,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Freeze-frame + Mode 06 UI panels | 2026-07 | `EvidencePanels`, Dashboard |
 | Markdown diagnostic report export | 2026-07 | `ReportService`, `ReportDownload` |
 | DTC P0305–08 + more Mode 01 PID seed rows | 2026-07 | `dtc-dictionary.json`, `pid-dictionary.json` |
+| Live gauge strip + freshness (S2/I6) | 2026-07 | `GET .../live-gauges`, `LiveGaugeStrip`, Dashboard |
 
 ---
 

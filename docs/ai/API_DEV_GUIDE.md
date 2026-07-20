@@ -42,7 +42,7 @@ allowed to append evidence; it still does not classify).
 | `SolverService` | `solve` | Requires `desiredState.successCriteria` on problems |
 | `ForecastService` | optional / helpers | Oil-level trend |
 | `ActionService` | via other services | Sole mutation + DecisionRecord |
-| `ObservationService` | no | Append / query batches; evidence provenance |
+| `ObservationService` | no | Append / query batches; provenance; live gauges |
 | `SolutionHistoryService` | no | Roll up repair outcomes by action / class / family |
 | `CampaignService` | no | Match `known-campaigns.json` |
 | `RecommendationService` | no (uses recognition outputs) | List / refresh / status |
