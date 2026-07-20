@@ -100,6 +100,7 @@ TBox, still run them by hand to iterate quickly:
 ```bash
 python3 -m logos realize packages/ontology/fixtures/misfire_realize_fixture.json --json
 python3 -m logos reason  packages/ontology/fixtures/misfire_reason_fixture.json --json
+python3 -m logos reason  packages/ontology/fixtures/oilstarvation_reason_fixture.json --json
 ```
 
 Registry shape is Zod-validated (`packages/ontology/src/schemas.ts`) and

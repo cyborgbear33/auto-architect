@@ -56,6 +56,47 @@ describe("PolicyService", () => {
     );
   });
 
+  it("forbids clear-codes-and-drive when MultiAirOilStarvation is proven (second safety-hold pattern)", async () => {
+    const bridge = new FakeLogosBridge(undefined, undefined, undefined, undefined, (input) => {
+      const oil = input.facts.some((f) => f.formula.startsWith("MultiAirOilStarvation("));
+      return {
+        derived: oil
+          ? [
+              {
+                formula: "Forbid(ClearCodesAndDrive(veh_jeep_renegade_2015_latitude))",
+                ruleId: "R_forbid_clear_oilstarvation",
+                facts: [],
+                confidence: 0.9,
+              },
+              {
+                formula: "Ought(CheckOilBeforeMultiAirActuator(veh_jeep_renegade_2015_latitude))",
+                ruleId: "R_ought_oil_precheck",
+                facts: [],
+                confidence: 0.9,
+              },
+            ]
+          : [],
+        resolutions: [],
+        unresolved: [],
+        defeated: [],
+        unsafe: [],
+        realized: [],
+        rounds: 1,
+        fixpoint: true,
+        realizationNote: null,
+        realizationUndecided: [],
+      };
+    });
+    const policy = new PolicyService(bridge);
+    const evaluation = await policy.evaluate(JEEP, ["MultiAirOilStarvation"]);
+    const check = policy.isActionForbidden(evaluation, "clear-codes-and-drive");
+    expect(check.forbidden).toBe(true);
+    expect(check.reason).toContain("R_forbid_clear_oilstarvation");
+    expect(evaluation.obligations).toContain(
+      "Ought(CheckOilBeforeMultiAirActuator(veh_jeep_renegade_2015_latitude))",
+    );
+  });
+
   it("sanitizes hyphen/colon vehicle ids into FOL-safe atoms before calling reason", async () => {
     let sentFormula = "";
     const bridge = new FakeLogosBridge(undefined, undefined, undefined, undefined, (input) => {

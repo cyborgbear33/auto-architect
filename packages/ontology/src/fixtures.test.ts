@@ -10,7 +10,11 @@ import { describe, expect, it } from "vitest";
  */
 const fixturesDir = resolve(dirname(fileURLToPath(import.meta.url)), "../fixtures");
 
-const FIXTURES = ["misfire_realize_fixture.json", "misfire_reason_fixture.json"] as const;
+const FIXTURES = [
+  "misfire_realize_fixture.json",
+  "misfire_reason_fixture.json",
+  "oilstarvation_reason_fixture.json",
+] as const;
 
 describe("ontology fixtures (path + parse)", () => {
   for (const name of FIXTURES) {

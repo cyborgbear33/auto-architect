@@ -3,14 +3,17 @@ import { describe, expect, it } from "vitest";
 import misfireReasonFixture from "../../ontology/fixtures/misfire_reason_fixture.json" with {
   type: "json",
 };
+import oilstarvationReasonFixture from "../../ontology/fixtures/oilstarvation_reason_fixture.json" with {
+  type: "json",
+};
 import { createLogosBridge } from "./index.ts";
 import type { ReasonInput } from "./types.ts";
 
 /**
  * Exercises the REAL `python3 -m logos reason --json` subprocess (no fake)
- * against the same misfire safety-hold fixture `docs/ai/ONTOLOGY_DEV_GUIDE.md`
- * tells contributors to run by hand — covers ABox-realization-driven rule
- * firing (the exact shape `PolicyService` depends on for safety holds).
+ * against the checked-in safety-hold fixtures (`misfire_reason_fixture.json`,
+ * `oilstarvation_reason_fixture.json`) — covers ABox-realization-driven rule
+ * firing (the shape `PolicyService` depends on for safety holds).
  *
  * Self-skips when LOGOS isn't installed. To run it locally:
  *   pip install -e /path/to/metalanguage/engine   (or set LOGOS_PYTHON_BIN)
@@ -75,6 +78,28 @@ describe.skipIf(!available)("LOGOS reason real subprocess integration", () => {
     expect(
       res.derived.some(
         (d) => d.formula === "Ought(StopDrivingAndDiagnose(owner, jeep_renegade_engine))",
+      ),
+    ).toBe(true);
+    expect(res.fixpoint).toBe(true);
+  });
+
+  it("realizes MultiAirOilStarvation and forbids clear-codes-and-drive", async () => {
+    const bridge = createLogosBridge();
+    const res = await bridge.reason(
+      reasonInputFromFixture(oilstarvationReasonFixture as unknown as FixtureEntry[]),
+    );
+
+    expect(
+      res.realized.some(
+        (r) => r.individual === "jeep_renegade_engine" && r.class === "MultiAirOilStarvation",
+      ),
+    ).toBe(true);
+    expect(
+      res.derived.some((d) => d.formula === "Forbid(ClearCodesAndDrive(jeep_renegade_engine))"),
+    ).toBe(true);
+    expect(
+      res.derived.some(
+        (d) => d.formula === "Ought(CheckOilBeforeMultiAirActuator(jeep_renegade_engine))",
       ),
     ).toBe(true);
     expect(res.fixpoint).toBe(true);

@@ -169,7 +169,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | logos-bridge seam sync with garden (domain renames only) | shipped | `AI_CODING_RULES.md` §10 intentional diffs |
 | Fastify API (vehicles, observations, recognition, actions) | shipped | `apps/api` |
 | In-memory store + seed Jeep | shipped | `apps/api/src/store` |
-| Policy safety hold (`clear-codes-and-drive`) | shipped | `PolicyService` + Diagnosis UI |
+| Policy safety holds (`clear-codes-and-drive` under misfire / MultiAir oil starvation / cam-crank) | shipped | `PolicyService`, reason fixtures, Diagnosis UI |
 | Oil-level trend forecast | shipped | `ForecastService` |
 | React UI (5 routes) | shipped | `apps/web-ui` |
 | `@auto/api-client` (typed fetch + queryKeys; web-ui thin re-export) | shipped | `packages/api-client`, `API_CLIENT_DEV_GUIDE.md` |

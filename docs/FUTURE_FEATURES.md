@@ -55,7 +55,6 @@ When proposing a new feature:
 | Export diagnostic report (Markdown / print-to-PDF) | planned | medium | Compose recognition + ranked actions + decisions into a shareable shop note. | DecisionRecord, verbalize, Journal |
 | Extract a real shared `@seam/logos-bridge-core` package instead of two hand-synced copies | planned | low | `pnpm check:bridge-drift` is an advisory reminder, not a fix — a real shared package would remove the sync burden entirely once both apps' bridge needs stabilize. | `packages/logos-bridge`, garden-architect's `@garden/logos-bridge`, `scripts/check-bridge-drift.mjs` |
 | Coverage thresholds (vitest coverage / codecov) | planned | low | Deferred until Postgres + shared UI packages land — prefer honest test-layer matrix over vanity %. | `TESTING_DEV_GUIDE.md`, CI |
-| Policy library expansion (e.g. forbid clear-codes under LowOilPressureStallRisk) | planned | medium | Only clear-codes-and-drive + misfire is wired as the demo hold. Start with one additional reason fixture so the safety-hold pattern isn't a one-off. | `PolicyService`, reason fixtures, `packages/ontology/fixtures` |
 | Ontology browser page (read-only TBox / views / DTC dictionary) | planned | low | Useful for debugging; garden has a full Ontology page — keep auto's lighter. | `@auto/ontology` loaders, new route |
 | Multi-vehicle comparison dashboard | planned | low | Only valuable once ≥2 real vehicles exist. | VehicleSwitcher, recognition summaries |
 
@@ -69,6 +68,7 @@ When proposing a new feature:
 | SAE-generic DL ontology + FCA Tigershark view | 2026-07 | `packages/ontology/dl-ontology.json`, `ONTOLOGY_DEV_GUIDE.md` |
 | Vehicle profile registry (Jeep + Silverado stub) | 2026-07 | `vehicle-profiles.json`, `ADD_A_VEHICLE.md` |
 | Realize + reason Python fixtures (misfire / safety hold) | 2026-07 | `packages/ontology/fixtures/*` |
+| Second policy reason fixture (MultiAirOilStarvation forbids clear-codes) | 2026-07 | `oilstarvation_reason_fixture.json`, `PolicyService` `R_forbid_clear_oilstarvation`, reason-integration + policy tests |
 | Shared packages: semantic-types, validation, logos-bridge, game-theory | 2026-07 | `packages/*` |
 | Cartridges: misfire, lean-fuel, evap, cam-crank, fca-tigershark-2.4, gm stub | 2026-07 | `packages/cartridges`, `ADD_A_CARTRIDGE.md` |
 | Fastify API: recognition, policy, solver, actions, observations, campaigns, forecast | 2026-07 | `apps/api`, `API_DEV_GUIDE.md` |

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "ontology",
+    "kind": "Ontology",
+    "subtypes": {
+      "Engine": "IndependentContinuant",
+      "Symptom": "IndependentContinuant",
+      "Condition": "IndependentContinuant",
+      "MultiAirFault": "Symptom",
+      "LowOilPressure": "Condition"
+    },
+    "roles": {
+      "hasDtc": { "domain": "Engine", "range": "Symptom" },
+      "hasCondition": { "domain": "Engine", "range": "Condition" }
+    },
+    "classes": {
+      "MultiAirOilStarvation": {
+        "equivalentTo": "Engine ⊓ ∃hasDtc.MultiAirFault ⊓ ∃hasCondition.LowOilPressure"
+      }
+    }
+  },
+  {
+    "id": "R_forbid_clear_oilstarvation",
+    "kind": "Rule",
+    "if": "MultiAirOilStarvation(x)",
+    "then": "Forbid(ClearCodesAndDrive(x))",
+    "priority": 10,
+    "logic": "FOL⊗ML",
+    "level": "L2"
+  },
+  {
+    "id": "R_ought_oil_precheck",
+    "kind": "Rule",
+    "if": "MultiAirOilStarvation(x)",
+    "then": "Ought(CheckOilBeforeMultiAirActuator(x))",
+    "priority": 10,
+    "logic": "FOL⊗ML",
+    "level": "L2"
+  },
+  {
+    "id": "C_a1",
+    "kind": "Claim",
+    "formula": "Engine(jeep_renegade_engine)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.99,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  },
+  {
+    "id": "C_a2",
+    "kind": "Claim",
+    "formula": "MultiAirFault(p0011)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.95,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  },
+  {
+    "id": "C_a3",
+    "kind": "Claim",
+    "formula": "hasDtc(jeep_renegade_engine, p0011)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.95,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  },
+  {
+    "id": "C_a4",
+    "kind": "Claim",
+    "formula": "LowOilPressure(low_oil_1)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.9,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  },
+  {
+    "id": "C_a5",
+    "kind": "Claim",
+    "formula": "hasCondition(jeep_renegade_engine, low_oil_1)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.9,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  }
+]

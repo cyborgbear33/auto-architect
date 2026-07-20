@@ -58,6 +58,7 @@ truly SAE-portable.
 python3 -m logos ontology packages/ontology/dl-ontology.json --json
 python3 -m logos realize packages/ontology/fixtures/misfire_realize_fixture.json --json
 python3 -m logos reason  packages/ontology/fixtures/misfire_reason_fixture.json --json
+python3 -m logos reason  packages/ontology/fixtures/oilstarvation_reason_fixture.json --json
 ```
 
 Only after realize/reason behave as intended should you wire cartridge framing
