@@ -45,6 +45,7 @@ allowed to append evidence; it still does not classify).
 | `ObservationService` | no | Append / query batches; provenance; live gauges |
 | `SolutionHistoryService` | no | Roll up repair outcomes by action / class / family |
 | `CaseTimelineService` | no | Derive case narrative from problems + decisions |
+| `GarageExportService` | no (import mutates store) | JSON garage dump/restore + CSV tables |
 | `CampaignService` | no | Match `known-campaigns.json` |
 | `RecommendationService` | no (uses recognition outputs) | List / refresh / status |
 | `VehicleService` | no | Profiles + engine-family resolution |

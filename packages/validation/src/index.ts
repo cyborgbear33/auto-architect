@@ -35,7 +35,12 @@ export const Mode06ResultSchema = z.object({
   passed: z.boolean().nullable(),
 });
 
-export const ObservationSourceSchema = z.enum(["obd_gateway", "manual_entry", "simulated"]);
+export const ObservationSourceSchema = z.enum([
+  "obd_gateway",
+  "manual_entry",
+  "simulated",
+  "imported_file",
+]);
 
 export const ObservationBatchSchema = z.object({
   vehicleId: z.string().min(1),
@@ -125,3 +130,67 @@ export const CreateVehicleSchema = z.object({
   notes: z.string().optional(),
 });
 export type CreateVehicleInput = z.infer<typeof CreateVehicleSchema>;
+
+/** Portable garage JSON dump (export / import). Nested entities are lightly gated. */
+export const GarageDumpSchema = z.object({
+  format: z.literal("auto-architect.garage"),
+  version: z.literal(1),
+  exportedAt: z.string().min(1),
+  scope: z.enum(["garage", "vehicle"]),
+  vehicleId: z.string().nullable(),
+  vehicles: z.array(
+    z
+      .object({
+        id: z.string().min(1),
+        make: z.string().min(1),
+        model: z.string().min(1),
+        year: z.number().nullable(),
+        trim: z.string().nullable(),
+        engineFamily: z.string().min(1),
+      })
+      .passthrough(),
+  ),
+  observations: z.array(ObservationBatchSchema),
+  problems: z.array(
+    z
+      .object({
+        id: z.string().min(1),
+        vehicleId: z.string().min(1),
+        status: z.string().min(1),
+        statement: z.object({
+          currentState: z.string(),
+          desiredState: z.string(),
+          gap: z.string(),
+        }),
+        actions: z.array(z.unknown()),
+        createdAt: z.string().min(1),
+        updatedAt: z.string().min(1),
+      })
+      .passthrough(),
+  ),
+  decisions: z.array(
+    z
+      .object({
+        id: z.string().min(1),
+        vehicleId: z.string().min(1),
+        problemId: z.string().min(1),
+        actionId: z.string().min(1),
+        rationale: z.string(),
+        policyAllowed: z.boolean(),
+        decidedAt: z.string().min(1),
+        decidedBy: z.string().min(1),
+      })
+      .passthrough(),
+  ),
+  recommendations: z
+    .array(
+      z
+        .object({
+          id: z.string().min(1),
+          vehicleId: z.string().min(1),
+        })
+        .passthrough(),
+    )
+    .default([]),
+});
+export type GarageDumpInput = z.infer<typeof GarageDumpSchema>;

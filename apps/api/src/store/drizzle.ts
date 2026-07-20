@@ -82,6 +82,10 @@ export function createDrizzleStore(databaseUrl: string): Store {
       });
     },
 
+    async listBatches(vehicleId) {
+      return batchesFor(vehicleId);
+    },
+
     async latestDtcs(vehicleId) {
       const rows = await batchesFor(vehicleId);
       const byCode = new Map<string, DtcObservation>();

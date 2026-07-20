@@ -71,5 +71,21 @@ describe("API HTTP smoke (buildApp + inject)", () => {
       problemIdFilter: null,
       events: [],
     });
+
+    const garage = await app.inject({ method: "GET", url: "/api/garage/export" });
+    expect(garage.statusCode).toBe(200);
+    expect(garage.json()).toMatchObject({
+      format: "auto-architect.garage",
+      version: 1,
+      scope: "garage",
+    });
+
+    const csv = await app.inject({
+      method: "GET",
+      url: `/api/vehicles/${id}/export/decisions.csv`,
+    });
+    expect(csv.statusCode).toBe(200);
+    expect(csv.headers["content-type"]).toMatch(/text\/csv/);
+    expect(csv.body).toContain("vehicleId");
   });
 });

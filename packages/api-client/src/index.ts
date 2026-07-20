@@ -15,6 +15,8 @@ import type {
   DtcObservation,
   EvidenceProvenance,
   FreezeFrame,
+  GarageDump,
+  GarageImportResult,
   KnownCampaign,
   LiveGaugeStrip,
   Mode06Result,
@@ -111,6 +113,23 @@ export class AutoApiClient {
     return this.fetchImpl ?? globalThis.fetch.bind(globalThis);
   }
 
+  private async requestText(path: string, init?: RequestInit): Promise<string> {
+    const res = await this.fetchFn()(`${this.baseUrl}${path}`, init);
+    const text = await res.text();
+    if (!res.ok) {
+      let message = text || res.statusText;
+      try {
+        const body = text ? JSON.parse(text) : undefined;
+        message =
+          (body as { error?: { message?: string } } | undefined)?.error?.message ?? message;
+      } catch {
+        /* raw text error */
+      }
+      throw new ApiError(message, res.status);
+    }
+    return text;
+  }
+
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
     const res = await this.fetchFn()(`${this.baseUrl}${path}`, {
       ...init,
@@ -168,6 +187,26 @@ export class AutoApiClient {
     const q = problemId ? `?problemId=${enc(problemId)}` : "";
     return this.request<CaseTimeline>(`/api/vehicles/${enc(vehicleId)}/case-timeline${q}`);
   };
+
+  // --- garage export / import -------------------------------------------------
+  exportGarage = () => this.request<GarageDump>("/api/garage/export");
+  exportVehicle = (vehicleId: string) =>
+    this.request<GarageDump>(`/api/vehicles/${enc(vehicleId)}/export`);
+  importGarage = (dump: GarageDump) =>
+    this.request<GarageImportResult>("/api/garage/import", {
+      method: "POST",
+      body: JSON.stringify(dump),
+    });
+  exportObservationsCsv = (vehicleId: string) =>
+    this.requestText(`/api/vehicles/${enc(vehicleId)}/export/observations.csv`);
+  exportDtcsCsv = (vehicleId: string) =>
+    this.requestText(`/api/vehicles/${enc(vehicleId)}/export/dtcs.csv`);
+  exportDecisionsCsv = (vehicleId: string) =>
+    this.requestText(`/api/vehicles/${enc(vehicleId)}/export/decisions.csv`);
+  exportProblemsCsv = (vehicleId: string) =>
+    this.requestText(`/api/vehicles/${enc(vehicleId)}/export/problems.csv`);
+  exportTimelineCsv = (vehicleId: string) =>
+    this.requestText(`/api/vehicles/${enc(vehicleId)}/export/timeline.csv`);
   getVehicleReport = (vehicleId: string) =>
     this.request<{
       scope: "vehicle" | "problem";

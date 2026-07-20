@@ -76,7 +76,12 @@ export interface Mode06Result {
   passed: boolean | null;
 }
 
-export type ObservationSource = "obd_gateway" | "manual_entry" | "simulated";
+export type ObservationSource =
+  | "obd_gateway"
+  | "manual_entry"
+  | "simulated"
+  /** Restored or uploaded via garage JSON import. */
+  | "imported_file";
 
 /** The single envelope obd-gateway posts to `POST /api/vehicles/:id/observations`. */
 export interface ObservationBatch {
@@ -443,6 +448,32 @@ export interface CaseTimeline {
   problemIdFilter: SemanticId | null;
   /** Oldest → newest. */
   events: CaseTimelineEvent[];
+}
+
+/** Portable garage snapshot for backup / migrate (JSON dump). */
+export const GARAGE_DUMP_FORMAT = "auto-architect.garage" as const;
+export const GARAGE_DUMP_VERSION = 1 as const;
+
+export interface GarageDump {
+  format: typeof GARAGE_DUMP_FORMAT;
+  version: typeof GARAGE_DUMP_VERSION;
+  exportedAt: IsoTimestamp;
+  scope: "garage" | "vehicle";
+  vehicleId: SemanticId | null;
+  vehicles: VehicleProfile[];
+  observations: ObservationBatch[];
+  problems: DiagnosticProblem[];
+  decisions: DecisionRecord[];
+  recommendations: Recommendation[];
+}
+
+export interface GarageImportResult {
+  vehiclesUpserted: number;
+  observationsAppended: number;
+  observationsSkipped: number;
+  problemsUpserted: number;
+  decisionsUpserted: number;
+  recommendationsUpserted: number;
 }
 
 // --- Known campaigns (TSBs / recalls) -------------------------------------

@@ -40,6 +40,8 @@ export interface VehicleRepository {
 
 export interface ObservationRepository {
   record(batch: ObservationBatch): Promise<void>;
+  /** All batches for a vehicle, oldest → newest (export / import). */
+  listBatches(vehicleId: string): Promise<ObservationBatch[]>;
   latestDtcs(vehicleId: string): Promise<DtcObservation[]>;
   latestPids(vehicleId: string): Promise<Record<string, number>>;
   latestFreezeFrames(vehicleId: string): Promise<FreezeFrame[]>;

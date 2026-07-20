@@ -58,6 +58,10 @@ function createObservationRepository(): ObservationRepository {
       batches.set(batch.vehicleId, list);
     },
 
+    async listBatches(vehicleId) {
+      return [...batchesFor(vehicleId)];
+    },
+
     async latestDtcs(vehicleId) {
       const byCode = new Map<string, DtcObservation>();
       for (const batch of batchesFor(vehicleId)) {

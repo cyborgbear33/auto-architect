@@ -52,7 +52,7 @@ multi-piece plans live in the next section.
 | **Problem history** — cases over time | **partial** | Case timeline (problems + decisions); Journal is decision audit | Mileage/session on events; evidence deep-links | Drive sessions; Durable observation history; H3–H5 |
 | **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel; verify-before-solved (`worked` → verifying) | Stronger family priors / sample-size UX | Multi-signal trends |
 | **History → better future decisions** | **partial** | Multi-signal trends + outcome calibration into draft/solve/refresh | Session-aware trends | Drive sessions (F4) |
-| **Reporting** — shareable diagnostic note | **partial** | Markdown download/copy (vehicle + problem) | Print/PDF polish | Print-friendly HTML/PDF |
+| **Reporting** — shareable diagnostic note | **partial** | Markdown + garage JSON/CSV export/import | Print/PDF polish | Print-friendly HTML/PDF |
 
 **Spine that already works:** ingest → realize → draft/solve → recommend → policy hold → log-repair → verify → Journal.  
 **Not yet a complete garage product:** live scan UX, drive sessions, session-aware history.
@@ -345,6 +345,7 @@ print later. One template, two scopes (vehicle snapshot vs single case).
 |---|---|---|---|
 | G1 | Report compose service (vehicle \| problem scope) | done | `ReportService` |
 | G2 | Markdown download / copy | done | `ReportDownload` |
+| G2b | Garage JSON dump + CSV tables + JSON import | done | `GarageExportService`, Journal panel |
 | G3 | Print-friendly HTML / PDF | todo | After Markdown stabilizes |
 | G4 | Include verbalized proofs + campaign refs | done | Narration + campaigns in Markdown |
 | G5 | Optional “attach last drive session summary” | todo | Needs S4 |
@@ -437,6 +438,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Case timeline from problems + decisions (H2) | 2026-07 | `CaseTimelineService`, `GET .../case-timeline`, Diagnosis + ProblemDetail |
 | Durable problem lifecycle event log | 2026-07 | `DiagnosticProblem.lifecycleEvents` stamped by ActionService |
 | Multi-signal trends (F3) | 2026-07 | `ForecastService.summary`, RisingFuelTrim / RecurringHighLoad, Dashboard |
+| Garage JSON dump + CSV export/import | 2026-07 | `GarageExportService`, `GET/POST /api/garage/*`, Journal `DataExportPanel` |
 
 ---
 

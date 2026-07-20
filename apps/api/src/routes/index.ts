@@ -1,13 +1,21 @@
 import {
   CreateDiagnosticProblemSchema,
   CreateVehicleSchema,
+  GarageDumpSchema,
   LogRepairSchema,
   ObservationBatchSchema,
   ProblemIdActionSchema,
 } from "@auto/validation";
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply } from "fastify";
 import { notFound } from "../lib/errors.ts";
 import type { Services } from "../services/index.ts";
+
+function sendCsv(reply: FastifyReply, filename: string, csv: string) {
+  reply
+    .header("Content-Type", "text/csv; charset=utf-8")
+    .header("Content-Disposition", `attachment; filename="${filename}"`)
+    .send(csv);
+}
 
 /**
  * All API routes. Reads use resource endpoints; state changes use action
@@ -89,6 +97,49 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     const { id } = req.params as { id: string };
     const { problemId } = req.query as { problemId?: string };
     return s.caseTimeline.forVehicle(id, problemId);
+  });
+
+  // --- garage JSON dump + CSV exports / import --------------------------------
+  app.get("/api/garage/export", async () => s.garageExport.dumpGarage());
+
+  app.post("/api/garage/import", async (req) => {
+    const dump = GarageDumpSchema.parse(req.body);
+    return s.garageExport.importDump(dump as unknown as import("@auto/semantic-types").GarageDump);
+  });
+
+  app.get("/api/vehicles/:id/export", async (req) => {
+    const { id } = req.params as { id: string };
+    return s.garageExport.dumpVehicle(id);
+  });
+
+  app.get("/api/vehicles/:id/export/observations.csv", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const csv = await s.garageExport.observationsCsv(id);
+    sendCsv(reply, `observations-${id.replace(/[^a-zA-Z0-9_-]+/g, "_")}.csv`, csv);
+  });
+
+  app.get("/api/vehicles/:id/export/dtcs.csv", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const csv = await s.garageExport.dtcsCsv(id);
+    sendCsv(reply, `dtcs-${id.replace(/[^a-zA-Z0-9_-]+/g, "_")}.csv`, csv);
+  });
+
+  app.get("/api/vehicles/:id/export/decisions.csv", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const csv = await s.garageExport.decisionsCsv(id);
+    sendCsv(reply, `decisions-${id.replace(/[^a-zA-Z0-9_-]+/g, "_")}.csv`, csv);
+  });
+
+  app.get("/api/vehicles/:id/export/problems.csv", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const csv = await s.garageExport.problemsCsv(id);
+    sendCsv(reply, `problems-${id.replace(/[^a-zA-Z0-9_-]+/g, "_")}.csv`, csv);
+  });
+
+  app.get("/api/vehicles/:id/export/timeline.csv", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const csv = await s.garageExport.timelineCsv(id);
+    sendCsv(reply, `timeline-${id.replace(/[^a-zA-Z0-9_-]+/g, "_")}.csv`, csv);
   });
 
   app.get("/api/vehicles/:id/report", async (req) => {

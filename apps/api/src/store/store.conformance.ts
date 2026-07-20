@@ -103,6 +103,7 @@ export function runStoreConformance(label: string, makeStore: () => Store): void
       );
 
       expect(await store.observations.batchCount(vehicle.id)).toBe(2);
+      expect(await store.observations.listBatches(vehicle.id)).toHaveLength(2);
       const dtcs = await store.observations.latestDtcs(vehicle.id);
       expect(dtcs).toEqual([{ code: "P0304", status: "stored" }]);
       expect(await store.observations.latestPids(vehicle.id)).toEqual({ ENGINE_LOAD: 85 });

@@ -4,12 +4,14 @@ const LABELS: Record<ObservationSource, string> = {
   obd_gateway: "Live OBD",
   simulated: "Simulated",
   manual_entry: "Manual entry",
+  imported_file: "Imported file",
 };
 
 const TONES: Record<ObservationSource, string> = {
   obd_gateway: "border-emerald-200 bg-emerald-50 text-emerald-800",
   simulated: "border-amber-200 bg-amber-50 text-amber-900",
   manual_entry: "border-slate-200 bg-slate-100 text-slate-700",
+  imported_file: "border-sky-200 bg-sky-50 text-sky-800",
 };
 
 function formatCapturedAt(iso: string): string {

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { DataExportPanel } from "../components/DataExportPanel.tsx";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { api, queryKeys } from "../lib/api.ts";
 
@@ -28,6 +29,10 @@ function VehicleJournal({ vehicleId }: { vehicleId: string }) {
         title="Decision journal"
         subtitle="Every enacted diagnostic/repair action, with why it was chosen and whether it worked"
       />
+
+      <div className="mb-4">
+        <DataExportPanel vehicleId={vehicleId} />
+      </div>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">
         {decisionsQ.data?.length === 0 && (
