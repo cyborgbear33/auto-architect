@@ -138,11 +138,52 @@ function inlineFormat(s: string): string {
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 }
 
-/** Minimal Markdown → print HTML for our compose-only shop notes. */
-export function markdownToPrintHtml(markdown: string): string {
+export type MarkdownPrintOptions = {
+  /** Document <title> and optional print chrome. */
+  title?: string;
+};
+
+/** Minimal Markdown → print HTML for shop notes and the mastery guide. */
+export function markdownToPrintHtml(markdown: string, opts: MarkdownPrintOptions = {}): string {
+  const docTitle = opts.title ?? "Diagnostic report";
   const blocks: string[] = [];
-  for (const raw of markdown.split("\n")) {
-    const line = raw;
+  const lines = markdown.split("\n");
+  let i = 0;
+  let inCode = false;
+  const codeLines: string[] = [];
+
+  const flushCode = () => {
+    if (!inCode) return;
+    blocks.push(`<pre><code>${esc(codeLines.join("\n"))}</code></pre>`);
+    codeLines.length = 0;
+    inCode = false;
+  };
+
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+
+    if (line.startsWith("```")) {
+      if (inCode) flushCode();
+      else inCode = true;
+      i += 1;
+      continue;
+    }
+    if (inCode) {
+      codeLines.push(line);
+      i += 1;
+      continue;
+    }
+
+    if (line.startsWith("|") && line.includes("|") && lines[i + 1]?.match(/^\|?\s*[-:| ]+\s*\|/)) {
+      const tableRows: string[] = [];
+      while (i < lines.length && (lines[i] ?? "").startsWith("|")) {
+        tableRows.push(lines[i] ?? "");
+        i += 1;
+      }
+      blocks.push(renderMarkdownTable(tableRows));
+      continue;
+    }
+
     if (line.startsWith("# ")) {
       blocks.push(`<h1>${inlineFormat(line.slice(2))}</h1>`);
     } else if (line.startsWith("## ")) {
@@ -151,44 +192,54 @@ export function markdownToPrintHtml(markdown: string): string {
       blocks.push(`<h3>${inlineFormat(line.slice(4))}</h3>`);
     } else if (line === "---") {
       blocks.push("<hr />");
+    } else if (line.startsWith("> ")) {
+      blocks.push(`<blockquote><p>${inlineFormat(line.slice(2))}</p></blockquote>`);
+    } else if (/^\d+\.\s+/.test(line)) {
+      blocks.push(`<li class="ol">${inlineFormat(line.replace(/^\d+\.\s+/, ""))}</li>`);
     } else if (line.startsWith("- ")) {
       blocks.push(`<li>${inlineFormat(line.slice(2))}</li>`);
     } else if (line.startsWith("  - ")) {
       blocks.push(`<li class="nested">${inlineFormat(line.slice(4))}</li>`);
     } else if (line.trim() === "") {
       blocks.push("");
-    } else if (line.startsWith("_") && line.endsWith("_")) {
+    } else if (line.startsWith("_") && line.endsWith("_") && line.length > 2) {
       blocks.push(`<p class="footnote"><em>${inlineFormat(line.slice(1, -1))}</em></p>`);
     } else {
       blocks.push(`<p>${inlineFormat(line)}</p>`);
     }
+    i += 1;
   }
+  flushCode();
 
-  // Wrap consecutive <li> into <ul>
+  // Wrap consecutive <li> into <ul> / <ol>
   const htmlBody: string[] = [];
-  let inList = false;
+  let listKind: "ul" | "ol" | null = null;
   for (const b of blocks) {
-    if (b.startsWith("<li")) {
-      if (!inList) {
-        htmlBody.push("<ul>");
-        inList = true;
+    const isOl = b.startsWith('<li class="ol"');
+    const isUl = b.startsWith("<li") && !isOl;
+    if (isOl || isUl) {
+      const kind = isOl ? "ol" : "ul";
+      if (listKind !== kind) {
+        if (listKind) htmlBody.push(`</${listKind}>`);
+        htmlBody.push(`<${kind}>`);
+        listKind = kind;
       }
-      htmlBody.push(b);
+      htmlBody.push(isOl ? b.replace(' class="ol"', "") : b);
     } else {
-      if (inList) {
-        htmlBody.push("</ul>");
-        inList = false;
+      if (listKind) {
+        htmlBody.push(`</${listKind}>`);
+        listKind = null;
       }
       htmlBody.push(b);
     }
   }
-  if (inList) htmlBody.push("</ul>");
+  if (listKind) htmlBody.push(`</${listKind}>`);
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Diagnostic report</title>
+<title>${esc(docTitle)}</title>
 <style>
   :root { color-scheme: light; }
   body {
@@ -227,23 +278,72 @@ export function markdownToPrintHtml(markdown: string): string {
     font-family: system-ui, sans-serif;
     font-size: 0.85rem;
   }
+  pre {
+    font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.65rem 0.75rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.5rem 0 0.75rem;
+    font-size: 0.95em;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.3rem 0.45rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #f3f3f3; font-weight: 650; }
+  blockquote {
+    margin: 0.5rem 0;
+    padding: 0.35rem 0.75rem;
+    border-left: 3px solid #999;
+    color: #333;
+    background: #fafafa;
+  }
+  ol { margin: 0.35rem 0 0.6rem; padding-left: 1.25rem; }
   @media print {
     body { margin: 0; max-width: none; padding: 0.4in 0.6in; }
     .no-print { display: none !important; }
     h2 { break-after: avoid; }
-    ul, p { break-inside: avoid; }
+    ul, ol, p, table { break-inside: avoid; }
     a { color: inherit; text-decoration: none; }
   }
   @page { margin: 0.6in; }
 </style>
 </head>
 <body>
-<p class="no-print">Print this page (Ctrl/Cmd+P) for a shop-ready note. Close the tab when done.</p>
+<p class="no-print">Print this page (Ctrl/Cmd+P), or use your browser’s <strong>Save as PDF</strong>. Close the tab when done.</p>
 <article class="report">
 ${htmlBody.join("\n")}
 </article>
 </body>
 </html>`;
+}
+
+function renderMarkdownTable(rows: string[]): string {
+  const cells = (row: string) =>
+    row
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split("|")
+      .map((c) => c.trim());
+  const bodyRows = rows.filter((r) => !/^\|?\s*[-:| ]+\s*\|/.test(r));
+  if (bodyRows.length === 0) return "";
+  const [header, ...rest] = bodyRows;
+  const headCells = cells(header ?? "");
+  const thead = `<thead><tr>${headCells.map((c) => `<th>${inlineFormat(c)}</th>`).join("")}</tr></thead>`;
+  const tbody = `<tbody>${rest
+    .map((r) => `<tr>${cells(r).map((c) => `<td>${inlineFormat(c)}</td>`).join("")}</tr>`)
+    .join("")}</tbody>`;
+  return `<table>${thead}${tbody}</table>`;
 }
 
 function formatDuration(sec: number): string {

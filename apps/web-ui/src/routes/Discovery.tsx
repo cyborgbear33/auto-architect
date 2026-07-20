@@ -1,5 +1,6 @@
 import type { DiscoveryForensicsReport, DiscoveryPidRow, DiscoverySupportStatus } from "@auto/semantic-types";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { ApiError, api, queryKeys } from "../lib/api.ts";
@@ -87,8 +88,11 @@ function VehicleDiscovery({ vehicleId }: { vehicleId: string }) {
             {`python -m obd_gateway --vehicle-id ${vehicleId} --simulate --dry-run discover\npython -m obd_gateway --vehicle-id ${vehicleId} discover`}
           </pre>
           <p className="mt-2 text-xs text-amber-800/80">
-            See <code className="rounded bg-white/70 px-1">docs/OPERATOR_OBD_MANUAL.md</code> for
-            MX+ connection and Jeep gray-adapter notes.
+            New here? Open the{" "}
+            <Link to="/guide" className="font-medium text-amber-950 underline underline-offset-2">
+              Guide
+            </Link>{" "}
+            for the full vehicle → ontology → discovery path (print / Markdown export included).
           </p>
         </div>
       )}

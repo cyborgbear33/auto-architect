@@ -81,6 +81,12 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         subtitle={vehicle ? `${vehicle.engineFamily} · ${vehicle.id}` : undefined}
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to="/guide"
+              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              OBD Guide
+            </Link>
             <ReportDownload vehicleId={vehicleId} />
             <button
               type="button"

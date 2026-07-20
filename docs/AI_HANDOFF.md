@@ -199,6 +199,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Operator OBD manual (MX+ / Jeep gray adapter) | shipped | `docs/OPERATOR_OBD_MANUAL.md`; Jeep profile notes |
 | Functions / Proxi guided procedure | shipped | `special-procedures.json`; `/functions`; ActionService start/complete |
 | OBD capability discovery (vehicle intelligence) | shipped | gateway `discover`; `DiscoveryService`; UI `/discovery` |
+| Vehicle & OBD mastery Guide (print / Markdown) | shipped | `VEHICLE_OBD_MASTERY_GUIDE.md`; `MasteryGuideService`; UI `/guide` |
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |
 | Problem caseboard + verify-after-repair (P2–P5) | shipped | Diagnosis filters; abandon/escalate/reopen; `worked` → verifying → verify |
@@ -252,6 +253,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | [`ai/ADD_A_CARTRIDGE.md`](ai/ADD_A_CARTRIDGE.md) | Extend a diagnostic domain |
 | [`ai/ADD_A_VEHICLE.md`](ai/ADD_A_VEHICLE.md) | Add Silverado (or any next car) |
 | [`OPERATOR_OBD_MANUAL.md`](OPERATOR_OBD_MANUAL.md) | Human OBDLink MX+ setup + thorough-scan integration plan |
+| [`VEHICLE_OBD_MASTERY_GUIDE.md`](VEHICLE_OBD_MASTERY_GUIDE.md) | In-app Guide curriculum (vehicle → ontology → discovery → troubleshoot) |
 | [`ai/OBD_EDGE_CONTRACT.md`](ai/OBD_EDGE_CONTRACT.md) | OBD-II / CANBUS edge rules |
 | [`ai/HARDWARE_STANDARDS.md`](ai/HARDWARE_STANDARDS.md) | SAE/ISO/CAN grounding reference |
 | [`ai/TESTING_DEV_GUIDE.md`](ai/TESTING_DEV_GUIDE.md) | Vitest / pytest / FakeLogosBridge |

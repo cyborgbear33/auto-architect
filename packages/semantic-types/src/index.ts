@@ -135,6 +135,24 @@ export interface DiscoveryMode06Row {
   inOntology: boolean;
 }
 
+/** One chapter of the vehicle / OBD mastery guide (in-app Guide page). */
+export interface MasteryGuideSection {
+  id: string;
+  title: string;
+  /** Section body markdown (without the `##` heading line). */
+  markdown: string;
+}
+
+/** Personalized peace-of-mind curriculum for a selected vehicle. */
+export interface MasteryGuide {
+  vehicleId: SemanticId;
+  title: string;
+  generatedAt: IsoTimestamp;
+  sections: MasteryGuideSection[];
+  markdown: string;
+  html: string;
+}
+
 /** Ontology-enriched vehicle intelligence / forensics report. */
 export interface DiscoveryForensicsReport {
   vehicleId: SemanticId;

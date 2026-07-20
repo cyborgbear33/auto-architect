@@ -14,6 +14,7 @@ import type {
   DiagnosticProblem,
   DiscoveryForensicsReport,
   DriveSession,
+  MasteryGuide,
   DriveSessionSummary,
   DtcObservation,
   EvidenceProvenance,
@@ -293,6 +294,8 @@ export class AutoApiClient {
     this.request<{ markdown: string; html: string; capturedAt: string }>(
       `/api/vehicles/${enc(vehicleId)}/discovery/report`,
     );
+  getMasteryGuide = (vehicleId: string) =>
+    this.request<MasteryGuide>(`/api/vehicles/${enc(vehicleId)}/mastery-guide`);
   getForecast = (vehicleId: string, sessionId?: string) => {
     const q = sessionId ? `?sessionId=${enc(sessionId)}` : "";
     return this.request<ForecastSummary>(`/api/vehicles/${enc(vehicleId)}/forecast${q}`);
@@ -439,6 +442,7 @@ export const queryKeys = {
   freezeFrames: (vehicleId: string) => ["freezeFrames", vehicleId] as const,
   mode06: (vehicleId: string) => ["mode06", vehicleId] as const,
   discovery: (vehicleId: string) => ["discovery", vehicleId] as const,
+  masteryGuide: (vehicleId: string) => ["masteryGuide", vehicleId] as const,
   forecast: (vehicleId: string, sessionId?: string | null) =>
     ["forecast", vehicleId, sessionId ?? null] as const,
   recognition: (vehicleId: string) => ["recognition", vehicleId] as const,

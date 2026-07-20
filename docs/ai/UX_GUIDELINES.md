@@ -58,19 +58,25 @@ I do next? Why? What is forbidden? What did I already try?
 Real nav (`apps/web-ui/src/components/Layout.tsx`):
 
 ```text
-Dashboard · Diagnosis · Recalls & TSBs · Journal
+Dashboard · Diagnosis · Discovery · Guide · Functions · Recalls & TSBs · Journal
 ```
 
 Plus detail route: `/problems/$problemId`.
 
-**Do not grow a flat 17-item nav.** If new pages are needed, group by goal:
+**Do not grow a flat 17-item nav.** Goal grouping (keep labels short in the rail):
 
 ```text
 Operate     — Dashboard (live condition)
 Diagnose    — Diagnosis, Problem detail
+Verify/Learn — Discovery (capability forensics), Guide (mastery curriculum)
+OEM ops     — Functions (guided Proxi / special procedures)
 Reference   — Recalls & TSBs
 History     — Journal
 ```
+
+**Guide** is the peace-of-mind manual: vehicle → ontology → discovery → scan →
+troubleshoot, personalized per selected vehicle, with Markdown + Print/PDF
+export. Link it from Discovery empty states and Dashboard — do not bury it.
 
 Vehicle switcher is global (every page). Same pattern as garden's garden switcher.
 

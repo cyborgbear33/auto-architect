@@ -7,6 +7,7 @@ import { DiscoveryService } from "./discovery.ts";
 import { DriveSessionService } from "./drive-sessions.ts";
 import { ForecastService } from "./forecast.ts";
 import { GarageExportService } from "./garage-export.ts";
+import { MasteryGuideService } from "./mastery-guide.ts";
 import { ObservationService } from "./observations.ts";
 import { PolicyService } from "./policy.ts";
 import { RecognitionService } from "./recognition.ts";
@@ -28,6 +29,7 @@ export interface Services {
   actions: ActionService;
   observations: ObservationService;
   discovery: DiscoveryService;
+  masteryGuide: MasteryGuideService;
   driveSessions: DriveSessionService;
   recommendations: RecommendationService;
   campaigns: CampaignService;
@@ -50,6 +52,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
   const actions = new ActionService(store, vehicles, recognition, policy, solver, solutionHistory);
   const observations = new ObservationService(store, vehicles);
   const discovery = new DiscoveryService(store, vehicles);
+  const masteryGuide = new MasteryGuideService(vehicles, discovery);
   const driveSessions = new DriveSessionService(store, vehicles, observations);
   const campaigns = new CampaignService(vehicles);
   const specialProcedures = new SpecialProcedureService(vehicles);
@@ -82,6 +85,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     actions,
     observations,
     discovery,
+    masteryGuide,
     driveSessions,
     recommendations,
     campaigns,
@@ -101,6 +105,7 @@ export {
   DriveSessionService,
   ForecastService,
   GarageExportService,
+  MasteryGuideService,
   ObservationService,
   PolicyService,
   RecognitionService,

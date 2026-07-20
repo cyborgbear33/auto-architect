@@ -113,6 +113,11 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     return report;
   });
 
+  app.get("/api/vehicles/:id/mastery-guide", async (req) => {
+    const { id } = req.params as { id: string };
+    return s.masteryGuide.forVehicle(id);
+  });
+
   app.get("/api/vehicles/:id/observation-batches", async (req) => {
     const { id } = req.params as { id: string };
     return { batches: await s.observations.listBatches(id) };

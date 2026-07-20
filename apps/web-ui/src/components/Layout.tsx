@@ -9,6 +9,7 @@ const NAV_ITEMS: Array<{ to: string; label: string }> = [
   { to: "/", label: "Dashboard" },
   { to: "/diagnosis", label: "Diagnosis" },
   { to: "/discovery", label: "Discovery" },
+  { to: "/guide", label: "Guide" },
   { to: "/functions", label: "Functions" },
   { to: "/campaigns", label: "Recalls & TSBs" },
   { to: "/journal", label: "Journal" },

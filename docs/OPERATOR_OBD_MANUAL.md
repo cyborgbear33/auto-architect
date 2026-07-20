@@ -4,6 +4,10 @@ Human-readable guide for connecting vehicles to **auto-architect** through an
 **OBDLink MX+** (ELM327-compatible) and growing toward the most useful, thorough
 standard-OBD picture we can get without proprietary shop-tool sessions.
 
+**Start here in the app:** select a vehicle → **Guide** (vehicle-personalized
+mastery curriculum with Markdown download and Print → Save as PDF). Shared
+source text: [`VEHICLE_OBD_MASTERY_GUIDE.md`](VEHICLE_OBD_MASTERY_GUIDE.md).
+
 Companion technical docs (for agents / implementers):
 
 - [`ai/OBD_EDGE_CONTRACT.md`](ai/OBD_EDGE_CONTRACT.md) — what the gateway may do

@@ -458,6 +458,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Gateway Mode 02 + Mode 06 population + DTC dictionary UI text | 2026-07 | `read_freeze_frames` / `read_mode06`; API+Dashboard `lookupDtc` fill |
 | Functions panel + FCA Proxi guided procedure | 2026-07 | `special-procedures.json`; `/functions`; start/complete actions; external AlfaOBD |
 | OBD capability discovery (vehicle intelligence report) | 2026-07 | gateway `discover`; API enrich; UI `/discovery`; Jeep gray-adapter hardware context |
+| Vehicle & OBD mastery Guide (personalized + Print/PDF) | 2026-07 | `VEHICLE_OBD_MASTERY_GUIDE.md`; `MasteryGuideService`; UI `/guide` |
 
 ---
 
