@@ -9,12 +9,14 @@ src/
   server.ts / app.ts / config.ts
   routes/index.ts          ← HTTP only: parse, call service, return
   services/*.ts            ← business logic
-  store/{index,memory,seed}.ts
+  store/{index,memory,drizzle,seed}.ts
+  db/{schema,client}.ts    ← Drizzle schema (Postgres adapter only)
   lib/{errors,bridge-errors,ids}.ts
 ```
 
-Handlers stay thin. Services own behavior. The store is swappable later
-(`memory` today; Postgres planned).
+Handlers stay thin. Services own behavior. The store is swappable via
+`STORAGE_DRIVER` (`memory` | `postgres` | `auto`). Services never branch on the
+driver — they depend only on the `Store` interface.
 
 ## Mutation gate
 
@@ -75,6 +77,23 @@ should align with the path id (routes currently merge path id into the body).
 4. Register in `routes/index.ts`.
 5. Add a service unit test with `FakeLogosBridge` when LOGOS is involved.
 6. Update `ARCHITECTURE.md` surface table if the public contract changed.
+
+## Storage drivers
+
+| `STORAGE_DRIVER` | Behavior |
+|---|---|
+| `memory` (default) | In-memory maps; resets on process restart. Used by unit/smoke tests. |
+| `postgres` | Drizzle adapter; requires `DATABASE_URL`. Runs migrations in `store.init()`. |
+| `auto` | Postgres when `DATABASE_URL` is set, otherwise memory. |
+
+```bash
+pnpm infra:up                 # docker compose Postgres on :5433 (avoids garden on :5432)
+pnpm db:generate              # after schema changes
+DATABASE_URL=postgres://auto:auto@localhost:5433/auto pnpm dev:api:postgres
+```
+
+Store conformance: `apps/api/src/store/store.test.ts` always covers memory;
+set `DATABASE_URL` to also run the Postgres suite.
 
 ## Ports & CORS
 

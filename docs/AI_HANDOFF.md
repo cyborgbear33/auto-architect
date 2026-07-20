@@ -38,6 +38,13 @@ a **2015 Jeep Renegade Latitude (2.4L Tigershark MultiAir2)**, built generically
 enough that a second vehicle (e.g. Chevrolet Silverado) is an engine-family +
 cartridge addition, not a rewrite.
 
+**Product reasons (maturity):** scanning, analysis, probabilistic diagnosis,
+informing the operator, recommendations, problem tracking, problem/solution
+history, history-informed future decisions, and reporting. Most are **partial**;
+reporting is **missing**. Summary + ideal solutions (work pieces S1…G5):
+[`FUTURE_FEATURES.md` § Product goals](FUTURE_FEATURES.md#product-goals-why-this-app-exists)
+and [§ Ideal solutions](FUTURE_FEATURES.md#ideal-solutions-by-goal).
+
 ---
 
 ## 2. The two projects and how they connect
@@ -102,7 +109,8 @@ pnpm install                       # also runs scripts/setup-solver.mjs --check
 | `LOGOS_PYTHON_BIN` | Python used by the bridge (default `python3`) |
 | `LOGOS_TRANSPORT` | `serve` (warm daemon) or `subprocess` (one-shot) |
 | `PORT` | API port (default `4100`) |
-| `STORAGE_DRIVER` | `memory` today (Postgres deferred) |
+| `STORAGE_DRIVER` | `memory` (default) \| `postgres` \| `auto` (postgres if `DATABASE_URL` set) |
+| `DATABASE_URL` | Postgres URL when using the Drizzle adapter (e.g. `postgres://auto:auto@localhost:5433/auto`) |
 
 **Run & verify:**
 
@@ -115,7 +123,9 @@ pnpm -r test
 pnpm lint:ontology
 pnpm obd-gateway:test
 
-pnpm dev:api                 # http://localhost:4100  (in-memory, seeded Jeep)
+pnpm dev:api                 # http://localhost:4100  (in-memory by default, seeded Jeep)
+pnpm infra:up                # local Postgres on :5433 (docker compose)
+DATABASE_URL=postgres://auto:auto@localhost:5433/auto pnpm dev:api:postgres
 pnpm dev:ui                  # http://localhost:5173  (proxies /api → :4100)
 ```
 
@@ -168,14 +178,14 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | logos-bridge drift check vs garden-architect (advisory) | shipped | `scripts/check-bridge-drift.mjs` |
 | logos-bridge seam sync with garden (domain renames only) | shipped | `AI_CODING_RULES.md` §10 intentional diffs |
 | Fastify API (vehicles, observations, recognition, actions) | shipped | `apps/api` |
-| In-memory store + seed Jeep | shipped | `apps/api/src/store` |
+| In-memory store + seed Jeep | shipped | `apps/api/src/store/memory.ts` |
+| Postgres store (Drizzle; migrate-on-init) | shipped | `apps/api/src/store/drizzle.ts`, `apps/api/drizzle/`, `pnpm infra:up` |
 | Policy safety holds (`clear-codes-and-drive` under misfire / MultiAir oil starvation / cam-crank) | shipped | `PolicyService`, reason fixtures, Diagnosis UI |
 | Oil-level trend forecast | shipped | `ForecastService` |
 | React UI (5 routes) | shipped | `apps/web-ui` |
 | `@auto/api-client` (typed fetch + queryKeys; web-ui thin re-export) | shipped | `packages/api-client`, `API_CLIENT_DEV_GUIDE.md` |
 | Python obd-gateway (`scan` / `watch` / `--simulate`) | shipped | `apps/obd-gateway` |
 | Ontology lint CI | shipped | `scripts/lint-ontology.mjs`, `.github/workflows/ci.yml` |
-| Postgres persistence | **not yet** | see `FUTURE_FEATURES.md` |
 | Auth / multi-user | **not yet** | see `FUTURE_FEATURES.md` |
 | Live Mode 06 / freeze-frame UI richness | partial | API endpoints exist; UI is thin |
 | LLM agent loop (propose-only) | **not yet** | garden has `agent-service`; auto does not |

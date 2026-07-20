@@ -35,6 +35,7 @@ CI + `pnpm healthcheck` enforce these.
 | **Ontology parity (Python-free)** | `@auto/ontology` lint + Zod registries; `@auto/cartridges` `ontology-lint.test.ts` | Ontology JSON, DTC dictionary, vehicle profiles, cartridge `requires` / names |
 | **Real-LOGOS smoke** | `packages/logos-bridge/src/*-integration.test.ts` | Wire contract, fixtures, `LOGOS_MIN_ENGINE_VERSION` bumps |
 | **HTTP smoke** | `apps/api/src/app.smoke.test.ts` (`buildApp` + `inject`) | Route registration / `buildApp` / seed wiring |
+| **Store conformance** | `apps/api/src/store/store.test.ts` | Always memory; Postgres when `DATABASE_URL` is set |
 | **Gateway (pytest)** | `apps/obd-gateway/tests/` | Edge payload, CLI, pid_map |
 | **UI (RTL, mocked api)** | `apps/web-ui/src/__tests__/` | Page interaction; never invent fault classes client-side |
 

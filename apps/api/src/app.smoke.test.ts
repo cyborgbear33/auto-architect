@@ -30,7 +30,7 @@ describe("API HTTP smoke (buildApp + inject)", () => {
   it("GET /health returns ok", async () => {
     const res = await app.inject({ method: "GET", url: "/health" });
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toMatchObject({ status: "ok" });
+    expect(res.json()).toMatchObject({ status: "ok", storage: "memory" });
   });
 
   it("GET /api/vehicles lists the seeded Jeep", async () => {

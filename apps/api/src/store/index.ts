@@ -8,14 +8,18 @@ import type {
   Recommendation,
   VehicleProfile,
 } from "@auto/semantic-types";
+import type { ApiConfig } from "../config.ts";
+import { createDrizzleStore } from "./drizzle.ts";
+import { createMemoryStore } from "./memory.ts";
+
+export { createDrizzleStore, createMemoryStore };
 
 /**
- * The storage seam. Today only `createMemoryStore` exists (Phase B, per the
- * plan: "in-memory store first, Postgres later") — everything above this
- * interface (services, routes) is written against the interface, not the
- * implementation, so swapping in a Postgres-backed store later is additive.
+ * The storage seam. Services and routes depend only on this interface —
+ * `createMemoryStore` / `createDrizzleStore` are interchangeable adapters.
  */
 export interface Store {
+  readonly driver: "memory" | "postgres";
   vehicles: VehicleRepository;
   observations: ObservationRepository;
   problems: ProblemRepository;
@@ -62,4 +66,13 @@ export interface DecisionRepository {
   listByVehicle(vehicleId: string): Promise<DecisionRecord[]>;
 }
 
-export { createMemoryStore } from "./memory.ts";
+/** Build the configured store. Services never learn which adapter this is. */
+export function createStore(config: Pick<ApiConfig, "storageDriver" | "databaseUrl">): Store {
+  if (config.storageDriver === "postgres") {
+    if (!config.databaseUrl) {
+      throw new Error("STORAGE_DRIVER=postgres requires DATABASE_URL to be set.");
+    }
+    return createDrizzleStore(config.databaseUrl);
+  }
+  return createMemoryStore();
+}

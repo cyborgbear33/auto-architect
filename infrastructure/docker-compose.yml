@@ -1,0 +1,27 @@
+# Local Postgres for auto-architect.
+#
+#   pnpm infra:up
+#   STORAGE_DRIVER=postgres DATABASE_URL=postgres://auto:auto@localhost:5433/auto pnpm dev:api
+#
+# Host port defaults to 5433 so it can coexist with garden-architect on 5432.
+# Override with POSTGRES_HOST_PORT=5432 if you prefer the usual Postgres port.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: auto-postgres
+    environment:
+      POSTGRES_USER: auto
+      POSTGRES_PASSWORD: auto
+      POSTGRES_DB: auto
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - auto-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auto -d auto"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  auto-pgdata:

@@ -169,6 +169,7 @@ export function createMemoryStore(): Store {
   let decisions = createDecisionRepository();
 
   return {
+    driver: "memory" as const,
     get vehicles() {
       return vehicles;
     },

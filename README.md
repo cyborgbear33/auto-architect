@@ -29,8 +29,12 @@ apps/obd-gateway (Python)  --POST Observations-->  apps/api (Fastify)  <--HTTP--
 
 ```bash
 pnpm install                 # also runs scripts/setup-solver.mjs --check
-pnpm dev:api                 # Fastify API on :4100 (in-memory store, seeded with the Jeep)
+pnpm dev:api                 # Fastify API on :4100 (memory store by default, seeded Jeep)
 pnpm dev:ui                  # Vite dev server on :5173 (proxies /api, /health to :4100)
+
+# Optional durable storage (survives tsx watch restarts):
+pnpm infra:up                # Postgres on :5433
+DATABASE_URL=postgres://auto:auto@localhost:5433/auto pnpm dev:api:postgres
 ```
 
 Feed it evidence without any hardware, via obd-gateway's simulate mode:

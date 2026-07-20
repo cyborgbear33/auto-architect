@@ -23,12 +23,17 @@ Ontology → Validation → API → Store → UI / OBD edge → Actions → Deci
   validated before storage or action.
 - **API exposes semantic contracts.** Reads through resource endpoints; state
   changes through action endpoints that go through `ActionService`.
-- **Store holds validated facts** keyed by stable semantic IDs (in-memory today).
+- **Store holds validated facts** keyed by stable semantic IDs (`memory` or
+  Postgres via `STORAGE_DRIVER`).
 - **UI / obd-gateway visualize and report.** They never own fault meaning.
 - **Actions → Decisions.** Mutations emit `DecisionRecord`s that preserve *why*.
 
 If the software cannot say *what was observed, which fault class is proven, what
 action is allowed, and why a recommendation was ranked* — it is not semantic yet.
+
+Product-goal maturity + ideal solutions (work pieces):
+[`FUTURE_FEATURES.md` § Product goals](FUTURE_FEATURES.md#product-goals-why-this-app-exists)
+/ [Ideal solutions](FUTURE_FEATURES.md#ideal-solutions-by-goal).
 
 ---
 
@@ -37,7 +42,7 @@ action is allowed, and why a recommendation was ranked* — it is not semantic y
 ```
 apps/
   web-ui/         React 19 + TanStack Router/Query + Redux Toolkit + Tailwind v4
-  api/            Fastify 5 + Zod + in-memory store
+  api/            Fastify 5 + Zod + Store seam (memory | Postgres/Drizzle)
   obd-gateway/    Python + python-OBD → Observation batches
 
 packages/
@@ -237,11 +242,11 @@ Required layers are listed in `docs/ai/TESTING_DEV_GUIDE.md`.
 
 ## 11. Deliberately deferred
 
-See [`FUTURE_FEATURES.md`](FUTURE_FEATURES.md). High-level:
+See [`FUTURE_FEATURES.md`](FUTURE_FEATURES.md) — especially **Product goals**.
+High-level gaps vs a complete garage product:
 
-- Postgres (and durable observation history)
-- Auth / multi-user
-- Shared UI component package / typed API client
-- Propose-only LLM agent service
-- Richer live gauges and Mode 06 visualization
-- Full Silverado engine-family cartridge (stub only today)
+- Live scan UX (MX+ dry-run, gauges, Mode 06 / freeze-frame UI)
+- Outcome-calibrated diagnosis + solution history → better recommendations
+- Problem caseboard / verify-after-repair; drive sessions
+- Diagnostic report export (still missing)
+- Auth / multi-user; shared UI package; LLM advise loop; full Silverado cartridge

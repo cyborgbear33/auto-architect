@@ -2,12 +2,12 @@ import { createLogosBridge } from "@auto/logos-bridge";
 import { buildApp } from "./app.ts";
 import { loadConfig } from "./config.ts";
 import { createServices } from "./services/index.ts";
-import { createMemoryStore } from "./store/index.ts";
+import { createStore } from "./store/index.ts";
 import { seed } from "./store/seed.ts";
 
 async function main(): Promise<void> {
   const config = loadConfig();
-  const store = createMemoryStore();
+  const store = createStore(config);
   await store.init();
 
   if (config.seedOnStart) {

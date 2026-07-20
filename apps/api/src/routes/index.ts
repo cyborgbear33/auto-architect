@@ -16,7 +16,7 @@ import type { Services } from "../services/index.ts";
 export async function registerRoutes(app: FastifyInstance, s: Services): Promise<void> {
   app.get("/health", async () => ({
     status: "ok",
-    storage: s.store.constructor.name,
+    storage: s.store.driver,
     time: new Date().toISOString(),
   }));
 
