@@ -1,3 +1,4 @@
+import type { EvidenceProvenance } from "@auto/semantic-types";
 import type { ObservationBatchInput } from "@auto/validation";
 import type { Store } from "../store/index.ts";
 import type { VehicleService } from "./vehicle.ts";
@@ -27,5 +28,10 @@ export class ObservationService {
 
   async latestMode06(vehicleId: string) {
     return this.store.observations.latestMode06(vehicleId);
+  }
+
+  async provenance(vehicleId: string): Promise<EvidenceProvenance> {
+    await this.vehicles.getOrThrow(vehicleId);
+    return this.store.observations.provenance(vehicleId);
   }
 }

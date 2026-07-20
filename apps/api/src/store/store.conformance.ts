@@ -110,6 +110,11 @@ export function runStoreConformance(label: string, makeStore: () => Store): void
       expect(await store.observations.latestMode06(vehicle.id)).toHaveLength(1);
       const series = await store.observations.series(vehicle.id, "ENGINE_LOAD");
       expect(series.map((p) => p.value)).toEqual([40, 85]);
+
+      const provenance = await store.observations.provenance(vehicle.id);
+      expect(provenance.batchCount).toBe(2);
+      expect(provenance.latestSource).toBe("simulated");
+      expect(provenance.sourcesSeen).toContain("simulated");
     });
 
     it("stores problems and updates status / payload fields", async () => {

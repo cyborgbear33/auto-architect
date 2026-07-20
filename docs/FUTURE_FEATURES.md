@@ -46,11 +46,11 @@ multi-piece plans live in the next section.
 | **Scanning** — ingest OBD evidence | **partial** | Gateway `scan`/`watch`/`--simulate`; `POST .../observations`; batches in memory or Postgres | Live MX+ path proven; live gauges; Mode 06 + freeze-frame visible; sessions group a drive | Live MX+ dry-run; Live gauges; Mode 06 UI; Freeze-frame panel; Drive sessions; Durable observation history |
 | **Analysis** — prove fault classes from evidence | **partial** | `RecognitionService` + cartridges → `GET .../recognition`; Dashboard/Diagnosis | Claims shown with evidence + plain-English proof; broader DTC/PID KB | Verbalize; Freeze-frame panel; Mode 06 UI; SAE PID/DTC KB |
 | **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Draft/solve → ranked actions + `confidence`/`certainty`; policy holds | Scores update from confirmed repair outcomes (not cartridge-static only) | Outcome → confidence calibration |
-| **Informing the user** — clear operator surfaces | **partial** | Dashboard, Diagnosis, ProblemDetail, Campaigns, Journal | Live/evidence-rich UI; trust primitives; source (sim vs live) obvious | Live gauges; Mode 06 / freeze-frame UI; Verbalize; `@auto/ui-components`; Evidence source labeling |
-| **Recommendations** — what to do next | **partial** | `RecommendationService.refresh` from proven classes; Dashboard cards | Cost/risk/confidence on cards; history-aware priority | Calibration into `refresh`; Recommendation card richness; Solution history rollup |
+| **Informing the user** — clear operator surfaces | **partial** | Dashboard/Diagnosis show evidence source; ProblemDetail/Diagnosis show solution history | Live/evidence-rich UI; trust primitives; source labeled | Live gauges; Mode 06 / freeze-frame UI; Verbalize; `@auto/ui-components` |
+| **Recommendations** — what to do next | **partial** | Refresh from proven classes; solution history visible (not yet in priority) | Cost/risk/confidence on cards; history-aware priority | Calibration into `refresh`; Recommendation card richness |
 | **Problem tracking** — open cases through solve | **shipped (MVP)** | `DiagnosticProblem` CRUD/list; create/solve; Diagnosis + ProblemDetail | Filter/reopen/abandon + verify-after-repair caseboard | Problem caseboard + verify-after-repair |
 | **Problem history** — cases over time | **partial** | Problems persist (Postgres); outcome on `log-repair`; Journal is decisions, not a case timeline | Chronological case timeline with mileage/session context | Problem caseboard; Drive sessions; Durable observation history |
-| **Solution history** — what fixed what, confirmed over time | **partial** | `log-repair` → `DecisionRecord` + `ProblemOutcome`; Journal lists them | “What fixed class X on this vehicle/family” rollup; outcomes feed playbooks | Solution history rollup; Outcome → confidence calibration |
+| **Solution history** — what fixed what, confirmed over time | **partial** | Rollup API + “What worked before” panel; Journal still lists decisions | Outcomes feed playbook/recommendation priority | Outcome → confidence calibration |
 | **History → better future decisions** | **partial (narrow)** | Oil PID series → `ForecastService` → may prove oil class → recs refresh. Past outcomes do **not** change ranking | Outcomes + trends inform solve priors and recommendation priority | Outcome → confidence calibration; Durable observation history; Drive sessions; Multi-signal trends |
 | **Reporting** — shareable diagnostic note | **missing** | Journal = audit list only | Export recognition + ranked actions + decisions (+ outcomes) as Markdown/print | Export diagnostic report |
 
@@ -181,7 +181,7 @@ Ship `@auto/ui-components` once patterns repeat twice.
 | # | Work piece | Status | Notes |
 |---|---|---|---|
 | I1 | Goal-grouped nav + vehicle switcher | done | Dashboard / Diagnosis / Campaigns / Journal |
-| I2 | Evidence source labeling (sim / live / manual) everywhere data shows | todo | Trust baseline |
+| I2 | Evidence source labeling (sim / live / manual) everywhere data shows | done | Dashboard + Diagnosis via `GET .../evidence-provenance` |
 | I3 | Live gauges + Mode 06 + freeze-frame panels | todo | Overlaps Scanning S2/S3 |
 | I4 | Verbalized proofs on Diagnosis / ProblemDetail | todo | Overlaps Analysis A2 |
 | I5 | Shared `@auto/ui-components` | todo | Status, empty/error, evidence |
@@ -288,8 +288,8 @@ confirmation (“worked after 50 mi verify”) over assuming solve ≡ fixed.
 |---|---|---|---|
 | X1 | log-repair → DecisionRecord + ProblemOutcome | done | ActionService |
 | X2 | Journal list with outcome pills | done | thin but real |
-| X3 | Rollup API: by vehicle, class, engineFamily, actionId | todo | |
-| X4 | “What worked before” panel on Diagnosis / ProblemDetail | todo | |
+| X3 | Rollup API: by vehicle, class, engineFamily, actionId | done | `GET .../solution-history?class=` |
+| X4 | “What worked before” panel on Diagnosis / ProblemDetail | done | `WhatWorkedPanel` |
 | X5 | Require / encourage outcome + verify before terminal solved | todo | Process, not just schema |
 
 **Seams:** `DecisionRecord`, `ProblemOutcome`, RecommendationsService, Journal.  
@@ -369,12 +369,10 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Live gauge view (RPM, load, fuel trim, coolant) + staleness | S2, I3, I6 | planned | high | Operators need live PIDs while diagnosing. | `ObservationsService`, Dashboard |
 | Durable observation history + freeze-frame retention | S5, H3 | planned | high | Trends, verify-after-repair, history→decision. | `ObservationsService`, store batches |
 | Continuous drive session recorder | S4, H3, F4, G5 | planned | medium | Groups watch streams for history/reports. | obd-gateway watch, ObservationsService |
-| Evidence source labeling (sim / live / manual) | I2 | planned | high | Trust baseline before live MX+ habits form. | ObservationBatch.source, Dashboard/Diagnosis |
 | Freeze-frame detail panel | S3, A1, I3 | planned | medium | Evidence for analysis + informing. | `GET .../freeze-frame`, Diagnosis |
 | Mode 06 monitor results UI | S3, A3, I3 | planned | medium | API has `/mode06`; UI does not. | `GET /api/vehicles/:id/mode06` |
 | Verbalize plain-English proof traces | A2, I4, G4 | planned | medium | Bridge ready; UI shows class names today. | logos-bridge `verbalize`, RecognitionService |
-| Outcome → confidence calibration | D3, D4, R4, F2 | planned | high | Honest probabilistic diagnosis + history loop. | `logRepair`, RecommendationsService, cartridges |
-| Solution history rollup API + “what worked” panel | X3, X4, R4 | planned | high | Confirmed fixes become queryable memory. | `DecisionRecord`, `ProblemOutcome` |
+| Outcome → confidence calibration | D3, D4, R4, F2 | planned | high | Honest probabilistic diagnosis + history loop; rollup (X3) is the read model. | `logRepair`, RecommendationsService, cartridges |
 | Problem caseboard + verify-after-repair + reopen | P2–P5, H2 | planned | medium | Completes problem tracking/history beyond MVP. | `DiagnosticProblem`, Diagnosis UI |
 | Recommendation card richness + status lifecycle UI | R2, R3 | planned | medium | Cost/risk/confidence; accept/dismiss/convert. | Dashboard, RecommendationsService |
 | Multi-signal trend expansion (beyond oil) | F3 | planned | medium | Broader history→recognition; ontology-backed only. | ForecastService, recognition |
@@ -430,6 +428,8 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Ruff lint/format for `obd-gateway` (wired into healthcheck + CI) | 2026-07 | `apps/obd-gateway/pyproject.toml`, `pnpm obd-gateway:lint`, `CODE_STANDARDS.md` |
 | Postgres persistence (Drizzle store adapter + migrate-on-init) | 2026-07 | `apps/api/src/{db,store/drizzle.ts}`, `infrastructure/docker-compose.yml`, `STORAGE_DRIVER` / `DATABASE_URL`, `API_DEV_GUIDE.md` |
 | Product-goals maturity map + ideal solutions (work pieces S1…G5) | 2026-07 | this file § Product goals / Ideal solutions |
+| Evidence source labeling (I2) | 2026-07 | `GET .../evidence-provenance`, `EvidenceSourceBadge`, Dashboard/Diagnosis |
+| Solution history rollup + What worked panel (X3/X4) | 2026-07 | `SolutionHistoryService`, `GET .../solution-history`, `WhatWorkedPanel` |
 
 ---
 

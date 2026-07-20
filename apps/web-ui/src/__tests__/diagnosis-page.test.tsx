@@ -52,6 +52,19 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         mostSpecific: ["MisfireUnderLoad"],
         undecided: [],
       }),
+      getEvidenceProvenance: vi.fn().mockResolvedValue({
+        latestSource: "obd_gateway",
+        latestCapturedAt: "2026-07-19T12:00:00.000Z",
+        batchCount: 2,
+        sourcesSeen: ["obd_gateway"],
+      }),
+      getSolutionHistory: vi.fn().mockResolvedValue({
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        engineFamily: "fca-tigershark-2.4",
+        faultClassFilter: null,
+        vehicle: [],
+        engineFamilyRollup: [],
+      }),
       listProblems: vi.fn().mockResolvedValue([]),
       createDiagnosticProblem: vi.fn().mockResolvedValue({
         id: "problem:1",

@@ -5,6 +5,7 @@ import type {
   FreezeFrame,
   Mode06Result,
   ObservationBatch,
+  ObservationSource,
   Recommendation,
   VehicleProfile,
 } from "@auto/semantic-types";
@@ -101,6 +102,22 @@ function createObservationRepository(): ObservationRepository {
 
     async batchCount(vehicleId) {
       return batchesFor(vehicleId).length;
+    },
+
+    async provenance(vehicleId) {
+      const list = batchesFor(vehicleId);
+      if (list.length === 0) {
+        return { latestSource: null, latestCapturedAt: null, batchCount: 0, sourcesSeen: [] };
+      }
+      const latest = list[list.length - 1]!;
+      const seen = new Set<ObservationSource>();
+      for (const b of list) seen.add(b.source);
+      return {
+        latestSource: latest.source,
+        latestCapturedAt: latest.capturedAt,
+        batchCount: list.length,
+        sourcesSeen: [...seen],
+      };
     },
   };
 }

@@ -90,6 +90,17 @@ export interface ObservationBatch {
   mode06?: Mode06Result[];
 }
 
+/**
+ * Trust chrome for evidence: where the latest batch came from, and which
+ * sources have contributed to this vehicle's stored history.
+ */
+export interface EvidenceProvenance {
+  latestSource: ObservationSource | null;
+  latestCapturedAt: IsoTimestamp | null;
+  batchCount: number;
+  sourcesSeen: ObservationSource[];
+}
+
 // --- Problem/Solution vocabulary (LOGOS-facing) ---------------------------
 
 export type ProblemType =
@@ -297,6 +308,34 @@ export interface DecisionRecord {
   decidedAt: IsoTimestamp;
   decidedBy: SemanticId;
   outcome?: ProblemOutcome;
+}
+
+/**
+ * Aggregated confirmed-fix memory from DecisionRecord + ProblemOutcome,
+ * joined to DiagnosticProblem.triggeredByClass when available.
+ */
+export interface SolutionRollupBucket {
+  actionId: string;
+  faultClass: string | null;
+  scope: "vehicle" | "engineFamily";
+  engineFamily: string;
+  worked: number;
+  partial: number;
+  failed: number;
+  inconclusive: number;
+  /** Decisions that carried an outcome (excludes bare audit rows). */
+  totalWithOutcome: number;
+  lastDecidedAt: IsoTimestamp | null;
+}
+
+/** Vehicle + engine-family solution history for "what worked before". */
+export interface SolutionHistory {
+  vehicleId: SemanticId;
+  engineFamily: string;
+  /** Optional filter applied by the API (`?class=`). */
+  faultClassFilter: string | null;
+  vehicle: SolutionRollupBucket[];
+  engineFamilyRollup: SolutionRollupBucket[];
 }
 
 // --- Known campaigns (TSBs / recalls) -------------------------------------

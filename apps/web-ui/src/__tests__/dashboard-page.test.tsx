@@ -49,6 +49,12 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         .mockResolvedValue([
           { code: "P0304", status: "stored", description: "Cylinder 4 Misfire" },
         ]),
+      getEvidenceProvenance: vi.fn().mockResolvedValue({
+        latestSource: "simulated",
+        latestCapturedAt: "2026-07-19T12:00:00.000Z",
+        batchCount: 1,
+        sourcesSeen: ["simulated"],
+      }),
       getForecast: vi.fn().mockResolvedValue({ declining: false, series: [] }),
       getRecognition: vi.fn().mockResolvedValue({
         individual: "veh:jeep-renegade-2015-latitude",
@@ -87,6 +93,16 @@ describe("Dashboard", () => {
     const section = within(heading.closest("section")!);
     expect(await section.findByText("P0304")).toBeInTheDocument();
     expect(section.getByText("stored")).toBeInTheDocument();
+  });
+
+  it("labels evidence source so simulated data is never mistaken for live OBD", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <Dashboard />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText(/Latest evidence: Simulated/)).toBeInTheDocument();
   });
 
   it("shows proven fault classes from recognition, never a synthesized Healthy", async () => {

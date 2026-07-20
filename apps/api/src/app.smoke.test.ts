@@ -39,4 +39,26 @@ describe("API HTTP smoke (buildApp + inject)", () => {
     const body = res.json() as { vehicles: Array<{ id: string }> };
     expect(body.vehicles.map((v) => v.id)).toContain("veh:jeep-renegade-2015-latitude");
   });
+
+  it("GET evidence-provenance and solution-history for the seeded Jeep", async () => {
+    const id = "veh:jeep-renegade-2015-latitude";
+    const provenance = await app.inject({
+      method: "GET",
+      url: `/api/vehicles/${id}/evidence-provenance`,
+    });
+    expect(provenance.statusCode).toBe(200);
+    expect(provenance.json()).toMatchObject({ batchCount: 0, latestSource: null });
+
+    const history = await app.inject({
+      method: "GET",
+      url: `/api/vehicles/${id}/solution-history`,
+    });
+    expect(history.statusCode).toBe(200);
+    expect(history.json()).toMatchObject({
+      vehicleId: id,
+      engineFamily: "fca-tigershark-2.4",
+      vehicle: [],
+      engineFamilyRollup: [],
+    });
+  });
 });

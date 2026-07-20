@@ -7,6 +7,7 @@ import { ObservationService } from "./observations.ts";
 import { PolicyService } from "./policy.ts";
 import { RecognitionService } from "./recognition.ts";
 import { RecommendationService } from "./recommendations.ts";
+import { SolutionHistoryService } from "./solution-history.ts";
 import { SolverService } from "./solver.ts";
 import { VehicleService } from "./vehicle.ts";
 
@@ -22,6 +23,7 @@ export interface Services {
   observations: ObservationService;
   recommendations: RecommendationService;
   campaigns: CampaignService;
+  solutionHistory: SolutionHistoryService;
 }
 
 export function createServices(store: Store, bridge: LogosBridge): Services {
@@ -34,6 +36,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
   const observations = new ObservationService(store, vehicles);
   const recommendations = new RecommendationService(store, vehicles, recognition);
   const campaigns = new CampaignService(vehicles);
+  const solutionHistory = new SolutionHistoryService(store, vehicles);
 
   return {
     store,
@@ -47,6 +50,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     observations,
     recommendations,
     campaigns,
+    solutionHistory,
   };
 }
 
@@ -58,6 +62,7 @@ export {
   PolicyService,
   RecognitionService,
   RecommendationService,
+  SolutionHistoryService,
   SolverService,
   VehicleService,
 };

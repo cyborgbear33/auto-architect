@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "../components/Layout.tsx";
+import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
 import { api, queryKeys } from "../lib/api.ts";
 import { useAppSelector } from "../store/index.ts";
 
@@ -50,6 +51,12 @@ export function ProblemDetail() {
       qc.invalidateQueries({ queryKey: queryKeys.problem(problemId) });
       if (problem?.vehicleId) {
         qc.invalidateQueries({ queryKey: queryKeys.decisions(problem.vehicleId) });
+        qc.invalidateQueries({ queryKey: queryKeys.solutionHistory(problem.vehicleId) });
+        if (problem.triggeredByClass) {
+          qc.invalidateQueries({
+            queryKey: queryKeys.solutionHistory(problem.vehicleId, problem.triggeredByClass),
+          });
+        }
       }
       setLogForm(null);
     },
@@ -64,6 +71,10 @@ export function ProblemDetail() {
   return (
     <div>
       <PageHeader title={problem.triggeredByClass ?? "Diagnostic problem"} subtitle={problem.id} />
+
+      <div className="mb-4">
+        <WhatWorkedPanel vehicleId={problem.vehicleId} faultClass={problem.triggeredByClass} />
+      </div>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">
         <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">

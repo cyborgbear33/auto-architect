@@ -12,9 +12,10 @@ import type {
   FreezeFrame,
   Mode06Result,
   ObservationBatch,
+  ObservationSource,
   VehicleProfile,
 } from "@auto/semantic-types";
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { createDb, type DbHandle } from "../db/client.ts";
 import * as t from "../db/schema.ts";
@@ -133,6 +134,29 @@ export function createDrizzleStore(databaseUrl: string): Store {
         .from(t.observationBatches)
         .where(eq(t.observationBatches.vehicleId, vehicleId));
       return rows.length;
+    },
+
+    async provenance(vehicleId) {
+      const rows = await db
+        .select({
+          source: t.observationBatches.source,
+          capturedAt: t.observationBatches.capturedAt,
+        })
+        .from(t.observationBatches)
+        .where(eq(t.observationBatches.vehicleId, vehicleId))
+        .orderBy(desc(t.observationBatches.capturedAt));
+      if (rows.length === 0) {
+        return { latestSource: null, latestCapturedAt: null, batchCount: 0, sourcesSeen: [] };
+      }
+      const latest = rows[0]!;
+      const seen = new Set<ObservationSource>();
+      for (const r of rows) seen.add(r.source as ObservationSource);
+      return {
+        latestSource: latest.source as ObservationSource,
+        latestCapturedAt: latest.capturedAt,
+        batchCount: rows.length,
+        sourcesSeen: [...seen],
+      };
     },
   };
 

@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import {
   EmptyVehicleState,
   PageHeader,
@@ -44,6 +45,10 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
     queryKey: queryKeys.dtcs(vehicleId),
     queryFn: () => api.getDtcs(vehicleId),
   });
+  const provenanceQ = useQuery({
+    queryKey: queryKeys.evidenceProvenance(vehicleId),
+    queryFn: () => api.getEvidenceProvenance(vehicleId),
+  });
   const forecastQ = useQuery({
     queryKey: queryKeys.forecast(vehicleId),
     queryFn: () => api.getForecast(vehicleId),
@@ -77,6 +82,10 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
           </button>
         }
       />
+
+      <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
+        <EvidenceSourceBadge provenance={provenanceQ.data} />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <section className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">

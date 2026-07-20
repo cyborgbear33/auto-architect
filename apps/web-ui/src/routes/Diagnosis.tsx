@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
+import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
 import { ApiError, api, queryKeys } from "../lib/api.ts";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -40,6 +42,10 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
     queryKey: queryKeys.recognition(vehicleId),
     queryFn: () => api.getRecognition(vehicleId),
   });
+  const provenanceQ = useQuery({
+    queryKey: queryKeys.evidenceProvenance(vehicleId),
+    queryFn: () => api.getEvidenceProvenance(vehicleId),
+  });
   const problemsQ = useQuery({
     queryKey: queryKeys.problems(vehicleId),
     queryFn: () => api.listProblems(vehicleId),
@@ -73,6 +79,14 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         title="Diagnosis"
         subtitle="LOGOS realize → proven fault classes → drafted DiagnosticProblems → solve-ranked next steps"
       />
+
+      <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
+        <EvidenceSourceBadge provenance={provenanceQ.data} />
+      </div>
+
+      <div className="mb-4">
+        <WhatWorkedPanel vehicleId={vehicleId} />
+      </div>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="mb-2 text-sm font-semibold text-slate-700">

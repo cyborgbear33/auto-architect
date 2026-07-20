@@ -2,6 +2,7 @@ import type {
   DecisionRecord,
   DiagnosticProblem,
   DtcObservation,
+  EvidenceProvenance,
   FreezeFrame,
   Mode06Result,
   ObservationBatch,
@@ -46,6 +47,8 @@ export interface ObservationRepository {
   /** Every value ever recorded for one PID on one vehicle, in capture order (for `forecast`). */
   series(vehicleId: string, pid: string): Promise<Array<{ timestamp: string; value: number }>>;
   batchCount(vehicleId: string): Promise<number>;
+  /** Latest batch source/time + distinct sources seen for this vehicle. */
+  provenance(vehicleId: string): Promise<EvidenceProvenance>;
 }
 
 export interface ProblemRepository {

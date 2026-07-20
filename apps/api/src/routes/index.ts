@@ -53,6 +53,11 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     return { dtcs: await s.observations.latestDtcs(id) };
   });
 
+  app.get("/api/vehicles/:id/evidence-provenance", async (req) => {
+    const { id } = req.params as { id: string };
+    return s.observations.provenance(id);
+  });
+
   app.get("/api/vehicles/:id/freeze-frame", async (req) => {
     const { id } = req.params as { id: string };
     return { freezeFrames: await s.observations.latestFreezeFrames(id) };
@@ -66,6 +71,12 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
   app.get("/api/vehicles/:id/forecast", async (req) => {
     const { id } = req.params as { id: string };
     return s.forecast.oilLevelTrend(id);
+  });
+
+  app.get("/api/vehicles/:id/solution-history", async (req) => {
+    const { id } = req.params as { id: string };
+    const { class: faultClass } = req.query as { class?: string };
+    return s.solutionHistory.forVehicle(id, faultClass);
   });
 
   // --- recognition (LOGOS realize) --------------------------------------------

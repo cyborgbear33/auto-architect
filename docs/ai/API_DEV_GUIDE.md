@@ -42,9 +42,10 @@ allowed to append evidence; it still does not classify).
 | `SolverService` | `solve` | Requires `desiredState.successCriteria` on problems |
 | `ForecastService` | optional / helpers | Oil-level trend |
 | `ActionService` | via other services | Sole mutation + DecisionRecord |
-| `ObservationsService` | no | Append / query batches |
-| `CampaignsService` | no | Match `known-campaigns.json` |
-| `RecommendationsService` | no (uses recognition outputs) | List / refresh / status |
+| `ObservationService` | no | Append / query batches; evidence provenance |
+| `SolutionHistoryService` | no | Roll up repair outcomes by action / class / family |
+| `CampaignService` | no | Match `known-campaigns.json` |
+| `RecommendationService` | no (uses recognition outputs) | List / refresh / status |
 | `VehicleService` | no | Profiles + engine-family resolution |
 
 Inject `LogosBridge` (or `FakeLogosBridge` in tests) from `services/index.ts`.

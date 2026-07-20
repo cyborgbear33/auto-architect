@@ -12,11 +12,13 @@ import type {
   DecisionRecord,
   DiagnosticProblem,
   DtcObservation,
+  EvidenceProvenance,
   FreezeFrame,
   KnownCampaign,
   Mode06Result,
   Recognition,
   Recommendation,
+  SolutionHistory,
   VehicleProfile,
 } from "@auto/semantic-types";
 
@@ -139,6 +141,12 @@ export class AutoApiClient {
     this.request<{ dtcs: DtcObservation[] }>(`/api/vehicles/${enc(vehicleId)}/dtcs`).then(
       (r) => r.dtcs,
     );
+  getEvidenceProvenance = (vehicleId: string) =>
+    this.request<EvidenceProvenance>(`/api/vehicles/${enc(vehicleId)}/evidence-provenance`);
+  getSolutionHistory = (vehicleId: string, faultClass?: string) => {
+    const q = faultClass ? `?class=${enc(faultClass)}` : "";
+    return this.request<SolutionHistory>(`/api/vehicles/${enc(vehicleId)}/solution-history${q}`);
+  };
   getFreezeFrames = (vehicleId: string) =>
     this.request<{ freezeFrames: FreezeFrame[] }>(
       `/api/vehicles/${enc(vehicleId)}/freeze-frame`,
@@ -224,6 +232,7 @@ export const queryKeys = {
   vehicle: (id: string) => ["vehicle", id] as const,
   engineFamilies: () => ["engineFamilies"] as const,
   dtcs: (vehicleId: string) => ["dtcs", vehicleId] as const,
+  evidenceProvenance: (vehicleId: string) => ["evidenceProvenance", vehicleId] as const,
   freezeFrames: (vehicleId: string) => ["freezeFrames", vehicleId] as const,
   mode06: (vehicleId: string) => ["mode06", vehicleId] as const,
   forecast: (vehicleId: string) => ["forecast", vehicleId] as const,
@@ -233,4 +242,6 @@ export const queryKeys = {
   problems: (vehicleId: string) => ["problems", vehicleId] as const,
   problem: (id: string) => ["problem", id] as const,
   decisions: (vehicleId: string) => ["decisions", vehicleId] as const,
+  solutionHistory: (vehicleId: string, faultClass?: string) =>
+    ["solutionHistory", vehicleId, faultClass ?? null] as const,
 };
