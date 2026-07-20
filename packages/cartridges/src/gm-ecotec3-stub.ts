@@ -1,18 +1,20 @@
 import type { Cartridge } from "./types.ts";
 
 /**
- * A deliberate stub proving the multi-vehicle extension point: adding a
- * Chevrolet Silverado (or any GM EcoTec3-family vehicle) does NOT require
- * touching the base TBox or any generic cartridge. This cartridge is
- * intentionally inert (no perception/framing rules, no new DL classes — a
- * cartridge may reference classes, never define them) until real GM PIDs/DTCs
- * are researched and verified for the actual truck once it's acquired.
+ * A deliberate stub proving the multi-vehicle extension point (A5).
  *
- * To activate: research the truck's real engine (e.g. EcoTec3 5.3L/6.2L or
- * Duramax), add any GM-specific fault classes to dl-ontology.json behind a
- * new `gm-ecotec3-*` view (mirroring `fca-tigershark-2.4`), fill in this
- * cartridge's perception/framing rules (mirroring fca-tigershark-2.4.ts), and
- * point the vehicle's `engineFamily` at the real id in vehicle-profiles.json.
+ * The Silverado profile already loads the full SAE-generic cartridge set
+ * (misfire/lean/rich/EVAP/catalyst/O2/EGR/secondary-air/…). This cartridge
+ * stays inert — no perception/framing, no invented GM classes — until a real
+ * truck exists.
+ *
+ * Activation checklist (do not skip):
+ * 1. Confirm year/trim/VIN + exact engine (EcoTec3 5.3/6.2, Duramax, …).
+ * 2. Cite public GM TSB / service-manual summaries for any OEM-enhanced codes.
+ * 3. Add GM-specific classes to dl-ontology.json behind a `gm-ecotec3-*` view
+ *    (mirror `fca-tigershark-2.4`), never into the generic view.
+ * 4. Fill this cartridge's perception/framing (mirror fca-tigershark-2.4.ts).
+ * 5. Rename `gm-ecotec3-tbd` → real family id in vehicle-profiles.json.
  */
 export const gmEcotec3StubCartridge: Cartridge = {
   name: "gm-ecotec3-stub",

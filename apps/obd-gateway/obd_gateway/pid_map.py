@@ -46,6 +46,8 @@ STANDARD_PID_COMMANDS: dict[str, obd.OBDCommand] = {
     "O2_B1S2": obd.commands.O2_B1S2,
     "O2_B2S1": obd.commands.O2_B2S1,
     "O2_B2S2": obd.commands.O2_B2S2,
+    "COMMANDED_EGR": obd.commands.COMMANDED_EGR,
+    "EGR_ERROR": obd.commands.EGR_ERROR,
     "BAROMETRIC_PRESSURE": obd.commands.BAROMETRIC_PRESSURE,
     "CATALYST_TEMP_B1S1": obd.commands.CATALYST_TEMP_B1S1,
     "CATALYST_TEMP_B2S1": obd.commands.CATALYST_TEMP_B2S1,

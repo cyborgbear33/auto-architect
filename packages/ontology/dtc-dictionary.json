@@ -1,23 +1,91 @@
 {
   "disclaimer": "SAE-generic (Pxxxx, digit 2 = 0) codes and their meanings are standardized (SAE J2012) and safe to treat as universal. Manufacturer-enhanced codes (digit 2 = 1, e.g. FCA P1xxx) are NOT reproduced here beyond what public TSB summaries describe, and must be verified against a real service manual / AlfaOBD readout before acting — do not treat this dictionary as authoritative for enhanced codes.",
   "codes": {
-    "P0300": { "description": "Random/Multiple Cylinder Misfire Detected", "concept": "CylinderMisfire", "sae": true },
-    "P0301": { "description": "Cylinder 1 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
-    "P0302": { "description": "Cylinder 2 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
-    "P0303": { "description": "Cylinder 3 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
-    "P0304": { "description": "Cylinder 4 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
-    "P0305": { "description": "Cylinder 5 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
-    "P0306": { "description": "Cylinder 6 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
-    "P0307": { "description": "Cylinder 7 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
-    "P0308": { "description": "Cylinder 8 Misfire Detected", "concept": "CylinderMisfire", "sae": true },
-    "P0016": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 1 Sensor A)", "concept": "CamCrankCorrelation", "sae": true },
-    "P0017": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 1 Sensor B)", "concept": "CamCrankCorrelation", "sae": true },
-    "P0018": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 2 Sensor A)", "concept": "CamCrankCorrelation", "sae": true },
-    "P0019": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 2 Sensor B)", "concept": "CamCrankCorrelation", "sae": true },
-    "P0171": { "description": "System Too Lean (Bank 1)", "concept": "LeanCodeBank1", "sae": true },
-    "P0174": { "description": "System Too Lean (Bank 2)", "concept": "LeanCodeBank2", "sae": true },
-    "P0172": { "description": "System Too Rich (Bank 1)", "concept": "RichCodeBank1", "sae": true },
-    "P0175": { "description": "System Too Rich (Bank 2)", "concept": "RichCodeBank2", "sae": true },
+    "P0300": {
+      "description": "Random/Multiple Cylinder Misfire Detected",
+      "concept": "CylinderMisfire",
+      "sae": true
+    },
+    "P0301": {
+      "description": "Cylinder 1 Misfire Detected",
+      "concept": "CylinderMisfire",
+      "sae": true
+    },
+    "P0302": {
+      "description": "Cylinder 2 Misfire Detected",
+      "concept": "CylinderMisfire",
+      "sae": true
+    },
+    "P0303": {
+      "description": "Cylinder 3 Misfire Detected",
+      "concept": "CylinderMisfire",
+      "sae": true
+    },
+    "P0304": {
+      "description": "Cylinder 4 Misfire Detected",
+      "concept": "CylinderMisfire",
+      "sae": true
+    },
+    "P0305": {
+      "description": "Cylinder 5 Misfire Detected",
+      "concept": "CylinderMisfire",
+      "sae": true
+    },
+    "P0306": {
+      "description": "Cylinder 6 Misfire Detected",
+      "concept": "CylinderMisfire",
+      "sae": true
+    },
+    "P0307": {
+      "description": "Cylinder 7 Misfire Detected",
+      "concept": "CylinderMisfire",
+      "sae": true
+    },
+    "P0308": {
+      "description": "Cylinder 8 Misfire Detected",
+      "concept": "CylinderMisfire",
+      "sae": true
+    },
+    "P0016": {
+      "description": "Crankshaft Position - Camshaft Position Correlation (Bank 1 Sensor A)",
+      "concept": "CamCrankCorrelation",
+      "sae": true
+    },
+    "P0017": {
+      "description": "Crankshaft Position - Camshaft Position Correlation (Bank 1 Sensor B)",
+      "concept": "CamCrankCorrelation",
+      "sae": true
+    },
+    "P0018": {
+      "description": "Crankshaft Position - Camshaft Position Correlation (Bank 2 Sensor A)",
+      "concept": "CamCrankCorrelation",
+      "sae": true
+    },
+    "P0019": {
+      "description": "Crankshaft Position - Camshaft Position Correlation (Bank 2 Sensor B)",
+      "concept": "CamCrankCorrelation",
+      "sae": true
+    },
+    "P0171": {
+      "description": "System Too Lean (Bank 1)",
+      "concept": "LeanCodeBank1",
+      "sae": true
+    },
+    "P0174": {
+      "description": "System Too Lean (Bank 2)",
+      "concept": "LeanCodeBank2",
+      "sae": true
+    },
+    "P0172": {
+      "description": "System Too Rich (Bank 1)",
+      "concept": "RichCodeBank1",
+      "sae": true
+    },
+    "P0175": {
+      "description": "System Too Rich (Bank 2)",
+      "concept": "RichCodeBank2",
+      "sae": true
+    },
     "P0420": {
       "description": "Catalyst System Efficiency Below Threshold (Bank 1)",
       "concept": "CatalystCodeBank1",
@@ -88,14 +156,22 @@
       "concept": "O2HeaterBank2",
       "sae": true
     },
-    "P0442": { "description": "Evaporative Emission System Leak Detected (Small Leak)", "concept": "EvapCodeSmall", "sae": true },
+    "P0442": {
+      "description": "Evaporative Emission System Leak Detected (Small Leak)",
+      "concept": "EvapCodeSmall",
+      "sae": true
+    },
     "P0456": {
       "description": "Evaporative Emission System Leak Detected (Very Small Leak)",
       "concept": "EvapCodeSmall",
       "sae": true,
       "note": "Same small-leak EVAP family as P0442 (SAE J2012); still maps to EvapCodeSmall — no new fault class."
     },
-    "P0455": { "description": "Evaporative Emission System Leak Detected (Large Leak)", "concept": "EvapCodeLarge", "sae": true },
+    "P0455": {
+      "description": "Evaporative Emission System Leak Detected (Large Leak)",
+      "concept": "EvapCodeLarge",
+      "sae": true
+    },
     "P0457": {
       "description": "Evaporative Emission System Leak Detected (Fuel Cap Loose/Off)",
       "concept": "EvapCodeLarge",
@@ -121,6 +197,116 @@
       "sae": true,
       "engineFamily": "fca-tigershark-2.4",
       "note": "See P0011 note — same TSB 05047457A pre-check order applies."
+    },
+    "P0136": {
+      "description": "O2 Sensor Circuit (Bank 1 Sensor 2)",
+      "concept": "O2DownstreamCircuitBank1",
+      "sae": true
+    },
+    "P0137": {
+      "description": "O2 Sensor Circuit Low Voltage (Bank 1 Sensor 2)",
+      "concept": "O2DownstreamPerformanceBank1",
+      "sae": true
+    },
+    "P0138": {
+      "description": "O2 Sensor Circuit High Voltage (Bank 1 Sensor 2)",
+      "concept": "O2DownstreamPerformanceBank1",
+      "sae": true
+    },
+    "P0139": {
+      "description": "O2 Sensor Circuit Slow Response (Bank 1 Sensor 2)",
+      "concept": "O2DownstreamPerformanceBank1",
+      "sae": true
+    },
+    "P0140": {
+      "description": "O2 Sensor Circuit No Activity Detected (Bank 1 Sensor 2)",
+      "concept": "O2DownstreamPerformanceBank1",
+      "sae": true
+    },
+    "P0141": {
+      "description": "O2 Sensor Heater Circuit (Bank 1 Sensor 2)",
+      "concept": "O2DownstreamHeaterBank1",
+      "sae": true
+    },
+    "P0156": {
+      "description": "O2 Sensor Circuit (Bank 2 Sensor 2)",
+      "concept": "O2DownstreamCircuitBank2",
+      "sae": true
+    },
+    "P0157": {
+      "description": "O2 Sensor Circuit Low Voltage (Bank 2 Sensor 2)",
+      "concept": "O2DownstreamPerformanceBank2",
+      "sae": true
+    },
+    "P0158": {
+      "description": "O2 Sensor Circuit High Voltage (Bank 2 Sensor 2)",
+      "concept": "O2DownstreamPerformanceBank2",
+      "sae": true
+    },
+    "P0159": {
+      "description": "O2 Sensor Circuit Slow Response (Bank 2 Sensor 2)",
+      "concept": "O2DownstreamPerformanceBank2",
+      "sae": true
+    },
+    "P0160": {
+      "description": "O2 Sensor Circuit No Activity Detected (Bank 2 Sensor 2)",
+      "concept": "O2DownstreamPerformanceBank2",
+      "sae": true
+    },
+    "P0161": {
+      "description": "O2 Sensor Heater Circuit (Bank 2 Sensor 2)",
+      "concept": "O2DownstreamHeaterBank2",
+      "sae": true
+    },
+    "P0400": {
+      "description": "Exhaust Gas Recirculation Flow Malfunction",
+      "concept": "EgrFlowCode",
+      "sae": true
+    },
+    "P0401": {
+      "description": "Exhaust Gas Recirculation Flow Insufficient Detected",
+      "concept": "EgrFlowCode",
+      "sae": true
+    },
+    "P0402": {
+      "description": "Exhaust Gas Recirculation Flow Excessive Detected",
+      "concept": "EgrFlowCode",
+      "sae": true
+    },
+    "P0403": {
+      "description": "Exhaust Gas Recirculation Control Circuit",
+      "concept": "EgrCircuitCode",
+      "sae": true
+    },
+    "P0404": {
+      "description": "Exhaust Gas Recirculation Control Circuit Range/Performance",
+      "concept": "EgrCircuitCode",
+      "sae": true
+    },
+    "P0405": {
+      "description": "Exhaust Gas Recirculation Sensor A Circuit Low",
+      "concept": "EgrCircuitCode",
+      "sae": true
+    },
+    "P0406": {
+      "description": "Exhaust Gas Recirculation Sensor A Circuit High",
+      "concept": "EgrCircuitCode",
+      "sae": true
+    },
+    "P0410": {
+      "description": "Secondary Air Injection System Malfunction",
+      "concept": "SecondaryAirCode",
+      "sae": true
+    },
+    "P0411": {
+      "description": "Secondary Air Injection System Incorrect Flow Detected",
+      "concept": "SecondaryAirCode",
+      "sae": true
+    },
+    "P0412": {
+      "description": "Secondary Air Injection System Switching Valve A Circuit",
+      "concept": "SecondaryAirCode",
+      "sae": true
     }
   }
 }

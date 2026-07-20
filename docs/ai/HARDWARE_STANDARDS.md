@@ -109,9 +109,9 @@ repo (`Mode06Result`):
 - Only name monitors that appear in **ISO 15031-5 / SAE J1979 Annex D** (or a
   cited OEM chart). Seed lives in `packages/ontology/mode06-dictionary.json`.
 - Unknown OBDMIDs stay unlabeled and never feed recognition.
-- Upstream O2 sensor monitors (`$01` / `$05`) map to
-  `FailedO2MonitorBank*` → `O2PerformanceFaultBank*` (not circuit faults).
-  Downstream sensor-2 monitors (`$02` / `$06`) stay label-only for now.
+- Upstream O2 monitors (`$01` / `$05`) → `FailedO2MonitorBank*` (performance).
+  Downstream (`$02` / `$06`) → `FailedO2DownstreamMonitorBank*`.
+  EGR `$31` → `FailedEgrMonitor`; secondary air `$71` → `FailedSecondaryAirMonitor`.
 - Legacy TID+CID (pre-CAN) vehicles are out of this thin seed; do not invent
   manufacturer TID charts.
 

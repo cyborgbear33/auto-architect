@@ -126,8 +126,8 @@ Expand dictionaries and ontology views so perception has more lawful fuel.
 | A1 | Evidence panel per `mostSpecific` class | done | `Recognition.classEvidence` + `ClassEvidencePanel` (no Mode 06 in v1) |
 | A2 | Wire `verbalize` into Recognition API + Diagnosis UI | done | `Recognition.narration` + ontology-note fallback |
 | A3 | Mode 06 as recognition input where ontology allows | done | Thin SAE/ISO OBDMID seed → perception → realize; unknown MIDs unlabeled |
-| A4 | Broader curated DTC/PID KB + ontology lint parity | partial | O2 perf DTCs + O2 voltage PIDs + P0457; still not full J2012 |
-| A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | Stub ≠ support |
+| A4 | Broader curated DTC/PID KB + ontology lint parity | partial | EGR/AIR/downstream O2 + EGR PIDs; still not full J2012 |
+| A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | SAE set shared; GM stub inert until real truck |
 
 **Seams:** cartridges, `RecognitionService`, logos-bridge `realize`/`verbalize`,
 dictionaries, Diagnosis/Dashboard.  
@@ -452,6 +452,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Rich / catalyst / O2 DTC families | 2026-07 | new ontology + cartridges; FallingFuelTrim; realize fixtures |
 | Mode 06 meaning → recognition (A3) | 2026-07 | `mode06-dictionary.json`; failed monitors feed realize; UI labels |
 | O2 performance classes + A4 O2/EVAP seed | 2026-07 | P0131–34/P0151–54; Mode 06 $01/$05; O2_B* PIDs; P0457 |
+| EGR / secondary air / downstream O2 + A5 stub parity | 2026-07 | new cartridges; Mode 06 $31/$71/$02/$06; GM shares SAE set |
 
 ---
 

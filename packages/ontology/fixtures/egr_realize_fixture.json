@@ -1,0 +1,32 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "EgrFlowCode": "Symptom",
+    "FailedEgrMonitor": "Condition",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": { "domain": "Engine", "range": "Symptom" },
+    "hasCondition": { "domain": "Engine", "range": "Condition" }
+  },
+  "classes": {
+    "EgrFlowFault": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.EgrFlowCode ⊔ ∃hasCondition.FailedEgrMonitor)"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": ["Engine"],
+      "mode06_egr": ["FailedEgrMonitor"]
+    },
+    "roles": [["hasCondition", "jeep_renegade_engine", "mode06_egr"]]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": ["EgrFlowFault", "MisfireUnderLoad"]
+}

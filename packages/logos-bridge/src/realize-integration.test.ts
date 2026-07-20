@@ -18,7 +18,16 @@ import misfireRealizeFixture from "../../ontology/fixtures/misfire_realize_fixtu
 import o2RealizeFixture from "../../ontology/fixtures/o2_realize_fixture.json" with {
   type: "json",
 };
+import o2DownstreamRealizeFixture from "../../ontology/fixtures/o2_downstream_realize_fixture.json" with {
+  type: "json",
+};
 import o2PerformanceRealizeFixture from "../../ontology/fixtures/o2_performance_realize_fixture.json" with {
+  type: "json",
+};
+import egrRealizeFixture from "../../ontology/fixtures/egr_realize_fixture.json" with {
+  type: "json",
+};
+import secondaryAirRealizeFixture from "../../ontology/fixtures/secondary_air_realize_fixture.json" with {
   type: "json",
 };
 import richRealizeFixture from "../../ontology/fixtures/rich_realize_fixture.json" with {
@@ -120,6 +129,24 @@ describe.skipIf(!available)("LOGOS realize real subprocess integration", () => {
     const result = await bridge.realize(realizeInputFromFixture(o2PerformanceRealizeFixture));
     expect(result.mostSpecific).toContain("O2PerformanceFaultBank1");
     expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
+  it("proves O2DownstreamPerformanceFaultBank1 from failed Mode 06 OBDMID $02", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(o2DownstreamRealizeFixture));
+    expect(result.mostSpecific).toContain("O2DownstreamPerformanceFaultBank1");
+  });
+
+  it("proves EgrFlowFault from failed Mode 06 EGR monitor", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(egrRealizeFixture));
+    expect(result.mostSpecific).toContain("EgrFlowFault");
+  });
+
+  it("proves SecondaryAirSystemFault from P0410", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(secondaryAirRealizeFixture));
+    expect(result.mostSpecific).toContain("SecondaryAirSystemFault");
   });
 });
 

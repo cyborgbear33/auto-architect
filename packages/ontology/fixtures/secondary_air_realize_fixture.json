@@ -1,0 +1,32 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "SecondaryAirCode": "Symptom",
+    "FailedSecondaryAirMonitor": "Condition",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": { "domain": "Engine", "range": "Symptom" },
+    "hasCondition": { "domain": "Engine", "range": "Condition" }
+  },
+  "classes": {
+    "SecondaryAirSystemFault": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.SecondaryAirCode ⊔ ∃hasCondition.FailedSecondaryAirMonitor)"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": ["Engine"],
+      "p0410": ["SecondaryAirCode"]
+    },
+    "roles": [["hasDtc", "jeep_renegade_engine", "p0410"]]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": ["SecondaryAirSystemFault", "MisfireUnderLoad"]
+}

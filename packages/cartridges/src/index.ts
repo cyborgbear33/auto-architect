@@ -7,6 +7,7 @@ export {
   type ClassEvidenceBundle,
   type ClassEvidencePid,
 } from "./class-evidence.ts";
+export { egrCartridge } from "./egr.ts";
 export { evapCartridge } from "./evap.ts";
 export { fcaTigershark24Cartridge } from "./fca-tigershark-2.4.ts";
 export { gmEcotec3StubCartridge } from "./gm-ecotec3-stub.ts";
@@ -22,6 +23,7 @@ export {
   resolveCartridgesForEngineFamily,
 } from "./registry.ts";
 export { richFuelCartridge } from "./rich-fuel.ts";
+export { secondaryAirCartridge } from "./secondary-air.ts";
 export type {
   AboxAssertions,
   Cartridge,

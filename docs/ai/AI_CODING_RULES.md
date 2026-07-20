@@ -57,16 +57,13 @@ Prefer these before inventing new ones:
 `LeanFuelBank1/2`, `RichFuelBank1/2`, `EvapLeakSmall/Large`,
 `CatalystEfficiencyBank1/2`, `O2CircuitFaultBank1/2`,
 `O2PerformanceFaultBank1/2`, `O2HeaterFaultBank1/2`,
+`O2DownstreamCircuit/Performance/HeaterFaultBank1/2`,
+`EgrFlowFault`, `EgrCircuitFault`, `SecondaryAirSystemFault`,
 `ChronicOilConsumption`, `MultiAirOilStarvation` (FCA view only).
 
-**Symptom / condition / trend subtypes:** `CylinderMisfire`, `CamCrankCorrelation`,
-`LeanCodeBank1/2`, `RichCodeBank1/2`, `EvapCodeSmall/Large`,
-`CatalystCodeBank1/2`, `O2CircuitBank1/2`, `O2PerformanceBank1/2`,
-`O2HeaterBank1/2`, `MultiAirFault`,
-`HighLoad`, `PositiveFuelTrim`, `NegativeFuelTrim`, `LowOilPressure`,
-`FailedCatalystMonitorBank1/2`, `FailedEvapMonitorSmall/Large`,
-`FailedO2MonitorBank1/2`, `FailedO2HeaterMonitorBank1/2`, `FailedMisfireMonitor`,
-`OilLevelDecline`, `RisingFuelTrim`, `FallingFuelTrim`, `RecurringHighLoad`.
+**Symptom / condition / trend subtypes:** see `dl-ontology.json` subtypes —
+notably `EgrFlowCode`, `EgrCircuitCode`, `SecondaryAirCode`,
+`O2Downstream*`, Mode 06 `Failed*` Conditions, fuel-trim/load Trends.
 
 **Object / record types (`@auto/semantic-types`):** `VehicleProfile`,
 `DtcObservation`, `PidReading`, `DiagnosticProblem`, `DiagnosticSolution`,

@@ -1,6 +1,7 @@
 import { getEngineFamilyCartridges } from "@auto/ontology";
 import { camCrankCorrelationCartridge } from "./cam-crank-correlation.ts";
 import { catalystCartridge } from "./catalyst.ts";
+import { egrCartridge } from "./egr.ts";
 import { evapCartridge } from "./evap.ts";
 import { fcaTigershark24Cartridge } from "./fca-tigershark-2.4.ts";
 import { gmEcotec3StubCartridge } from "./gm-ecotec3-stub.ts";
@@ -8,6 +9,7 @@ import { leanFuelCartridge } from "./lean-fuel.ts";
 import { misfireCartridge } from "./misfire.ts";
 import { o2SensorCartridge } from "./o2-sensor.ts";
 import { richFuelCartridge } from "./rich-fuel.ts";
+import { secondaryAirCartridge } from "./secondary-air.ts";
 import type { Cartridge, FramingResult, VehicleView } from "./types.ts";
 
 /** Every cartridge known to the app, keyed by name (packages/ontology/vehicle-profiles.json references these names). */
@@ -18,6 +20,8 @@ export const cartridgeRegistry: Record<string, Cartridge> = {
   [evapCartridge.name]: evapCartridge,
   [catalystCartridge.name]: catalystCartridge,
   [o2SensorCartridge.name]: o2SensorCartridge,
+  [egrCartridge.name]: egrCartridge,
+  [secondaryAirCartridge.name]: secondaryAirCartridge,
   [camCrankCorrelationCartridge.name]: camCrankCorrelationCartridge,
   [fcaTigershark24Cartridge.name]: fcaTigershark24Cartridge,
   [gmEcotec3StubCartridge.name]: gmEcotec3StubCartridge,

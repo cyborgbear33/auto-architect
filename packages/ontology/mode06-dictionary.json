@@ -8,8 +8,8 @@
     },
     "02": {
       "description": "Oxygen Sensor Monitor Bank 1 – Sensor 2",
-      "sae": true,
-      "note": "Label-only — downstream/sensor-2 performance classes not yet ontologized."
+      "concept": "FailedO2DownstreamMonitorBank1",
+      "sae": true
     },
     "05": {
       "description": "Oxygen Sensor Monitor Bank 2 – Sensor 1",
@@ -18,8 +18,8 @@
     },
     "06": {
       "description": "Oxygen Sensor Monitor Bank 2 – Sensor 2",
-      "sae": true,
-      "note": "Label-only — see OBDMID 02 note."
+      "concept": "FailedO2DownstreamMonitorBank2",
+      "sae": true
     },
     "21": {
       "description": "Catalyst Monitor Bank 1",
@@ -84,6 +84,26 @@
     "A5": {
       "description": "Misfire Cylinder 4 Data",
       "concept": "FailedMisfireMonitor",
+      "sae": true
+    },
+    "31": {
+      "description": "EGR Monitor Bank 1",
+      "concept": "FailedEgrMonitor",
+      "sae": true
+    },
+    "42": {
+      "description": "Oxygen Sensor Heater Monitor Bank 1 – Sensor 2",
+      "concept": "FailedO2DownstreamHeaterMonitorBank1",
+      "sae": true
+    },
+    "46": {
+      "description": "Oxygen Sensor Heater Monitor Bank 2 – Sensor 2",
+      "concept": "FailedO2DownstreamHeaterMonitorBank2",
+      "sae": true
+    },
+    "71": {
+      "description": "Secondary Air Monitor 1",
+      "concept": "FailedSecondaryAirMonitor",
       "sae": true
     }
   }

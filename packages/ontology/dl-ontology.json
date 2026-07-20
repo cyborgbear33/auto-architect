@@ -4,7 +4,6 @@
     "Symptom": "IndependentContinuant",
     "Condition": "IndependentContinuant",
     "Trend": "IndependentContinuant",
-
     "CylinderMisfire": "Symptom",
     "CamCrankCorrelation": "Symptom",
     "LeanCodeBank1": "Symptom",
@@ -21,8 +20,16 @@
     "O2PerformanceBank2": "Symptom",
     "O2HeaterBank1": "Symptom",
     "O2HeaterBank2": "Symptom",
+    "O2DownstreamCircuitBank1": "Symptom",
+    "O2DownstreamCircuitBank2": "Symptom",
+    "O2DownstreamPerformanceBank1": "Symptom",
+    "O2DownstreamPerformanceBank2": "Symptom",
+    "O2DownstreamHeaterBank1": "Symptom",
+    "O2DownstreamHeaterBank2": "Symptom",
+    "EgrFlowCode": "Symptom",
+    "EgrCircuitCode": "Symptom",
+    "SecondaryAirCode": "Symptom",
     "MultiAirFault": "Symptom",
-
     "HighLoad": "Condition",
     "PositiveFuelTrim": "Condition",
     "NegativeFuelTrim": "Condition",
@@ -36,7 +43,12 @@
     "FailedO2HeaterMonitorBank1": "Condition",
     "FailedO2HeaterMonitorBank2": "Condition",
     "FailedMisfireMonitor": "Condition",
-
+    "FailedO2DownstreamMonitorBank1": "Condition",
+    "FailedO2DownstreamMonitorBank2": "Condition",
+    "FailedO2DownstreamHeaterMonitorBank1": "Condition",
+    "FailedO2DownstreamHeaterMonitorBank2": "Condition",
+    "FailedEgrMonitor": "Condition",
+    "FailedSecondaryAirMonitor": "Condition",
     "OilLevelDecline": "Trend",
     "RisingFuelTrim": "Trend",
     "FallingFuelTrim": "Trend",
@@ -110,6 +122,33 @@
     },
     "MultiAirOilStarvation": {
       "equivalentTo": "Engine ⊓ ∃hasDtc.MultiAirFault ⊓ ∃hasCondition.LowOilPressure"
+    },
+    "O2DownstreamCircuitFaultBank1": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.O2DownstreamCircuitBank1"
+    },
+    "O2DownstreamCircuitFaultBank2": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.O2DownstreamCircuitBank2"
+    },
+    "O2DownstreamPerformanceFaultBank1": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.O2DownstreamPerformanceBank1 ⊔ ∃hasCondition.FailedO2DownstreamMonitorBank1)"
+    },
+    "O2DownstreamPerformanceFaultBank2": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.O2DownstreamPerformanceBank2 ⊔ ∃hasCondition.FailedO2DownstreamMonitorBank2)"
+    },
+    "O2DownstreamHeaterFaultBank1": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.O2DownstreamHeaterBank1 ⊔ ∃hasCondition.FailedO2DownstreamHeaterMonitorBank1)"
+    },
+    "O2DownstreamHeaterFaultBank2": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.O2DownstreamHeaterBank2 ⊔ ∃hasCondition.FailedO2DownstreamHeaterMonitorBank2)"
+    },
+    "EgrFlowFault": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.EgrFlowCode ⊔ ∃hasCondition.FailedEgrMonitor)"
+    },
+    "EgrCircuitFault": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.EgrCircuitCode"
+    },
+    "SecondaryAirSystemFault": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.SecondaryAirCode ⊔ ∃hasCondition.FailedSecondaryAirMonitor)"
     }
   },
   "notes": {
@@ -133,7 +172,16 @@
     "RisingFuelTrim": "Trend evidence from LONG_FUEL_TRIM series (ForecastService) — pairs with lean DTCs.",
     "FallingFuelTrim": "Trend evidence from LONG_FUEL_TRIM series (ForecastService) — pairs with rich DTCs.",
     "RecurringHighLoad": "Trend evidence from ENGINE_LOAD series (ForecastService) — pairs with misfire DTCs.",
-    "MultiAirOilStarvation": "Engine-family-specific (FCA MultiAir electrohydraulic valve actuation): only loaded via the fca-tigershark-2.4 view. See TSB 05047457A — always rule out low/dirty/wrong-viscosity oil BEFORE blaming the MultiAir actuator itself."
+    "MultiAirOilStarvation": "Engine-family-specific (FCA MultiAir electrohydraulic valve actuation): only loaded via the fca-tigershark-2.4 view. See TSB 05047457A — always rule out low/dirty/wrong-viscosity oil BEFORE blaming the MultiAir actuator itself.",
+    "O2DownstreamCircuitFaultBank1": "SAE-generic: P0136 downstream circuit (DTC-only).",
+    "O2DownstreamCircuitFaultBank2": "SAE-generic: P0156 downstream circuit (DTC-only).",
+    "O2DownstreamPerformanceFaultBank1": "SAE-generic: P0137–P0140, or failed Mode 06 O2 OBDMID $02.",
+    "O2DownstreamPerformanceFaultBank2": "SAE-generic: P0157–P0160, or failed Mode 06 O2 OBDMID $06.",
+    "O2DownstreamHeaterFaultBank1": "SAE-generic: P0141, or failed Mode 06 heater OBDMID $42.",
+    "O2DownstreamHeaterFaultBank2": "SAE-generic: P0161, or failed Mode 06 heater OBDMID $46.",
+    "EgrFlowFault": "SAE-generic: P0400–P0402, or failed Mode 06 EGR OBDMID $31.",
+    "EgrCircuitFault": "SAE-generic: P0403–P0406 EGR control/sensor circuit (DTC-only).",
+    "SecondaryAirSystemFault": "SAE-generic: P0410–P0412, or failed Mode 06 secondary-air OBDMID $71."
   },
   "views": {
     "generic": {
@@ -154,6 +202,15 @@
         "O2PerformanceFaultBank2",
         "O2HeaterFaultBank1",
         "O2HeaterFaultBank2",
+        "O2DownstreamCircuitFaultBank1",
+        "O2DownstreamCircuitFaultBank2",
+        "O2DownstreamPerformanceFaultBank1",
+        "O2DownstreamPerformanceFaultBank2",
+        "O2DownstreamHeaterFaultBank1",
+        "O2DownstreamHeaterFaultBank2",
+        "EgrFlowFault",
+        "EgrCircuitFault",
+        "SecondaryAirSystemFault",
         "ChronicOilConsumption"
       ]
     },
@@ -175,6 +232,15 @@
         "O2PerformanceFaultBank2",
         "O2HeaterFaultBank1",
         "O2HeaterFaultBank2",
+        "O2DownstreamCircuitFaultBank1",
+        "O2DownstreamCircuitFaultBank2",
+        "O2DownstreamPerformanceFaultBank1",
+        "O2DownstreamPerformanceFaultBank2",
+        "O2DownstreamHeaterFaultBank1",
+        "O2DownstreamHeaterFaultBank2",
+        "EgrFlowFault",
+        "EgrCircuitFault",
+        "SecondaryAirSystemFault",
         "ChronicOilConsumption",
         "MultiAirOilStarvation"
       ]

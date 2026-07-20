@@ -20,9 +20,12 @@ describe("ontology registries", () => {
     expect(getEngineFamilyCartridges("fca-tigershark-2.4")).toContain("fca-tigershark-2.4");
   });
 
-  it("resolves the Silverado stub to the generic view (no Tigershark cartridge)", () => {
+  it("resolves the Silverado stub to the generic view with SAE cartridges + inert GM stub", () => {
     expect(getEngineFamilyView("gm-ecotec3-tbd")).toBe("generic");
     expect(getEngineFamilyCartridges("gm-ecotec3-tbd")).not.toContain("fca-tigershark-2.4");
+    expect(getEngineFamilyCartridges("gm-ecotec3-tbd")).toEqual(
+      expect.arrayContaining(["egr", "secondary-air", "o2-sensor", "gm-ecotec3-stub"]),
+    );
   });
 
   it("looks up P0304 as a CylinderMisfire concept", () => {
@@ -84,9 +87,17 @@ describe("ontology registries", () => {
     expect(lookupDtc("P0150")).toMatchObject({ concept: "O2CircuitBank2", sae: true });
     expect(lookupDtc("P0133")).toMatchObject({ concept: "O2PerformanceBank1", sae: true });
     expect(lookupDtc("P0153")).toMatchObject({ concept: "O2PerformanceBank2", sae: true });
+    expect(lookupDtc("P0139")).toMatchObject({
+      concept: "O2DownstreamPerformanceBank1",
+      sae: true,
+    });
+    expect(lookupDtc("P0141")).toMatchObject({ concept: "O2DownstreamHeaterBank1", sae: true });
     expect(lookupDtc("P0135")).toMatchObject({ concept: "O2HeaterBank1", sae: true });
     expect(lookupDtc("P0155")).toMatchObject({ concept: "O2HeaterBank2", sae: true });
     expect(lookupDtc("P0457")).toMatchObject({ concept: "EvapCodeLarge", sae: true });
+    expect(lookupDtc("P0401")).toMatchObject({ concept: "EgrFlowCode", sae: true });
+    expect(lookupDtc("P0405")).toMatchObject({ concept: "EgrCircuitCode", sae: true });
+    expect(lookupDtc("P0410")).toMatchObject({ concept: "SecondaryAirCode", sae: true });
   });
 
   it("maps SAE/ISO Mode 06 OBDMIDs onto Condition concepts (or label-only)", () => {
@@ -99,13 +110,19 @@ describe("ontology registries", () => {
     expect(lookupMode06("A2")).toMatchObject({ concept: "FailedMisfireMonitor", sae: true });
     expect(lookupMode06("01")).toMatchObject({ concept: "FailedO2MonitorBank1", sae: true });
     expect(lookupMode06("05")).toMatchObject({ concept: "FailedO2MonitorBank2", sae: true });
-    expect(lookupMode06("02")?.concept).toBeUndefined();
+    expect(lookupMode06("02")).toMatchObject({
+      concept: "FailedO2DownstreamMonitorBank1",
+      sae: true,
+    });
+    expect(lookupMode06("31")).toMatchObject({ concept: "FailedEgrMonitor", sae: true });
+    expect(lookupMode06("71")).toMatchObject({ concept: "FailedSecondaryAirMonitor", sae: true });
     expect(lookupMode06("FE")).toBeUndefined();
   });
 
   it("seeds upstream O2 voltage PIDs with Mode 01 hex", () => {
     expect(lookupPid("O2_B1S1")).toMatchObject({ unit: "volt", pidHex: "0x14", sae: true });
     expect(lookupPid("O2_B2S1")).toMatchObject({ unit: "volt", pidHex: "0x18", sae: true });
+    expect(lookupPid("COMMANDED_EGR")).toMatchObject({ unit: "percent", pidHex: "0x2C", sae: true });
   });
 
   it("returns undefined for an unknown PID key", () => {

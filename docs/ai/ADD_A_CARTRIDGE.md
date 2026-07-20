@@ -23,10 +23,12 @@ not declare.
 | `rich-fuel` | P0172 / P0175 + negative fuel trim |
 | `evap` | P0442 / P0455 / P0456 |
 | `catalyst` | P0420 / P0430 (DTC-only) |
-| `o2-sensor` | Circuit / performance / heater + Mode 06 O2/heater OBDMIDs |
+| `o2-sensor` | Upstream + downstream circuit/performance/heater + Mode 06 |
+| `egr` | P0400–P0406 + Mode 06 EGR OBDMID $31 |
+| `secondary-air` | P0410–P0412 + Mode 06 AIR OBDMID $71 |
 | `cam-crank-correlation` | P0016–P0018 family |
 | `fca-tigershark-2.4` | MultiAir oil starvation (OEM view) |
-| `gm-ecotec3-stub` | Inert multi-vehicle extension proof |
+| `gm-ecotec3-stub` | Inert A5 extension proof (SAE cartridges load separately) |
 
 ## The recipe
 

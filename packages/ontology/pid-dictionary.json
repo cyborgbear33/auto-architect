@@ -131,7 +131,6 @@
       "mode": "01",
       "pidHex": "0x19"
     },
-
     "MAF": {
       "description": "Mass air flow sensor",
       "unit": "grams/sec",
@@ -238,6 +237,22 @@
       "sae": false,
       "manualOnly": true,
       "note": "Not a Mode 01 PID — pass via --manual-pid. Used by ForecastService oil-level trend."
+    },
+    "COMMANDED_EGR": {
+      "description": "Commanded EGR",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x2C",
+      "note": "Evidence adjacency for EGR cases; no cartridge duty-cycle threshold yet."
+    },
+    "EGR_ERROR": {
+      "description": "EGR error",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x2D",
+      "note": "J1979 centered percent; evidence adjacency only."
     }
   }
 }

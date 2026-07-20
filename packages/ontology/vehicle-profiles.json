@@ -16,7 +16,7 @@
       "trim": null,
       "engineFamily": "gm-ecotec3-tbd",
       "obdProtocol": null,
-      "notes": "Stub profile proving the multi-vehicle extension point. Fill in year/trim/VIN and confirm the real GM engine family (e.g. EcoTec3 5.3L / 6.2L / Duramax) once the truck is available; add any GM-specific cartridge beside fca-tigershark-2.4.ts without touching the generic base TBox."
+      "notes": "Stub profile proving the multi-vehicle extension point. Shares the full SAE-generic cartridge set; OEM-specific depth waits on a real truck (year/trim/VIN + confirmed EcoTec3/Duramax family + GM TSBs). Do not invent GM fault classes in the stub cartridge."
     }
   },
   "engineFamilies": {
@@ -30,6 +30,8 @@
         "evap",
         "catalyst",
         "o2-sensor",
+        "egr",
+        "secondary-air",
         "cam-crank-correlation",
         "fca-tigershark-2.4"
       ]
@@ -44,7 +46,10 @@
         "evap",
         "catalyst",
         "o2-sensor",
-        "cam-crank-correlation"
+        "egr",
+        "secondary-air",
+        "cam-crank-correlation",
+        "gm-ecotec3-stub"
       ]
     }
   }

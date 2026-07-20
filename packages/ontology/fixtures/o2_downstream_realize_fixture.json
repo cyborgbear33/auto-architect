@@ -1,0 +1,32 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "O2DownstreamPerformanceBank1": "Symptom",
+    "FailedO2DownstreamMonitorBank1": "Condition",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": { "domain": "Engine", "range": "Symptom" },
+    "hasCondition": { "domain": "Engine", "range": "Condition" }
+  },
+  "classes": {
+    "O2DownstreamPerformanceFaultBank1": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.O2DownstreamPerformanceBank1 ⊔ ∃hasCondition.FailedO2DownstreamMonitorBank1)"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": ["Engine"],
+      "mode06_o2_dn": ["FailedO2DownstreamMonitorBank1"]
+    },
+    "roles": [["hasCondition", "jeep_renegade_engine", "mode06_o2_dn"]]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": ["O2DownstreamPerformanceFaultBank1", "MisfireUnderLoad"]
+}
