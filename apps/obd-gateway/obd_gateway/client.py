@@ -14,7 +14,12 @@ from typing import Any
 import obd
 
 from .config import GatewayConfig
-from .pid_map import STANDARD_PID_COMMANDS, resolve_pid_keys
+from .pid_map import (
+    FREEZE_FRAME_PID_COMMANDS,
+    STANDARD_MODE06_COMMANDS,
+    STANDARD_PID_COMMANDS,
+    resolve_pid_keys,
+)
 
 logger = logging.getLogger("obd_gateway.client")
 
@@ -23,11 +28,38 @@ def _now_iso() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
+def _magnitude(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(getattr(value, "magnitude", value))
+    except (TypeError, ValueError):
+        return None
+
+
+def _unit_of(value: Any) -> str | None:
+    unit = str(getattr(value, "units", "") or "") or None
+    return unit
+
+
+def _freeze_dtc_code(value: Any) -> str | None:
+    """python-OBD's single_dtc decoder returns (code, description) or None."""
+    if value is None:
+        return None
+    if isinstance(value, tuple) and value:
+        code = value[0]
+        return str(code).upper() if code else None
+    if isinstance(value, str) and value.strip():
+        return value.strip().upper()
+    return None
+
+
 class ObdGatewayClient:
     """Connects to an ELM327-compatible adapter (OBDLink MX+ included) and
-    reads Mode 01 PIDs plus 03/07 (stored/pending) DTCs. Never writes state
-    beyond an optional explicit `clear_dtcs()` call the CLI gates behind a
-    confirmation flag — mirrors ActionService's mutation gate, one level down."""
+    reads Mode 01 PIDs, Mode 02 freeze frame, Mode 03/07 DTCs, and Mode 06
+    monitor results. Never writes state beyond an optional explicit
+    `clear_dtcs()` call the CLI gates behind a confirmation flag — mirrors
+    ActionService's mutation gate, one level down."""
 
     def __init__(self, config: GatewayConfig, connection: obd.OBD | None = None):
         self.config = config
@@ -85,10 +117,16 @@ class ObdGatewayClient:
                 logger.debug("no data for %s this cycle, skipping", key)
                 continue
             value = response.value
-            magnitude = getattr(value, "magnitude", value)
-            unit = str(getattr(value, "units", "")) or None
+            magnitude = _magnitude(value)
+            if magnitude is None:
+                continue
             readings.append(
-                {"pid": key, "value": float(magnitude), "unit": unit, "timestamp": _now_iso()}
+                {
+                    "pid": key,
+                    "value": magnitude,
+                    "unit": _unit_of(value),
+                    "timestamp": _now_iso(),
+                }
             )
         return readings
 
@@ -109,6 +147,92 @@ class ObdGatewayClient:
                         {"code": code, "status": "pending", "description": description or None}
                     )
         return dtcs
+
+    def read_freeze_frames(self) -> list[dict[str, Any]]:
+        """Mode 02 freeze frame for the DTC that triggered it. Omits the whole
+        frame when no freeze DTC is present — never invents a DTC or PID."""
+        conn = self._require_connection()
+        freeze_cmd = obd.commands.DTC_FREEZE_DTC
+        if not conn.supports(freeze_cmd):
+            # Some stacks expose Mode 01 $02 instead; try as a last resort.
+            freeze_cmd = obd.commands.FREEZE_DTC
+            if not conn.supports(freeze_cmd):
+                logger.debug("ECU does not support freeze-frame DTC query")
+                return []
+
+        response = conn.query(freeze_cmd)
+        if response.is_null():
+            return []
+        dtc = _freeze_dtc_code(response.value)
+        if not dtc:
+            return []
+
+        readings: list[dict[str, Any]] = []
+        for key, command in FREEZE_FRAME_PID_COMMANDS.items():
+            if not conn.supports(command):
+                continue
+            pid_response = conn.query(command)
+            if pid_response.is_null():
+                continue
+            magnitude = _magnitude(pid_response.value)
+            if magnitude is None:
+                continue
+            readings.append(
+                {
+                    "pid": key,
+                    "value": magnitude,
+                    "unit": _unit_of(pid_response.value),
+                    "timestamp": _now_iso(),
+                }
+            )
+
+        return [{"dtc": dtc, "readings": readings}]
+
+    def read_mode06(self) -> list[dict[str, Any]]:
+        """Mode 06 on-board monitor tests for OBDMIDs in STANDARD_MODE06_COMMANDS.
+        Skips unsupported MIDs and null tests; never invents pass/fail."""
+        conn = self._require_connection()
+        results: list[dict[str, Any]] = []
+        for mid, command in STANDARD_MODE06_COMMANDS.items():
+            if not conn.supports(command):
+                logger.debug("ECU does not support Mode 06 MID %s, skipping", mid)
+                continue
+            response = conn.query(command)
+            if response.is_null() or response.value is None:
+                continue
+            monitor = response.value
+            tests = getattr(monitor, "tests", None)
+            if tests is None:
+                continue
+            for test in tests:
+                if getattr(test, "is_null", lambda: True)():
+                    continue
+                tid_raw = getattr(test, "tid", None)
+                if tid_raw is None:
+                    continue
+                try:
+                    tid = f"{int(tid_raw):02X}"
+                except (TypeError, ValueError):
+                    tid = str(tid_raw).upper()
+                value = _magnitude(getattr(test, "value", None))
+                min_v = _magnitude(getattr(test, "min", None))
+                max_v = _magnitude(getattr(test, "max", None))
+                if value is None:
+                    continue
+                passed = getattr(test, "passed", None)
+                if not isinstance(passed, bool):
+                    passed = None
+                results.append(
+                    {
+                        "tid": tid,
+                        "mid": mid,
+                        "value": value,
+                        "min": min_v,
+                        "max": max_v,
+                        "passed": passed,
+                    }
+                )
+        return results
 
     def read_vin(self) -> str | None:
         conn = self._require_connection()

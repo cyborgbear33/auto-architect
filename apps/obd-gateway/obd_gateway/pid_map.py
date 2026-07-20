@@ -66,9 +66,51 @@ MANUAL_ONLY_PIDS: dict[str, str] = {
     "OIL_LEVEL_PCT": "oil level is not a Mode 01 PID — read from the dipstick/dash message and pass via --manual-pid",
 }
 
+# Mode 02 freeze-frame clones of STANDARD_PID_COMMANDS keys that python-OBD exposes
+# as `DTC_<KEY>`. Used by client.read_freeze_frames — never invent readings.
+FREEZE_FRAME_PID_COMMANDS: dict[str, obd.OBDCommand] = {
+    key: cmd
+    for key in STANDARD_PID_COMMANDS
+    if (cmd := getattr(obd.commands, f"DTC_{key}", None)) is not None
+}
+
+# Mode 06 OBDMID hex → python-OBD MONITOR_* command. Keys match
+# packages/ontology/mode06-dictionary.json (no $). Unknown MIDs stay unlabeled
+# in the UI; do not invent TID meanings here.
+STANDARD_MODE06_COMMANDS: dict[str, obd.OBDCommand] = {
+    "01": obd.commands.MONITOR_O2_B1S1,
+    "02": obd.commands.MONITOR_O2_B1S2,
+    "05": obd.commands.MONITOR_O2_B2S1,
+    "06": obd.commands.MONITOR_O2_B2S2,
+    "21": obd.commands.MONITOR_CATALYST_B1,
+    "22": obd.commands.MONITOR_CATALYST_B2,
+    "31": obd.commands.MONITOR_EGR_B1,
+    "39": obd.commands.MONITOR_EVAP_150,
+    "3A": obd.commands.MONITOR_EVAP_090,
+    "3B": obd.commands.MONITOR_EVAP_040,
+    "3C": obd.commands.MONITOR_EVAP_020,
+    "41": obd.commands.MONITOR_O2_HEATER_B1S1,
+    "42": obd.commands.MONITOR_O2_HEATER_B1S2,
+    "45": obd.commands.MONITOR_O2_HEATER_B2S1,
+    "46": obd.commands.MONITOR_O2_HEATER_B2S2,
+    "71": obd.commands.MONITOR_SECONDARY_AIR_1,
+    "A1": obd.commands.MONITOR_MISFIRE_GENERAL,
+    "A2": obd.commands.MONITOR_MISFIRE_CYLINDER_1,
+    "A3": obd.commands.MONITOR_MISFIRE_CYLINDER_2,
+    "A4": obd.commands.MONITOR_MISFIRE_CYLINDER_3,
+    "A5": obd.commands.MONITOR_MISFIRE_CYLINDER_4,
+}
+
 
 def resolve_pid_keys(requested: tuple[str, ...]) -> tuple[list[str], list[str]]:
     """Split requested PID keys into (supported, unsupported) against STANDARD_PID_COMMANDS."""
     supported = [p for p in requested if p in STANDARD_PID_COMMANDS]
     unsupported = [p for p in requested if p not in STANDARD_PID_COMMANDS]
     return supported, unsupported
+
+
+def mode06_mid_from_command(command: obd.OBDCommand) -> str:
+    """Extract OBDMID hex from a Mode 06 command byte string (e.g. b'0621' → '21')."""
+    raw = command.command
+    text = raw.decode("ascii") if isinstance(raw, bytes) else str(raw)
+    return text[2:].upper()

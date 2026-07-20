@@ -8,7 +8,7 @@ CLI entry point. Two modes, per the plan (docs/../auto-architect_car_diagnostics
 Both support `--manual-pid KEY=VALUE[:UNIT]` (repeatable) for PIDs that
 aren't standard Mode 01 (OIL_PRESSURE_PSI, OIL_LEVEL_PCT — see pid_map.py),
 `--dry-run` to print the batch instead of POSTing it, and `--simulate` to
-skip the hardware connection entirely (only manual-pids/DTCs go in the
+skip the hardware connection entirely (manual-pids/DTCs/Mode 06/FF go in the
 batch) — mirrors garden-architect's edge-gateway `simulate.ts`, useful for
 demoing or testing the API against a batch shape with no adapter plugged in.
 """
@@ -23,7 +23,7 @@ import time
 from dataclasses import replace
 
 from .api_client import ApiClient, ApiClientError
-from .batch import build_observation_batch, parse_manual_pids
+from .batch import build_observation_batch, parse_manual_pids, parse_simulated_mode06
 from .client import ObdGatewayClient
 from .config import DEFAULT_PIDS, GatewayConfig
 
@@ -59,12 +59,22 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--odometer-miles", type=float, default=None)
     parser.add_argument("--no-dtcs", action="store_true", help="skip reading DTCs this cycle")
     parser.add_argument(
+        "--no-freeze-frame",
+        action="store_true",
+        help="skip Mode 02 freeze-frame read this cycle",
+    )
+    parser.add_argument(
+        "--no-mode06",
+        action="store_true",
+        help="skip Mode 06 on-board monitor read this cycle",
+    )
+    parser.add_argument(
         "--dry-run", action="store_true", help="print the batch instead of POSTing it"
     )
     parser.add_argument(
         "--simulate",
         action="store_true",
-        help="skip the OBD hardware connection entirely — batch is built only from --manual-pid/DTCs",
+        help="skip the OBD hardware connection entirely — batch is built only from simulate/manual flags",
     )
     parser.add_argument(
         "--simulate-dtc",
@@ -72,6 +82,19 @@ def _build_parser() -> argparse.ArgumentParser:
         default=[],
         metavar="CODE:STATUS",
         help="e.g. P0304:stored (repeatable, only with --simulate)",
+    )
+    parser.add_argument(
+        "--simulate-freeze-frame",
+        default=None,
+        metavar="DTC",
+        help="with --simulate: attach a freeze frame for DTC using --manual-pid readings as the snapshot",
+    )
+    parser.add_argument(
+        "--simulate-mode06",
+        action="append",
+        default=[],
+        metavar="MID:TID:VALUE:MIN:MAX[:pass|fail]",
+        help="e.g. 21:01:0.8:0:0.5:fail (repeatable, only with --simulate)",
     )
     parser.add_argument("-v", "--verbose", action="store_true")
 
@@ -119,17 +142,33 @@ def run_once(
     args: argparse.Namespace,
 ) -> dict:
     manual_pids = parse_manual_pids(args.manual_pid)
+    freeze_frames: list[dict] = []
+    mode06: list[dict] = []
     if client is None:
         pid_readings: list[dict] = []
         dtcs = _parse_simulated_dtcs(args.simulate_dtc)
+        mode06 = parse_simulated_mode06(args.simulate_mode06)
+        if args.simulate_freeze_frame:
+            freeze_frames = [
+                {
+                    "dtc": str(args.simulate_freeze_frame).strip().upper(),
+                    "readings": list(manual_pids),
+                }
+            ]
     else:
         pid_readings = client.read_pids(config.pids)
         dtcs = [] if args.no_dtcs else client.read_dtcs()
+        if not args.no_freeze_frame:
+            freeze_frames = client.read_freeze_frames()
+        if not args.no_mode06:
+            mode06 = client.read_mode06()
     batch = build_observation_batch(
         vehicle_id=config.vehicle_id,
         pid_readings=pid_readings,
         dtcs=dtcs,
         manual_pids=manual_pids,
+        freeze_frames=freeze_frames,
+        mode06=mode06,
         odometer_miles=args.odometer_miles,
         source="simulated" if client is None else "obd_gateway",
     )
@@ -138,9 +177,11 @@ def run_once(
     else:
         result = api.post_observation_batch(config.vehicle_id, batch)
         logger.info(
-            "posted batch: %d pids, %d dtcs -> %s",
+            "posted batch: %d pids, %d dtcs, %d freezeFrames, %d mode06 -> %s",
             len(batch.get("pids", [])),
             len(batch.get("dtcs", [])),
+            len(batch.get("freezeFrames", [])),
+            len(batch.get("mode06", [])),
             result,
         )
     return batch

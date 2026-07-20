@@ -84,3 +84,82 @@ def test_read_pids_requires_connection_first():
         raise AssertionError("expected RuntimeError")
     except RuntimeError as exc:
         assert "connect()" in str(exc)
+
+
+class FakeMonitorTest:
+    def __init__(self, tid, value, min_v, max_v):
+        self.tid = tid
+        self.value = value
+        self.min = min_v
+        self.max = max_v
+
+    def is_null(self):
+        return self.tid is None or self.value is None or self.min is None or self.max is None
+
+    @property
+    def passed(self):
+        if self.is_null():
+            return False
+        return self.min <= self.value <= self.max
+
+
+class FakeMonitor:
+    def __init__(self, tests):
+        self._tests = tests
+
+    @property
+    def tests(self):
+        return [t for t in self._tests if not t.is_null()]
+
+
+def test_read_freeze_frames_returns_dtc_and_mode02_pids():
+    ureg = obd.Unit
+    fake = FakeConnection(
+        supported={
+            obd.commands.DTC_FREEZE_DTC,
+            obd.commands.DTC_ENGINE_LOAD,
+            obd.commands.DTC_RPM,
+        },
+        responses={
+            obd.commands.DTC_FREEZE_DTC: ("P0304", "Cylinder 4 Misfire Detected"),
+            obd.commands.DTC_ENGINE_LOAD: 85.0 * ureg.percent,
+            obd.commands.DTC_RPM: 2100.0 * ureg.rpm,
+        },
+    )
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
+    frames = client.read_freeze_frames()
+    assert len(frames) == 1
+    assert frames[0]["dtc"] == "P0304"
+    by_pid = {r["pid"]: r for r in frames[0]["readings"]}
+    assert by_pid["ENGINE_LOAD"]["value"] == 85.0
+    assert by_pid["RPM"]["value"] == 2100.0
+
+
+def test_read_freeze_frames_omits_when_no_freeze_dtc():
+    fake = FakeConnection(supported={obd.commands.DTC_FREEZE_DTC}, responses={})
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
+    assert client.read_freeze_frames() == []
+
+
+def test_read_mode06_maps_mid_tid_and_pass_fail():
+    monitor = FakeMonitor(
+        [
+            FakeMonitorTest(tid=1, value=0.8, min_v=0.0, max_v=0.5),
+            FakeMonitorTest(tid=None, value=1.0, min_v=0.0, max_v=1.0),  # null → skipped
+        ]
+    )
+    fake = FakeConnection(
+        supported={obd.commands.MONITOR_CATALYST_B1},
+        responses={obd.commands.MONITOR_CATALYST_B1: monitor},
+    )
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
+    rows = client.read_mode06()
+    assert len(rows) == 1
+    assert rows[0] == {
+        "tid": "01",
+        "mid": "21",
+        "value": 0.8,
+        "min": 0.0,
+        "max": 0.5,
+        "passed": False,
+    }

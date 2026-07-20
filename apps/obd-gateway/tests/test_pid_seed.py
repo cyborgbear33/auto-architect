@@ -10,10 +10,16 @@ import json
 from pathlib import Path
 
 from obd_gateway.config import DEFAULT_PIDS
-from obd_gateway.pid_map import MANUAL_ONLY_PIDS, STANDARD_PID_COMMANDS
+from obd_gateway.pid_map import (
+    MANUAL_ONLY_PIDS,
+    STANDARD_MODE06_COMMANDS,
+    STANDARD_PID_COMMANDS,
+    mode06_mid_from_command,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PID_DICTIONARY_PATH = REPO_ROOT / "packages" / "ontology" / "pid-dictionary.json"
+MODE06_DICTIONARY_PATH = REPO_ROOT / "packages" / "ontology" / "mode06-dictionary.json"
 
 
 def _load_pid_seed() -> dict[str, dict]:
@@ -65,3 +71,10 @@ def test_default_poll_pids_are_in_seed_with_units():
 def test_every_seed_row_has_a_unit():
     for key, entry in _load_pid_seed().items():
         assert entry.get("unit"), key
+
+
+def test_mode06_dictionary_mids_are_bound_to_monitor_commands():
+    data = json.loads(MODE06_DICTIONARY_PATH.read_text(encoding="utf-8"))
+    for mid in data["monitors"]:
+        assert mid in STANDARD_MODE06_COMMANDS, f"mode06-dictionary MID {mid} missing from gateway"
+        assert mode06_mid_from_command(STANDARD_MODE06_COMMANDS[mid]) == mid.upper()

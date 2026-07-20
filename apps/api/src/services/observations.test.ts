@@ -1,10 +1,56 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMemoryStore } from "../store/index.ts";
 import { seed } from "../store/seed.ts";
-import { LIVE_GAUGE_STALE_AFTER_MS, ObservationService } from "./observations.ts";
+import {
+  enrichDtcDescription,
+  LIVE_GAUGE_STALE_AFTER_MS,
+  ObservationService,
+} from "./observations.ts";
 import { VehicleService } from "./vehicle.ts";
 
 const JEEP = "veh:jeep-renegade-2015-latitude";
+
+describe("enrichDtcDescription", () => {
+  it("fills SAE dictionary text when the adapter left description empty", () => {
+    expect(enrichDtcDescription({ code: "P0304", status: "stored" }).description).toBe(
+      "Cylinder 4 Misfire Detected",
+    );
+  });
+
+  it("keeps adapter description when present", () => {
+    expect(
+      enrichDtcDescription({
+        code: "P0304",
+        status: "stored",
+        description: "from adapter",
+      }).description,
+    ).toBe("from adapter");
+  });
+});
+
+describe("ObservationService.latestDtcs", () => {
+  const store = createMemoryStore();
+  const vehicles = new VehicleService(store);
+  const observations = new ObservationService(store, vehicles);
+
+  beforeEach(async () => {
+    await store.reset();
+    await seed(store);
+  });
+
+  it("returns dictionary descriptions for codes posted without text", async () => {
+    await observations.record({
+      vehicleId: JEEP,
+      capturedAt: new Date().toISOString(),
+      source: "simulated",
+      dtcs: [{ code: "P0304", status: "stored" }],
+    });
+    const dtcs = await observations.latestDtcs(JEEP);
+    expect(dtcs).toEqual([
+      { code: "P0304", status: "stored", description: "Cylinder 4 Misfire Detected" },
+    ]);
+  });
+});
 
 describe("ObservationService.liveGauges", () => {
   const store = createMemoryStore();

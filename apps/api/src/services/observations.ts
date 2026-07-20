@@ -1,5 +1,6 @@
-import { lookupPid } from "@auto/ontology";
+import { lookupDtc, lookupPid } from "@auto/ontology";
 import type {
+  DtcObservation,
   EvidenceProvenance,
   LiveGaugeStrip,
   ObservationBatch,
@@ -51,8 +52,10 @@ export class ObservationService {
     return this.store.observations.listBatches(vehicleId);
   }
 
-  async latestDtcs(vehicleId: string) {
-    return this.store.observations.latestDtcs(vehicleId);
+  async latestDtcs(vehicleId: string): Promise<DtcObservation[]> {
+    await this.vehicles.getOrThrow(vehicleId);
+    const dtcs = await this.store.observations.latestDtcs(vehicleId);
+    return dtcs.map(enrichDtcDescription);
   }
 
   async latestFreezeFrames(vehicleId: string) {
@@ -144,6 +147,15 @@ function shortPidLabel(pid: string, description?: string): string {
     SPEED: "Speed",
   };
   return shortcuts[pid] ?? description;
+}
+
+/** Prefer adapter text; fill from curated SAE dictionary when silent. */
+export function enrichDtcDescription(dtc: DtcObservation): DtcObservation {
+  const existing = dtc.description?.trim();
+  if (existing) return dtc;
+  const fromDict = lookupDtc(dtc.code)?.description;
+  if (!fromDict) return dtc;
+  return { ...dtc, description: fromDict };
 }
 
 function isEvidenceBatch(b: ObservationBatch): boolean {

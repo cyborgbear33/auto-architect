@@ -95,9 +95,9 @@ into the Journal forever.
 
 | # | Work piece | Status | Notes |
 |---|---|---|---|
-| S1 | Validated live MX+ dry-run on Jeep (scan + watch → Dashboard) | todo | Operator checklist; document ports/adapter quirks |
+| S1 | Validated live MX+ dry-run on Jeep (scan + watch → Dashboard) | todo | Checklist + gray MX+ access adapter noted in `OPERATOR_OBD_MANUAL.md` |
 | S2 | Live gauge strip (RPM, load, fuel trim, coolant) + stale indicators | done | `GET .../live-gauges`, `LiveGaugeStrip` |
-| S3 | Mode 06 + freeze-frame capture already in batches → **surface in UI** | done | `EvidencePanels` on Dashboard |
+| S3 | Mode 06 + freeze-frame capture already in batches → **surface in UI** | done | Edge `read_freeze_frames` / `read_mode06` + `EvidencePanels` |
 | S4 | DriveSession object (start/stop; batches linked by `sessionId`) | done | `DriveSessionService`; simulate path; Dashboard panel |
 | S5 | Retention policy (keep FF/Mode06 forever; downsample high-rate PIDs) | done | `applyRetention` / prune; keep evidence; hourly PID downsample |
 | S6 | Bluetooth / preferred-adapter discovery | todo | Friction reduction after S1 works manually |
@@ -453,6 +453,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Mode 06 meaning → recognition (A3) | 2026-07 | `mode06-dictionary.json`; failed monitors feed realize; UI labels |
 | O2 performance classes + A4 O2/EVAP seed | 2026-07 | P0131–34/P0151–54; Mode 06 $01/$05; O2_B* PIDs; P0457 |
 | EGR / secondary air / downstream O2 + A5 stub parity | 2026-07 | new cartridges; Mode 06 $31/$71/$02/$06; GM shares SAE set |
+| Gateway Mode 02 + Mode 06 population + DTC dictionary UI text | 2026-07 | `read_freeze_frames` / `read_mode06`; API+Dashboard `lookupDtc` fill |
 
 ---
 

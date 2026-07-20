@@ -6,7 +6,8 @@ This is the **custom domain layer** on top of the shared propose/dispose
 architecture. Garden's equivalent is `EDGE_DEVICE_DEV_GUIDE.md` (MQTT sensors).
 Auto's edge is a serial/Bluetooth ELM327-compatible adapter (OBDLink MX+).
 
-Operator install/CLI detail: [`apps/obd-gateway/README.md`](../../apps/obd-gateway/README.md).
+Operator install/CLI detail: [`apps/obd-gateway/README.md`](../../apps/obd-gateway/README.md).  
+Human setup + phased MX+ integration plan: [`OPERATOR_OBD_MANUAL.md`](../OPERATOR_OBD_MANUAL.md).
 
 ---
 
@@ -37,9 +38,9 @@ Classification, policy, and ranking live exclusively in `apps/api`.
 | Mode | Content | Status |
 |---|---|---|
 | 01 | Live PIDs | primary |
-| 02 | Freeze frame | supported in API shape; gateway should populate when available |
-| 03 / 07 / 0A | Stored / pending / permanent DTCs | primary |
-| 06 | On-board monitor results | API exposes; gateway/UI richness still backlog |
+| 02 | Freeze frame | gateway populates when ECU exposes a freeze DTC + Mode 02 PIDs |
+| 03 / 07 / 0A | Stored / pending / permanent DTCs | 03/07 primary; 0A not in python-OBD yet |
+| 06 | On-board monitor results | gateway populates SAE-seed OBDMIDs when ECU supports them |
 
 Manual / simulated PIDs are allowed for tests (`--manual-pid`, `--simulate`).
 

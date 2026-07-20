@@ -194,6 +194,9 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | O2 performance + A4 SAE seed slice | shipped | P0131–34/P0151–54; Mode 06 $01/$05; O2 voltage PIDs; P0457 |
 | EGR / secondary air / downstream O2 | shipped | cartridges + Mode 06; Vortec 6.0 shares SAE set; OEM stub still inert |
 | Freeze-frame + Mode 06 UI | shipped | `EvidencePanels` on Dashboard |
+| Gateway Mode 02 + Mode 06 capture | shipped | `read_freeze_frames` / `read_mode06`; simulate flags for lab |
+| DTC dictionary text on Dashboard rows | shipped | API `enrichDtcDescription` + UI `lookupDtc` fallback |
+| Operator OBD manual (MX+ / Jeep gray adapter) | shipped | `docs/OPERATOR_OBD_MANUAL.md`; Jeep profile notes |
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |
 | Problem caseboard + verify-after-repair (P2–P5) | shipped | Diagnosis filters; abandon/escalate/reopen; `worked` → verifying → verify |
@@ -214,7 +217,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Python obd-gateway (`scan` / `watch` / `--simulate`) | shipped | `apps/obd-gateway` |
 | Ontology lint CI | shipped | `scripts/lint-ontology.mjs`, `.github/workflows/ci.yml` |
 | Auth / multi-user | **not yet** | see `FUTURE_FEATURES.md` |
-| Live Mode 06 / freeze-frame UI richness | partial | OBDMID labels + pass/fail; raw TID/MID behind debug |
+| Live Mode 06 / freeze-frame UI richness | partial | Edge populates FF + SAE-seed Mode 06; OBDMID labels + pass/fail; raw TID/MID behind debug |
 | LLM agent loop (propose-only) | **not yet** | garden has `agent-service`; auto does not |
 
 ---
@@ -246,6 +249,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | [`ai/ONTOLOGY_DEV_GUIDE.md`](ai/ONTOLOGY_DEV_GUIDE.md) | DL TBox, views, DTC dictionary |
 | [`ai/ADD_A_CARTRIDGE.md`](ai/ADD_A_CARTRIDGE.md) | Extend a diagnostic domain |
 | [`ai/ADD_A_VEHICLE.md`](ai/ADD_A_VEHICLE.md) | Add Silverado (or any next car) |
+| [`OPERATOR_OBD_MANUAL.md`](OPERATOR_OBD_MANUAL.md) | Human OBDLink MX+ setup + thorough-scan integration plan |
 | [`ai/OBD_EDGE_CONTRACT.md`](ai/OBD_EDGE_CONTRACT.md) | OBD-II / CANBUS edge rules |
 | [`ai/HARDWARE_STANDARDS.md`](ai/HARDWARE_STANDARDS.md) | SAE/ISO/CAN grounding reference |
 | [`ai/TESTING_DEV_GUIDE.md`](ai/TESTING_DEV_GUIDE.md) | Vitest / pytest / FakeLogosBridge |

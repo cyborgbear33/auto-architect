@@ -46,3 +46,32 @@ def test_build_observation_batch_merges_pid_readings_and_manual_pids():
     assert set(pids_by_key) == {"ENGINE_LOAD", "OIL_PRESSURE_PSI"}
     assert batch["dtcs"] == [{"code": "P0304", "status": "stored"}]  # None description dropped
     assert batch["odometerMiles"] == 54321.0
+
+
+def test_build_observation_batch_includes_freeze_frames_and_mode06():
+    batch = build_observation_batch(
+        vehicle_id="veh:x",
+        freeze_frames=[
+            {
+                "dtc": "P0304",
+                "readings": [
+                    {"pid": "ENGINE_LOAD", "value": 85.0, "unit": "%", "timestamp": "t"},
+                ],
+            }
+        ],
+        mode06=[
+            {"tid": "01", "mid": "21", "value": 0.8, "min": 0.0, "max": 0.5, "passed": False},
+        ],
+    )
+    assert batch["freezeFrames"][0]["dtc"] == "P0304"
+    assert batch["mode06"][0]["mid"] == "21"
+    assert batch["mode06"][0]["passed"] is False
+
+
+def test_parse_simulated_mode06():
+    from obd_gateway.batch import parse_simulated_mode06
+
+    rows = parse_simulated_mode06(["21:01:0.8:0:0.5:fail"])
+    assert rows == [
+        {"tid": "01", "mid": "21", "value": 0.8, "min": 0.0, "max": 0.5, "passed": False}
+    ]

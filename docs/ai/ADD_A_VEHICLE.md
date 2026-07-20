@@ -69,6 +69,9 @@ add OEM-specific pages (prefer not to).
 
 ## Live OBD scan (operator path)
 
+Full human manual (MX+ + Jeep gray adapter + phased integration plan):
+[`../OPERATOR_OBD_MANUAL.md`](../OPERATOR_OBD_MANUAL.md).
+
 For a more complete picture when an adapter is plugged in:
 
 1. Start API (`pnpm dev:api` or Postgres variant). Open the UI and select the
@@ -89,9 +92,9 @@ For a more complete picture when an adapter is plugged in:
 5. Optional richer inputs today: `--manual-pid` for non-standard keys the
    gateway cannot read; odometer / oil notes via UI where available.
 6. For monitor / Mode 06 depth: drive until readiness monitors complete when
-   possible. **Today the gateway posts Mode 01 PIDs + Mode 03/07 DTCs**; Mode 06
-   / freeze-frame richness is API+UI-ready but still an edge backlog — do not
-   expect a shop-tool-complete Mode 06 dump from `scan` alone yet.
+   possible. The gateway posts Mode 01 PIDs, Mode 03/07 DTCs, Mode 02 freeze
+   frame (when present), and Mode 06 rows for seeded OBDMIDs the ECU supports —
+   not every manufacturer TID label.
 
 Wrong vehicle id = evidence lands on the wrong profile. Empty honest scan ≠
 “healthy” — it means nothing measured.

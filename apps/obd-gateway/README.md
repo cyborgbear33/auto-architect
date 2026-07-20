@@ -45,9 +45,10 @@ python -m obd_gateway --vehicle-id veh:jeep-renegade-2015-latitude watch --inter
 ```
 
 Use the **same** `--vehicle-id` you have selected in the web UI so recognition
-and recommendations attach to the right profile. Today each `scan`/`watch`
-cycle posts Mode 01 PIDs + Mode 03/07 DTCs; Mode 06 / freeze-frame population
-from the edge is still backlog (API/UI can display them when present).
+and recommendations attach to the right profile. Each `scan`/`watch` cycle
+posts Mode 01 PIDs, Mode 03/07 DTCs, Mode 02 freeze frame (when the ECU has
+one), and Mode 06 monitor rows for OBDMIDs in the SAE seed (when supported).
+Skip with `--no-freeze-frame` / `--no-mode06` if needed.
 
 Try it with no hardware and no API running first:
 
@@ -79,6 +80,14 @@ Environment variables (all overridable by CLI flags):
 | `AUTO_POLL_INTERVAL_SECONDS` | `5.0` | `watch` mode poll interval |
 | `AUTO_PIDS` | see `config.py` `DEFAULT_PIDS` | comma-separated PID keys to poll each cycle |
 | `AUTO_REQUEST_TIMEOUT_SECONDS` | `10.0` | HTTP timeout when POSTing to the API |
+
+## Reference hardware (Jeep)
+
+The 2015 Jeep Renegade Latitude uses an **OBDLink MX+** with a **gray-type
+OBD-II adapter/extension** between the vehicle port and the MX+ for easier
+physical access. That adapter does not change protocol or unlock OEM sessions.
+Full operator workflow + integration plan:
+[`docs/OPERATOR_OBD_MANUAL.md`](../../docs/OPERATOR_OBD_MANUAL.md).
 
 ## Pairing an OBDLink MX+ over Bluetooth (Linux)
 

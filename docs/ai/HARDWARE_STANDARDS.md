@@ -8,6 +8,20 @@ Companion docs:
 - [`OBD_EDGE_CONTRACT.md`](OBD_EDGE_CONTRACT.md) — what `obd-gateway` may do
 - [`ONTOLOGY_DEV_GUIDE.md`](ONTOLOGY_DEV_GUIDE.md) — DTC dictionary / TBox discipline
 - [`FUTURE_FEATURES.md`](../FUTURE_FEATURES.md) — full PID/DTC knowledge-base backlog
+- [`OPERATOR_OBD_MANUAL.md`](../OPERATOR_OBD_MANUAL.md) — human-readable MX+ setup + integration plan
+
+---
+
+## 0. Reference hardware (this project)
+
+| Item | Note |
+|---|---|
+| Preferred adapter | **OBDLink MX+** (Bluetooth ELM327-compatible) |
+| 2015 Jeep Renegade Latitude 2.4L | MX+ used with a **gray-type OBD-II adapter/extension** for better DLC access. Operator-confirmed; mechanical only — not a protocol or OEM-session unlock. Profile: `veh:jeep-renegade-2015-latitude`. |
+| 2003 Silverado 2500 HD (gas) | Same MX+ family; leave protocol auto-detect. Profile: `veh:silverado-2500hd-2003`. |
+
+Operator workflow and phased “thorough OBD map” plan:
+[`OPERATOR_OBD_MANUAL.md`](../OPERATOR_OBD_MANUAL.md).
 
 ---
 

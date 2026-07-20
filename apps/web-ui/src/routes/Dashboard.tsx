@@ -1,3 +1,4 @@
+import { lookupDtc } from "@auto/ontology";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -123,7 +124,9 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
                 className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm"
               >
                 <span className="font-mono font-semibold text-slate-800">{dtc.code}</span>
-                <span className="text-slate-500">{dtc.description ?? "—"}</span>
+                <span className="text-slate-500">
+                  {dtc.description?.trim() || lookupDtc(dtc.code)?.description || "—"}
+                </span>
                 <Pill
                   tone={
                     dtc.status === "permanent"

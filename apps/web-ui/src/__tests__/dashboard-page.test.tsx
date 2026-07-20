@@ -164,7 +164,22 @@ describe("Dashboard", () => {
     const heading = await screen.findByText("Active DTCs");
     const section = within(heading.closest("section")!);
     expect(await section.findByText("P0304")).toBeInTheDocument();
+    expect(section.getByText("Cylinder 4 Misfire")).toBeInTheDocument();
     expect(section.getByText("stored")).toBeInTheDocument();
+  });
+
+  it("falls back to the DTC dictionary when the API omits description", async () => {
+    const { api } = await import("../lib/api.ts");
+    vi.mocked(api.getDtcs).mockResolvedValueOnce([{ code: "P0304", status: "stored" }]);
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <Dashboard />
+      </QueryClientProvider>,
+    );
+    const heading = await screen.findByText("Active DTCs");
+    const section = within(heading.closest("section")!);
+    expect(await section.findByText("Cylinder 4 Misfire Detected")).toBeInTheDocument();
   });
 
   it("labels evidence source so simulated data is never mistaken for live OBD", async () => {

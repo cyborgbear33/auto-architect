@@ -16,7 +16,7 @@ apps/obd-gateway (Python)  --POST Observations-->  apps/api (Fastify)  <--HTTP--
                                         metalanguage/engine (LOGOS, unmodified)
 ```
 
-- **`apps/obd-gateway`** (Python + python-OBD): talks to an OBDLink MX+ (or any ELM327-compatible adapter) directly over Bluetooth/USB. Reads standard Mode 01 PIDs and Mode 03/07 DTCs, tags them with a vehicle profile id, and POSTs `Observation` batches to the API. Never classifies anything itself.
+- **`apps/obd-gateway`** (Python + python-OBD): talks to an OBDLink MX+ (or any ELM327-compatible adapter) directly over Bluetooth/USB. Reads Mode 01 PIDs, Mode 02 freeze frame, Mode 03/07 DTCs, and SAE-seed Mode 06 monitors; tags them with a vehicle profile id; POSTs `Observation` batches to the API. Never classifies anything itself.
 - **`apps/api`** (Fastify + TypeScript): the deterministic core. `RecognitionService` turns observations into ABox facts and calls LOGOS `realize` to prove fault classes (never synthesizes a fake "Healthy"). `PolicyService` calls `reason` for real safety holds. `SolverService` calls `solve` to rank next actions. `ActionService` is the single mutation gate — every state change goes through it, with an audit trail (`DecisionRecord`).
 - **`apps/web-ui`** (React 19 + Vite + TanStack Router/Query + Redux Toolkit + Tailwind): vehicle picker, live DTC/PID dashboard, a Diagnosis page that drafts/solves `DiagnosticProblem`s and demonstrates the safety-hold policy gate, a recall/TSB matcher, and a decision journal.
 - **`packages/ontology`**: the DL TBox (`dl-ontology.json`) — SAE-generic fault classes (misfire, lean fuel, EVAP leak, cam/crank correlation) in a `generic` view, plus an engine-family-specific view (`fca-tigershark-2.4`) for MultiAir oil-starvation. A vehicle-profile registry (`vehicle-profiles.json`) maps each vehicle to an engine family, which selects both the ontology view and the cartridges to load. Also owns a curated DTC dictionary and known campaigns (TSB 05-047-457A, recalls W80/W84).
@@ -70,6 +70,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck, Biome, tests, ontology lint, and
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | As-built service graph and contracts |
 | [`docs/FUTURE_FEATURES.md`](docs/FUTURE_FEATURES.md) | Canonical backlog (planned ↔ implemented) |
 | [`docs/ai/README_FOR_AI.md`](docs/ai/README_FOR_AI.md) | Coding-rules read order |
+| [`docs/OPERATOR_OBD_MANUAL.md`](docs/OPERATOR_OBD_MANUAL.md) | Human OBDLink MX+ setup + integration plan (Jeep gray adapter noted) |
 | [`docs/ai/OBD_EDGE_CONTRACT.md`](docs/ai/OBD_EDGE_CONTRACT.md) | OBD-II / CANBUS edge rules |
 | [`docs/ai/HARDWARE_STANDARDS.md`](docs/ai/HARDWARE_STANDARDS.md) | SAE/ISO/CAN grounding (J1979, J2012, UDS, J1939) |
 | [`docs/ai/CODE_STANDARDS.md`](docs/ai/CODE_STANDARDS.md) | TS / Biome / `pnpm healthcheck` |
