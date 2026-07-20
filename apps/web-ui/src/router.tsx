@@ -3,6 +3,7 @@ import { Layout } from "./components/Layout.tsx";
 import { Campaigns } from "./routes/Campaigns.tsx";
 import { Dashboard } from "./routes/Dashboard.tsx";
 import { Diagnosis } from "./routes/Diagnosis.tsx";
+import { Functions } from "./routes/Functions.tsx";
 import { Journal } from "./routes/Journal.tsx";
 import { ProblemDetail } from "./routes/ProblemDetail.tsx";
 
@@ -16,6 +17,7 @@ const routes = [
     path: "/problems/$problemId",
     component: ProblemDetail,
   }),
+  createRoute({ getParentRoute: () => rootRoute, path: "/functions", component: Functions }),
   createRoute({ getParentRoute: () => rootRoute, path: "/campaigns", component: Campaigns }),
   createRoute({ getParentRoute: () => rootRoute, path: "/journal", component: Journal }),
 ];

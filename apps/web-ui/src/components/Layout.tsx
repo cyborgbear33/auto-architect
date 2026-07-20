@@ -8,6 +8,7 @@ import { selectVehicle, setDebugMode } from "../store/uiSlice.ts";
 const NAV_ITEMS: Array<{ to: string; label: string }> = [
   { to: "/", label: "Dashboard" },
   { to: "/diagnosis", label: "Diagnosis" },
+  { to: "/functions", label: "Functions" },
   { to: "/campaigns", label: "Recalls & TSBs" },
   { to: "/journal", label: "Journal" },
 ];

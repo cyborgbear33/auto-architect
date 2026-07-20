@@ -1,4 +1,5 @@
 import { draftForClass } from "@auto/cartridges";
+import { getSpecialProcedure } from "@auto/ontology";
 import type {
   DecisionRecord,
   DiagnosticProblem,
@@ -6,9 +7,11 @@ import type {
   ProblemStatus,
 } from "@auto/semantic-types";
 import type {
+  CompleteSpecialProcedureInput,
   CreateDiagnosticProblemInput,
   LogRepairInput,
   ProblemIdActionInput,
+  StartSpecialProcedureInput,
 } from "@auto/validation";
 import { conflict, notFound, policyBlocked, validationError } from "../lib/errors.ts";
 import { newId, nowIso } from "../lib/ids.ts";
@@ -450,6 +453,129 @@ export class ActionService {
 
   async listDecisions(vehicleId: string): Promise<DecisionRecord[]> {
     return this.store.decisions.listByVehicle(vehicleId);
+  }
+
+  /**
+   * Start a guided special procedure (e.g. Proxi). Opens a diagnostic case and
+   * writes a Journal decision. Does not send bi-directional OBD commands.
+   */
+  async startSpecialProcedure(input: StartSpecialProcedureInput): Promise<{
+    problem: DiagnosticProblem;
+    decision: DecisionRecord;
+    procedureId: string;
+  }> {
+    const vehicle = await this.vehicles.getOrThrow(input.vehicleId);
+    const proc = getSpecialProcedure(input.procedureId);
+    if (!proc || proc.engineFamily !== vehicle.engineFamily) {
+      throw notFound("SpecialProcedure", input.procedureId);
+    }
+    if (proc.executionMode !== "external_enhanced_tool") {
+      throw validationError(
+        `Procedure "${proc.id}" execution mode "${proc.executionMode}" is not supported.`,
+      );
+    }
+
+    const problem = await this.createDiagnosticProblem({
+      vehicleId: vehicle.id,
+      gapType: "coordination",
+      statement: {
+        currentState: `Guided run started: ${proc.title}. Modules may be out of Proxi sync with the BCM.`,
+        desiredState: `${proc.title} completed via external enhanced tool (AlfaOBD/wiTECH + OBDLink MX+); vehicle shifts and mismatch symptoms cleared.`,
+        gap: proc.summary.slice(0, 400),
+        whyItMatters:
+          "Proxi mismatch commonly leaves FCA next-gen vehicles stuck in Park after battery events.",
+        urgency: "high",
+      },
+      actions: [
+        {
+          id: proc.id,
+          description: `Run ${proc.title} externally (AlfaOBD / wiTECH)`,
+          firstStep:
+            "Follow Functions checklist: detect out-of-sync modules, align via body computer PROXI, verify. Gray adapter when the tool prompts.",
+          cost: 0.2,
+          risk: 0.35,
+          reversibility: 0.1,
+        },
+      ],
+    });
+
+    const now = nowIso();
+    const ctx = await this.evidenceContext(vehicle.id);
+    const decision: DecisionRecord = {
+      id: newId("decision"),
+      vehicleId: vehicle.id,
+      problemId: problem.id,
+      actionId: `${proc.id}:started`,
+      rationale: input.note?.trim()
+        ? `Started guided ${proc.title}. ${input.note.trim()}`
+        : `Started guided ${proc.title} (external enhanced tool — not gateway bi-directional).`,
+      policyAllowed: true,
+      decidedAt: now,
+      decidedBy: input.decidedBy,
+      ...ctx,
+    };
+    await this.store.decisions.create(decision);
+    return { problem, decision, procedureId: proc.id };
+  }
+
+  /**
+   * Mark a guided special-procedure run completed or failed; closes the case
+   * with a Journal decision (still no OBD gateway write).
+   */
+  async completeSpecialProcedure(input: CompleteSpecialProcedureInput): Promise<{
+    problem: DiagnosticProblem;
+    decision: DecisionRecord;
+  }> {
+    const vehicle = await this.vehicles.getOrThrow(input.vehicleId);
+    const proc = getSpecialProcedure(input.procedureId);
+    if (!proc || proc.engineFamily !== vehicle.engineFamily) {
+      throw notFound("SpecialProcedure", input.procedureId);
+    }
+    const problem = await this.requireProblem(input.problemId);
+    if (problem.vehicleId !== vehicle.id) {
+      throw validationError("Procedure problem belongs to a different vehicle.");
+    }
+
+    const now = nowIso();
+    const worked = input.status === "completed";
+    const outcomeStatus = worked ? "worked" : "failed";
+    const nextStatus: ProblemStatus = worked ? "solved" : "abandoned";
+    const lifecycleEvents = await this.stampLifecycle(problem, {
+      type: worked ? "closed_solved" : "abandoned",
+      at: now,
+      note: input.note,
+      verifyResult: worked ? "passed" : "failed",
+    });
+
+    const updated = await this.store.problems.update(problem.id, {
+      status: nextStatus,
+      outcome: {
+        status: outcomeStatus,
+        recordedAt: now,
+        recordedBy: input.decidedBy,
+        action: `${proc.id}:${input.status}`,
+        note: input.note,
+      },
+      lifecycleEvents,
+    });
+
+    const ctx = await this.evidenceContext(vehicle.id);
+    const decision: DecisionRecord = {
+      id: newId("decision"),
+      vehicleId: vehicle.id,
+      problemId: problem.id,
+      actionId: `${proc.id}:${input.status}`,
+      rationale: input.note?.trim()
+        ? `Guided ${proc.title} ${input.status}. ${input.note.trim()}`
+        : `Guided ${proc.title} marked ${input.status}.`,
+      policyAllowed: true,
+      decidedAt: now,
+      decidedBy: input.decidedBy,
+      outcome: updated.outcome,
+      ...ctx,
+    };
+    await this.store.decisions.create(decision);
+    return { problem: updated, decision };
   }
 
   private async requireProblem(problemId: string): Promise<DiagnosticProblem> {

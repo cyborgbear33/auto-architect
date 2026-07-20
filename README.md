@@ -70,7 +70,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck, Biome, tests, ontology lint, and
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | As-built service graph and contracts |
 | [`docs/FUTURE_FEATURES.md`](docs/FUTURE_FEATURES.md) | Canonical backlog (planned ↔ implemented) |
 | [`docs/ai/README_FOR_AI.md`](docs/ai/README_FOR_AI.md) | Coding-rules read order |
-| [`docs/OPERATOR_OBD_MANUAL.md`](docs/OPERATOR_OBD_MANUAL.md) | Human OBDLink MX+ setup + integration plan (Jeep gray adapter noted) |
+| [`docs/OPERATOR_OBD_MANUAL.md`](docs/OPERATOR_OBD_MANUAL.md) | Human OBDLink MX+ setup, Proxi Functions, integration plan |
 | [`docs/ai/OBD_EDGE_CONTRACT.md`](docs/ai/OBD_EDGE_CONTRACT.md) | OBD-II / CANBUS edge rules |
 | [`docs/ai/HARDWARE_STANDARDS.md`](docs/ai/HARDWARE_STANDARDS.md) | SAE/ISO/CAN grounding (J1979, J2012, UDS, J1939) |
 | [`docs/ai/CODE_STANDARDS.md`](docs/ai/CODE_STANDARDS.md) | TS / Biome / `pnpm healthcheck` |

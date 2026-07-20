@@ -40,6 +40,23 @@ export type DiagnosticReportDto = {
   lastSession: DriveSessionSummary | null;
 };
 
+/** Mirrors `@auto/ontology` SpecialProcedureEntry (kept local to avoid a client→ontology dep). */
+export type SpecialProcedureDto = {
+  id: string;
+  title: string;
+  engineFamily: string;
+  executionMode: "external_enhanced_tool" | "gateway_bidirectional";
+  summary: string;
+  triggers: string[];
+  modulesInvolved: Array<{ id: string; role: string }>;
+  detectSteps: string[];
+  alignSteps: string[];
+  verifySteps: string[];
+  hardware: string[];
+  risks: string[];
+  references: string[];
+};
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -307,6 +324,41 @@ export class AutoApiClient {
       `/api/vehicles/${enc(vehicleId)}/campaigns`,
     );
 
+  // --- special procedures (Proxi, etc.) ---------------------------------------
+  getSpecialProcedures = (vehicleId: string) =>
+    this.request<{ procedures: SpecialProcedureDto[] }>(
+      `/api/vehicles/${enc(vehicleId)}/special-procedures`,
+    ).then((r) => r.procedures);
+  startSpecialProcedure = (input: {
+    vehicleId: string;
+    procedureId: string;
+    decidedBy?: string;
+    note?: string;
+  }) =>
+    this.request<{
+      problem: DiagnosticProblem;
+      decision: DecisionRecord;
+      procedureId: string;
+    }>("/api/actions/start-special-procedure", {
+      method: "POST",
+      body: JSON.stringify({ decidedBy: "operator", ...input }),
+    });
+  completeSpecialProcedure = (input: {
+    vehicleId: string;
+    problemId: string;
+    procedureId: string;
+    status: "completed" | "failed";
+    decidedBy?: string;
+    note?: string;
+  }) =>
+    this.request<{ problem: DiagnosticProblem; decision: DecisionRecord }>(
+      "/api/actions/complete-special-procedure",
+      {
+        method: "POST",
+        body: JSON.stringify({ decidedBy: "operator", ...input }),
+      },
+    );
+
   // --- diagnostic problems + policy -------------------------------------------
   listProblems = (vehicleId: string) =>
     this.request<{ problems: DiagnosticProblem[] }>(
@@ -384,6 +436,7 @@ export const queryKeys = {
   recognition: (vehicleId: string) => ["recognition", vehicleId] as const,
   recommendations: (vehicleId: string) => ["recommendations", vehicleId] as const,
   campaigns: (vehicleId: string) => ["campaigns", vehicleId] as const,
+  specialProcedures: (vehicleId: string) => ["specialProcedures", vehicleId] as const,
   problems: (vehicleId: string) => ["problems", vehicleId] as const,
   problem: (id: string) => ["problem", id] as const,
   decisions: (vehicleId: string) => ["decisions", vehicleId] as const,

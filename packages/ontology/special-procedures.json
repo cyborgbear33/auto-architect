@@ -1,0 +1,78 @@
+{
+  "disclaimer": "Curated operator procedures for enhanced OEM functions that auto-architect cannot execute over standard OBD-II (Mode 01–07). Steps cite public owner/tech reports; verify against a dealer tool or AlfaOBD prompts on the vehicle. Do not invent bi-directional gateway commands from this catalog.",
+  "procedures": [
+    {
+      "id": "proc:fca-proxi-alignment",
+      "title": "Proxi alignment (module configuration sync)",
+      "engineFamily": "fca-tigershark-2.4",
+      "executionMode": "external_enhanced_tool",
+      "summary": "On FCA next-generation electrical architecture (Jeep Renegade and related), the Body Control Module (BCM) is the master of Proxi configuration data. After a dead battery, battery disconnect, or certain module/radio/switch changes, other ECUs can lose their handshake with the BCM. The vehicle may stay in Park, show a flashing odometer, and light ABS/traction or service warnings. A Proxi (proxy) alignment re-syncs modules to the BCM. Standard Mode 03 OBD scans alone are not enough — you need an enhanced tool (AlfaOBD or dealer wiTECH) plus OBDLink MX+, typically with the gray OBD adapter during the routine.",
+      "triggers": [
+        "Vehicle starts but will not shift out of Park (or shifter lock bypass does not restore drive)",
+        "Flashing odometer after battery disconnect, battery death, or module/radio work",
+        "ABS / traction control lights and/or cluster service messages after battery work",
+        "Enhanced scan shows configuration-mismatch / Proxi-related faults (e.g. TCM vs BCM sync loss; related FCA reports cite P1500-00 ECU configuration mismatch on sibling platforms)"
+      ],
+      "modulesInvolved": [
+        {
+          "id": "BCM",
+          "role": "Master of Proxi configuration — alignment is run from the body computer / BCM"
+        },
+        {
+          "id": "TCM",
+          "role": "Often loses Proxi sync after battery events; common reason the vehicle stays in Park"
+        },
+        {
+          "id": "ABS",
+          "role": "May show traction/ABS warnings when out of sync with BCM Proxi data"
+        },
+        {
+          "id": "IPC",
+          "role": "Instrument cluster / odometer flashing is a classic Proxi-mismatch symptom"
+        },
+        {
+          "id": "Other ECUs",
+          "role": "Radio, steering, and other modules may participate; a full-module enhanced scan lists which ECUs report mismatch"
+        }
+      ],
+      "detectSteps": [
+        "Confirm recent battery disconnect/death, jump-start, or module/accessory work (radio, switches) — common Proxi triggers on 2015 Renegade (no Security Gateway on this year).",
+        "Note cabin symptoms: stuck in Park, flashing odometer, ABS/traction or service lamps. These suggest Proxi mismatch but do not prove it by themselves.",
+        "Do a standard OBD scan (this app / MX+ Mode 03–07) and record any powertrain codes — useful context, but insufficient alone for Proxi diagnosis.",
+        "With an enhanced tool (AlfaOBD or dealer wiTECH), scan all modules — not only the PCM. Look for configuration-mismatch / Proxi-related DTCs and which ECU reports them (TCM, ABS, IPC, etc.). The BCM remains the Proxi master; mismatch codes on other modules identify who is out of sync with the BCM.",
+        "If the enhanced tool reports Proxi/configuration mismatch (or classic symptom cluster after battery work with no mechanical Park-lock failure), proceed to alignment. If a module is offline/no-comm, fix network/power/module hardware before or instead of alignment."
+      ],
+      "alignSteps": [
+        "Hardware: OBDLink MX+ (or compatible ELM327-class interface supported by AlfaOBD) and the gray OBD-II adapter/extension used between the vehicle DLC and the MX+ when AlfaOBD prompts for it. 2015 Renegade: no Security Gateway bypass required.",
+        "Install AlfaOBD (phone or PC). Pair/connect the MX+ so AlfaOBD can talk to the vehicle.",
+        "In AlfaOBD select: Jeep → Renegade → Body computer (BCM).",
+        "Connect to the body computer, then choose PROXI alignment (wording may be PROXI / Proxy alignment).",
+        "Start the procedure and follow on-screen prompts exactly. Typical Renegade flow reported by operators: procedure starts → turn ignition/key OFF → plug in the gray adapter with the OBDLink on the end → turn ignition/key back ON → wait until the tool reports Finished.",
+        "When Finished, start the engine. Do not clear codes as a substitute for completing the alignment.",
+        "Dealer alternative: wiTECH (or equivalent) Proxi/configuration alignment from the BCM — same intent, different UI."
+      ],
+      "verifySteps": [
+        "Confirm the vehicle shifts out of Park into Reverse/Drive (safe area, brake applied).",
+        "Confirm the odometer is no longer flashing and ABS/traction/service warnings related to the mismatch have cleared or can be cleared after a successful re-scan.",
+        "Re-scan all modules with the enhanced tool — configuration-mismatch / Proxi DTCs should be gone. Re-scan standard OBD in this app for remaining powertrain codes.",
+        "In auto-architect Functions, mark the guided run completed (or failed with notes) so the Journal records the outcome."
+      ],
+      "hardware": [
+        "OBDLink MX+ (Bluetooth)",
+        "Gray-type OBD-II adapter/extension between DLC and MX+ (required when AlfaOBD prompts; used for Proxi on Renegade)",
+        "AlfaOBD license/app, or dealer wiTECH session"
+      ],
+      "risks": [
+        "This app cannot send Proxi alignment over the standard OBD gateway — execution is external (AlfaOBD/wiTECH).",
+        "A bad or DOA gray adapter cable will fail mid-procedure; verify continuity if the tool stalls after the adapter prompt.",
+        "Proxi will not fix a failed shifter mechanism, dead TCM, or open CAN/LIN wiring — rule those out if alignment completes but Park lock remains.",
+        "Do not invent AT/UDS command sequences; follow the enhanced tool’s prompts."
+      ],
+      "references": [
+        "Owner/tech reports: FCA next-gen BCM Proxi after battery disconnect (Renegade / Cherokee / 500X class) — stuck in Park, flashing odometer, ABS lights",
+        "AlfaOBD Renegade path: Body computer → PROXI alignment; gray adapter prompt mid-procedure (Jeep Renegade Forum operator reports)",
+        "Related FCA configuration mismatch example discussed publicly: P1500-00 ECU configuration mismatch (TCM) after battery replacement on sibling platforms — verify exact code text on your enhanced scan"
+      ]
+    }
+  ]
+}

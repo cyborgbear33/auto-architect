@@ -13,6 +13,7 @@ import dtcDictionaryJson from "../dtc-dictionary.json" with { type: "json" };
 import knownCampaignsJson from "../known-campaigns.json" with { type: "json" };
 import mode06DictionaryJson from "../mode06-dictionary.json" with { type: "json" };
 import pidDictionaryJson from "../pid-dictionary.json" with { type: "json" };
+import specialProceduresJson from "../special-procedures.json" with { type: "json" };
 import vehicleProfilesJson from "../vehicle-profiles.json" with { type: "json" };
 import {
   type LintableOntology,
@@ -27,6 +28,8 @@ import {
   Mode06DictionaryFileSchema,
   type PidDictionaryEntry,
   PidDictionaryFileSchema,
+  type SpecialProcedureEntry,
+  SpecialProceduresFileSchema,
   type VehicleProfilesFile,
   VehicleProfilesFileSchema,
 } from "./schemas.ts";
@@ -47,6 +50,9 @@ export {
   type PidDictionaryEntry,
   PidDictionaryEntrySchema,
   PidDictionaryFileSchema,
+  type SpecialProcedureEntry,
+  SpecialProcedureEntrySchema,
+  SpecialProceduresFileSchema,
   VehicleProfilesFileSchema,
 } from "./schemas.ts";
 export { lintOntology };
@@ -67,6 +73,7 @@ const mode06DictionaryFile = Mode06DictionaryFileSchema.parse(mode06DictionaryJs
 const vehicleProfilesFile: VehicleProfilesFile =
   VehicleProfilesFileSchema.parse(vehicleProfilesJson);
 const knownCampaignsFile = KnownCampaignsFileSchema.parse(knownCampaignsJson);
+const specialProceduresFile = SpecialProceduresFileSchema.parse(specialProceduresJson);
 
 const dtcDictionary: Record<string, DtcDictionaryEntry> = dtcDictionaryFile.codes;
 const pidDictionary: Record<string, PidDictionaryEntry> = pidDictionaryFile.pids;
@@ -195,6 +202,16 @@ export function tsbsForEngineFamily(engineFamilyId: string): TsbEntry[] {
   return knownCampaignsFile.tsbs.filter((t) => t.engineFamily === engineFamilyId);
 }
 
+export function listSpecialProcedures(engineFamilyId?: string): SpecialProcedureEntry[] {
+  const all = specialProceduresFile.procedures;
+  if (!engineFamilyId) return all;
+  return all.filter((p) => p.engineFamily === engineFamilyId);
+}
+
+export function getSpecialProcedure(id: string): SpecialProcedureEntry | undefined {
+  return specialProceduresFile.procedures.find((p) => p.id === id);
+}
+
 function zodIssues(prefix: string, err: ZodError): OntologyLintIssue[] {
   return err.issues.map((issue) => ({
     code: "registry_schema_invalid",
@@ -229,6 +246,10 @@ export function runOntologyLint(
   if (!campaignsParsed.success) {
     schemaErrors.push(...zodIssues("known-campaigns.json", campaignsParsed.error));
   }
+  const proceduresParsed = SpecialProceduresFileSchema.safeParse(specialProceduresJson);
+  if (!proceduresParsed.success) {
+    schemaErrors.push(...zodIssues("special-procedures.json", proceduresParsed.error));
+  }
 
   if (
     schemaErrors.length > 0 ||
@@ -236,9 +257,38 @@ export function runOntologyLint(
     !pidParsed.success ||
     !mode06Parsed.success ||
     !profilesParsed.success ||
-    !campaignsParsed.success
+    !campaignsParsed.success ||
+    !proceduresParsed.success
   ) {
     return { ok: false, errors: schemaErrors, warnings: [] };
+  }
+
+  const procedureErrors: OntologyLintIssue[] = [];
+  const familyIds = new Set(Object.keys(profilesParsed.data.engineFamilies));
+  const seenProcIds = new Set<string>();
+  for (const proc of proceduresParsed.data.procedures) {
+    if (seenProcIds.has(proc.id)) {
+      procedureErrors.push({
+        code: "special_procedure_duplicate_id",
+        message: `Duplicate special procedure id "${proc.id}"`,
+      });
+    }
+    seenProcIds.add(proc.id);
+    if (!familyIds.has(proc.engineFamily)) {
+      procedureErrors.push({
+        code: "special_procedure_unknown_engine_family",
+        message: `Special procedure "${proc.id}" references engineFamily "${proc.engineFamily}", which is not declared`,
+      });
+    }
+    if (proc.executionMode === "gateway_bidirectional") {
+      procedureErrors.push({
+        code: "special_procedure_gateway_bidirectional_unsupported",
+        message: `Special procedure "${proc.id}" claims gateway_bidirectional — not supported in MVP (use external_enhanced_tool)`,
+      });
+    }
+  }
+  if (procedureErrors.length > 0) {
+    return { ok: false, errors: procedureErrors, warnings: [] };
   }
 
   return lintOntology({

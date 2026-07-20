@@ -1,4 +1,5 @@
 import {
+  CompleteSpecialProcedureSchema,
   CreateDiagnosticProblemSchema,
   CreateVehicleSchema,
   EndDriveSessionSchema,
@@ -9,6 +10,7 @@ import {
   ProblemIdActionSchema,
   SimulateDriveSessionSchema,
   StartDriveSessionSchema,
+  StartSpecialProcedureSchema,
 } from "@auto/validation";
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { notFound } from "../lib/errors.ts";
@@ -229,6 +231,23 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
   app.get("/api/vehicles/:id/campaigns", async (req) => {
     const { id } = req.params as { id: string };
     return s.campaigns.forVehicle(id);
+  });
+
+  // --- special procedures (Proxi, etc.) ----------------------------------------
+  app.get("/api/vehicles/:id/special-procedures", async (req) => {
+    const { id } = req.params as { id: string };
+    return { procedures: await s.specialProcedures.forVehicle(id) };
+  });
+
+  app.post("/api/actions/start-special-procedure", async (req, reply) => {
+    const input = StartSpecialProcedureSchema.parse(req.body);
+    reply.code(201);
+    return s.actions.startSpecialProcedure(input);
+  });
+
+  app.post("/api/actions/complete-special-procedure", async (req) => {
+    const input = CompleteSpecialProcedureSchema.parse(req.body);
+    return s.actions.completeSpecialProcedure(input);
   });
 
   // --- diagnostic problems + policy safety holds ------------------------------

@@ -383,6 +383,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 |---|---|---|---|---|
 | Expand DTC dictionary beyond Tigershark seed set | partial | medium | Rich/catalyst/O2 circuit+performance+heater + P0457; more P0xxx still open. | `dtc-dictionary.json`, ontology lint |
 | Fill GM Vortec 6.0 / Silverado 2500 HD OEM cartridge | planned | high when truck scans available | Profile is 2003 2500 HD gas 6.0L; stub inert until curated GM TSBs. | `gm-vortec-6.0-stub.ts`, vehicle profiles |
+| In-app Proxi / enhanced BCM session over MX+ | planned | low until explicit UDS project | Guided Functions v1 is external AlfaOBD; do not clone AlfaOBD. | future edge path, not Mode 01–07 |
 | Bluetooth auto-discovery / MX+ preferred adapter profile | planned | medium | Less friction for scanning. | `obd_gateway/config.py`, `client.py` |
 | Propose-only LLM agent loop (advise pass) | planned | medium | LLM proposes, LOGOS disposes — not required for OBD correctness. | logos-bridge, cartridges, new `apps/agent-service` |
 | OpenAPI 3.1 export from Fastify | planned | low | External tooling once surface stabilizes. | `apps/api` routes |
@@ -454,13 +455,15 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | O2 performance classes + A4 O2/EVAP seed | 2026-07 | P0131–34/P0151–54; Mode 06 $01/$05; O2_B* PIDs; P0457 |
 | EGR / secondary air / downstream O2 + A5 stub parity | 2026-07 | new cartridges; Mode 06 $31/$71/$02/$06; GM shares SAE set |
 | Gateway Mode 02 + Mode 06 population + DTC dictionary UI text | 2026-07 | `read_freeze_frames` / `read_mode06`; API+Dashboard `lookupDtc` fill |
+| Functions panel + FCA Proxi guided procedure | 2026-07 | `special-procedures.json`; `/functions`; start/complete actions; external AlfaOBD |
 
 ---
 
 ## Explicit non-goals (for now)
 
-- Reverse-engineering proprietary FCA enhanced diagnostics / AlfaOBD session cloning
+- Reverse-engineering proprietary FCA enhanced diagnostics / AlfaOBD session cloning into `obd-gateway`
+- In-app bi-directional Proxi / UDS over MX+ without an explicit enhanced-session project (guided external procedures **are** in scope)
 - Direct ECU flashing or bi-directional actuator control from this app
-- Replacing a professional scan tool for dealer-level guided procedures
+- Claiming dealer-complete coverage from Mode 01–07 alone
 - Multi-tenant SaaS before local single-operator durability exists
 - Claiming calibrated probabilistic diagnosis before repair outcomes feed rankings

@@ -410,8 +410,8 @@ export type RecommendationStatus =
   | "converted_to_repair"
   | "dismissed";
 
-/** Where a recommendation card came from — never invent classes for campaigns. */
-export type RecommendationSource = "class" | "campaign";
+/** Where a recommendation card came from — never invent classes for campaigns/procedures. */
+export type RecommendationSource = "class" | "campaign" | "procedure";
 
 export interface Recommendation {
   id: SemanticId;
@@ -429,11 +429,13 @@ export interface Recommendation {
   suggestedActionId?: string;
   /**
    * Proven fault classes that framed this card (realize + cartridge).
-   * Empty for campaign/TSB applicability cards (R5).
+   * Empty for campaign/TSB/procedure applicability cards (R5).
    */
   generatedFromClasses: string[];
   /** OEM campaign / TSB ids that produced this card (R5). */
   generatedFromCampaignIds?: string[];
+  /** Special-procedure ids (e.g. Proxi) that produced this card. */
+  generatedFromProcedureIds?: string[];
   /** Discriminator for UI + convert. Defaults to class when omitted (legacy). */
   source?: RecommendationSource;
   generatedByProblem?: SemanticId;

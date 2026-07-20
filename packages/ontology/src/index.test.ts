@@ -3,7 +3,9 @@ import {
   campaignsForEngineFamily,
   getEngineFamilyCartridges,
   getEngineFamilyView,
+  getSpecialProcedure,
   getVehicleProfile,
+  listSpecialProcedures,
   lookupDtc,
   lookupMode06,
   lookupPid,
@@ -129,7 +131,11 @@ describe("ontology registries", () => {
   it("seeds upstream O2 voltage PIDs with Mode 01 hex", () => {
     expect(lookupPid("O2_B1S1")).toMatchObject({ unit: "volt", pidHex: "0x14", sae: true });
     expect(lookupPid("O2_B2S1")).toMatchObject({ unit: "volt", pidHex: "0x18", sae: true });
-    expect(lookupPid("COMMANDED_EGR")).toMatchObject({ unit: "percent", pidHex: "0x2C", sae: true });
+    expect(lookupPid("COMMANDED_EGR")).toMatchObject({
+      unit: "percent",
+      pidHex: "0x2C",
+      sae: true,
+    });
   });
 
   it("returns undefined for an unknown PID key", () => {
@@ -145,5 +151,14 @@ describe("ontology registries", () => {
   it("finds the MultiAir TSB for the Tigershark engine family", () => {
     const tsbs = tsbsForEngineFamily("fca-tigershark-2.4");
     expect(tsbs.some((t) => t.id === "05-047-457A")).toBe(true);
+  });
+
+  it("lists FCA Proxi alignment for the Tigershark family only", () => {
+    const jeep = listSpecialProcedures("fca-tigershark-2.4");
+    expect(jeep.map((p) => p.id)).toContain("proc:fca-proxi-alignment");
+    expect(getSpecialProcedure("proc:fca-proxi-alignment")?.executionMode).toBe(
+      "external_enhanced_tool",
+    );
+    expect(listSpecialProcedures("gm-vortec-6.0")).toEqual([]);
   });
 });

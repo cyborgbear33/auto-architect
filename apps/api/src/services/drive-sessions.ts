@@ -47,7 +47,12 @@ export class DriveSessionService {
     if (sessions.length === 0) return null;
     const ended = sessions
       .filter((s) => s.endedAt)
-      .sort((a, b) => (b.endedAt ?? b.startedAt).localeCompare(a.endedAt ?? a.startedAt));
+      .sort((a, b) => {
+        const byEnd = (b.endedAt ?? b.startedAt).localeCompare(a.endedAt ?? a.startedAt);
+        if (byEnd !== 0) return byEnd;
+        // Same-second ends (common in fast simulate tests): prefer later start.
+        return b.startedAt.localeCompare(a.startedAt);
+      });
     const session = ended[0] ?? sessions.find((s) => !s.endedAt) ?? sessions[0];
     if (!session) return null;
     const batches = (await this.store.observations.listBatches(vehicleId)).filter(

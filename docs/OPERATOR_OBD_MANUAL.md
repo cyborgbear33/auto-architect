@@ -171,9 +171,29 @@ allow**, then deepen meaning in the ontology — without cloning AlfaOBD.
 
 ### Explicitly later / non-goals
 
-- UDS / proprietary FCA enhanced session cloning
-- Bi-directional actuators, coding, flashing
+- Cloning AlfaOBD session decoding into `obd-gateway`
+- In-app bi-directional Proxi over MX+ (until an explicit enhanced-session project)
 - Claiming dealer-complete coverage from Mode 01–07 alone
+
+---
+
+## 5b. Proxi alignment (Jeep Renegade — stuck in Park / flashing odo)
+
+**UI:** select the Jeep → **Functions** → **Proxi alignment (module configuration sync)**.
+
+After battery death/disconnect (or some module/radio work), FCA next-gen ECUs can
+lose their handshake with the **BCM** (Proxi master). Classic symptoms: stuck in
+Park, flashing odometer, ABS/traction lights.
+
+| Step | What to do |
+|---|---|
+| Detect | Full-module enhanced scan (AlfaOBD/wiTECH). Note which ECUs report configuration-mismatch / Proxi faults (often TCM). Standard Mode 03 alone is not enough. |
+| Align | AlfaOBD → Jeep → Renegade → Body computer → **PROXI alignment** → Start → follow prompts (often key off → **gray adapter** + MX+ → key on → Finished) → start engine. |
+| Verify | Shift out of Park; odometer steady; mismatch DTCs gone on re-scan. |
+| Log | In Functions: **Start guided run** before/during; **Mark completed** / **failed** after so the Journal keeps a case trail. |
+
+Auto-architect does **not** send Proxi commands on the standard OBD path. Full
+step text lives in `packages/ontology/special-procedures.json` and the Functions UI.
 
 ---
 
@@ -190,7 +210,8 @@ When you want the best picture before trusting recognition:
 7. Live gauges not stale if diagnosing now  
 8. Jeep oil concerns: manual oil PIDs or honest gap noted  
 9. Campaigns page checked for W80/W84 / TSB matches  
-10. Report exported if sharing a case  
+10. Jeep stuck in Park / flashing odo after battery work → Functions → Proxi  
+11. Report exported if sharing a case  
 
 ---
 
@@ -203,6 +224,7 @@ When you want the best picture before trusting recognition:
 | Wrong conclusions | Wrong `--vehicle-id`; simulated batch mistaken for live |
 | No Mode 06 / FF | ECU may not have data this cycle — not a gateway “healthy” claim |
 | Protocol errors (truck) | Clear forced protocol; allow auto-detect |
+| Stuck in Park / flashing odo after battery | Functions → Proxi; AlfaOBD + gray adapter — not gateway `scan` alone |
 
 ---
 

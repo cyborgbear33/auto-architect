@@ -12,7 +12,8 @@
     "./vehicle-profiles.json": "./vehicle-profiles.json",
     "./dtc-dictionary.json": "./dtc-dictionary.json",
     "./pid-dictionary.json": "./pid-dictionary.json",
-    "./known-campaigns.json": "./known-campaigns.json"
+    "./known-campaigns.json": "./known-campaigns.json",
+    "./special-procedures.json": "./special-procedures.json"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

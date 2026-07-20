@@ -1,4 +1,5 @@
 import { draftForClass } from "@auto/cartridges";
+import { listSpecialProcedures } from "@auto/ontology";
 import type { CandidateAction, DiagnosticProblem, Recommendation } from "@auto/semantic-types";
 import { conflict, notFound, validationError } from "../lib/errors.ts";
 import { newId, nowIso } from "../lib/ids.ts";
@@ -49,6 +50,11 @@ export class RecommendationService {
       existing
         .filter((r) => OPEN_STATUSES.has(r.status))
         .flatMap((r) => r.generatedFromCampaignIds ?? []),
+    );
+    const openProcedureIds = new Set(
+      existing
+        .filter((r) => OPEN_STATUSES.has(r.status))
+        .flatMap((r) => r.generatedFromProcedureIds ?? []),
     );
 
     const vehicleView = {
@@ -149,6 +155,30 @@ export class RecommendationService {
       openCampaignIds.add(t.id);
     }
 
+    // Guided special procedures (e.g. Proxi) — applicability only; open Functions to run.
+    for (const proc of listSpecialProcedures(vehicle.engineFamily)) {
+      if (openProcedureIds.has(proc.id)) continue;
+      const rec: Recommendation = {
+        id: newId("rec"),
+        vehicleId,
+        title: proc.title,
+        priority: "high",
+        status: "new",
+        reason: [
+          proc.summary.slice(0, 320),
+          "Open Functions to run the guided checklist. Execution uses AlfaOBD/wiTECH + OBDLink MX+ (gray adapter when prompted) — not the standard OBD gateway.",
+          "Applicability / operator context only — not a proven fault class from Mode 01–07.",
+        ].join(" "),
+        source: "procedure",
+        generatedFromClasses: [],
+        generatedFromProcedureIds: [proc.id],
+        createdAt: nowIso(),
+      };
+      await this.store.recommendations.create(rec);
+      created.push(rec);
+      openProcedureIds.add(proc.id);
+    }
+
     return [...existing, ...created];
   }
 
@@ -192,10 +222,24 @@ export class RecommendationService {
     }
 
     const isCampaign = rec.source === "campaign" || (rec.generatedFromCampaignIds?.length ?? 0) > 0;
+    const isProcedure =
+      rec.source === "procedure" || (rec.generatedFromProcedureIds?.length ?? 0) > 0;
     const className = rec.generatedFromClasses[0];
 
     let problem: DiagnosticProblem;
-    if (isCampaign) {
+    if (isProcedure) {
+      const procedureId = rec.generatedFromProcedureIds?.[0];
+      if (!procedureId) {
+        throw validationError("Procedure recommendation missing generatedFromProcedureIds.");
+      }
+      const started = await this.actions.startSpecialProcedure({
+        vehicleId: rec.vehicleId,
+        procedureId,
+        decidedBy: "operator",
+        note: "Converted from Functions recommendation card",
+      });
+      problem = started.problem;
+    } else if (isCampaign) {
       const campaignId = rec.generatedFromCampaignIds?.[0] ?? "campaign";
       problem = await this.actions.createDiagnosticProblem({
         vehicleId: rec.vehicleId,

@@ -7,7 +7,7 @@
       "trim": "Latitude",
       "engineFamily": "fca-tigershark-2.4",
       "obdProtocol": "ISO 15765-4 (CAN, 500 kbps)",
-      "notes": "2.4L Tigershark MultiAir2 (sales code ED6/ED8/EDD/EDE range). In scope for Customer Satisfaction Notifications W80 (oil consumption inspection) and W84 (PCM reprogramming) — see known-campaigns.json. Reference adapter: OBDLink MX+ with a gray-type OBD-II adapter/extension between the vehicle DLC and the MX+ for better physical port access (mechanical convenience only — does not change ISO 15765-4 / unlock OEM enhanced sessions). See docs/OPERATOR_OBD_MANUAL.md."
+      "notes": "2.4L Tigershark MultiAir2 (sales code ED6/ED8/EDD/EDE range). In scope for Customer Satisfaction Notifications W80 (oil consumption inspection) and W84 (PCM reprogramming) — see known-campaigns.json. Reference adapter: OBDLink MX+ with a gray-type OBD-II adapter/extension between the vehicle DLC and the MX+ for better physical port access and for AlfaOBD Proxi alignment when prompted (does not change ISO 15765-4 by itself). Proxi / module sync: Functions → proc:fca-proxi-alignment. See docs/OPERATOR_OBD_MANUAL.md."
     },
     "veh:silverado-2500hd-2003": {
       "make": "Chevrolet",

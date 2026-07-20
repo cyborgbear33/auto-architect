@@ -197,6 +197,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Gateway Mode 02 + Mode 06 capture | shipped | `read_freeze_frames` / `read_mode06`; simulate flags for lab |
 | DTC dictionary text on Dashboard rows | shipped | API `enrichDtcDescription` + UI `lookupDtc` fallback |
 | Operator OBD manual (MX+ / Jeep gray adapter) | shipped | `docs/OPERATOR_OBD_MANUAL.md`; Jeep profile notes |
+| Functions / Proxi guided procedure | shipped | `special-procedures.json`; `/functions`; ActionService start/complete |
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |
 | Problem caseboard + verify-after-repair (P2–P5) | shipped | Diagnosis filters; abandon/escalate/reopen; `worked` → verifying → verify |

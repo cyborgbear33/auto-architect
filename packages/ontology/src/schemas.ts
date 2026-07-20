@@ -112,6 +112,32 @@ export const KnownCampaignsFileSchema = z.object({
   tsbs: z.array(TsbEntrySchema),
 });
 
+export const SpecialProcedureModuleSchema = z.object({
+  id: z.string().min(1),
+  role: z.string().min(1),
+});
+
+export const SpecialProcedureEntrySchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  engineFamily: z.string().min(1),
+  executionMode: z.enum(["external_enhanced_tool", "gateway_bidirectional"]),
+  summary: z.string().min(1),
+  triggers: z.array(z.string().min(1)).min(1),
+  modulesInvolved: z.array(SpecialProcedureModuleSchema).min(1),
+  detectSteps: z.array(z.string().min(1)).min(1),
+  alignSteps: z.array(z.string().min(1)).min(1),
+  verifySteps: z.array(z.string().min(1)).min(1),
+  hardware: z.array(z.string().min(1)).min(1),
+  risks: z.array(z.string().min(1)).min(1),
+  references: z.array(z.string().min(1)).min(1),
+});
+
+export const SpecialProceduresFileSchema = z.object({
+  disclaimer: z.string().optional(),
+  procedures: z.array(SpecialProcedureEntrySchema),
+});
+
 export type DtcDictionaryFile = z.infer<typeof DtcDictionaryFileSchema>;
 export type PidDictionaryFile = z.infer<typeof PidDictionaryFileSchema>;
 export type PidDictionaryEntry = z.infer<typeof PidDictionaryEntrySchema>;
@@ -119,3 +145,5 @@ export type Mode06DictionaryFile = z.infer<typeof Mode06DictionaryFileSchema>;
 export type Mode06DictionaryEntry = z.infer<typeof Mode06DictionaryEntrySchema>;
 export type VehicleProfilesFile = z.infer<typeof VehicleProfilesFileSchema>;
 export type KnownCampaignsFile = z.infer<typeof KnownCampaignsFileSchema>;
+export type SpecialProcedureEntry = z.infer<typeof SpecialProcedureEntrySchema>;
+export type SpecialProceduresFile = z.infer<typeof SpecialProceduresFileSchema>;

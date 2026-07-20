@@ -28,6 +28,10 @@ function isCampaignRec(rec: Recommendation): boolean {
   return rec.source === "campaign" || (rec.generatedFromCampaignIds?.length ?? 0) > 0;
 }
 
+function isProcedureRec(rec: Recommendation): boolean {
+  return rec.source === "procedure" || (rec.generatedFromProcedureIds?.length ?? 0) > 0;
+}
+
 function RecommendationCard({
   rec,
   onAccept,
@@ -42,8 +46,10 @@ function RecommendationCard({
   busy: boolean;
 }) {
   const campaign = isCampaignRec(rec);
+  const procedure = isProcedureRec(rec);
   const faultClass = rec.generatedFromClasses[0];
   const campaignId = rec.generatedFromCampaignIds?.[0];
+  const procedureId = rec.generatedFromProcedureIds?.[0];
   return (
     <li className="rounded-md bg-slate-50 px-3 py-2.5 text-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -56,6 +62,11 @@ function RecommendationCard({
                 campaign
               </span>
             )}
+            {procedure && (
+              <span className="rounded border border-sky-200 bg-sky-50 px-1.5 py-0.5 text-[11px] font-medium text-sky-800">
+                procedure
+              </span>
+            )}
             <span className="text-[11px] uppercase tracking-wide text-slate-400">{rec.status}</span>
           </div>
           <p className="mt-1 text-xs text-slate-500">{rec.reason}</p>
@@ -65,12 +76,17 @@ function RecommendationCard({
             {rec.risk !== undefined && <span>risk {pct(rec.risk)}</span>}
             {faultClass && <span className="font-mono text-slate-600">{faultClass}</span>}
             {campaignId && <span className="font-mono text-slate-600">{campaignId}</span>}
-            {!campaign && (
+            {procedureId && <span className="font-mono text-slate-600">{procedureId}</span>}
+            {!campaign && !procedure && (
               <a href="#evidence" className="font-medium text-sky-700 hover:underline">
                 Evidence
               </a>
             )}
-            {campaign ? (
+            {procedure ? (
+              <Link to="/functions" className="font-medium text-sky-700 hover:underline">
+                Functions
+              </Link>
+            ) : campaign ? (
               <Link to="/campaigns" className="font-medium text-sky-700 hover:underline">
                 Campaigns
               </Link>

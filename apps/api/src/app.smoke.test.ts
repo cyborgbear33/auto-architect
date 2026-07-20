@@ -88,4 +88,35 @@ describe("API HTTP smoke (buildApp + inject)", () => {
     expect(csv.headers["content-type"]).toMatch(/text\/csv/);
     expect(csv.body).toContain("vehicleId");
   });
+
+  it("lists Proxi special procedure and records start/complete decisions", async () => {
+    const id = "veh:jeep-renegade-2015-latitude";
+    const list = await app.inject({ method: "GET", url: `/api/vehicles/${id}/special-procedures` });
+    expect(list.statusCode).toBe(200);
+    const procedures = (list.json() as { procedures: Array<{ id: string }> }).procedures;
+    expect(procedures.map((p) => p.id)).toContain("proc:fca-proxi-alignment");
+
+    const started = await app.inject({
+      method: "POST",
+      url: "/api/actions/start-special-procedure",
+      payload: { vehicleId: id, procedureId: "proc:fca-proxi-alignment", decidedBy: "test" },
+    });
+    expect(started.statusCode).toBe(201);
+    const startBody = started.json() as { problem: { id: string }; procedureId: string };
+    expect(startBody.procedureId).toBe("proc:fca-proxi-alignment");
+
+    const completed = await app.inject({
+      method: "POST",
+      url: "/api/actions/complete-special-procedure",
+      payload: {
+        vehicleId: id,
+        problemId: startBody.problem.id,
+        procedureId: "proc:fca-proxi-alignment",
+        status: "completed",
+        decidedBy: "test",
+      },
+    });
+    expect(completed.statusCode).toBe(200);
+    expect((completed.json() as { problem: { status: string } }).problem.status).toBe("solved");
+  });
 });

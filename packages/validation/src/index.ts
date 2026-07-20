@@ -167,6 +167,24 @@ export const MarkRecommendationStatusSchema = z.object({
 });
 export type MarkRecommendationStatusInput = z.infer<typeof MarkRecommendationStatusSchema>;
 
+export const StartSpecialProcedureSchema = z.object({
+  vehicleId: z.string().min(1),
+  procedureId: z.string().min(1),
+  decidedBy: z.string().min(1).default("operator"),
+  note: z.string().optional(),
+});
+export type StartSpecialProcedureInput = z.infer<typeof StartSpecialProcedureSchema>;
+
+export const CompleteSpecialProcedureSchema = z.object({
+  vehicleId: z.string().min(1),
+  problemId: z.string().min(1),
+  procedureId: z.string().min(1),
+  status: z.enum(["completed", "failed"]),
+  decidedBy: z.string().min(1).default("operator"),
+  note: z.string().optional(),
+});
+export type CompleteSpecialProcedureInput = z.infer<typeof CompleteSpecialProcedureSchema>;
+
 /** Portable garage JSON dump (export / import). Nested entities are lightly gated. */
 export const GarageDumpSchema = z.object({
   format: z.literal("auto-architect.garage"),
