@@ -166,6 +166,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Ontology Zod registries + engineFamily→view→cartridge lint | shipped | `packages/ontology/src/schemas.ts`, `lint.ts` |
 | API HTTP smoke (`buildApp` + inject) | shipped | `apps/api/src/app.smoke.test.ts` |
 | logos-bridge drift check vs garden-architect (advisory) | shipped | `scripts/check-bridge-drift.mjs` |
+| logos-bridge seam sync with garden (domain renames only) | shipped | `AI_CODING_RULES.md` §10 intentional diffs |
 | Fastify API (vehicles, observations, recognition, actions) | shipped | `apps/api` |
 | In-memory store + seed Jeep | shipped | `apps/api/src/store` |
 | Policy safety hold (`clear-codes-and-drive`) | shipped | `PolicyService` + Diagnosis UI |

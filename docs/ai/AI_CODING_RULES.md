@@ -92,6 +92,11 @@ Prefer these before inventing new ones:
     seam by design — port real fixes/protocol changes both ways. Run
     `pnpm check:bridge-drift` (advisory) when you touch these files. See
     [`TESTING_DEV_GUIDE.md`](TESTING_DEV_GUIDE.md).
+    **Intentional (not drift):** `DiagnosticSolution` vs `GardenSolution` (and
+    their `@auto` / `@garden` semantic-types imports); multi-vehicle vs
+    multi-bed wording in comments; ontology-lint JSDoc (engine-family vs
+    Plant-taxon). Everything else in those three files should stay
+    behaviorally identical after a sync pass.
 
 ---
 

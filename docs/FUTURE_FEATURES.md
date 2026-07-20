@@ -37,7 +37,6 @@ When proposing a new feature:
 | Durable observation history + freeze-frame retention | planned | high | Needed for trend/forecast credibility and post-repair verification. | `ObservationsService`, Mode 01/02/03 batches |
 | Shared `@auto/ui-components` (status pills, empty/error states, evidence panels) | planned | medium | Prevents per-page inventing of trust/evidence UI; matches garden. | `UX_GUIDELINES`, Diagnosis/Dashboard patterns |
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | planned | high (operator validation) | Catches adapter/port/path issues CI never sees; validate Jeep path before deep feature work. | `apps/obd-gateway`, Dashboard, real adapter |
-| Port logos-bridge seam drift vs garden (one-time sync pass) | planned | medium (preliminary) | `pnpm check:bridge-drift` already flags structural drift — port intentional transport/salvage fixes both ways before they diverge further. | `packages/logos-bridge`, garden `@garden/logos-bridge`, `scripts/check-bridge-drift.mjs` |
 | Live gauge view (RPM, load, fuel trim, coolant) with units | planned | high (operator UX) | Dashboard today is DTC/recognition-first; operators expect live PIDs during a drive. | `ObservationsService` latest PIDs, web-ui Dashboard |
 | Mode 06 monitor results UI | planned | medium | API already exposes `/mode06`; UI does not surface it. | `GET /api/vehicles/:id/mode06` |
 | Freeze-frame detail panel next to misfire/load evidence | planned | medium | Freeze-frame is half the story for `MisfireUnderLoad`. | `GET .../freeze-frame`, Diagnosis/ProblemDetail |
@@ -84,6 +83,7 @@ When proposing a new feature:
 | Project documentation set (handoff, architecture, AI guides, backlog) | 2026-07 | `docs/` |
 | Real-LOGOS integration tests in CI (realize/reason/schema, beyond ontology-lint) | 2026-07 | `packages/logos-bridge/src/{realize,reason,schema}-integration.test.ts`, `.github/workflows/ci.yml`, `TESTING_DEV_GUIDE.md` |
 | Advisory logos-bridge drift check vs garden-architect | 2026-07 | `scripts/check-bridge-drift.mjs`, `pnpm check:bridge-drift`, wired into `pnpm healthcheck` |
+| One-time logos-bridge seam sync vs garden (transport identical; domain renames kept) | 2026-07 | `bridge.ts` / `serve-client.ts` / `errors.ts` both repos, `AI_CODING_RULES.md` §10 |
 | Shared `@auto/api-client` (typed fetch, ApiError, queryKeys; web-ui migrated) | 2026-07 | `packages/api-client`, `API_CLIENT_DEV_GUIDE.md`, `apps/web-ui/src/lib/api.ts` |
 | Thin SAE PID/DTC seed (cartridge + DEFAULT_PIDS units/hex; P0019) | 2026-07 | `pid-dictionary.json`, `dtc-dictionary.json`, `HARDWARE_STANDARDS.md`, gateway `test_pid_seed.py` |
 | Ruff lint/format for `obd-gateway` (wired into healthcheck + CI) | 2026-07 | `apps/obd-gateway/pyproject.toml`, `pnpm obd-gateway:lint`, `CODE_STANDARDS.md` |

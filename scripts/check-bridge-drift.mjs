@@ -77,15 +77,20 @@ if (!gardenRoot) {
  * structural drift shows up as a difference.
  */
 function normalize(src) {
-  return src
-    .replace(/\/\*[\s\S]*?\*\//g, " ") // block comments
-    .replace(/\/\/.*$/gm, " ") // line comments
-    .replace(/DiagnosticSolution|GardenSolution/g, "__SOLUTION_TYPE__")
-    .replace(/@auto\/semantic-types|@garden\/semantic-types/g, "__SEMANTIC_TYPES__")
-    .replace(/@auto\/logos-bridge|@garden\/logos-bridge/g, "__PKG_NAME__")
-    .replace(/multi-vehicle|multi-bed/gi, "__DOMAIN_ADJ__")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    src
+      .replace(/\/\*[\s\S]*?\*\//g, " ") // block comments
+      .replace(/\/\/.*$/gm, " ") // line comments
+      .replace(/DiagnosticSolution|GardenSolution/g, "__SOLUTION_TYPE__")
+      .replace(/@auto\/semantic-types|@garden\/semantic-types/g, "__SEMANTIC_TYPES__")
+      .replace(/@auto\/logos-bridge|@garden\/logos-bridge/g, "__PKG_NAME__")
+      .replace(/multi-vehicle|multi-bed/gi, "__DOMAIN_ADJ__")
+      // Trailing commas are formatting-only; ignore so Prettier wrap differences
+      // do not look like transport drift.
+      .replace(/,(\s*[}\]])/g, "$1")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 const SEAM_FILES = ["bridge.ts", "serve-client.ts", "errors.ts"];
