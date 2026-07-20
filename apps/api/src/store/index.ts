@@ -6,6 +6,7 @@ import type {
   EvidenceProvenance,
   FreezeFrame,
   Mode06Result,
+  ObdCapabilityReport,
   ObservationBatch,
   Recommendation,
   VehicleProfile,
@@ -15,6 +16,9 @@ import { createDrizzleStore } from "./drizzle.ts";
 import { createMemoryStore } from "./memory.ts";
 
 export { createDrizzleStore, createMemoryStore };
+
+/** Keep a short history of capability discoveries per vehicle. */
+export const DISCOVERY_HISTORY_LIMIT = 5;
 
 /**
  * The storage seam. Services and routes depend only on this interface —
@@ -28,6 +32,7 @@ export interface Store {
   problems: ProblemRepository;
   recommendations: RecommendationRepository;
   decisions: DecisionRepository;
+  discovery: DiscoveryRepository;
   init(): Promise<void>;
   reset(): Promise<void>;
   close(): Promise<void>;
@@ -89,6 +94,13 @@ export interface RecommendationRepository {
 export interface DecisionRepository {
   create(rec: DecisionRecord): Promise<DecisionRecord>;
   listByVehicle(vehicleId: string): Promise<DecisionRecord[]>;
+}
+
+export interface DiscoveryRepository {
+  record(report: ObdCapabilityReport): Promise<void>;
+  latest(vehicleId: string): Promise<ObdCapabilityReport | undefined>;
+  /** Newest first, capped at DISCOVERY_HISTORY_LIMIT. */
+  list(vehicleId: string): Promise<ObdCapabilityReport[]>;
 }
 
 /** Build the configured store. Services never learn which adapter this is. */

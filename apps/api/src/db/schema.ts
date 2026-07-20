@@ -10,6 +10,7 @@ import type {
   DecisionRecord,
   DiagnosticProblem,
   DriveSession,
+  ObdCapabilityReport,
   ObservationBatch,
   Recommendation,
   VehicleProfile,
@@ -102,6 +103,24 @@ export const decisions = pgTable(
   }),
 );
 
+export const discoveryReports = pgTable(
+  "discovery_reports",
+  {
+    id: text("id").primaryKey(),
+    vehicleId: text("vehicle_id").notNull(),
+    capturedAt: timestamp("captured_at", tz).notNull(),
+    source: text("source").notNull(),
+    payload: jsonb("payload").$type<ObdCapabilityReport>().notNull(),
+    createdAt: timestamp("created_at", tz).notNull().defaultNow(),
+  },
+  (t) => ({
+    vehicleCapturedIdx: index("discovery_reports_vehicle_captured_idx").on(
+      t.vehicleId,
+      t.capturedAt,
+    ),
+  }),
+);
+
 export const schema = {
   vehicles,
   observationBatches,
@@ -109,4 +128,5 @@ export const schema = {
   problems,
   recommendations,
   decisions,
+  discoveryReports,
 };

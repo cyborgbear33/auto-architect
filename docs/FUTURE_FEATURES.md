@@ -385,6 +385,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Fill GM Vortec 6.0 / Silverado 2500 HD OEM cartridge | planned | high when truck scans available | Profile is 2003 2500 HD gas 6.0L; stub inert until curated GM TSBs. | `gm-vortec-6.0-stub.ts`, vehicle profiles |
 | In-app Proxi / enhanced BCM session over MX+ | planned | low until explicit UDS project | Guided Functions v1 is external AlfaOBD; do not clone AlfaOBD. | future edge path, not Mode 01–07 |
 | Bluetooth auto-discovery / MX+ preferred adapter profile | planned | medium | Less friction for scanning. | `obd_gateway/config.py`, `client.py` |
+| Expand discover beyond seed via raw `0100/0120/…` support-bit decode | planned | low | v1 probes `STANDARD_PID_COMMANDS` only; full bitmask catalog if needed. | `obd_gateway/discovery.py`, pid dictionary |
 | Propose-only LLM agent loop (advise pass) | planned | medium | LLM proposes, LOGOS disposes — not required for OBD correctness. | logos-bridge, cartridges, new `apps/agent-service` |
 | OpenAPI 3.1 export from Fastify | planned | low | External tooling once surface stabilizes. | `apps/api` routes |
 | Auth / single-user local identity (optional JWT) | planned | low until multi-user | Before any network exposure. | garden `AuthService` patterns |
@@ -456,6 +457,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | EGR / secondary air / downstream O2 + A5 stub parity | 2026-07 | new cartridges; Mode 06 $31/$71/$02/$06; GM shares SAE set |
 | Gateway Mode 02 + Mode 06 population + DTC dictionary UI text | 2026-07 | `read_freeze_frames` / `read_mode06`; API+Dashboard `lookupDtc` fill |
 | Functions panel + FCA Proxi guided procedure | 2026-07 | `special-procedures.json`; `/functions`; start/complete actions; external AlfaOBD |
+| OBD capability discovery (vehicle intelligence report) | 2026-07 | gateway `discover`; API enrich; UI `/discovery`; Jeep gray-adapter hardware context |
 
 ---
 

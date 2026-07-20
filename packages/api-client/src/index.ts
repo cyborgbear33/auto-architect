@@ -12,6 +12,7 @@ import type {
   CaseTimeline,
   DecisionRecord,
   DiagnosticProblem,
+  DiscoveryForensicsReport,
   DriveSession,
   DriveSessionSummary,
   DtcObservation,
@@ -286,6 +287,12 @@ export class AutoApiClient {
     this.request<{ results: Mode06Result[] }>(`/api/vehicles/${enc(vehicleId)}/mode06`).then(
       (r) => r.results,
     );
+  getDiscovery = (vehicleId: string) =>
+    this.request<DiscoveryForensicsReport>(`/api/vehicles/${enc(vehicleId)}/discovery`);
+  getDiscoveryReport = (vehicleId: string) =>
+    this.request<{ markdown: string; html: string; capturedAt: string }>(
+      `/api/vehicles/${enc(vehicleId)}/discovery/report`,
+    );
   getForecast = (vehicleId: string, sessionId?: string) => {
     const q = sessionId ? `?sessionId=${enc(sessionId)}` : "";
     return this.request<ForecastSummary>(`/api/vehicles/${enc(vehicleId)}/forecast${q}`);
@@ -431,6 +438,7 @@ export const queryKeys = {
   liveGauges: (vehicleId: string) => ["liveGauges", vehicleId] as const,
   freezeFrames: (vehicleId: string) => ["freezeFrames", vehicleId] as const,
   mode06: (vehicleId: string) => ["mode06", vehicleId] as const,
+  discovery: (vehicleId: string) => ["discovery", vehicleId] as const,
   forecast: (vehicleId: string, sessionId?: string | null) =>
     ["forecast", vehicleId, sessionId ?? null] as const,
   recognition: (vehicleId: string) => ["recognition", vehicleId] as const,

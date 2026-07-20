@@ -17,13 +17,14 @@ import type {
   ObservationSource,
   VehicleProfile,
 } from "@auto/semantic-types";
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, notInArray } from "drizzle-orm";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { createDb, type DbHandle } from "../db/client.ts";
 import * as t from "../db/schema.ts";
 import { notFound } from "../lib/errors.ts";
 import type {
   DecisionRepository,
+  DiscoveryRepository,
   ObservationRepository,
   ProblemRepository,
   RecommendationRepository,
@@ -31,6 +32,7 @@ import type {
   Store,
   VehicleRepository,
 } from "./index.ts";
+import { DISCOVERY_HISTORY_LIMIT } from "./index.ts";
 
 const MIGRATIONS_FOLDER = fileURLToPath(new URL("../../drizzle", import.meta.url));
 
@@ -349,6 +351,54 @@ export function createDrizzleStore(databaseUrl: string): Store {
     },
   };
 
+  const discovery: DiscoveryRepository = {
+    async record(report) {
+      const id = `disc:${report.vehicleId}:${report.capturedAt}:${randomUUID()}`;
+      await db.insert(t.discoveryReports).values({
+        id,
+        vehicleId: report.vehicleId,
+        capturedAt: report.capturedAt,
+        source: report.source,
+        payload: report,
+      });
+      const keep = await db
+        .select({ id: t.discoveryReports.id })
+        .from(t.discoveryReports)
+        .where(eq(t.discoveryReports.vehicleId, report.vehicleId))
+        .orderBy(desc(t.discoveryReports.capturedAt))
+        .limit(DISCOVERY_HISTORY_LIMIT);
+      const keepIds = keep.map((r) => r.id);
+      if (keepIds.length > 0) {
+        await db
+          .delete(t.discoveryReports)
+          .where(
+            and(
+              eq(t.discoveryReports.vehicleId, report.vehicleId),
+              notInArray(t.discoveryReports.id, keepIds),
+            ),
+          );
+      }
+    },
+    async latest(vehicleId) {
+      const [row] = await db
+        .select()
+        .from(t.discoveryReports)
+        .where(eq(t.discoveryReports.vehicleId, vehicleId))
+        .orderBy(desc(t.discoveryReports.capturedAt))
+        .limit(1);
+      return row?.payload;
+    },
+    async list(vehicleId) {
+      const rows = await db
+        .select()
+        .from(t.discoveryReports)
+        .where(eq(t.discoveryReports.vehicleId, vehicleId))
+        .orderBy(desc(t.discoveryReports.capturedAt))
+        .limit(DISCOVERY_HISTORY_LIMIT);
+      return rows.map((r) => r.payload);
+    },
+  };
+
   return {
     driver: "postgres" as const,
     vehicles,
@@ -357,12 +407,13 @@ export function createDrizzleStore(databaseUrl: string): Store {
     problems,
     recommendations,
     decisions,
+    discovery,
     async init() {
       await migrate(db, { migrationsFolder: MIGRATIONS_FOLDER });
     },
     async reset() {
       await sql.unsafe(
-        `TRUNCATE vehicles, observation_batches, drive_sessions, problems, recommendations, decisions;`,
+        `TRUNCATE vehicles, observation_batches, drive_sessions, problems, recommendations, decisions, discovery_reports;`,
       );
     },
     async close() {

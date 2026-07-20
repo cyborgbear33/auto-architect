@@ -185,6 +185,38 @@ export const CompleteSpecialProcedureSchema = z.object({
 });
 export type CompleteSpecialProcedureInput = z.infer<typeof CompleteSpecialProcedureSchema>;
 
+const SupportFlagSchema = z.boolean().nullable();
+
+export const ObdCapabilityReportSchema = z.object({
+  vehicleId: z.string().min(1),
+  capturedAt: z.string().min(1),
+  source: ObservationSourceSchema,
+  connection: z.object({
+    connected: z.boolean(),
+    port: z.string().nullable(),
+    protocolId: z.string().nullable(),
+    protocolName: z.string().nullable(),
+  }),
+  modes: z.object({
+    mode01: z.object({
+      supported: z.array(z.string()),
+      unsupported: z.array(z.string()),
+      unknown: z.array(z.string()),
+    }),
+    mode02FreezeFrame: z.object({ supported: SupportFlagSchema }),
+    mode03Dtcs: z.object({ supported: SupportFlagSchema }),
+    mode07Pending: z.object({ supported: SupportFlagSchema }),
+    mode06: z.object({
+      supportedMids: z.array(z.string()),
+      unsupportedMids: z.array(z.string()),
+      unknownMids: z.array(z.string()),
+    }),
+    vin: z.object({ supported: SupportFlagSchema }),
+  }),
+  manualOnlyPids: z.array(z.string()),
+});
+export type ObdCapabilityReportInput = z.infer<typeof ObdCapabilityReportSchema>;
+
 /** Portable garage JSON dump (export / import). Nested entities are lightly gated. */
 export const GarageDumpSchema = z.object({
   format: z.literal("auto-architect.garage"),

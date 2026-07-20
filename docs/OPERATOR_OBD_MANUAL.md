@@ -115,6 +115,24 @@ python -m obd_gateway --vehicle-id veh:jeep-renegade-2015-latitude \
   scan
 ```
 
+### Capability discovery (vehicle intelligence)
+
+Before or after a scan, probe **what the ECU can expose** (support bits, not a
+full PID value dump). The API enriches the report with ontology / cartridge
+mapping and hardware notes (MX+, Jeep gray adapter). View it in the UI under
+**Discovery**.
+
+```bash
+# Lab catalog (no hardware) — prints JSON
+python -m obd_gateway --vehicle-id veh:jeep-renegade-2015-latitude \
+  --simulate --dry-run discover
+
+# Live probe + POST to API (omit --dry-run to ingest)
+python -m obd_gateway --vehicle-id veh:jeep-renegade-2015-latitude discover
+```
+
+Then open **Discovery** in the web UI (or `GET /api/vehicles/:id/discovery`).
+
 ---
 
 ## 5. Ultimate integration plan (phased)
@@ -134,6 +152,8 @@ allow**, then deepen meaning in the ontology — without cloning AlfaOBD.
 
 ### Phase B — Thorough Mode 01 mapping
 
+- [x] Run gateway `discover` (or simulate) → **Discovery** page shows support
+      vs ontology mapping (Phase B kickoff).
 - [ ] After a live Jeep session, log which PIDs in `STANDARD_PID_COMMANDS`
       returned data vs unsupported.
 - [ ] Expand `DEFAULT_PIDS` / dictionary only for PIDs that actually help

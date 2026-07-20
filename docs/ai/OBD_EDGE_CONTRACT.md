@@ -84,6 +84,10 @@ bug: recognition will run the wrong engine-family cartridges.
 ## 6. Reliability rules
 
 - Prefer one-shot `scan` for shop stops; `watch` for drive logging.
+- `discover` may probe ECU **support** (e.g. `conn.supports(...)` / PID support
+  bitmasks) for Mode 01 keys, Mode 06 MIDs, freeze frame, Mode 03/07, and VIN.
+  It must not clear codes, write to the vehicle, or dump full PID **values**
+  (values remain `scan` / `watch`).
 - Timeouts and adapter disconnects should fail visibly (non-zero exit / log),
   not invent zeroed PIDs that look like real data.
 - `--simulate` exists so CI and UI demos never require hardware.

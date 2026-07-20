@@ -9,10 +9,12 @@ import type {
   DecisionRecord,
   DiagnosticProblem,
   DriveSession,
+  ObdCapabilityReport,
   ObservationBatch,
   Recommendation,
   VehicleProfile,
 } from "@auto/semantic-types";
+import { DISCOVERY_HISTORY_LIMIT } from "./index.ts";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import type { Store } from "./index.ts";
 
@@ -206,6 +208,42 @@ export function runStoreConformance(label: string, makeStore: () => Store): void
       expect(await store.decisions.listByVehicle(vehicle.id)).toHaveLength(1);
     });
 
+    it("records discovery reports with latest + capped history", async () => {
+      await store.vehicles.create(vehicle);
+      const base: ObdCapabilityReport = {
+        vehicleId: vehicle.id,
+        capturedAt: "2026-07-20T10:00:00.000Z",
+        source: "simulated",
+        connection: {
+          connected: false,
+          port: null,
+          protocolId: null,
+          protocolName: null,
+        },
+        modes: {
+          mode01: { supported: [], unsupported: [], unknown: ["RPM"] },
+          mode02FreezeFrame: { supported: null },
+          mode03Dtcs: { supported: null },
+          mode07Pending: { supported: null },
+          mode06: { supportedMids: [], unsupportedMids: [], unknownMids: ["21"] },
+          vin: { supported: null },
+        },
+        manualOnlyPids: [],
+      };
+      for (let i = 0; i < DISCOVERY_HISTORY_LIMIT + 2; i++) {
+        await store.discovery.record({
+          ...base,
+          capturedAt: `2026-07-20T${String(10 + i).padStart(2, "0")}:00:00.000Z`,
+        });
+      }
+      const list = await store.discovery.list(vehicle.id);
+      expect(list.length).toBe(DISCOVERY_HISTORY_LIMIT);
+      expect(list[0]?.capturedAt).toBe(
+        `2026-07-20T${String(10 + DISCOVERY_HISTORY_LIMIT + 1).padStart(2, "0")}:00:00.000Z`,
+      );
+      expect((await store.discovery.latest(vehicle.id))?.capturedAt).toBe(list[0]?.capturedAt);
+    });
+
     it("reset() clears all tables / maps", async () => {
       await store.vehicles.create(vehicle);
       await store.observations.record(batch());
@@ -215,10 +253,31 @@ export function runStoreConformance(label: string, makeStore: () => Store): void
         startedAt: "2026-07-19T10:00:00.000Z",
         source: "simulated",
       });
+      await store.discovery.record({
+        vehicleId: vehicle.id,
+        capturedAt: "2026-07-20T12:00:00.000Z",
+        source: "simulated",
+        connection: {
+          connected: false,
+          port: null,
+          protocolId: null,
+          protocolName: null,
+        },
+        modes: {
+          mode01: { supported: [], unsupported: [], unknown: [] },
+          mode02FreezeFrame: { supported: null },
+          mode03Dtcs: { supported: null },
+          mode07Pending: { supported: null },
+          mode06: { supportedMids: [], unsupportedMids: [], unknownMids: [] },
+          vin: { supported: null },
+        },
+        manualOnlyPids: [],
+      });
       await store.reset();
       expect(await store.vehicles.list()).toHaveLength(0);
       expect(await store.observations.batchCount(vehicle.id)).toBe(0);
       expect(await store.sessions.listByVehicle(vehicle.id)).toHaveLength(0);
+      expect(await store.discovery.list(vehicle.id)).toHaveLength(0);
     });
   });
 }

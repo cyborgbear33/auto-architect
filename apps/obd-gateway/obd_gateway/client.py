@@ -14,8 +14,10 @@ from typing import Any
 import obd
 
 from .config import GatewayConfig
+from .discovery import now_iso as discovery_now_iso
 from .pid_map import (
     FREEZE_FRAME_PID_COMMANDS,
+    MANUAL_ONLY_PIDS,
     STANDARD_MODE06_COMMANDS,
     STANDARD_PID_COMMANDS,
     resolve_pid_keys,
@@ -40,6 +42,18 @@ def _magnitude(value: Any) -> float | None:
 def _unit_of(value: Any) -> str | None:
     unit = str(getattr(value, "units", "") or "") or None
     return unit
+
+
+def _call_or_attr(obj: Any, name: str) -> str | None:
+    """Read python-OBD protocol helpers whether exposed as method or property."""
+    raw = getattr(obj, name, None)
+    if raw is None:
+        return None
+    try:
+        value = raw() if callable(raw) else raw
+    except Exception:  # noqa: BLE001 — adapter quirks must not abort discovery
+        return None
+    return str(value) if value is not None else None
 
 
 def _freeze_dtc_code(value: Any) -> str | None:
@@ -240,3 +254,61 @@ class ObdGatewayClient:
             return None
         response = conn.query(obd.commands.VIN)
         return None if response.is_null() else str(response.value)
+
+    def discover_capabilities(self, *, vehicle_id: str) -> dict[str, Any]:
+        """Probe ECU/adapter support for gateway-seeded OBD modes — no value dump."""
+        conn = self._require_connection()
+        mode01_supported: list[str] = []
+        mode01_unsupported: list[str] = []
+        for key, command in sorted(STANDARD_PID_COMMANDS.items()):
+            if conn.supports(command):
+                mode01_supported.append(key)
+            else:
+                mode01_unsupported.append(key)
+
+        mode06_supported: list[str] = []
+        mode06_unsupported: list[str] = []
+        for mid, command in sorted(STANDARD_MODE06_COMMANDS.items()):
+            if conn.supports(command):
+                mode06_supported.append(mid)
+            else:
+                mode06_unsupported.append(mid)
+
+        freeze_supported = conn.supports(obd.commands.DTC_FREEZE_DTC) or conn.supports(
+            obd.commands.FREEZE_DTC
+        )
+        mode07 = conn.supports(obd.commands.GET_CURRENT_DTC)
+        vin_supported = conn.supports(obd.commands.VIN)
+
+        port = getattr(conn, "port_name", None) or self.config.obd_port
+        protocol_id = _call_or_attr(conn, "protocol_id")
+        protocol_name = _call_or_attr(conn, "protocol_name")
+
+        return {
+            "vehicleId": vehicle_id,
+            "capturedAt": discovery_now_iso(),
+            "source": "obd_gateway",
+            "connection": {
+                "connected": True,
+                "port": str(port) if port else None,
+                "protocolId": protocol_id,
+                "protocolName": protocol_name,
+            },
+            "modes": {
+                "mode01": {
+                    "supported": mode01_supported,
+                    "unsupported": mode01_unsupported,
+                    "unknown": [],
+                },
+                "mode02FreezeFrame": {"supported": freeze_supported},
+                "mode03Dtcs": {"supported": True},
+                "mode07Pending": {"supported": mode07},
+                "mode06": {
+                    "supportedMids": mode06_supported,
+                    "unsupportedMids": mode06_unsupported,
+                    "unknownMids": [],
+                },
+                "vin": {"supported": vin_supported},
+            },
+            "manualOnlyPids": sorted(MANUAL_ONLY_PIDS.keys()),
+        }

@@ -52,3 +52,25 @@ class ApiClient:
             return response.json()
         except ValueError:
             return {}
+
+    def post_discovery_report(self, vehicle_id: str, report: dict[str, Any]) -> dict[str, Any]:
+        url = f"{self.base_url}/api/vehicles/{quote(vehicle_id, safe='')}/discovery"
+        try:
+            response = self.session.post(url, json=report, timeout=self.timeout_seconds)
+        except requests.RequestException as exc:
+            raise ApiClientError(f"could not reach the API at {url}: {exc}") from exc
+        if response.status_code >= 400:
+            body: Any
+            try:
+                body = response.json()
+            except ValueError:
+                body = response.text
+            raise ApiClientError(
+                f"API rejected the discovery report (HTTP {response.status_code})",
+                status_code=response.status_code,
+                body=body,
+            )
+        try:
+            return response.json()
+        except ValueError:
+            return {}

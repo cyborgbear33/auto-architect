@@ -5,6 +5,7 @@ import type {
   DtcObservation,
   FreezeFrame,
   Mode06Result,
+  ObdCapabilityReport,
   ObservationBatch,
   ObservationSource,
   Recommendation,
@@ -13,6 +14,7 @@ import type {
 import { notFound } from "../lib/errors.ts";
 import type {
   DecisionRepository,
+  DiscoveryRepository,
   ObservationRepository,
   ProblemRepository,
   RecommendationRepository,
@@ -20,6 +22,7 @@ import type {
   Store,
   VehicleRepository,
 } from "./index.ts";
+import { DISCOVERY_HISTORY_LIMIT } from "./index.ts";
 
 function createVehicleRepository(): VehicleRepository {
   const byId = new Map<string, VehicleProfile>();
@@ -249,6 +252,24 @@ function createDecisionRepository(): DecisionRepository {
   };
 }
 
+function createDiscoveryRepository(): DiscoveryRepository {
+  const byVehicle = new Map<string, ObdCapabilityReport[]>();
+  return {
+    async record(report) {
+      const list = byVehicle.get(report.vehicleId) ?? [];
+      list.push(report);
+      list.sort((a, b) => b.capturedAt.localeCompare(a.capturedAt));
+      byVehicle.set(report.vehicleId, list.slice(0, DISCOVERY_HISTORY_LIMIT));
+    },
+    async latest(vehicleId) {
+      return byVehicle.get(vehicleId)?.[0];
+    },
+    async list(vehicleId) {
+      return [...(byVehicle.get(vehicleId) ?? [])];
+    },
+  };
+}
+
 export function createMemoryStore(): Store {
   let vehicles = createVehicleRepository();
   let observations = createObservationRepository();
@@ -256,6 +277,7 @@ export function createMemoryStore(): Store {
   let problems = createProblemRepository();
   let recommendations = createRecommendationRepository();
   let decisions = createDecisionRepository();
+  let discovery = createDiscoveryRepository();
 
   return {
     driver: "memory" as const,
@@ -277,6 +299,9 @@ export function createMemoryStore(): Store {
     get decisions() {
       return decisions;
     },
+    get discovery() {
+      return discovery;
+    },
     async init() {
       /* nothing to do for the in-memory driver */
     },
@@ -287,6 +312,7 @@ export function createMemoryStore(): Store {
       problems = createProblemRepository();
       recommendations = createRecommendationRepository();
       decisions = createDecisionRepository();
+      discovery = createDiscoveryRepository();
     },
     async close() {
       /* nothing to do for the in-memory driver */

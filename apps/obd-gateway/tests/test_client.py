@@ -141,6 +141,37 @@ def test_read_freeze_frames_omits_when_no_freeze_dtc():
     assert client.read_freeze_frames() == []
 
 
+def test_discover_capabilities_partitions_mode01_and_mode06():
+    fake = FakeConnection(
+        supported={
+            obd.commands.RPM,
+            obd.commands.ENGINE_LOAD,
+            obd.commands.DTC_FREEZE_DTC,
+            obd.commands.GET_CURRENT_DTC,
+            obd.commands.MONITOR_CATALYST_B1,
+            obd.commands.VIN,
+        },
+        responses={},
+    )
+    fake.protocol_id = lambda: "6"
+    fake.protocol_name = lambda: "ISO 15765-4"
+    fake.port_name = "/dev/rfcomm0"
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
+    report = client.discover_capabilities(vehicle_id="veh:jeep-renegade-2015-latitude")
+    assert report["vehicleId"] == "veh:jeep-renegade-2015-latitude"
+    assert report["source"] == "obd_gateway"
+    assert report["connection"]["connected"] is True
+    assert report["connection"]["protocolName"] == "ISO 15765-4"
+    assert "RPM" in report["modes"]["mode01"]["supported"]
+    assert "ENGINE_LOAD" in report["modes"]["mode01"]["supported"]
+    assert "SPEED" in report["modes"]["mode01"]["unsupported"]
+    assert "21" in report["modes"]["mode06"]["supportedMids"]
+    assert report["modes"]["mode02FreezeFrame"]["supported"] is True
+    assert report["modes"]["mode07Pending"]["supported"] is True
+    assert report["modes"]["vin"]["supported"] is True
+    assert "OIL_PRESSURE_PSI" in report["manualOnlyPids"]
+
+
 def test_read_mode06_maps_mid_tid_and_pass_fail():
     monitor = FakeMonitor(
         [

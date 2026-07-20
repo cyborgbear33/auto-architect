@@ -1,9 +1,9 @@
 """
-CLI entry point. Two modes, per the plan (docs/../auto-architect_car_diagnostics_app plan, Phase C):
+CLI entry point:
 
-  scan   one-shot: connect, read PIDs + DTCs, POST one Observation batch, exit.
-  watch  continuous-poll mode for drives: repeat `scan`'s read+post every
-         --interval seconds until Ctrl+C.
+  scan      one-shot: connect, read PIDs + DTCs (+ FF/Mode06), POST one batch, exit.
+  watch     continuous-poll mode for drives.
+  discover  probe ECU/adapter support (no value dump); POST capability report.
 
 Both support `--manual-pid KEY=VALUE[:UNIT]` (repeatable) for PIDs that
 aren't standard Mode 01 (OIL_PRESSURE_PSI, OIL_LEVEL_PCT — see pid_map.py),
@@ -26,6 +26,7 @@ from .api_client import ApiClient, ApiClientError
 from .batch import build_observation_batch, parse_manual_pids, parse_simulated_mode06
 from .client import ObdGatewayClient
 from .config import DEFAULT_PIDS, GatewayConfig
+from .discovery import build_simulated_capability_report
 
 logger = logging.getLogger("obd_gateway.cli")
 
@@ -103,6 +104,10 @@ def _build_parser() -> argparse.ArgumentParser:
     watch = sub.add_parser("watch", help="continuous-poll mode for drives")
     watch.add_argument(
         "--interval", type=float, default=None, help="seconds between polls (default from config)"
+    )
+    sub.add_parser(
+        "discover",
+        help="probe Mode 01/02/03/06/07/VIN support (no value dump); POST discovery report",
     )
     return parser
 
@@ -187,6 +192,34 @@ def run_once(
     return batch
 
 
+def run_discover(
+    config: GatewayConfig,
+    client: ObdGatewayClient | None,
+    api: ApiClient | None,
+    args: argparse.Namespace,
+) -> dict:
+    if client is None:
+        report = build_simulated_capability_report(vehicle_id=config.vehicle_id)
+    else:
+        report = client.discover_capabilities(vehicle_id=config.vehicle_id)
+    if args.dry_run or api is None:
+        print(json.dumps(report, indent=2))
+    else:
+        result = api.post_discovery_report(config.vehicle_id, report)
+        mode01 = report["modes"]["mode01"]
+        mode06 = report["modes"]["mode06"]
+        logger.info(
+            "posted discovery: mode01 %d supported / %d unsupported / %d unknown; "
+            "mode06 %d supported MIDs -> %s",
+            len(mode01.get("supported", [])),
+            len(mode01.get("unsupported", [])),
+            len(mode01.get("unknown", [])),
+            len(mode06.get("supportedMids", [])),
+            result,
+        )
+    return report
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     logging.basicConfig(
@@ -209,6 +242,8 @@ def main(argv: list[str] | None = None) -> int:
             client.connect()
         if args.mode == "scan":
             run_once(config, client, api, args)
+        elif args.mode == "discover":
+            run_discover(config, client, api, args)
         elif args.mode == "watch":
             logger.info("watching every %.1fs — Ctrl+C to stop", config.poll_interval_seconds)
             while True:

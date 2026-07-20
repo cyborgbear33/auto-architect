@@ -198,6 +198,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | DTC dictionary text on Dashboard rows | shipped | API `enrichDtcDescription` + UI `lookupDtc` fallback |
 | Operator OBD manual (MX+ / Jeep gray adapter) | shipped | `docs/OPERATOR_OBD_MANUAL.md`; Jeep profile notes |
 | Functions / Proxi guided procedure | shipped | `special-procedures.json`; `/functions`; ActionService start/complete |
+| OBD capability discovery (vehicle intelligence) | shipped | gateway `discover`; `DiscoveryService`; UI `/discovery` |
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |
 | Problem caseboard + verify-after-repair (P2–P5) | shipped | Diagnosis filters; abandon/escalate/reopen; `worked` → verifying → verify |
@@ -213,9 +214,9 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Observation retention (S5) | shipped | Keep DTC/FF/Mode06; hourly downsample of old PID-only batches |
 | Policy safety holds (`clear-codes-and-drive` under misfire / MultiAir oil starvation / cam-crank) | shipped | `PolicyService`, reason fixtures, Diagnosis UI |
 | Oil-level trend forecast | shipped | `ForecastService` |
-| React UI (5 routes) | shipped | `apps/web-ui` |
+| React UI (Dashboard, Diagnosis, Discovery, Functions, …) | shipped | `apps/web-ui` |
 | `@auto/api-client` (typed fetch + queryKeys; web-ui thin re-export) | shipped | `packages/api-client`, `API_CLIENT_DEV_GUIDE.md` |
-| Python obd-gateway (`scan` / `watch` / `--simulate`) | shipped | `apps/obd-gateway` |
+| Python obd-gateway (`scan` / `watch` / `discover` / `--simulate`) | shipped | `apps/obd-gateway` |
 | Ontology lint CI | shipped | `scripts/lint-ontology.mjs`, `.github/workflows/ci.yml` |
 | Auth / multi-user | **not yet** | see `FUTURE_FEATURES.md` |
 | Live Mode 06 / freeze-frame UI richness | partial | Edge populates FF + SAE-seed Mode 06; OBDMID labels + pass/fail; raw TID/MID behind debug |

@@ -38,6 +38,25 @@ def test_missing_vehicle_id_exits_2(capsys):
     assert "AUTO_VEHICLE_ID" in capsys.readouterr().err
 
 
+def test_dry_run_simulate_discover_prints_unknown_catalog(capsys):
+    exit_code = main(
+        [
+            "--vehicle-id",
+            "veh:jeep-renegade-2015-latitude",
+            "--dry-run",
+            "--simulate",
+            "discover",
+        ]
+    )
+    assert exit_code == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["source"] == "simulated"
+    assert report["connection"]["connected"] is False
+    assert "RPM" in report["modes"]["mode01"]["unknown"]
+    assert "21" in report["modes"]["mode06"]["unknownMids"]
+    assert report["modes"]["mode01"]["supported"] == []
+
+
 def test_dry_run_simulate_includes_freeze_frame_and_mode06(capsys):
     exit_code = main(
         [

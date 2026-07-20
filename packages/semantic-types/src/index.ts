@@ -89,6 +89,92 @@ export type ObservationSource =
   /** Restored or uploaded via garage JSON import. */
   | "imported_file";
 
+/** Support ternary for discovery probes (null = unknown / not probed). */
+export type SupportFlag = boolean | null;
+
+/** Raw capability report from obd-gateway `discover` (support probe, not values). */
+export interface ObdCapabilityReport {
+  vehicleId: SemanticId;
+  capturedAt: IsoTimestamp;
+  source: ObservationSource;
+  connection: {
+    connected: boolean;
+    port: string | null;
+    protocolId: string | null;
+    protocolName: string | null;
+  };
+  modes: {
+    mode01: { supported: string[]; unsupported: string[]; unknown: string[] };
+    mode02FreezeFrame: { supported: SupportFlag };
+    mode03Dtcs: { supported: SupportFlag };
+    mode07Pending: { supported: SupportFlag };
+    mode06: { supportedMids: string[]; unsupportedMids: string[]; unknownMids: string[] };
+    vin: { supported: SupportFlag };
+  };
+  manualOnlyPids: string[];
+}
+
+export type DiscoverySupportStatus = "supported" | "unsupported" | "unknown" | "manual_only";
+
+export interface DiscoveryPidRow {
+  pid: string;
+  support: DiscoverySupportStatus;
+  description: string | null;
+  unit: string | null;
+  pidHex: string | null;
+  inOntology: boolean;
+  inDefaultPoll: boolean;
+  cartridgeRelevant: boolean;
+}
+
+export interface DiscoveryMode06Row {
+  mid: string;
+  support: DiscoverySupportStatus;
+  description: string | null;
+  concept: string | null;
+  inOntology: boolean;
+}
+
+/** Ontology-enriched vehicle intelligence / forensics report. */
+export interface DiscoveryForensicsReport {
+  vehicleId: SemanticId;
+  capturedAt: IsoTimestamp;
+  source: ObservationSource;
+  vehicle: {
+    make: string;
+    model: string;
+    year: number | null;
+    trim: string | null;
+    engineFamily: string;
+    profileObdProtocol: string | null;
+  };
+  hardware: {
+    preferredAdapter: string;
+    adapterNotes: string[];
+    connection: ObdCapabilityReport["connection"];
+  };
+  summary: {
+    mode01Supported: number;
+    mode01Unsupported: number;
+    mode01Unknown: number;
+    mode06Supported: number;
+    mode06Unsupported: number;
+    mode06Unknown: number;
+    freezeFrame: SupportFlag;
+    mode03Dtcs: SupportFlag;
+    mode07Pending: SupportFlag;
+    vin: SupportFlag;
+    unmappedSupportedPids: number;
+    cartridgeRelevantAvailable: number;
+  };
+  mode01: DiscoveryPidRow[];
+  mode06: DiscoveryMode06Row[];
+  unmappedSupportedPids: string[];
+  narrative: string[];
+  markdown: string;
+  html: string;
+}
+
 /** The single envelope obd-gateway posts to `POST /api/vehicles/:id/observations`. */
 export interface ObservationBatch {
   vehicleId: SemanticId;

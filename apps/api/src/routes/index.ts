@@ -6,6 +6,7 @@ import {
   GarageDumpSchema,
   LogRepairSchema,
   MarkRecommendationStatusSchema,
+  ObdCapabilityReportSchema,
   ObservationBatchSchema,
   ProblemIdActionSchema,
   SimulateDriveSessionSchema,
@@ -86,6 +87,30 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
   app.get("/api/vehicles/:id/mode06", async (req) => {
     const { id } = req.params as { id: string };
     return { results: await s.observations.latestMode06(id) };
+  });
+
+  // --- OBD capability discovery (support probe → forensics) -------------------
+  app.post("/api/vehicles/:id/discovery", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const body = { ...(req.body as Record<string, unknown>), vehicleId: id };
+    const input = ObdCapabilityReportSchema.parse(body);
+    const report = await s.discovery.record(input);
+    reply.code(202);
+    return { accepted: true, capturedAt: report.capturedAt };
+  });
+
+  app.get("/api/vehicles/:id/discovery", async (req) => {
+    const { id } = req.params as { id: string };
+    const forensics = await s.discovery.getForensics(id);
+    if (!forensics) throw notFound("DiscoveryReport", id);
+    return forensics;
+  });
+
+  app.get("/api/vehicles/:id/discovery/report", async (req) => {
+    const { id } = req.params as { id: string };
+    const report = await s.discovery.getReport(id);
+    if (!report) throw notFound("DiscoveryReport", id);
+    return report;
   });
 
   app.get("/api/vehicles/:id/observation-batches", async (req) => {
