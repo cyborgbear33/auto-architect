@@ -54,6 +54,18 @@ describe("runPerception", () => {
     expect(abox.concepts["veh:x:cylinder-misfire"]).toBeUndefined();
   });
 
+  it("asserts FailedO2MonitorBank1 from a failed Mode 06 OBDMID $01", () => {
+    const cartridges = resolveCartridgesForEngineFamily("fca-tigershark-2.4");
+    const abox = runPerception(
+      "veh:x",
+      [],
+      {},
+      cartridges,
+      [{ tid: "01", mid: "01", value: 0.9, min: 0, max: 0.5, passed: false }],
+    );
+    expect(abox.concepts["veh:x:mode06-o2-b1"]).toEqual(["FailedO2MonitorBank1"]);
+  });
+
   it("asserts FailedCatalystMonitorBank1 from a failed Mode 06 OBDMID $21", () => {
     const cartridges = resolveCartridgesForEngineFamily("fca-tigershark-2.4");
     const abox = runPerception(

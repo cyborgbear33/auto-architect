@@ -31,14 +31,52 @@
     "P0130": {
       "description": "O2 Sensor Circuit (Bank 1 Sensor 1)",
       "concept": "O2CircuitBank1",
-      "sae": true,
-      "note": "Circuit family only — voltage-range / slow-response codes deferred until related PIDs are ontologized."
+      "sae": true
     },
     "P0150": {
       "description": "O2 Sensor Circuit (Bank 2 Sensor 1)",
       "concept": "O2CircuitBank2",
-      "sae": true,
-      "note": "Circuit family only — see P0130 note."
+      "sae": true
+    },
+    "P0131": {
+      "description": "O2 Sensor Circuit Low Voltage (Bank 1 Sensor 1)",
+      "concept": "O2PerformanceBank1",
+      "sae": true
+    },
+    "P0132": {
+      "description": "O2 Sensor Circuit High Voltage (Bank 1 Sensor 1)",
+      "concept": "O2PerformanceBank1",
+      "sae": true
+    },
+    "P0133": {
+      "description": "O2 Sensor Circuit Slow Response (Bank 1 Sensor 1)",
+      "concept": "O2PerformanceBank1",
+      "sae": true
+    },
+    "P0134": {
+      "description": "O2 Sensor Circuit No Activity Detected (Bank 1 Sensor 1)",
+      "concept": "O2PerformanceBank1",
+      "sae": true
+    },
+    "P0151": {
+      "description": "O2 Sensor Circuit Low Voltage (Bank 2 Sensor 1)",
+      "concept": "O2PerformanceBank2",
+      "sae": true
+    },
+    "P0152": {
+      "description": "O2 Sensor Circuit High Voltage (Bank 2 Sensor 1)",
+      "concept": "O2PerformanceBank2",
+      "sae": true
+    },
+    "P0153": {
+      "description": "O2 Sensor Circuit Slow Response (Bank 2 Sensor 1)",
+      "concept": "O2PerformanceBank2",
+      "sae": true
+    },
+    "P0154": {
+      "description": "O2 Sensor Circuit No Activity Detected (Bank 2 Sensor 1)",
+      "concept": "O2PerformanceBank2",
+      "sae": true
     },
     "P0135": {
       "description": "O2 Sensor Heater Circuit (Bank 1 Sensor 1)",
@@ -58,6 +96,12 @@
       "note": "Same small-leak EVAP family as P0442 (SAE J2012); still maps to EvapCodeSmall — no new fault class."
     },
     "P0455": { "description": "Evaporative Emission System Leak Detected (Large Leak)", "concept": "EvapCodeLarge", "sae": true },
+    "P0457": {
+      "description": "Evaporative Emission System Leak Detected (Fuel Cap Loose/Off)",
+      "concept": "EvapCodeLarge",
+      "sae": true,
+      "note": "Cap-off / loose-cap family (SAE J2012); maps to EvapCodeLarge with P0455 / Mode 06 $39."
+    },
     "P0316": {
       "description": "Engine Misfire Detected on Startup (First 1000 Revolutions)",
       "concept": "CylinderMisfire",

@@ -17,6 +17,8 @@
     "CatalystCodeBank2": "Symptom",
     "O2CircuitBank1": "Symptom",
     "O2CircuitBank2": "Symptom",
+    "O2PerformanceBank1": "Symptom",
+    "O2PerformanceBank2": "Symptom",
     "O2HeaterBank1": "Symptom",
     "O2HeaterBank2": "Symptom",
     "MultiAirFault": "Symptom",
@@ -29,6 +31,8 @@
     "FailedCatalystMonitorBank2": "Condition",
     "FailedEvapMonitorSmall": "Condition",
     "FailedEvapMonitorLarge": "Condition",
+    "FailedO2MonitorBank1": "Condition",
+    "FailedO2MonitorBank2": "Condition",
     "FailedO2HeaterMonitorBank1": "Condition",
     "FailedO2HeaterMonitorBank2": "Condition",
     "FailedMisfireMonitor": "Condition",
@@ -89,6 +93,12 @@
     "O2CircuitFaultBank2": {
       "equivalentTo": "Engine ⊓ ∃hasDtc.O2CircuitBank2"
     },
+    "O2PerformanceFaultBank1": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.O2PerformanceBank1 ⊔ ∃hasCondition.FailedO2MonitorBank1)"
+    },
+    "O2PerformanceFaultBank2": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.O2PerformanceBank2 ⊔ ∃hasCondition.FailedO2MonitorBank2)"
+    },
     "O2HeaterFaultBank1": {
       "equivalentTo": "Engine ⊓ (∃hasDtc.O2HeaterBank1 ⊔ ∃hasCondition.FailedO2HeaterMonitorBank1)"
     },
@@ -113,8 +123,10 @@
     "EvapLeakLarge": "SAE-generic: P0455, or failed Mode 06 EVAP OBDMID $39/$3A.",
     "CatalystEfficiencyBank1": "SAE-generic: P0420, or failed Mode 06 catalyst OBDMID $21.",
     "CatalystEfficiencyBank2": "SAE-generic: P0430, or failed Mode 06 catalyst OBDMID $22.",
-    "O2CircuitFaultBank1": "SAE-generic: P0130 circuit (DTC-only; O2 sensor performance monitor $01 is label-only until performance classes exist).",
+    "O2CircuitFaultBank1": "SAE-generic: P0130 circuit (DTC-only).",
     "O2CircuitFaultBank2": "SAE-generic: P0150 circuit (DTC-only).",
+    "O2PerformanceFaultBank1": "SAE-generic: P0131–P0134 (voltage / slow response / no activity), or failed Mode 06 O2 OBDMID $01. No invented PID voltage thresholds.",
+    "O2PerformanceFaultBank2": "SAE-generic: P0151–P0154, or failed Mode 06 O2 OBDMID $05.",
     "O2HeaterFaultBank1": "SAE-generic: P0135 heater circuit, or failed Mode 06 heater OBDMID $41.",
     "O2HeaterFaultBank2": "SAE-generic: P0155 heater circuit, or failed Mode 06 heater OBDMID $45.",
     "ChronicOilConsumption": "SAE-generic: fed by `forecast` over logged oil-level/odometer samples, not a DTC.",
@@ -138,6 +150,8 @@
         "CatalystEfficiencyBank2",
         "O2CircuitFaultBank1",
         "O2CircuitFaultBank2",
+        "O2PerformanceFaultBank1",
+        "O2PerformanceFaultBank2",
         "O2HeaterFaultBank1",
         "O2HeaterFaultBank2",
         "ChronicOilConsumption"
@@ -157,6 +171,8 @@
         "CatalystEfficiencyBank2",
         "O2CircuitFaultBank1",
         "O2CircuitFaultBank2",
+        "O2PerformanceFaultBank1",
+        "O2PerformanceFaultBank2",
         "O2HeaterFaultBank1",
         "O2HeaterFaultBank2",
         "ChronicOilConsumption",

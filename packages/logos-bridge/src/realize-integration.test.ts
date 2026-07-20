@@ -18,6 +18,9 @@ import misfireRealizeFixture from "../../ontology/fixtures/misfire_realize_fixtu
 import o2RealizeFixture from "../../ontology/fixtures/o2_realize_fixture.json" with {
   type: "json",
 };
+import o2PerformanceRealizeFixture from "../../ontology/fixtures/o2_performance_realize_fixture.json" with {
+  type: "json",
+};
 import richRealizeFixture from "../../ontology/fixtures/rich_realize_fixture.json" with {
   type: "json",
 };
@@ -109,6 +112,13 @@ describe.skipIf(!available)("LOGOS realize real subprocess integration", () => {
     const result = await bridge.realize(realizeInputFromFixture(o2RealizeFixture));
     expect(result.mostSpecific).toContain("O2CircuitFaultBank1");
     expect(result.member).not.toContain("O2HeaterFaultBank1");
+    expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
+  it("proves O2PerformanceFaultBank1 from failed Mode 06 O2 monitor alone", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(o2PerformanceRealizeFixture));
+    expect(result.mostSpecific).toContain("O2PerformanceFaultBank1");
     expect(result.member).not.toContain("MisfireUnderLoad");
   });
 });

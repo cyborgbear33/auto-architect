@@ -191,6 +191,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Evidence panel per proven class (A1) | shipped | `Recognition.classEvidence` + `ClassEvidencePanel` |
 | Rich / catalyst / O2 DTC families | shipped | cartridges + ontology; FallingFuelTrim; DTC-only cat/O2 |
 | Mode 06 meaning → recognition (A3) | shipped | SAE/ISO OBDMID seed; failed monitors → realize; labeled UI |
+| O2 performance + A4 SAE seed slice | shipped | P0131–34/P0151–54; Mode 06 $01/$05; O2 voltage PIDs; P0457 |
 | Freeze-frame + Mode 06 UI | shipped | `EvidencePanels` on Dashboard |
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |

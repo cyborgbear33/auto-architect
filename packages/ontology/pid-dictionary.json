@@ -101,6 +101,37 @@
       "mode": "01",
       "pidHex": "0x42"
     },
+    "O2_B1S1": {
+      "description": "O2 sensor voltage — Bank 1 Sensor 1",
+      "unit": "volt",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x14",
+      "note": "Evidence adjacency for O2 performance cases; no cartridge voltage threshold yet."
+    },
+    "O2_B1S2": {
+      "description": "O2 sensor voltage — Bank 1 Sensor 2",
+      "unit": "volt",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x15"
+    },
+    "O2_B2S1": {
+      "description": "O2 sensor voltage — Bank 2 Sensor 1",
+      "unit": "volt",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x18",
+      "note": "Evidence adjacency for O2 performance cases; no cartridge voltage threshold yet."
+    },
+    "O2_B2S2": {
+      "description": "O2 sensor voltage — Bank 2 Sensor 2",
+      "unit": "volt",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x19"
+    },
+
     "MAF": {
       "description": "Mass air flow sensor",
       "unit": "grams/sec",

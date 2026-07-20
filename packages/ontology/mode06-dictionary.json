@@ -3,13 +3,23 @@
   "monitors": {
     "01": {
       "description": "Oxygen Sensor Monitor Bank 1 – Sensor 1",
+      "concept": "FailedO2MonitorBank1",
+      "sae": true
+    },
+    "02": {
+      "description": "Oxygen Sensor Monitor Bank 1 – Sensor 2",
       "sae": true,
-      "note": "Label-only for now — sensor-performance classes (P0133 family) are not yet ontologized; do not treat as O2 circuit fault."
+      "note": "Label-only — downstream/sensor-2 performance classes not yet ontologized."
     },
     "05": {
       "description": "Oxygen Sensor Monitor Bank 2 – Sensor 1",
+      "concept": "FailedO2MonitorBank2",
+      "sae": true
+    },
+    "06": {
+      "description": "Oxygen Sensor Monitor Bank 2 – Sensor 2",
       "sae": true,
-      "note": "Label-only for now — see OBDMID 01 note."
+      "note": "Label-only — see OBDMID 02 note."
     },
     "21": {
       "description": "Catalyst Monitor Bank 1",

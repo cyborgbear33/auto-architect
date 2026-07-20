@@ -55,15 +55,17 @@ Prefer these before inventing new ones:
 
 **Fault classes (DL):** `MisfireUnderLoad`, `CamCrankCorrelationFault`,
 `LeanFuelBank1/2`, `RichFuelBank1/2`, `EvapLeakSmall/Large`,
-`CatalystEfficiencyBank1/2`, `O2CircuitFaultBank1/2`, `O2HeaterFaultBank1/2`,
+`CatalystEfficiencyBank1/2`, `O2CircuitFaultBank1/2`,
+`O2PerformanceFaultBank1/2`, `O2HeaterFaultBank1/2`,
 `ChronicOilConsumption`, `MultiAirOilStarvation` (FCA view only).
 
 **Symptom / condition / trend subtypes:** `CylinderMisfire`, `CamCrankCorrelation`,
 `LeanCodeBank1/2`, `RichCodeBank1/2`, `EvapCodeSmall/Large`,
-`CatalystCodeBank1/2`, `O2CircuitBank1/2`, `O2HeaterBank1/2`, `MultiAirFault`,
+`CatalystCodeBank1/2`, `O2CircuitBank1/2`, `O2PerformanceBank1/2`,
+`O2HeaterBank1/2`, `MultiAirFault`,
 `HighLoad`, `PositiveFuelTrim`, `NegativeFuelTrim`, `LowOilPressure`,
 `FailedCatalystMonitorBank1/2`, `FailedEvapMonitorSmall/Large`,
-`FailedO2HeaterMonitorBank1/2`, `FailedMisfireMonitor`,
+`FailedO2MonitorBank1/2`, `FailedO2HeaterMonitorBank1/2`, `FailedMisfireMonitor`,
 `OilLevelDecline`, `RisingFuelTrim`, `FallingFuelTrim`, `RecurringHighLoad`.
 
 **Object / record types (`@auto/semantic-types`):** `VehicleProfile`,
