@@ -169,6 +169,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Vehicle profile registry + engine families | shipped | `packages/ontology/vehicle-profiles.json` |
 | Curated DTC dictionary + W80/W84 / TSB campaigns | shipped | `dtc-dictionary.json`, `known-campaigns.json` |
 | Thin SAE PID dictionary seed (units / Mode 01 hex) | shipped | `pid-dictionary.json`, gateway `test_pid_seed.py` |
+| Gateway Mode 01 PID metadata parity (S7 slice) | shipped | All `STANDARD_PID_COMMANDS` seeded; P0456/P0316 on existing concepts |
 | Ruff lint/format for obd-gateway (healthcheck + CI) | shipped | `apps/obd-gateway/pyproject.toml`, `pnpm obd-gateway:lint` |
 | Generic cartridges (misfire, lean, EVAP, cam/crank) | shipped | `packages/cartridges/src/*.ts` |
 | FCA MultiAir cartridge + GM EcoTec3 stub | shipped | `fca-tigershark-2.4.ts`, `gm-ecotec3-stub.ts` |

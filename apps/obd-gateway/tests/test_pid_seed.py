@@ -35,6 +35,18 @@ def test_seed_mode01_pids_are_in_standard_commands():
         )
 
 
+def test_standard_commands_have_seed_metadata():
+    """S7 gate: every gateway-bound Mode 01 key has ontology units/hex."""
+    seed = _load_pid_seed()
+    for key in STANDARD_PID_COMMANDS:
+        assert key in seed, f"STANDARD_PID_COMMANDS {key} missing from pid-dictionary.json"
+        entry = seed[key]
+        assert entry.get("unit"), key
+        assert entry.get("mode") == "01", key
+        assert entry.get("pidHex"), key
+        assert entry.get("sae") is True, key
+
+
 def test_seed_manual_pids_are_in_manual_only():
     for key, entry in _load_pid_seed().items():
         if not entry.get("manualOnly"):

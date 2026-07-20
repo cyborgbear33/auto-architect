@@ -80,11 +80,17 @@ Rough shape:
 - Adding a PID: dictionary row → `pid_map.py` command (or manual) → cartridge
   threshold → UI units (see `OBD_EDGE_CONTRACT.md` §7).
 
-### Thin seed scope (shipped)
+### Thin seed + gateway Mode 01 metadata (shipped)
 
-Seed only what cartridges already perceive, plus gateway `DEFAULT_PIDS` and the
-manual oil keys used by MultiAir / oil-level forecast. Do **not** paste a full
-J1979 table here — that is the separate comprehensive KB backlog item.
+`pid-dictionary.json` must cover:
+
+1. Cartridge-perceived PIDs (thresholds / perception)
+2. Gateway `DEFAULT_PIDS` (live poll)
+3. Every key in `STANDARD_PID_COMMANDS` (`pid_map.py`) — units + Mode 01 hex
+4. Manual-only oil keys (`OIL_PRESSURE_PSI`, `OIL_LEVEL_PCT`)
+
+Bidirectional gate: `apps/obd-gateway/tests/test_pid_seed.py`. Do **not** paste a
+full J1979 table — that remains the comprehensive KB backlog item.
 
 ---
 
@@ -111,7 +117,8 @@ The ontology owns *meaning*; standards own *whether that meaning is real*.
    `FUTURE_FEATURES.md` non-goals / backlog, do not sneak into `obd-gateway`.
 4. **J1939 is a separate bus model** — do not stretch passenger OBD cartridges
    to cover it; add an explicit extension path when needed.
-5. **Full PID/DTC knowledge base is backlog** — the thin seed in
-   `pid-dictionary.json` / cartridge-used DTC rows is the starter set; growing
-   to a comprehensive SAE/ISO table remains the high-priority item in
-   [`FUTURE_FEATURES.md`](../FUTURE_FEATURES.md).
+5. **Full PID/DTC knowledge base is backlog** — gateway-bound Mode 01 metadata
+   and curated DTC rows (including P0456/P0316 on existing concepts) are the
+   current floor; a comprehensive J1979/J2012 catalog remains the high-priority
+   item in [`FUTURE_FEATURES.md`](../FUTURE_FEATURES.md). Do not claim full SAE
+   coverage in disclaimers or UI.

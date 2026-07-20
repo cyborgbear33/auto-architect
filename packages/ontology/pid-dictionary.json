@@ -1,5 +1,5 @@
 {
-  "disclaimer": "Thin SAE J1979 seed: Mode 01 PIDs cartridges already perceive, plus the gateway DEFAULT_PIDS set used for live polling, and manual-only oil keys used by MultiAir / oil-level forecast. Units are canonical UI/observation strings. This is not a full J1979 table — expand only with cited standard rows (see HARDWARE_STANDARDS.md). Hex IDs are SAE Mode 01 PID numbers; python-OBD command names are the keys.",
+  "disclaimer": "SAE J1979 Mode 01 metadata for every key bound in obd-gateway STANDARD_PID_COMMANDS, plus manual-only oil keys used by MultiAir / oil-level forecast. Units are canonical UI/observation strings. This is not a full J1979 table — expand only with cited standard rows (see HARDWARE_STANDARDS.md). Hex IDs are SAE Mode 01 PID numbers; python-OBD command names are the keys (including the AMBIANT_AIR_TEMP spelling).",
   "pids": {
     "ENGINE_LOAD": {
       "description": "Calculated engine load value",
@@ -7,6 +7,13 @@
       "sae": true,
       "mode": "01",
       "pidHex": "0x04"
+    },
+    "ABSOLUTE_LOAD": {
+      "description": "Absolute load value",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x43"
     },
     "LONG_FUEL_TRIM_1": {
       "description": "Long term fuel trim — Bank 1",
@@ -65,12 +72,27 @@
       "mode": "01",
       "pidHex": "0x0F"
     },
+    "AMBIANT_AIR_TEMP": {
+      "description": "Ambient air temperature",
+      "unit": "celsius",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x46",
+      "note": "Key spelling matches python-OBD (AMBIANT_AIR_TEMP), not the English spelling 'ambient'."
+    },
     "THROTTLE_POS": {
       "description": "Throttle position",
       "unit": "percent",
       "sae": true,
       "mode": "01",
       "pidHex": "0x11"
+    },
+    "RELATIVE_THROTTLE_POS": {
+      "description": "Relative throttle position",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x45"
     },
     "CONTROL_MODULE_VOLTAGE": {
       "description": "Control module voltage",
@@ -107,12 +129,56 @@
       "mode": "01",
       "pidHex": "0x2F"
     },
+    "FUEL_PRESSURE": {
+      "description": "Fuel pressure (gauge)",
+      "unit": "kPa",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x0A"
+    },
+    "FUEL_RAIL_PRESSURE_DIRECT": {
+      "description": "Fuel rail pressure (direct injection)",
+      "unit": "kPa",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x23"
+    },
     "BAROMETRIC_PRESSURE": {
       "description": "Barometric pressure",
       "unit": "kPa",
       "sae": true,
       "mode": "01",
       "pidHex": "0x33"
+    },
+    "CATALYST_TEMP_B1S1": {
+      "description": "Catalyst temperature — Bank 1 Sensor 1",
+      "unit": "celsius",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x3C"
+    },
+    "CATALYST_TEMP_B2S1": {
+      "description": "Catalyst temperature — Bank 2 Sensor 1",
+      "unit": "celsius",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x3D"
+    },
+    "EVAP_VAPOR_PRESSURE": {
+      "description": "Evaporative system vapor pressure",
+      "unit": "Pa",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x32",
+      "note": "J1979 reports Pa (signed); not the same scale as manifold kPa."
+    },
+    "COMMANDED_EVAPORATIVE_PURGE": {
+      "description": "Commanded evaporative purge",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x2E",
+      "note": "Bound to python-OBD EVAPORATIVE_PURGE in pid_map.py."
     },
     "RUN_TIME": {
       "description": "Run time since engine start",

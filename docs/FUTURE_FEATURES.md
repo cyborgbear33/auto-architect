@@ -44,7 +44,7 @@ multi-piece plans live in the next section.
 | Goal | Status | What exists today | Done when | Closing backlog |
 |---|---|---|---|---|
 | **Scanning** — ingest OBD evidence | **partial** | Simulate/API ingest; live gauge strip + FF/Mode06 UI; source labels | Live MX+ path proven; drive sessions; retention policy | Live MX+ dry-run; Drive sessions; Durable observation history |
-| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration; lean/cam-crank fixtures; FF/Mode06 UI; broader DTC/PID seed | Broader SAE KB; richer evidence adjacency | SAE PID/DTC KB expansion |
+| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration; gateway Mode 01 PID metadata; FF/Mode06 UI | Full J1979/J2012; evidence adjacency (A1) | SAE PID/DTC KB expansion |
 | **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration on draft/solve + refresh | Family priors polish; counterfactuals UI | Counterfactuals UI; optional LLM advise |
 | **Informing the user** — clear operator surfaces | **partial** | Source badges, narration, FF/Mode06 panels, report export | Live gauges; shared UI package | Live gauges; `@auto/ui-components` |
 | **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert | Deeper campaign→repair playbooks | RecommendationService |
@@ -101,7 +101,7 @@ into the Journal forever.
 | S4 | DriveSession object (start/stop; batches linked by `sessionId`) | done | `DriveSessionService`; simulate path; Dashboard panel |
 | S5 | Retention policy (keep FF/Mode06 forever; downsample high-rate PIDs) | done | `applyRetention` / prune; keep evidence; hourly PID downsample |
 | S6 | Bluetooth / preferred-adapter discovery | todo | Friction reduction after S1 works manually |
-| S7 | SAE PID/DTC dictionary depth for scan interpretation | partial | P0305–08 + more Mode 01 PIDs; still not full J1979 |
+| S7 | SAE PID/DTC dictionary depth for scan interpretation | partial | Gateway Mode 01 metadata closed + P0456/P0316; still not full J1979 |
 
 **Seams:** `apps/obd-gateway`, `ObservationsService`, store batches, Dashboard.  
 **Anti-patterns:** Classifying faults in the gateway; silent simulate-vs-live;
@@ -126,7 +126,7 @@ Expand dictionaries and ontology views so perception has more lawful fuel.
 | A1 | Evidence panel per `mostCommon` / `mostSpecific` class | todo | Freeze-frame + key PIDs next to claim |
 | A2 | Wire `verbalize` into Recognition API + Diagnosis UI | done | `Recognition.narration` + ontology-note fallback |
 | A3 | Mode 06 as recognition input where ontology allows | todo | Don’t invent monitor meanings |
-| A4 | Broader curated DTC/PID KB + ontology lint parity | partial | P0305–08 + more Mode 01 PIDs |
+| A4 | Broader curated DTC/PID KB + ontology lint parity | partial | pid_map↔dictionary gate; P0456/P0316; still not full J2012 |
 | A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | Stub ≠ support |
 
 **Seams:** cartridges, `RecognitionService`, logos-bridge `realize`/`verbalize`,
@@ -374,14 +374,14 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Recommendation card richness + status lifecycle UI | R2, R3 | done | medium | Cost/risk on cards; accept/dismiss/convert via ActionService. | `RecommendationPanel`, RecommendationService |
 | Multi-signal trend expansion (beyond oil) | F3 | done | medium | LTFT + load → realize; coolant UI-only. | ForecastService, recognition |
 | Print/PDF diagnostic report polish | G3, G5 | done | medium | Print HTML + last-session summary on reports. | `ReportService`, `ReportDownload` |
-| Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | planned | high | Shared KB; land gates first (`HARDWARE_STANDARDS.md`). | dictionaries, ontology lint |
+| Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | partial | high | Gateway Mode 01 metadata closed; full J1979/J2012 still open. | dictionaries, ontology lint, `test_pid_seed.py` |
 | Shared `@auto/ui-components` | I5 | planned | medium | Consistent trust/evidence UI. | `UX_GUIDELINES` |
 
 ### Platform / coverage (support goals, not a goal themselves)
 
 | Feature | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|
-| Expand DTC dictionary beyond Tigershark seed set | planned | medium | More P0xxx coverage improves perception. | `dtc-dictionary.json`, ontology lint |
+| Expand DTC dictionary beyond Tigershark seed set | planned | medium | More P0xxx families (rich/catalyst/O2) need new concepts. | `dtc-dictionary.json`, ontology lint |
 | Fill GM EcoTec3 / Silverado engine-family cartridge | planned | high when truck available | Stub only until real DTCs/TSBs. | `gm-ecotec3-stub.ts`, vehicle profiles |
 | Bluetooth auto-discovery / MX+ preferred adapter profile | planned | medium | Less friction for scanning. | `obd_gateway/config.py`, `client.py` |
 | Propose-only LLM agent loop (advise pass) | planned | medium | LLM proposes, LOGOS disposes — not required for OBD correctness. | logos-bridge, cartridges, new `apps/agent-service` |
@@ -433,6 +433,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Freeze-frame + Mode 06 UI panels | 2026-07 | `EvidencePanels`, Dashboard |
 | Markdown diagnostic report export | 2026-07 | `ReportService`, `ReportDownload` |
 | DTC P0305–08 + more Mode 01 PID seed rows | 2026-07 | `dtc-dictionary.json`, `pid-dictionary.json` |
+| Close pid_map↔dictionary Mode 01 gate + P0456/P0316 (S7 slice) | 2026-07 | 9 orphan PIDs seeded; bidirectional `test_pid_seed`; EvapCodeSmall/CylinderMisfire reuse |
 | Live gauge strip + freshness (S2/I6) | 2026-07 | `GET .../live-gauges`, `LiveGaugeStrip`, Dashboard |
 | Problem caseboard + verify-after-repair (P2–P5, X5) | 2026-07 | Diagnosis filters; abandon/escalate/reopen; `worked` → verifying → verify |
 | Case timeline from problems + decisions (H2) | 2026-07 | `CaseTimelineService`, `GET .../case-timeline`, Diagnosis + ProblemDetail |

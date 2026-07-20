@@ -53,6 +53,26 @@ describe("ontology registries", () => {
     expect(lookupPid("RPM")?.pidHex).toBe("0x0C");
   });
 
+  it("covers gateway-bound Mode 01 orphans closed in S7", () => {
+    expect(lookupPid("ABSOLUTE_LOAD")).toMatchObject({
+      unit: "percent",
+      pidHex: "0x43",
+      sae: true,
+    });
+    expect(lookupPid("AMBIANT_AIR_TEMP")).toMatchObject({
+      unit: "celsius",
+      pidHex: "0x46",
+    });
+    expect(lookupPid("COMMANDED_EVAPORATIVE_PURGE")?.pidHex).toBe("0x2E");
+    expect(lookupPid("EVAP_VAPOR_PRESSURE")?.unit).toBe("Pa");
+    expect(lookupPid("FUEL_RAIL_PRESSURE_DIRECT")?.pidHex).toBe("0x23");
+  });
+
+  it("maps P0456 and P0316 onto existing Symptom concepts (no new classes)", () => {
+    expect(lookupDtc("P0456")).toMatchObject({ concept: "EvapCodeSmall", sae: true });
+    expect(lookupDtc("P0316")).toMatchObject({ concept: "CylinderMisfire", sae: true });
+  });
+
   it("returns undefined for an unknown PID key", () => {
     expect(lookupPid("NOT_A_REAL_PID")).toBeUndefined();
   });

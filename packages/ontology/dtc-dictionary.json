@@ -17,7 +17,19 @@
     "P0171": { "description": "System Too Lean (Bank 1)", "concept": "LeanCodeBank1", "sae": true },
     "P0174": { "description": "System Too Lean (Bank 2)", "concept": "LeanCodeBank2", "sae": true },
     "P0442": { "description": "Evaporative Emission System Leak Detected (Small Leak)", "concept": "EvapCodeSmall", "sae": true },
+    "P0456": {
+      "description": "Evaporative Emission System Leak Detected (Very Small Leak)",
+      "concept": "EvapCodeSmall",
+      "sae": true,
+      "note": "Same small-leak EVAP family as P0442 (SAE J2012); still maps to EvapCodeSmall — no new fault class."
+    },
     "P0455": { "description": "Evaporative Emission System Leak Detected (Large Leak)", "concept": "EvapCodeLarge", "sae": true },
+    "P0316": {
+      "description": "Engine Misfire Detected on Startup (First 1000 Revolutions)",
+      "concept": "CylinderMisfire",
+      "sae": true,
+      "note": "Startup/first-1000-rev misfire (SAE J2012); same CylinderMisfire concept as P0300–P0308."
+    },
     "P0011": {
       "description": "Intake Camshaft Position Timing Over-Advanced (Bank 1)",
       "concept": "MultiAirFault",
