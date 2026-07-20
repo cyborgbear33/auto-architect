@@ -51,7 +51,7 @@ multi-piece plans live in the next section.
 | **Problem tracking** — open cases through solve | **shipped** | Caseboard filters; abandon/escalate/reopen; `worked` → verifying → verify check | — | — |
 | **Problem history** — cases over time | **partial** | Case timeline (problems + decisions); Journal is decision audit | Mileage/session on events; evidence deep-links | Drive sessions; Durable observation history; H3–H5 |
 | **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel; verify-before-solved (`worked` → verifying) | Stronger family priors / sample-size UX | Multi-signal trends |
-| **History → better future decisions** | **partial** | Multi-signal trends + outcome calibration into draft/solve/refresh | Session-aware trends | Drive sessions (F4) |
+| **History → better future decisions** | **partial** | Multi-signal trends + outcome calibration into draft/solve/refresh | Cascade prognosis (curated next-failure watchlist) + session-aware explainability | F5–F8; cascade prognosis backlog |
 | **Reporting** — shareable diagnostic note | **partial** | Markdown + garage JSON/CSV export/import | Print/PDF polish | Print-friendly HTML/PDF |
 
 **Spine that already works:** ingest → realize → draft/solve → recommend → policy hold → log-repair → verify → Journal.  
@@ -307,12 +307,25 @@ sample size; treating dismissed recommendations as confirmed fixes.
 2. **Outcome memory** — confirmed repairs shift priors and recommendation
    priority for the next similar case.
 
-The operator sees *why* a priority moved (“worked 2/2 times on this vehicle”).
-Small samples shrink toward cartridge defaults — never overfit one lucky fix.
+A third lane, **cascade prognosis**, answers on command: *given what is already
+proven or open, what high-confidence common failures are likely next?* It is
+not a second recognition engine and not actuarial insurance math — it is a
+curated, evidence-cited watchlist of next risks.
+
+The operator sees *why* a priority moved (“worked 2/2 times on this vehicle”)
+and *why* a cascade is listed (“catalyst damage risk because misfire under load
+is proven + drive-cycle heat”). Small samples shrink toward cartridge defaults —
+never overfit one lucky fix. Likelihood uses **ordinal bands** (`Watch` /
+`Elevated` / `High`) plus cited evidence and optional time/mileage **ranges** —
+not fake %-chance-of-failure until outcome data can honestly support it.
 
 **Strategy.** Keep lanes separate. Do not let trends invent classes outside
 realize. Calibration is the flagship piece; multi-signal trends expand
-ForecastService carefully with ontology backing.
+ForecastService carefully with ontology backing. Cascade prognosis is a
+**multi-phase** feature (see Planned Backlog): start with OBD fault-class edges
+seeded from the same DL/cartridge spine, then optionally add a thin
+operator-entered mechanical wear layer that shares the same edge schema —
+never invent pad/rotor/bearing state from Mode 01 alone.
 
 | # | Work piece | Status | Notes |
 |---|---|---|---|
@@ -321,11 +334,15 @@ ForecastService carefully with ontology backing.
 | F3 | Multi-signal trends (fuel trim, coolant, load-at-misfire) | done | RisingFuelTrim / RecurringHighLoad → realize; coolant informing-only |
 | F4 | Session-aware trends (per drive, not only global series) | done | `GET .../forecast?sessionId=`; Dashboard drive-scope picker; recognition stays global |
 | F5 | Explainability chip: “priority raised because …” | todo | Informing overlap |
+| F6 | Cascade edge catalog (OBD fault-class → next-risk) in ontology/cartridges | todo | Curated high-confidence common chains only; no ML black box |
+| F7 | On-command CascadePrognosisService + UI (ordinal bands + evidence + horizons) | todo | Inputs: proven classes, open problems, Trends; propose-only vs realize |
+| F8 | Optional mechanical wear layer (operator-entered stages) on same edge schema | todo | Pads/rotors/bearings etc.; never inferred from OBD alone |
 
 **Seams:** ForecastService, recognition, RecommendationsService, SolverService,
-solution rollups.  
+solution rollups; future `CascadePrognosisService` + ontology cascade edges.  
 **Anti-patterns:** Black-box ML ranking; silent priority changes; using
-simulated history to calibrate production priors.
+simulated history to calibrate production priors; presenting actuarial
+failure % without outcome backing; inventing mechanical wear from the bus.
 
 ---
 
@@ -373,6 +390,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Case timeline (problems + decisions) | H2 | done | medium | Case narrative on Diagnosis / ProblemDetail; Journal stays audit. | `CaseTimelineService` |
 | Recommendation card richness + status lifecycle UI | R2, R3 | done | medium | Cost/risk on cards; accept/dismiss/convert via ActionService. | `RecommendationPanel`, RecommendationService |
 | Multi-signal trend expansion (beyond oil) | F3 | done | medium | LTFT + load → realize; coolant UI-only. | ForecastService, recognition |
+| Cascade prognosis (likely next failures) | F6–F8 | planned | medium (after research) | On-command watchlist of high-confidence cascades from proven/open problems; ordinal bands not fake %. See design note below. | ontology cascade edges, recognition, ForecastService Trends, Diagnosis UI |
 | Print/PDF diagnostic report polish | G3, G5 | done | medium | Print HTML + last-session summary on reports. | `ReportService`, `ReportDownload` |
 | Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | partial | high | Gateway Mode 01 metadata closed; full J1979/J2012 still open. | dictionaries, ontology lint, `test_pid_seed.py` |
 | Shared `@auto/ui-components` | I5 | planned | medium | Consistent trust/evidence UI. | `UX_GUIDELINES` |
@@ -395,6 +413,54 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Coverage thresholds (vitest / codecov) | planned | low | Prefer honest layers over vanity %. | `TESTING_DEV_GUIDE.md`, CI |
 | Ontology browser page (read-only TBox / views / DTC dict) | planned | low | Debug aid; keep lighter than garden. | `@auto/ontology` |
 | Multi-vehicle comparison dashboard | planned | low | Only valuable with ≥2 real vehicles. | VehicleSwitcher, recognition |
+
+#### Design note — Cascade prognosis (parked for research)
+
+**Working name:** Cascade prognosis (UI: “Likely next” / “What may go next”).  
+**Not:** a replacement for `ForecastService` PID projections, nor actuarial
+insurance probabilities.
+
+**Likelihood (decided leaning):** ordinal bands only — `Watch` / `Elevated` /
+`High` — plus cited evidence and optional time or mileage **ranges**. Do **not**
+ship %-chance-of-failure as real probability until outcome history can back it.
+Optional later: a 0–1 *score* labeled as curated prior × evidence weight
+(explicitly not actuarial).
+
+**Scope options researched (pick / hybrid when unparking):**
+
+| Id | Meaning |
+|---|---|
+| **1A** | OBD / diagnostic cascades only — edges among fault classes & Trends already in the ontology spine (e.g. misfire under load → catalyst damage risk; oil decline → MultiAir starvation). |
+| **1B** | 1A plus a small curated **mechanical wear** catalog that requires **operator-entered** stage (pad wear, rotor condition, bearing noise, etc.) — never invented from Mode 01/03 alone. |
+| **Hybrid (recommended when returning)** | One shared **cascade-edge** schema; two evidence *sources*: (1) bus-backed / realize-proven antecedents, (2) operator-asserted wear stages. Same prognosis UI and ordinal bands. |
+
+**Clever multi-phase shape (initial thought to revisit later):**
+
+1. **Phase F6 — Edge catalog.** Declare a small set of high-confidence, common
+   `antecedent → consequent` edges in ontology/cartridges (role or JSON catalog
+   with: consequent class or watch-concept, ordinal prior band, optional
+   horizon range template, required evidence kinds, citation / shop rationale).
+   Prefer edges operators already believe (catalyst after chronic misfire; oil
+   starvation after chronic oil loss) over exotic long chains.
+2. **Phase F7 — On-command prognosis (1A-shaped).** Service loads current
+   recognition + open problems + flagged Trends; matches antecedents; emits a
+   ranked watchlist with band + evidence citations + optional horizon. Propose
+   only — does not invent proven classes; optional “open as watch problem”
+   goes through ActionService. Surface on Diagnosis / ProblemDetail (reuse
+   surfaces; avoid a new nav item unless volume demands it).
+3. **Phase F8 — Wear layer (1B-shaped).** Same edge matcher; antecedents may
+   also be `manualCondition` stages on the vehicle (or problem). Mechanical
+   cascades (pads → rotors → hubs/bearings) live here. OBD never invents pad
+   thickness.
+
+**Integrity rules:** ontology owns consequent meaning; heuristics/LLM may
+propose edges later but LOGOS/`realize` still owns *current* class membership;
+empty watchlist is honest; simulated batches must not quietly inflate bands;
+update Mastery Guide when this ships (`UX_GUIDELINES` §4).
+
+**Why parked:** needs research on which cascades are high-confidence & common
+enough for this garage, and how much mechanical wear entry operators will
+actually maintain.
 
 ---
 
@@ -470,3 +536,4 @@ canonical breakdown; backlog rows are schedulable delivery units.
 - Claiming dealer-complete coverage from Mode 01–07 alone
 - Multi-tenant SaaS before local single-operator durability exists
 - Claiming calibrated probabilistic diagnosis before repair outcomes feed rankings
+- Actuarial %-chance-of-failure / insurance-style prognosis without outcome-backed calibration (cascade prognosis, when built, uses ordinal bands + evidence — see F6–F8)
