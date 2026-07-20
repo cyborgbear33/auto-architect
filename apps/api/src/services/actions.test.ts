@@ -139,7 +139,7 @@ describe("ActionService (the mutation gate)", () => {
     expect(result.allowed).toBe(true);
   });
 
-  it("logs a repair as a DecisionRecord and updates the problem outcome", async () => {
+  it("logs a worked repair into verifying (not solved) with verification started", async () => {
     const draft = await ctx.actions.createDiagnosticProblem({
       vehicleId: JEEP,
       triggeredByClass: "MisfireUnderLoad",
@@ -156,7 +156,99 @@ describe("ActionService (the mutation gate)", () => {
     });
     expect(decision.policyAllowed).toBe(true);
     const problem = await ctx.actions.getDiagnosticProblem(draft.id);
-    expect(problem.status).toBe("solved");
+    expect(problem.status).toBe("verifying");
     expect(problem.outcome?.status).toBe("worked");
+    expect(problem.verification?.startedAt).toBeTruthy();
+  });
+
+  it("verify passes when the triggering class is no longer proven → solved", async () => {
+    const draft = await ctx.actions.createDiagnosticProblem({
+      vehicleId: JEEP,
+      triggeredByClass: "MisfireUnderLoad",
+      statement: { currentState: "", desiredState: "", gap: "" },
+      actions: [],
+    });
+    await ctx.actions.logRepair({
+      vehicleId: JEEP,
+      problemId: draft.id,
+      actionId: "swap-coil-plug",
+      rationale: "fixed",
+      decidedBy: "owner",
+      outcomeStatus: "worked",
+    });
+    // No misfire evidence → recognition empty → verify passes.
+    const verified = await ctx.actions.verifyDiagnosticProblem({ problemId: draft.id });
+    expect(verified.status).toBe("solved");
+    expect(verified.verification?.result).toBe("passed");
+  });
+
+  it("verify fails and reopens when the triggering class is still proven", async () => {
+    const draft = await ctx.actions.createDiagnosticProblem({
+      vehicleId: JEEP,
+      triggeredByClass: "MisfireUnderLoad",
+      statement: { currentState: "", desiredState: "", gap: "" },
+      actions: [],
+    });
+    await ctx.actions.logRepair({
+      vehicleId: JEEP,
+      problemId: draft.id,
+      actionId: "swap-coil-plug",
+      rationale: "thought fixed",
+      decidedBy: "owner",
+      outcomeStatus: "worked",
+    });
+    await ctx.store.observations.record({
+      vehicleId: JEEP,
+      capturedAt: "2026-01-01T00:00:00Z",
+      source: "manual_entry",
+      dtcs: [{ code: "P0304", status: "stored" }],
+      pids: [{ pid: "ENGINE_LOAD", value: 90, timestamp: "2026-01-01T00:00:00Z" }],
+    });
+    const verified = await ctx.actions.verifyDiagnosticProblem({ problemId: draft.id });
+    expect(verified.status).toBe("open");
+    expect(verified.verification?.result).toBe("failed");
+    expect(verified.verification?.stillProven).toContain("MisfireUnderLoad");
+  });
+
+  it("abandon / escalate / reopen lifecycle", async () => {
+    const draft = await ctx.actions.createDiagnosticProblem({
+      vehicleId: JEEP,
+      triggeredByClass: "MisfireUnderLoad",
+      statement: { currentState: "", desiredState: "", gap: "" },
+      actions: [],
+    });
+    const escalated = await ctx.actions.escalateDiagnosticProblem({ problemId: draft.id });
+    expect(escalated.status).toBe("escalated");
+
+    const reopened = await ctx.actions.reopenDiagnosticProblem({ problemId: draft.id });
+    expect(reopened.status).toBe("open");
+    expect(reopened.reopenedFromId).toBe(draft.id);
+
+    const abandoned = await ctx.actions.abandonDiagnosticProblem({ problemId: draft.id });
+    expect(abandoned.status).toBe("abandoned");
+
+    const again = await ctx.actions.reopenDiagnosticProblem({ problemId: draft.id });
+    expect(again.status).toBe("open");
+  });
+
+  it("reopen clears prior verification state", async () => {
+    const draft = await ctx.actions.createDiagnosticProblem({
+      vehicleId: JEEP,
+      triggeredByClass: "MisfireUnderLoad",
+      statement: { currentState: "", desiredState: "", gap: "" },
+      actions: [],
+    });
+    await ctx.actions.logRepair({
+      vehicleId: JEEP,
+      problemId: draft.id,
+      actionId: "swap-coil-plug",
+      rationale: "fixed",
+      decidedBy: "owner",
+      outcomeStatus: "worked",
+    });
+    await ctx.actions.verifyDiagnosticProblem({ problemId: draft.id });
+    const reopened = await ctx.actions.reopenDiagnosticProblem({ problemId: draft.id });
+    expect(reopened.status).toBe("open");
+    expect(reopened.verification).toBeUndefined();
   });
 });

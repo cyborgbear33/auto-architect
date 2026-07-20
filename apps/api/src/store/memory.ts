@@ -148,7 +148,7 @@ function createProblemRepository(): ProblemRepository {
     async update(id, patch) {
       const existing = byId.get(id);
       if (!existing) throw notFound("DiagnosticProblem", id);
-      const updated = { ...existing, ...patch, updatedAt: new Date().toISOString() };
+      const updated = applyProblemPatch(existing, patch);
       byId.set(id, updated);
       return updated;
     },
@@ -156,6 +156,24 @@ function createProblemRepository(): ProblemRepository {
       return [...byId.values()].filter((p) => p.vehicleId === vehicleId);
     },
   };
+}
+
+/** Merge patch; `undefined` values remove keys (e.g. clear verification on reopen). */
+function applyProblemPatch(
+  existing: DiagnosticProblem,
+  patch: Partial<DiagnosticProblem>,
+): DiagnosticProblem {
+  const updated: DiagnosticProblem = {
+    ...existing,
+    ...patch,
+    updatedAt: new Date().toISOString(),
+  };
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === undefined) {
+      delete (updated as unknown as Record<string, unknown>)[key];
+    }
+  }
+  return updated;
 }
 
 function createRecommendationRepository(): RecommendationRepository {

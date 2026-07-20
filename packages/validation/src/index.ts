@@ -107,6 +107,12 @@ export const LogRepairSchema = z.object({
 });
 export type LogRepairInput = z.infer<typeof LogRepairSchema>;
 
+export const ProblemIdActionSchema = z.object({
+  problemId: z.string().min(1),
+  note: z.string().optional(),
+});
+export type ProblemIdActionInput = z.infer<typeof ProblemIdActionSchema>;
+
 export const CreateVehicleSchema = z.object({
   make: z.string().min(1),
   model: z.string().min(1),

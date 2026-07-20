@@ -247,6 +247,6 @@ High-level gaps vs a complete garage product:
 
 - Live scan UX (MX+ dry-run, gauges, Mode 06 / freeze-frame UI)
 - Outcome-calibrated diagnosis + solution history → better recommendations
-- Problem caseboard / verify-after-repair; drive sessions
+- Case timeline UI (H2); drive sessions
 - Diagnostic report export (still missing)
 - Auth / multi-user; shared UI package; LLM advise loop; full Silverado cartridge

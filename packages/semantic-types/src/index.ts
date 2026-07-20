@@ -136,7 +136,23 @@ export type ProblemType =
   | "Learning"
   | "Stability";
 
-export type ProblemStatus = "open" | "analyzing" | "solved" | "escalated" | "abandoned";
+export type ProblemStatus =
+  | "open"
+  | "analyzing"
+  | "verifying"
+  | "solved"
+  | "escalated"
+  | "abandoned";
+
+/** Post-repair verification before a case is truly closed. */
+export interface ProblemVerification {
+  startedAt: IsoTimestamp;
+  completedAt?: IsoTimestamp;
+  result?: "passed" | "failed" | "inconclusive";
+  note?: string;
+  /** Classes still proven when verify ran (empty ⇒ cleared). */
+  stillProven?: string[];
+}
 
 export type GapType =
   | "knowledge"
@@ -281,6 +297,10 @@ export interface DiagnosticProblem {
   triggeredByClass?: string;
   solution?: DiagnosticSolution;
   outcome?: ProblemOutcome;
+  /** Set while status is `verifying` or after a verify check. */
+  verification?: ProblemVerification;
+  /** Prior case id when this problem was reopened from a closed one. */
+  reopenedFromId?: SemanticId;
   createdAt: IsoTimestamp;
   updatedAt: IsoTimestamp;
 }

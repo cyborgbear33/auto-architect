@@ -48,14 +48,14 @@ multi-piece plans live in the next section.
 | **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration on draft/solve + refresh | Family priors polish; counterfactuals UI | Counterfactuals UI; optional LLM advise |
 | **Informing the user** — clear operator surfaces | **partial** | Source badges, narration, FF/Mode06 panels, report export | Live gauges; shared UI package | Live gauges; `@auto/ui-components` |
 | **Recommendations** — what to do next | **partial** | Refresh sets confidence + history-aware priority bump | Cost/risk on cards; status lifecycle UI | Recommendation card richness |
-| **Problem tracking** — open cases through solve | **shipped (MVP)** | `DiagnosticProblem` CRUD/list; create/solve; Diagnosis + ProblemDetail | Filter/reopen/abandon + verify-after-repair caseboard | Problem caseboard + verify-after-repair |
-| **Problem history** — cases over time | **partial** | Problems persist (Postgres); outcome on `log-repair`; Journal is decisions, not a case timeline | Chronological case timeline with mileage/session context | Problem caseboard; Drive sessions; Durable observation history |
-| **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel; outcomes feed calibration | Stronger verify-before-solved process | X5 verify process |
+| **Problem tracking** — open cases through solve | **shipped** | Caseboard filters; abandon/escalate/reopen; `worked` → verifying → verify check | Chronological case timeline (H2) | Case timeline UI |
+| **Problem history** — cases over time | **partial** | Problems persist; lifecycle + verify on caseboard; Journal is decisions | Chronological case timeline with mileage/session context | Case timeline UI; Drive sessions; Durable observation history |
+| **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel; verify-before-solved (`worked` → verifying) | Stronger family priors / sample-size UX | Multi-signal trends |
 | **History → better future decisions** | **partial** | Oil trend + outcome calibration into draft/solve/refresh | Multi-signal trends; session-aware | Multi-signal trends; Drive sessions |
 | **Reporting** — shareable diagnostic note | **partial** | Markdown download/copy (vehicle + problem) | Print/PDF polish | Print-friendly HTML/PDF |
 
-**Spine that already works:** ingest → realize → draft/solve → recommend → policy hold → log-repair → Journal.  
-**Not yet a complete garage product:** live scan UX, evidence-rich informing, outcome-calibrated diagnosis, solution memory, report export.
+**Spine that already works:** ingest → realize → draft/solve → recommend → policy hold → log-repair → verify → Journal.  
+**Not yet a complete garage product:** live scan UX, case timeline, drive sessions, multi-signal trends.
 
 **Cross-cutting product strategy (applies to every goal):**
 
@@ -235,10 +235,10 @@ fault returns.
 | # | Work piece | Status | Notes |
 |---|---|---|---|
 | P1 | Create / get / list / solve problems | done | API + Diagnosis + ProblemDetail |
-| P2 | Caseboard filters + abandon / escalate UX | todo | |
-| P3 | Draft-from-recognition one-click | partial | Exists in spirit; polish |
-| P4 | Verify-after-repair workflow (link session + success criteria check) | todo | Ties to Scanning S4 + observations |
-| P5 | Reopen with lineage to prior case / decision | todo | Preserves history |
+| P2 | Caseboard filters + abandon / escalate UX | done | Diagnosis filters + lifecycle actions |
+| P3 | Draft-from-recognition one-click | done | Hidden while an *active* case exists for the class |
+| P4 | Verify-after-repair workflow (success criteria check) | done | `worked` → `verifying`; verify re-runs recognition |
+| P5 | Reopen with lineage to prior case / decision | done | `reopenedFromId`; clears verification |
 
 **Seams:** `DiagnosticProblem`, ActionService, Diagnosis UI, observations.  
 **Anti-patterns:** Solving without a problem; deleting cases instead of
@@ -290,7 +290,7 @@ confirmation (“worked after 50 mi verify”) over assuming solve ≡ fixed.
 | X2 | Journal list with outcome pills | done | thin but real |
 | X3 | Rollup API: by vehicle, class, engineFamily, actionId | done | `GET .../solution-history?class=` |
 | X4 | “What worked before” panel on Diagnosis / ProblemDetail | done | `WhatWorkedPanel` |
-| X5 | Require / encourage outcome + verify before terminal solved | todo | Process, not just schema |
+| X5 | Require / encourage outcome + verify before terminal solved | done | `log-repair` worked → verifying; verify closes or reopens |
 
 **Seams:** `DecisionRecord`, `ProblemOutcome`, RecommendationsService, Journal.  
 **Anti-patterns:** Outcomes that never get recorded; rollups that ignore
@@ -368,7 +368,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | high | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
 | Durable observation history + freeze-frame retention | S5, H3 | planned | high | Trends, verify-after-repair, history→decision. | `ObservationsService`, store batches |
 | Continuous drive session recorder | S4, H3, F4, G5 | planned | medium | Groups watch streams for history/reports. | obd-gateway watch, ObservationsService |
-| Problem caseboard + verify-after-repair + reopen | P2–P5, H2 | planned | medium | Completes problem tracking/history beyond MVP. | `DiagnosticProblem`, Diagnosis UI |
+| Problem caseboard + verify-after-repair + reopen | P2–P5, X5 | done | medium | Caseboard + verify-before-solved shipped; H2 timeline still open. | `DiagnosticProblem`, Diagnosis UI |
 | Recommendation card richness + status lifecycle UI | R2, R3 | planned | medium | Cost/risk; accept/dismiss/convert (confidence shipped). | Dashboard, RecommendationsService |
 | Multi-signal trend expansion (beyond oil) | F3 | planned | medium | Broader history→recognition; ontology-backed only. | ForecastService, recognition |
 | Print/PDF diagnostic report polish | G3, G5 | planned | medium | Markdown export shipped; print stylesheet next. | `ReportService`, Journal |
@@ -432,6 +432,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Markdown diagnostic report export | 2026-07 | `ReportService`, `ReportDownload` |
 | DTC P0305–08 + more Mode 01 PID seed rows | 2026-07 | `dtc-dictionary.json`, `pid-dictionary.json` |
 | Live gauge strip + freshness (S2/I6) | 2026-07 | `GET .../live-gauges`, `LiveGaugeStrip`, Dashboard |
+| Problem caseboard + verify-after-repair (P2–P5, X5) | 2026-07 | Diagnosis filters; abandon/escalate/reopen; `worked` → verifying → verify |
 
 ---
 

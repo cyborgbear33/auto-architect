@@ -8,6 +8,7 @@
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import type {
+  DiagnosticProblem,
   DtcObservation,
   FreezeFrame,
   Mode06Result,
@@ -205,7 +206,16 @@ export function createDrizzleStore(databaseUrl: string): Store {
     async update(id, patch) {
       const existing = await problems.get(id);
       if (!existing) throw notFound("DiagnosticProblem", id);
-      const updated = { ...existing, ...patch, updatedAt: new Date().toISOString() };
+      const updated: DiagnosticProblem = {
+        ...existing,
+        ...patch,
+        updatedAt: new Date().toISOString(),
+      };
+      for (const [key, value] of Object.entries(patch)) {
+        if (value === undefined) {
+          delete (updated as unknown as Record<string, unknown>)[key];
+        }
+      }
       await db
         .update(t.problems)
         .set({

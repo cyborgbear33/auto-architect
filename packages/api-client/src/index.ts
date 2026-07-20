@@ -224,6 +224,26 @@ export class AutoApiClient {
       method: "POST",
       body: JSON.stringify(input),
     });
+  verifyDiagnosticProblem = (problemId: string, note?: string) =>
+    this.request<DiagnosticProblem>("/api/actions/verify-diagnostic-problem", {
+      method: "POST",
+      body: JSON.stringify({ problemId, note }),
+    });
+  abandonDiagnosticProblem = (problemId: string, note?: string) =>
+    this.request<DiagnosticProblem>("/api/actions/abandon-diagnostic-problem", {
+      method: "POST",
+      body: JSON.stringify({ problemId, note }),
+    });
+  escalateDiagnosticProblem = (problemId: string, note?: string) =>
+    this.request<DiagnosticProblem>("/api/actions/escalate-diagnostic-problem", {
+      method: "POST",
+      body: JSON.stringify({ problemId, note }),
+    });
+  reopenDiagnosticProblem = (problemId: string, note?: string) =>
+    this.request<DiagnosticProblem>("/api/actions/reopen-diagnostic-problem", {
+      method: "POST",
+      body: JSON.stringify({ problemId, note }),
+    });
   requestClearCodesAndDrive = (vehicleId: string) =>
     this.request<{ allowed: true; obligations: string[] }>(
       `/api/vehicles/${enc(vehicleId)}/actions/clear-codes-and-drive`,

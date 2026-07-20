@@ -21,11 +21,6 @@ vi.mock("../store/index.ts", () => ({
     selector({ ui: mockUiState }),
 }));
 
-afterEach(() => {
-  resetMockUiState();
-  vi.clearAllMocks();
-});
-
 const { FakeApiError } = vi.hoisted(() => ({
   FakeApiError: class FakeApiError extends Error {
     statusCode: number;
@@ -76,6 +71,10 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         createdAt: "2026-01-01T00:00:00Z",
         updatedAt: "2026-01-01T00:00:00Z",
       }),
+      abandonDiagnosticProblem: vi.fn(),
+      escalateDiagnosticProblem: vi.fn(),
+      verifyDiagnosticProblem: vi.fn(),
+      reopenDiagnosticProblem: vi.fn(),
       requestClearCodesAndDrive: vi.fn(),
     },
   };
@@ -83,6 +82,12 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
 
 import { api } from "../lib/api.ts";
 import { Diagnosis } from "../routes/Diagnosis.tsx";
+
+afterEach(() => {
+  resetMockUiState();
+  vi.clearAllMocks();
+  vi.mocked(api.listProblems).mockResolvedValue([]);
+});
 
 function renderDiagnosis() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -128,5 +133,77 @@ describe("Diagnosis", () => {
     expect(
       await screen.findByText(/Blocked: blocked by R_forbid_clear_misfire/),
     ).toBeInTheDocument();
+  });
+
+  it("hides draft when an active case already exists for the class (P3)", async () => {
+    const problems = [
+      {
+        id: "problem:active",
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        status: "verifying" as const,
+        statement: { currentState: "a", desiredState: "b", gap: "c" },
+        actions: [],
+        triggeredByClass: "MisfireUnderLoad",
+        createdAt: "2026-01-01T00:00:00Z",
+        updatedAt: "2026-01-02T00:00:00Z",
+      },
+    ];
+    vi.mocked(api.listProblems).mockImplementation(async () => problems);
+    renderDiagnosis();
+    await waitFor(() => expect(api.listProblems).toHaveBeenCalled());
+    expect(await screen.findByRole("button", { name: "Run verify" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Draft diagnostic problem" })).toBeNull();
+  });
+
+  it("filters the caseboard and exposes lifecycle actions", async () => {
+    vi.mocked(api.listProblems).mockImplementation(async () => [
+      {
+        id: "problem:open",
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        status: "open" as const,
+        statement: { currentState: "misfire", desiredState: "smooth", gap: "coil" },
+        actions: [],
+        triggeredByClass: "MisfireUnderLoad",
+        createdAt: "2026-01-01T00:00:00Z",
+        updatedAt: "2026-01-02T00:00:00Z",
+      },
+      {
+        id: "problem:solved",
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        status: "solved" as const,
+        statement: { currentState: "old", desiredState: "ok", gap: "fixed" },
+        actions: [],
+        triggeredByClass: "LeanCruise",
+        createdAt: "2026-01-01T00:00:00Z",
+        updatedAt: "2026-01-03T00:00:00Z",
+      },
+    ]);
+    vi.mocked(api.abandonDiagnosticProblem).mockResolvedValue({
+      id: "problem:open",
+      vehicleId: "veh:jeep-renegade-2015-latitude",
+      status: "abandoned",
+      statement: { currentState: "misfire", desiredState: "smooth", gap: "coil" },
+      actions: [],
+      triggeredByClass: "MisfireUnderLoad",
+      createdAt: "2026-01-01T00:00:00Z",
+      updatedAt: "2026-01-04T00:00:00Z",
+    });
+
+    renderDiagnosis();
+    const heading = await screen.findByText("Problem caseboard");
+    const board = () => within(heading.closest("section")!);
+
+    expect(await board().findByText("MisfireUnderLoad")).toBeInTheDocument();
+    expect(board().queryByText("LeanCruise")).toBeNull();
+
+    fireEvent.click(board().getByRole("button", { name: "Solved" }));
+    expect(await board().findByText("LeanCruise")).toBeInTheDocument();
+    expect(board().queryByText("MisfireUnderLoad")).toBeNull();
+
+    fireEvent.click(board().getByRole("button", { name: "Active" }));
+    fireEvent.click(await board().findByRole("button", { name: "Abandon" }));
+    await waitFor(() =>
+      expect(api.abandonDiagnosticProblem).toHaveBeenCalledWith("problem:open"),
+    );
   });
 });

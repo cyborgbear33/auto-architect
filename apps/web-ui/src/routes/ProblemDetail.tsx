@@ -18,6 +18,15 @@ const KIND_EXPLANATIONS: Record<string, string> = {
   none: "no viable action was found.",
 };
 
+const STATUS_STYLES: Record<string, string> = {
+  open: "bg-slate-100 text-slate-700 border-slate-200",
+  analyzing: "bg-sky-100 text-sky-800 border-sky-200",
+  verifying: "bg-amber-100 text-amber-900 border-amber-200",
+  solved: "bg-green-100 text-green-800 border-green-200",
+  escalated: "bg-orange-100 text-orange-800 border-orange-200",
+  abandoned: "bg-slate-100 text-slate-400 border-slate-200",
+};
+
 export function ProblemDetail() {
   const { problemId } = useParams({ from: "/problems/$problemId" });
   const qc = useQueryClient();
@@ -33,9 +42,34 @@ export function ProblemDetail() {
     queryFn: () => api.getProblem(problemId),
   });
 
+  const invalidate = () => {
+    void qc.invalidateQueries({ queryKey: queryKeys.problem(problemId) });
+    const vehicleId = problemQ.data?.vehicleId;
+    if (vehicleId) {
+      void qc.invalidateQueries({ queryKey: queryKeys.problems(vehicleId) });
+    }
+  };
+
   const solve = useMutation({
     mutationFn: () => api.solveDiagnosticProblem(problemId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.problem(problemId) }),
+    onSuccess: invalidate,
+  });
+
+  const verify = useMutation({
+    mutationFn: () => api.verifyDiagnosticProblem(problemId),
+    onSuccess: invalidate,
+  });
+  const abandon = useMutation({
+    mutationFn: () => api.abandonDiagnosticProblem(problemId),
+    onSuccess: invalidate,
+  });
+  const escalate = useMutation({
+    mutationFn: () => api.escalateDiagnosticProblem(problemId),
+    onSuccess: invalidate,
+  });
+  const reopen = useMutation({
+    mutationFn: () => api.reopenDiagnosticProblem(problemId),
+    onSuccess: invalidate,
   });
 
   const logRepair = useMutation({
@@ -49,7 +83,7 @@ export function ProblemDetail() {
         outcomeStatus: input.outcome as "worked" | "partial" | "failed" | "inconclusive",
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.problem(problemId) });
+      invalidate();
       if (problem?.vehicleId) {
         qc.invalidateQueries({ queryKey: queryKeys.decisions(problem.vehicleId) });
         qc.invalidateQueries({ queryKey: queryKeys.solutionHistory(problem.vehicleId) });
@@ -76,6 +110,82 @@ export function ProblemDetail() {
         subtitle={problem.id}
         actions={<ReportDownload problemId={problem.id} />}
       />
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span
+          className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[problem.status] ?? STATUS_STYLES.open}`}
+        >
+          {problem.status}
+        </span>
+        {(problem.status === "open" || problem.status === "analyzing") && (
+          <>
+            <LifecycleButton
+              label="Escalate"
+              onClick={() => escalate.mutate()}
+              disabled={escalate.isPending}
+            />
+            <LifecycleButton
+              label="Abandon"
+              onClick={() => abandon.mutate()}
+              disabled={abandon.isPending}
+              muted
+            />
+          </>
+        )}
+        {(problem.status === "solved" ||
+          problem.status === "abandoned" ||
+          problem.status === "escalated") && (
+          <LifecycleButton
+            label="Reopen case"
+            onClick={() => reopen.mutate()}
+            disabled={reopen.isPending}
+          />
+        )}
+      </div>
+
+      {problem.status === "verifying" && (
+        <section className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+          <h2 className="text-sm font-semibold text-amber-900">Verify after repair</h2>
+          <p className="mt-1 text-sm text-amber-800">
+            Outcome was logged as <span className="font-medium">worked</span>. Re-check recognition
+            against success criteria before closing — the case is not solved yet.
+          </p>
+          {problem.desiredState?.successCriteria && (
+            <p className="mt-2 text-xs text-amber-700">
+              Success criteria: {problem.desiredState.successCriteria}
+            </p>
+          )}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => verify.mutate()}
+              disabled={verify.isPending}
+              className="rounded-md bg-amber-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-800 disabled:opacity-50"
+            >
+              Run verify check
+            </button>
+            <LifecycleButton
+              label="Abandon"
+              onClick={() => abandon.mutate()}
+              disabled={abandon.isPending}
+              muted
+            />
+          </div>
+        </section>
+      )}
+
+      {problem.verification?.result && (
+        <p
+          className={`mb-4 rounded-md px-3 py-2 text-sm ${
+            problem.verification.result === "passed"
+              ? "bg-green-50 text-green-800"
+              : "bg-red-50 text-red-800"
+          }`}
+        >
+          Verify {problem.verification.result}
+          {problem.verification.note ? `: ${problem.verification.note}` : ""}
+        </p>
+      )}
 
       <div className="mb-4">
         <WhatWorkedPanel vehicleId={problem.vehicleId} faultClass={problem.triggeredByClass} />
@@ -111,7 +221,7 @@ export function ProblemDetail() {
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Solution (LOGOS solve)</h2>
-          {!solution && (
+          {!solution && problem.status !== "abandoned" && (
             <button
               type="button"
               onClick={() => solve.mutate()}
@@ -153,15 +263,19 @@ export function ProblemDetail() {
                     )}
                   </div>
                   <p className="mt-1 text-slate-600">{r.action.description}</p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setLogForm({ actionId: r.action.id, rationale: "", outcome: "worked" })
-                    }
-                    className="mt-2 text-xs font-medium text-sky-700 hover:underline"
-                  >
-                    Log this as the repair taken
-                  </button>
+                  {problem.status !== "verifying" &&
+                    problem.status !== "solved" &&
+                    problem.status !== "abandoned" && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setLogForm({ actionId: r.action.id, rationale: "", outcome: "worked" })
+                        }
+                        className="mt-2 text-xs font-medium text-sky-700 hover:underline"
+                      >
+                        Log this as the repair taken
+                      </button>
+                    )}
                 </li>
               ))}
             </ol>
@@ -181,6 +295,11 @@ export function ProblemDetail() {
           <h2 className="mb-2 text-sm font-semibold text-slate-700">
             Log repair: {logForm.actionId}
           </h2>
+          <p className="mb-3 text-xs text-slate-500">
+            Choosing <span className="font-medium">Worked</span> moves the case to{" "}
+            <span className="font-medium">verifying</span> — run a verify check before it closes as
+            solved.
+          </p>
           <form
             className="space-y-3"
             onSubmit={(e) => {
@@ -241,5 +360,32 @@ export function ProblemDetail() {
         </p>
       )}
     </div>
+  );
+}
+
+function LifecycleButton({
+  label,
+  onClick,
+  disabled,
+  muted,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  muted?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`rounded-md border px-2.5 py-1 text-xs font-medium disabled:opacity-50 ${
+        muted
+          ? "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+          : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+      }`}
+    >
+      {label}
+    </button>
   );
 }

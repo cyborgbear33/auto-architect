@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import type { DiagnosticProblem, ProblemStatus } from "@auto/semantic-types";
+import { useMemo, useState } from "react";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
@@ -9,10 +10,21 @@ import { ApiError, api, queryKeys } from "../lib/api.ts";
 const STATUS_STYLES: Record<string, string> = {
   open: "bg-slate-100 text-slate-700 border-slate-200",
   analyzing: "bg-sky-100 text-sky-800 border-sky-200",
+  verifying: "bg-amber-100 text-amber-900 border-amber-200",
   solved: "bg-green-100 text-green-800 border-green-200",
   escalated: "bg-orange-100 text-orange-800 border-orange-200",
   abandoned: "bg-slate-100 text-slate-400 border-slate-200",
 };
+
+const ACTIVE: ReadonlySet<ProblemStatus> = new Set(["open", "analyzing", "verifying"]);
+
+type CaseboardFilter =
+  | "active"
+  | "verifying"
+  | "solved"
+  | "escalated"
+  | "abandoned"
+  | "all";
 
 function StatusPill({ status }: { status: string }) {
   return (
@@ -24,6 +36,12 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
+function matchesFilter(problem: DiagnosticProblem, filter: CaseboardFilter): boolean {
+  if (filter === "all") return true;
+  if (filter === "active") return ACTIVE.has(problem.status);
+  return problem.status === filter;
+}
+
 export function Diagnosis() {
   const vehicleId = useSelectedVehicleId();
   if (!vehicleId) return <EmptyVehicleState />;
@@ -32,6 +50,7 @@ export function Diagnosis() {
 
 function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
   const qc = useQueryClient();
+  const [filter, setFilter] = useState<CaseboardFilter>("active");
   const [clearCodesResult, setClearCodesResult] = useState<
     | { kind: "allowed"; obligations: string[] }
     | { kind: "blocked"; message: string; details: unknown }
@@ -51,15 +70,45 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
     queryFn: () => api.listProblems(vehicleId),
   });
 
-  const draftedClasses = new Set(problemsQ.data?.map((p) => p.triggeredByClass).filter(Boolean));
-  const undraftedClasses = (recognitionQ.data?.mostSpecific ?? []).filter(
-    (c) => !draftedClasses.has(c),
+  // P3: only treat a class as "drafted" while an active case exists for it.
+  const activeClasses = new Set(
+    problemsQ.data
+      ?.filter((p) => p.triggeredByClass && ACTIVE.has(p.status))
+      .map((p) => p.triggeredByClass as string),
   );
+  const undraftedClasses = (recognitionQ.data?.mostSpecific ?? []).filter(
+    (c) => !activeClasses.has(c),
+  );
+
+  const filteredProblems = useMemo(() => {
+    const list = (problemsQ.data ?? []).filter((p) => matchesFilter(p, filter));
+    return [...list].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  }, [problemsQ.data, filter]);
+
+  const invalidateProblems = () =>
+    qc.invalidateQueries({ queryKey: queryKeys.problems(vehicleId) });
 
   const createProblem = useMutation({
     mutationFn: (triggeredByClass: string) =>
       api.createDiagnosticProblem({ vehicleId, triggeredByClass }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.problems(vehicleId) }),
+    onSuccess: invalidateProblems,
+  });
+
+  const abandon = useMutation({
+    mutationFn: (problemId: string) => api.abandonDiagnosticProblem(problemId),
+    onSuccess: invalidateProblems,
+  });
+  const escalate = useMutation({
+    mutationFn: (problemId: string) => api.escalateDiagnosticProblem(problemId),
+    onSuccess: invalidateProblems,
+  });
+  const verify = useMutation({
+    mutationFn: (problemId: string) => api.verifyDiagnosticProblem(problemId),
+    onSuccess: invalidateProblems,
+  });
+  const reopen = useMutation({
+    mutationFn: (problemId: string) => api.reopenDiagnosticProblem(problemId),
+    onSuccess: invalidateProblems,
   });
 
   const clearCodes = useMutation({
@@ -73,11 +122,20 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
     },
   });
 
+  const filters: Array<{ id: CaseboardFilter; label: string }> = [
+    { id: "active", label: "Active" },
+    { id: "verifying", label: "Verifying" },
+    { id: "solved", label: "Solved" },
+    { id: "escalated", label: "Escalated" },
+    { id: "abandoned", label: "Abandoned" },
+    { id: "all", label: "All" },
+  ];
+
   return (
     <div>
       <PageHeader
         title="Diagnosis"
-        subtitle="LOGOS realize → proven fault classes → drafted DiagnosticProblems → solve-ranked next steps"
+        subtitle="Caseboard: draft → solve → repair → verify → close (or abandon / escalate / reopen)"
       />
 
       <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
@@ -94,7 +152,8 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         </h2>
         {undraftedClasses.length === 0 ? (
           <p className="text-sm text-slate-400">
-            Nothing new to draft — every proven class already has a diagnostic problem below.
+            Nothing new to draft — every proven class already has an active case below (or nothing is
+            proven).
           </p>
         ) : (
           <ul className="space-y-2">
@@ -125,28 +184,96 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
       </section>
 
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700">Diagnostic problems</h2>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-700">Problem caseboard</h2>
+          <div className="flex flex-wrap gap-1">
+            {filters.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFilter(f.id)}
+                className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                  filter === f.id
+                    ? "border-sky-300 bg-sky-50 text-sky-800"
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
-        {problemsQ.data?.length === 0 && (
-          <p className="text-sm text-slate-400">No diagnostic problems drafted yet.</p>
+
+        {filteredProblems.length === 0 && (
+          <p className="text-sm text-slate-400">No problems in this filter.</p>
         )}
         <ul className="space-y-2">
-          {problemsQ.data?.map((problem) => (
-            <li key={problem.id}>
-              <Link
-                to="/problems/$problemId"
-                params={{ problemId: problem.id }}
-                className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm hover:bg-slate-100"
-              >
-                <span>
+          {filteredProblems.map((problem) => (
+            <li
+              key={problem.id}
+              className="rounded-md bg-slate-50 px-3 py-2 text-sm"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <Link
+                  to="/problems/$problemId"
+                  params={{ problemId: problem.id }}
+                  className="min-w-0 flex-1 hover:underline"
+                >
                   <span className="font-medium text-slate-800">
                     {problem.triggeredByClass ?? "manual"}
                   </span>
                   <span className="ml-2 text-slate-500">{problem.statement.currentState}</span>
-                </span>
+                  {problem.verification?.result && (
+                    <span className="mt-0.5 block text-xs text-slate-500">
+                      verify: {problem.verification.result}
+                      {problem.verification.note ? ` — ${problem.verification.note}` : ""}
+                    </span>
+                  )}
+                </Link>
                 <StatusPill status={problem.status} />
-              </Link>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(problem.status === "open" || problem.status === "analyzing") && (
+                  <>
+                    <CaseAction
+                      label="Escalate"
+                      onClick={() => escalate.mutate(problem.id)}
+                      disabled={escalate.isPending}
+                    />
+                    <CaseAction
+                      label="Abandon"
+                      onClick={() => abandon.mutate(problem.id)}
+                      disabled={abandon.isPending}
+                      tone="muted"
+                    />
+                  </>
+                )}
+                {problem.status === "verifying" && (
+                  <>
+                    <CaseAction
+                      label="Run verify"
+                      onClick={() => verify.mutate(problem.id)}
+                      disabled={verify.isPending}
+                      tone="primary"
+                    />
+                    <CaseAction
+                      label="Abandon"
+                      onClick={() => abandon.mutate(problem.id)}
+                      disabled={abandon.isPending}
+                      tone="muted"
+                    />
+                  </>
+                )}
+                {(problem.status === "solved" ||
+                  problem.status === "abandoned" ||
+                  problem.status === "escalated") && (
+                  <CaseAction
+                    label="Reopen"
+                    onClick={() => reopen.mutate(problem.id)}
+                    disabled={reopen.isPending}
+                  />
+                )}
+              </div>
             </li>
           ))}
         </ul>
@@ -182,5 +309,34 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         )}
       </section>
     </div>
+  );
+}
+
+function CaseAction({
+  label,
+  onClick,
+  disabled,
+  tone = "default",
+}: {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  tone?: "default" | "primary" | "muted";
+}) {
+  const styles =
+    tone === "primary"
+      ? "bg-sky-600 text-white hover:bg-sky-700 border-sky-600"
+      : tone === "muted"
+        ? "bg-white text-slate-500 hover:bg-slate-100 border-slate-200"
+        : "bg-white text-slate-700 hover:bg-slate-100 border-slate-300";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-50 ${styles}`}
+    >
+      {label}
+    </button>
   );
 }

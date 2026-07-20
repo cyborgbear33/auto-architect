@@ -3,6 +3,7 @@ import {
   CreateVehicleSchema,
   LogRepairSchema,
   ObservationBatchSchema,
+  ProblemIdActionSchema,
 } from "@auto/validation";
 import type { FastifyInstance } from "fastify";
 import { notFound } from "../lib/errors.ts";
@@ -171,5 +172,25 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     const input = LogRepairSchema.parse(req.body);
     reply.code(201);
     return s.actions.logRepair(input);
+  });
+
+  app.post("/api/actions/verify-diagnostic-problem", async (req) => {
+    const input = ProblemIdActionSchema.parse(req.body);
+    return s.actions.verifyDiagnosticProblem(input);
+  });
+
+  app.post("/api/actions/abandon-diagnostic-problem", async (req) => {
+    const input = ProblemIdActionSchema.parse(req.body);
+    return s.actions.abandonDiagnosticProblem(input);
+  });
+
+  app.post("/api/actions/escalate-diagnostic-problem", async (req) => {
+    const input = ProblemIdActionSchema.parse(req.body);
+    return s.actions.escalateDiagnosticProblem(input);
+  });
+
+  app.post("/api/actions/reopen-diagnostic-problem", async (req) => {
+    const input = ProblemIdActionSchema.parse(req.body);
+    return s.actions.reopenDiagnosticProblem(input);
   });
 }

@@ -1,7 +1,11 @@
 import { draftForClass } from "@auto/cartridges";
-import type { DecisionRecord, DiagnosticProblem } from "@auto/semantic-types";
-import type { CreateDiagnosticProblemInput, LogRepairInput } from "@auto/validation";
-import { notFound, policyBlocked, validationError } from "../lib/errors.ts";
+import type { DecisionRecord, DiagnosticProblem, ProblemStatus } from "@auto/semantic-types";
+import type {
+  CreateDiagnosticProblemInput,
+  LogRepairInput,
+  ProblemIdActionInput,
+} from "@auto/validation";
+import { conflict, notFound, policyBlocked, validationError } from "../lib/errors.ts";
 import { newId, nowIso } from "../lib/ids.ts";
 import type { Store } from "../store/index.ts";
 import { applyCalibration, calibratePlaybook } from "./calibration.ts";
@@ -10,6 +14,12 @@ import type { RecognitionService } from "./recognition.ts";
 import type { SolutionHistoryService } from "./solution-history.ts";
 import type { SolverService } from "./solver.ts";
 import type { VehicleService } from "./vehicle.ts";
+
+const REOPENABLE: ReadonlySet<ProblemStatus> = new Set([
+  "solved",
+  "abandoned",
+  "escalated",
+]);
 
 /**
  * The mutation gate. Every state-changing operation in auto-architect goes
@@ -145,10 +155,16 @@ export class ActionService {
     return { allowed: true, obligations: evaluation.obligations };
   }
 
-  /** Log an actual repair/diagnostic action taken and its outcome — the L4 learning signal. */
+  /**
+   * Log an actual repair/diagnostic action. A `worked` outcome moves the case
+   * to `verifying` (not solved) — close only after `verifyDiagnosticProblem`.
+   */
   async logRepair(input: LogRepairInput): Promise<DecisionRecord> {
     const problem = await this.store.problems.get(input.problemId);
     if (!problem) throw notFound("DiagnosticProblem", input.problemId);
+    if (problem.status === "abandoned") {
+      throw conflict("Cannot log a repair on an abandoned problem — reopen it first.");
+    }
 
     const now = nowIso();
     const outcome = input.outcomeStatus
@@ -161,9 +177,19 @@ export class ActionService {
         }
       : undefined;
 
+    let nextStatus: ProblemStatus = problem.status;
+    let verification = problem.verification;
+    if (outcome?.status === "worked") {
+      nextStatus = "verifying";
+      verification = { startedAt: now };
+    } else if (outcome && (problem.status === "open" || problem.status === "analyzing")) {
+      nextStatus = "analyzing";
+    }
+
     await this.store.problems.update(input.problemId, {
-      status: outcome?.status === "worked" ? "solved" : problem.status,
+      status: nextStatus,
       ...(outcome ? { outcome } : {}),
+      ...(verification ? { verification } : {}),
     });
 
     const decision: DecisionRecord = {
@@ -180,7 +206,114 @@ export class ActionService {
     return this.store.decisions.create(decision);
   }
 
+  /**
+   * Post-repair verify: re-run recognition. If the triggering class is gone,
+   * mark solved; if still proven, fail verify and reopen the case.
+   */
+  async verifyDiagnosticProblem(input: ProblemIdActionInput): Promise<DiagnosticProblem> {
+    const problem = await this.requireProblem(input.problemId);
+    if (problem.status !== "verifying") {
+      throw conflict(
+        `Verify only applies to problems in "verifying" status (currently "${problem.status}").`,
+      );
+    }
+
+    const recognition = await this.recognition.recognize(problem.vehicleId);
+    const className = problem.triggeredByClass;
+    const stillProven = className
+      ? recognition.member.includes(className) || recognition.mostSpecific.includes(className)
+      : false;
+    const now = nowIso();
+    const criteria = problem.desiredState?.successCriteria;
+
+    if (!className) {
+      // Manual problems: operator confirms via note; treat verify as passed.
+      return this.store.problems.update(problem.id, {
+        status: "solved",
+        verification: {
+          startedAt: problem.verification?.startedAt ?? now,
+          completedAt: now,
+          result: "passed",
+          note: input.note ?? "Manual case verified by operator (no triggeredByClass).",
+          stillProven: [],
+        },
+      });
+    }
+
+    if (stillProven) {
+      return this.store.problems.update(problem.id, {
+        status: "open",
+        verification: {
+          startedAt: problem.verification?.startedAt ?? now,
+          completedAt: now,
+          result: "failed",
+          stillProven: [className],
+          note:
+            input.note ??
+            `${className} still proven after repair` +
+              (criteria ? ` — success criteria: ${criteria}` : ""),
+        },
+      });
+    }
+
+    return this.store.problems.update(problem.id, {
+      status: "solved",
+      verification: {
+        startedAt: problem.verification?.startedAt ?? now,
+        completedAt: now,
+        result: "passed",
+        stillProven: [],
+        note:
+          input.note ??
+          `${className} no longer proven` +
+            (criteria ? ` — success criteria: ${criteria}` : ""),
+      },
+    });
+  }
+
+  async abandonDiagnosticProblem(input: ProblemIdActionInput): Promise<DiagnosticProblem> {
+    const problem = await this.requireProblem(input.problemId);
+    if (problem.status === "solved") {
+      throw conflict("Solved problems are closed — reopen if you need to abandon a mistaken case.");
+    }
+    if (problem.status === "abandoned") return problem;
+    return this.store.problems.update(problem.id, { status: "abandoned" });
+  }
+
+  async escalateDiagnosticProblem(input: ProblemIdActionInput): Promise<DiagnosticProblem> {
+    const problem = await this.requireProblem(input.problemId);
+    if (problem.status === "escalated") return problem;
+    if (problem.status === "solved" || problem.status === "abandoned") {
+      throw conflict(`Cannot escalate a "${problem.status}" problem — reopen it first.`);
+    }
+    return this.store.problems.update(problem.id, { status: "escalated" });
+  }
+
+  /**
+   * Reopen a closed case in-place with lineage (`reopenedFromId` points at self
+   * history via prior status — we stamp the previous id as lineage anchor).
+   */
+  async reopenDiagnosticProblem(input: ProblemIdActionInput): Promise<DiagnosticProblem> {
+    const problem = await this.requireProblem(input.problemId);
+    if (!REOPENABLE.has(problem.status)) {
+      throw conflict(
+        `Only solved/abandoned/escalated problems can be reopened (currently "${problem.status}").`,
+      );
+    }
+    return this.store.problems.update(problem.id, {
+      status: "open",
+      reopenedFromId: problem.reopenedFromId ?? problem.id,
+      verification: undefined,
+    });
+  }
+
   async listDecisions(vehicleId: string): Promise<DecisionRecord[]> {
     return this.store.decisions.listByVehicle(vehicleId);
+  }
+
+  private async requireProblem(problemId: string): Promise<DiagnosticProblem> {
+    const problem = await this.store.problems.get(problemId);
+    if (!problem) throw notFound("DiagnosticProblem", problemId);
+    return problem;
   }
 }
