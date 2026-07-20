@@ -24,6 +24,10 @@ function pct(n: number): string {
   return `${(n * 100).toFixed(0)}%`;
 }
 
+function isCampaignRec(rec: Recommendation): boolean {
+  return rec.source === "campaign" || (rec.generatedFromCampaignIds?.length ?? 0) > 0;
+}
+
 function RecommendationCard({
   rec,
   onAccept,
@@ -37,7 +41,9 @@ function RecommendationCard({
   onConvert: () => void;
   busy: boolean;
 }) {
+  const campaign = isCampaignRec(rec);
   const faultClass = rec.generatedFromClasses[0];
+  const campaignId = rec.generatedFromCampaignIds?.[0];
   return (
     <li className="rounded-md bg-slate-50 px-3 py-2.5 text-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -45,6 +51,11 @@ function RecommendationCard({
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="font-medium text-slate-800">{rec.title}</span>
             <Pill tone={rec.priority}>{rec.priority}</Pill>
+            {campaign && (
+              <span className="rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-800">
+                campaign
+              </span>
+            )}
             <span className="text-[11px] uppercase tracking-wide text-slate-400">{rec.status}</span>
           </div>
           <p className="mt-1 text-xs text-slate-500">{rec.reason}</p>
@@ -53,12 +64,21 @@ function RecommendationCard({
             {rec.cost !== undefined && <span>cost {pct(rec.cost)}</span>}
             {rec.risk !== undefined && <span>risk {pct(rec.risk)}</span>}
             {faultClass && <span className="font-mono text-slate-600">{faultClass}</span>}
-            <a href="#evidence" className="font-medium text-sky-700 hover:underline">
-              Evidence
-            </a>
-            <Link to="/diagnosis" className="font-medium text-sky-700 hover:underline">
-              Diagnosis
-            </Link>
+            {campaignId && <span className="font-mono text-slate-600">{campaignId}</span>}
+            {!campaign && (
+              <a href="#evidence" className="font-medium text-sky-700 hover:underline">
+                Evidence
+              </a>
+            )}
+            {campaign ? (
+              <Link to="/campaigns" className="font-medium text-sky-700 hover:underline">
+                Campaigns
+              </Link>
+            ) : (
+              <Link to="/diagnosis" className="font-medium text-sky-700 hover:underline">
+                Diagnosis
+              </Link>
+            )}
           </div>
         </div>
         <div className="flex flex-shrink-0 flex-wrap gap-1.5">
@@ -94,7 +114,7 @@ function RecommendationCard({
   );
 }
 
-/** Operator shortlist with cost/risk chrome and accept / dismiss / convert (R2/R3). */
+/** Operator shortlist: class-backed + campaign/TSB cards with lifecycle actions. */
 export function RecommendationPanel({ vehicleId }: { vehicleId: string }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -138,8 +158,8 @@ export function RecommendationPanel({ vehicleId }: { vehicleId: string }) {
     <section className="rounded-lg border border-slate-200 bg-white p-4">
       <h2 className="mb-1 text-sm font-semibold text-slate-700">Recommendations</h2>
       <p className="mb-3 text-xs text-slate-400">
-        From proven classes only. Cost/risk come from the cartridge playbook; convert opens a case
-        via ActionService.
+        Proven classes (with playbook cost/risk) plus matched OEM campaigns/TSBs. Campaign cards are
+        applicability only — not a proven fault class.
       </p>
       {error && <p className="mb-2 text-xs text-red-600">{error}</p>}
       {recommendationsQ.isLoading && <p className="text-sm text-slate-400">Loading…</p>}

@@ -393,6 +393,9 @@ function composeMarkdown(input: {
       if (r.generatedFromClasses.length > 0) {
         lines.push(`  - Classes: ${r.generatedFromClasses.join(", ")}`);
       }
+      if (r.generatedFromCampaignIds && r.generatedFromCampaignIds.length > 0) {
+        lines.push(`  - Campaigns/TSBs: ${r.generatedFromCampaignIds.join(", ")}`);
+      }
     }
   }
   lines.push("");

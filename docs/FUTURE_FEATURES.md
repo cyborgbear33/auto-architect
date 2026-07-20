@@ -47,7 +47,7 @@ multi-piece plans live in the next section.
 | **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration; lean/cam-crank fixtures; FF/Mode06 UI; broader DTC/PID seed | Broader SAE KB; richer evidence adjacency | SAE PID/DTC KB expansion |
 | **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration on draft/solve + refresh | Family priors polish; counterfactuals UI | Counterfactuals UI; optional LLM advise |
 | **Informing the user** — clear operator surfaces | **partial** | Source badges, narration, FF/Mode06 panels, report export | Live gauges; shared UI package | Live gauges; `@auto/ui-components` |
-| **Recommendations** — what to do next | **partial** | Cards with conf/cost/risk + accept/dismiss/convert | Campaign-backed cards (R5) | RecommendationService |
+| **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert | Deeper campaign→repair playbooks | RecommendationService |
 | **Problem tracking** — open cases through solve | **shipped** | Caseboard filters; abandon/escalate/reopen; `worked` → verifying → verify check | — | — |
 | **Problem history** — cases over time | **partial** | Case timeline (problems + decisions); Journal is decision audit | Mileage/session on events; evidence deep-links | Drive sessions; Durable observation history; H3–H5 |
 | **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel; verify-before-solved (`worked` → verifying) | Stronger family priors / sample-size UX | Multi-signal trends |
@@ -212,7 +212,7 @@ is opened (`generatedByProblem`).
 | R2 | Card richness: confidence, cost/risk, evidence deep-link | done | Playbook cost/risk on refresh; Evidence + Diagnosis links |
 | R3 | Status lifecycle in UI (accept / dismiss / convert) | done | Accept/dismiss + convert→ActionService; open-only shortlist |
 | R4 | History-aware priority from solution rollup + calibration | done | One-step bump when worked≥2 clean |
-| R5 | Campaign-backed recommendations (TSB/recall → actionable card) | partial | Campaigns page exists; weak rec link |
+| R5 | Campaign-backed recommendations (TSB/recall → actionable card) | done | Refresh emits W80/W84/TSB cards; empty classes; Campaigns link |
 
 **Seams:** `RecommendationService`, recognition, campaigns, Dashboard.  
 **Anti-patterns:** Recommendations that invent fault classes; burying cost/risk;
@@ -446,6 +446,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Odometer / session on case timeline events (H3) | 2026-07 | lifecycle + DecisionRecord stamps; CaseTimelinePanel |
 | Session-aware signal trends (F4) | 2026-07 | `forecast?sessionId=`, Dashboard drive-scope picker |
 | Recommendation richness + lifecycle UI (R2/R3) | 2026-07 | cost/risk on cards; accept/dismiss/convert; `RecommendationPanel` |
+| Campaign-backed recommendations (R5) | 2026-07 | refresh → campaign/TSB cards; `generatedFromCampaignIds`; manual convert |
 
 ---
 

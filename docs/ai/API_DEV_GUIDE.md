@@ -48,8 +48,8 @@ allowed to append evidence; it still does not classify).
 | `SolutionHistoryService` | no | Roll up repair outcomes by action / class / family |
 | `CaseTimelineService` | no | Derive case narrative from problems + decisions |
 | `GarageExportService` | no (import mutates store) | JSON garage dump/restore + CSV tables |
-| `CampaignService` | no | Match `known-campaigns.json` |
-| `RecommendationService` | no (uses recognition outputs) | List / refresh / status / convert→ActionService |
+| `CampaignService` | no | Match `known-campaigns.json`; feeds R5 shortlist cards |
+| `RecommendationService` | no (uses recognition + campaigns) | List / refresh (class + campaign cards) / status / convert |
 | `VehicleService` | no | Profiles + engine-family resolution |
 
 Inject `LogosBridge` (or `FakeLogosBridge` in tests) from `services/index.ts`.

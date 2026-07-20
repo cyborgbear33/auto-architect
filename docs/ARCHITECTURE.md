@@ -157,7 +157,7 @@ enforced by `pnpm lint:ontology` and `packages/cartridges/src/ontology-lint.test
 | `DriveSessionService` | — | Start/end/list sessions; simulate upload path |
 | `ReportService` | — | Markdown + print HTML diagnostic reports; last session summary (G5) |
 | `CampaignsService` | — | Match vehicle vs known recalls/TSBs |
-| `RecommendationsService` | — | Surface ranked next steps to the UI |
+| `RecommendationService` | — | Shortlist from proven classes + matched campaigns/TSBs (R5) |
 | `VehicleService` | — | Profiles, engine families, view resolution |
 
 **FOL atom sanitization:** LOGOS `reason` formula parsing rejects hyphens/colons

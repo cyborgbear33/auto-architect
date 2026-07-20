@@ -5,25 +5,20 @@ import { newId, nowIso } from "../lib/ids.ts";
 import type { Store } from "../store/index.ts";
 import type { ActionService } from "./actions.ts";
 import { applyCalibration, calibratePlaybook } from "./calibration.ts";
+import type { CampaignService } from "./campaigns.ts";
 import type { RecognitionService } from "./recognition.ts";
 import type { SolutionHistoryService } from "./solution-history.ts";
 import type { VehicleService } from "./vehicle.ts";
 
-/** Statuses that still occupy the shortlist (block duplicate refresh for a class). */
+/** Statuses that still occupy the shortlist (block duplicate refresh). */
 const OPEN_STATUSES: ReadonlySet<Recommendation["status"]> = new Set(["new", "viewed", "accepted"]);
 
 const ACTIVE_PROBLEM: ReadonlySet<string> = new Set(["open", "analyzing", "verifying"]);
 
 /**
- * Turns "what classes does this vehicle provably belong to right now" into
- * the Recommendation cards the UI shows on the dashboard — one per
- * most-specific fault class a cartridge knows how to frame. Idempotent per
- * (vehicle, class): re-running never duplicates an already-open recommendation
- * for the same class.
- *
- * Confidence/priority can be adjusted from solution-history outcomes
- * (shrink toward cartridge priors); classes still come only from realize.
- * Cost/risk are compose-only rollups from the top playbook action (R2).
+ * Turns proven fault classes (and matched campaigns/TSBs) into Dashboard
+ * shortlist cards. Class cards never invent realize membership; campaign cards
+ * cite OEM ids with empty `generatedFromClasses` (R5).
  */
 export class RecommendationService {
   constructor(
@@ -32,6 +27,7 @@ export class RecommendationService {
     private recognition: RecognitionService,
     private solutionHistory: SolutionHistoryService,
     private actions: ActionService,
+    private campaigns: CampaignService,
   ) {}
 
   async refresh(vehicleId: string): Promise<Recommendation[]> {
@@ -49,6 +45,11 @@ export class RecommendationService {
         openClasses.add(p.triggeredByClass);
       }
     }
+    const openCampaignIds = new Set(
+      existing
+        .filter((r) => OPEN_STATUSES.has(r.status))
+        .flatMap((r) => r.generatedFromCampaignIds ?? []),
+    );
 
     const vehicleView = {
       vehicleId,
@@ -84,12 +85,70 @@ export class RecommendationService {
         reason: calibration.explain ? `${reasonBase} (${calibration.explain})` : reasonBase,
         confidence: calibration.recommendationConfidence,
         ...richness,
+        source: "class",
         generatedFromClasses: [className],
         createdAt: nowIso(),
       };
       await this.store.recommendations.create(rec);
       created.push(rec);
+      openClasses.add(className);
     }
+
+    // R5: applicability cards from matched campaigns / TSBs (not proven classes).
+    const pack = await this.campaigns.forVehicle(vehicleId);
+    const yearBit =
+      vehicle.year !== undefined && vehicle.year !== null ? `year ${vehicle.year}` : "year unknown";
+    for (const c of pack.campaigns) {
+      if (openCampaignIds.has(c.id)) continue;
+      const rec: Recommendation = {
+        id: newId("rec"),
+        vehicleId,
+        title: `${c.id}: ${c.title}`,
+        priority: "high",
+        status: "new",
+        reason: [
+          c.summary,
+          `Matched ${vehicle.engineFamily} (${yearBit}; campaign years ${c.yearRange[0]}–${c.yearRange[1]}).`,
+          c.reference ? `Ref: ${c.reference}` : null,
+          "Applicability only — not a proven fault class.",
+        ]
+          .filter(Boolean)
+          .join(" "),
+        source: "campaign",
+        generatedFromClasses: [],
+        generatedFromCampaignIds: [c.id],
+        createdAt: nowIso(),
+      };
+      await this.store.recommendations.create(rec);
+      created.push(rec);
+      openCampaignIds.add(c.id);
+    }
+    for (const t of pack.tsbs) {
+      if (openCampaignIds.has(t.id)) continue;
+      const rec: Recommendation = {
+        id: newId("rec"),
+        vehicleId,
+        title: `${t.id}: ${t.title}`,
+        priority: "normal",
+        status: "new",
+        reason: [
+          t.summary,
+          `Matched TSB for ${vehicle.engineFamily}.`,
+          t.reference ? `Ref: ${t.reference}` : null,
+          "Applicability only — not a proven fault class.",
+        ]
+          .filter(Boolean)
+          .join(" "),
+        source: "campaign",
+        generatedFromClasses: [],
+        generatedFromCampaignIds: [t.id],
+        createdAt: nowIso(),
+      };
+      await this.store.recommendations.create(rec);
+      created.push(rec);
+      openCampaignIds.add(t.id);
+    }
+
     return [...existing, ...created];
   }
 
@@ -114,8 +173,9 @@ export class RecommendationService {
 
   /**
    * Convert a recommendation into a diagnostic case via ActionService, then
-   * mark the card converted and link `generatedByProblem`. Reuses an active
-   * case for the same class when one already exists (P3).
+   * mark the card converted and link `generatedByProblem`.
+   * Class cards reuse an active case for the same class (P3).
+   * Campaign cards open a manual case (no triggeredByClass — never invent a class).
    */
   async convertToRepair(id: string): Promise<{
     recommendation: Recommendation;
@@ -131,23 +191,40 @@ export class RecommendationService {
       return { recommendation: rec, problem };
     }
 
+    const isCampaign = rec.source === "campaign" || (rec.generatedFromCampaignIds?.length ?? 0) > 0;
     const className = rec.generatedFromClasses[0];
-    if (!className) {
-      throw validationError("Recommendation has no generatedFromClasses to convert.");
-    }
 
-    const problems = await this.store.problems.listByVehicle(rec.vehicleId);
-    const existingCase = problems.find(
-      (p) => p.triggeredByClass === className && ACTIVE_PROBLEM.has(p.status),
-    );
-    const problem =
-      existingCase ??
-      (await this.actions.createDiagnosticProblem({
+    let problem: DiagnosticProblem;
+    if (isCampaign) {
+      const campaignId = rec.generatedFromCampaignIds?.[0] ?? "campaign";
+      problem = await this.actions.createDiagnosticProblem({
         vehicleId: rec.vehicleId,
-        triggeredByClass: className,
-        statement: { currentState: "", desiredState: "", gap: "" },
+        statement: {
+          currentState: `OEM campaign / TSB ${campaignId} applies to this vehicle`,
+          desiredState: `Dealer procedure for ${campaignId} completed or ruled out`,
+          gap: rec.reason.slice(0, 280),
+          whyItMatters: rec.title,
+          urgency: rec.priority === "high" || rec.priority === "critical" ? "high" : "medium",
+        },
         actions: [],
-      }));
+      });
+    } else {
+      if (!className) {
+        throw validationError("Recommendation has no generatedFromClasses to convert.");
+      }
+      const problems = await this.store.problems.listByVehicle(rec.vehicleId);
+      const existingCase = problems.find(
+        (p) => p.triggeredByClass === className && ACTIVE_PROBLEM.has(p.status),
+      );
+      problem =
+        existingCase ??
+        (await this.actions.createDiagnosticProblem({
+          vehicleId: rec.vehicleId,
+          triggeredByClass: className,
+          statement: { currentState: "", desiredState: "", gap: "" },
+          actions: [],
+        }));
+    }
 
     const recommendation = await this.store.recommendations.update(id, {
       status: "converted_to_repair",

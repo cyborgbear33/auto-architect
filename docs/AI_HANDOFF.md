@@ -185,6 +185,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Solution history rollup (“what worked before”) | shipped | `GET .../solution-history`, Diagnosis/ProblemDetail panel |
 | Outcome → confidence calibration | shipped | `calibration.ts` → draft/solve/recommendation refresh |
 | Recommendation richness + lifecycle (R2/R3) | shipped | cost/risk; accept/dismiss/convert; `RecommendationPanel` |
+| Campaign-backed recommendations (R5) | shipped | refresh emits TSB/recall cards; never invents fault classes |
 | Recognition narration (verbalize / ontology notes) | shipped | `Recognition.narration`, Dashboard/Diagnosis |
 | Freeze-frame + Mode 06 UI | shipped | `EvidencePanels` on Dashboard |
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |

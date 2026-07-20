@@ -57,7 +57,8 @@ describe("RecommendationService R2/R3", () => {
   });
 
   it("accept and dismiss update status; listOpen hides dismissed (R3)", async () => {
-    const [rec] = await services.recommendations.refresh(JEEP);
+    const recs = await services.recommendations.refresh(JEEP);
+    const rec = recs.find((r) => r.generatedFromClasses.includes("MisfireUnderLoad"));
     expect(rec).toBeTruthy();
     const accepted = await services.recommendations.markStatus(rec!.id, "accepted");
     expect(accepted.status).toBe("accepted");
@@ -68,27 +69,29 @@ describe("RecommendationService R2/R3", () => {
   });
 
   it("convertToRepair opens a case and links generatedByProblem (R3)", async () => {
-    const [rec] = await services.recommendations.refresh(JEEP);
-    const { recommendation, problem } = await services.recommendations.convertToRepair(rec!.id);
+    const recs = await services.recommendations.refresh(JEEP);
+    const rec = recs.find((r) => r.generatedFromClasses.includes("MisfireUnderLoad"))!;
+    const { recommendation, problem } = await services.recommendations.convertToRepair(rec.id);
     expect(recommendation.status).toBe("converted_to_repair");
     expect(recommendation.generatedByProblem).toBe(problem.id);
     expect(problem.triggeredByClass).toBe("MisfireUnderLoad");
     expect(problem.status).toBe("open");
 
     // Idempotent: second convert returns the same case.
-    const again = await services.recommendations.convertToRepair(rec!.id);
+    const again = await services.recommendations.convertToRepair(rec.id);
     expect(again.problem.id).toBe(problem.id);
   });
 
   it("convert reuses an existing active case for the same class", async () => {
-    const [rec] = await services.recommendations.refresh(JEEP);
+    const recs = await services.recommendations.refresh(JEEP);
+    const rec = recs.find((r) => r.generatedFromClasses.includes("MisfireUnderLoad"))!;
     const existing = await services.actions.createDiagnosticProblem({
       vehicleId: JEEP,
       triggeredByClass: "MisfireUnderLoad",
       statement: { currentState: "", desiredState: "", gap: "" },
       actions: [],
     });
-    const { problem } = await services.recommendations.convertToRepair(rec!.id);
+    const { problem } = await services.recommendations.convertToRepair(rec.id);
     expect(problem.id).toBe(existing.id);
   });
 
@@ -101,5 +104,40 @@ describe("RecommendationService R2/R3", () => {
     });
     const recs = await services.recommendations.refresh(JEEP);
     expect(recs.find((r) => r.generatedFromClasses.includes("MisfireUnderLoad"))).toBeUndefined();
+  });
+
+  it("refresh emits campaign/TSB cards without inventing fault classes (R5)", async () => {
+    const recs = await services.recommendations.refresh(JEEP);
+    const campaignIds = recs.flatMap((r) => r.generatedFromCampaignIds ?? []);
+    expect(campaignIds).toEqual(expect.arrayContaining(["W80", "W84", "05-047-457A"]));
+    const w80 = recs.find((r) => r.generatedFromCampaignIds?.includes("W80"));
+    expect(w80?.source).toBe("campaign");
+    expect(w80?.generatedFromClasses).toEqual([]);
+    expect(w80?.title).toMatch(/^W80:/);
+    expect(w80?.reason).toMatch(/Applicability only/);
+    // Class card still present when evidence proves misfire.
+    expect(recs.some((r) => r.generatedFromClasses.includes("MisfireUnderLoad"))).toBe(true);
+  });
+
+  it("refresh does not duplicate open campaign cards (R5)", async () => {
+    const first = await services.recommendations.refresh(JEEP);
+    const second = await services.recommendations.refresh(JEEP);
+    const w80Open = second.filter(
+      (r) =>
+        r.generatedFromCampaignIds?.includes("W80") &&
+        (r.status === "new" || r.status === "viewed" || r.status === "accepted"),
+    );
+    expect(w80Open).toHaveLength(1);
+    expect(first.filter((r) => r.generatedFromCampaignIds?.includes("W80"))).toHaveLength(1);
+  });
+
+  it("convert campaign card opens a manual case without triggeredByClass (R5)", async () => {
+    const recs = await services.recommendations.refresh(JEEP);
+    const w80 = recs.find((r) => r.generatedFromCampaignIds?.includes("W80"))!;
+    const { recommendation, problem } = await services.recommendations.convertToRepair(w80.id);
+    expect(recommendation.status).toBe("converted_to_repair");
+    expect(problem.triggeredByClass).toBeUndefined();
+    expect(problem.statement.currentState).toMatch(/W80/);
+    expect(problem.status).toBe("open");
   });
 });

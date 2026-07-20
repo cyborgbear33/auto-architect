@@ -43,24 +43,18 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
   const solutionHistory = new SolutionHistoryService(store, vehicles);
   const caseTimeline = new CaseTimelineService(store, vehicles);
   const garageExport = new GarageExportService(store, vehicles, caseTimeline);
-  const actions = new ActionService(
-    store,
-    vehicles,
-    recognition,
-    policy,
-    solver,
-    solutionHistory,
-  );
+  const actions = new ActionService(store, vehicles, recognition, policy, solver, solutionHistory);
   const observations = new ObservationService(store, vehicles);
   const driveSessions = new DriveSessionService(store, vehicles, observations);
+  const campaigns = new CampaignService(vehicles);
   const recommendations = new RecommendationService(
     store,
     vehicles,
     recognition,
     solutionHistory,
     actions,
+    campaigns,
   );
-  const campaigns = new CampaignService(vehicles);
   const reports = new ReportService(
     vehicles,
     observations,

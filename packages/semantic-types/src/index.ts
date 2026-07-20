@@ -387,6 +387,9 @@ export type RecommendationStatus =
   | "converted_to_repair"
   | "dismissed";
 
+/** Where a recommendation card came from — never invent classes for campaigns. */
+export type RecommendationSource = "class" | "campaign";
+
 export interface Recommendation {
   id: SemanticId;
   vehicleId: SemanticId;
@@ -401,7 +404,15 @@ export interface Recommendation {
   risk?: number;
   /** Action id whose cost/risk were copied onto the card. */
   suggestedActionId?: string;
+  /**
+   * Proven fault classes that framed this card (realize + cartridge).
+   * Empty for campaign/TSB applicability cards (R5).
+   */
   generatedFromClasses: string[];
+  /** OEM campaign / TSB ids that produced this card (R5). */
+  generatedFromCampaignIds?: string[];
+  /** Discriminator for UI + convert. Defaults to class when omitted (legacy). */
+  source?: RecommendationSource;
   generatedByProblem?: SemanticId;
   createdAt: IsoTimestamp;
 }
