@@ -367,6 +367,19 @@ export interface ClassNarration {
   source: "verbalize" | "ontology_note" | "class_name";
 }
 
+/** Supporting observations for one proven class (A1) — compose-only. */
+export interface ClassEvidence {
+  className: string;
+  dtcs: DtcObservation[];
+  pids: Array<{
+    pid: string;
+    value: number;
+    unit?: string;
+    thresholdMet?: boolean;
+  }>;
+  freezeFrames: FreezeFrame[];
+}
+
 export interface Recognition {
   individual: SemanticId;
   member: string[];
@@ -374,6 +387,8 @@ export interface Recognition {
   undecided?: string[];
   /** Operator-facing explanations for `mostSpecific` classes. */
   narration?: ClassNarration[];
+  /** Per-`mostSpecific` supporting DTCs / key PIDs / matching freeze-frames (A1). */
+  classEvidence?: ClassEvidence[];
 }
 
 // --- Recommendations & decision journal -----------------------------------

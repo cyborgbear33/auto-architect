@@ -44,7 +44,7 @@ multi-piece plans live in the next section.
 | Goal | Status | What exists today | Done when | Closing backlog |
 |---|---|---|---|---|
 | **Scanning** — ingest OBD evidence | **partial** | Simulate/API ingest; live gauge strip + FF/Mode06 UI; source labels | Live MX+ path proven; drive sessions; retention policy | Live MX+ dry-run; Drive sessions; Durable observation history |
-| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration; gateway Mode 01 PID metadata; FF/Mode06 UI | Full J1979/J2012; evidence adjacency (A1) | SAE PID/DTC KB expansion |
+| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration + per-class evidence (A1); gateway Mode 01 PID metadata; FF/Mode06 UI | Full J1979/J2012; Mode 06 meaning (A3) | SAE PID/DTC KB expansion |
 | **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration on draft/solve + refresh | Family priors polish; counterfactuals UI | Counterfactuals UI; optional LLM advise |
 | **Informing the user** — clear operator surfaces | **partial** | Source badges, narration, FF/Mode06 panels, report export | Live gauges; shared UI package | Live gauges; `@auto/ui-components` |
 | **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert | Deeper campaign→repair playbooks | RecommendationService |
@@ -123,7 +123,7 @@ Expand dictionaries and ontology views so perception has more lawful fuel.
 
 | # | Work piece | Status | Notes |
 |---|---|---|---|
-| A1 | Evidence panel per `mostCommon` / `mostSpecific` class | todo | Freeze-frame + key PIDs next to claim |
+| A1 | Evidence panel per `mostSpecific` class | done | `Recognition.classEvidence` + `ClassEvidencePanel` (no Mode 06 in v1) |
 | A2 | Wire `verbalize` into Recognition API + Diagnosis UI | done | `Recognition.narration` + ontology-note fallback |
 | A3 | Mode 06 as recognition input where ontology allows | todo | Don’t invent monitor meanings |
 | A4 | Broader curated DTC/PID KB + ontology lint parity | partial | pid_map↔dictionary gate; P0456/P0316; still not full J2012 |
@@ -381,7 +381,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 
 | Feature | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|
-| Expand DTC dictionary beyond Tigershark seed set | planned | medium | More P0xxx families (rich/catalyst/O2) need new concepts. | `dtc-dictionary.json`, ontology lint |
+| Expand DTC dictionary beyond Tigershark seed set | partial | medium | Rich/catalyst/O2 circuit+heater landed; more P0xxx families still open. | `dtc-dictionary.json`, ontology lint |
 | Fill GM EcoTec3 / Silverado engine-family cartridge | planned | high when truck available | Stub only until real DTCs/TSBs. | `gm-ecotec3-stub.ts`, vehicle profiles |
 | Bluetooth auto-discovery / MX+ preferred adapter profile | planned | medium | Less friction for scanning. | `obd_gateway/config.py`, `client.py` |
 | Propose-only LLM agent loop (advise pass) | planned | medium | LLM proposes, LOGOS disposes — not required for OBD correctness. | logos-bridge, cartridges, new `apps/agent-service` |
@@ -448,6 +448,8 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Session-aware signal trends (F4) | 2026-07 | `forecast?sessionId=`, Dashboard drive-scope picker |
 | Recommendation richness + lifecycle UI (R2/R3) | 2026-07 | cost/risk on cards; accept/dismiss/convert; `RecommendationPanel` |
 | Campaign-backed recommendations (R5) | 2026-07 | refresh → campaign/TSB cards; `generatedFromCampaignIds`; manual convert |
+| Evidence panel per proven class (A1) | 2026-07 | `Recognition.classEvidence`; Dashboard/Diagnosis `ClassEvidencePanel` |
+| Rich / catalyst / O2 DTC families | 2026-07 | new ontology + cartridges; FallingFuelTrim; realize fixtures |
 
 ---
 

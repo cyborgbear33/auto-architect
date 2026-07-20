@@ -188,6 +188,8 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Recommendation richness + lifecycle (R2/R3) | shipped | cost/risk; accept/dismiss/convert; `RecommendationPanel` |
 | Campaign-backed recommendations (R5) | shipped | refresh emits TSB/recall cards; never invents fault classes |
 | Recognition narration (verbalize / ontology notes) | shipped | `Recognition.narration`, Dashboard/Diagnosis |
+| Evidence panel per proven class (A1) | shipped | `Recognition.classEvidence` + `ClassEvidencePanel` |
+| Rich / catalyst / O2 DTC families | shipped | cartridges + ontology; FallingFuelTrim; DTC-only cat/O2 |
 | Freeze-frame + Mode 06 UI | shipped | `EvidencePanels` on Dashboard |
 | Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |
@@ -195,7 +197,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Case timeline (H2) | shipped | `GET .../case-timeline`, `CaseTimelinePanel` on Diagnosis / ProblemDetail |
 | Odometer / session on case events (H3) | shipped | Stamped on lifecycle + decisions; shown on CaseTimelinePanel |
 | Durable lifecycle event log | shipped | `lifecycleEvents` on `DiagnosticProblem`; ActionService append-only stamps |
-| Multi-signal trends (F3) | shipped | `ForecastService.summary`; RisingFuelTrim / RecurringHighLoad → realize |
+| Multi-signal trends (F3) | shipped | `ForecastService.summary`; Rising/FallingFuelTrim / RecurringHighLoad → realize |
 | Session-aware trends (F4) | shipped | `GET .../forecast?sessionId=`; Dashboard scope picker; recognition stays global |
 | Garage JSON + CSV export/import | shipped | `GarageExportService`, Journal Export panel; merge import with batch dedupe |
 | Print-friendly report HTML (G3) | shipped | Report `html` + print CSS; `ReportDownload` Print |

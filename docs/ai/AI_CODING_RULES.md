@@ -54,12 +54,15 @@ semantic meaning.
 Prefer these before inventing new ones:
 
 **Fault classes (DL):** `MisfireUnderLoad`, `CamCrankCorrelationFault`,
-`LeanFuelBank1`, `LeanFuelBank2`, `EvapLeakSmall`, `EvapLeakLarge`,
+`LeanFuelBank1/2`, `RichFuelBank1/2`, `EvapLeakSmall/Large`,
+`CatalystEfficiencyBank1/2`, `O2CircuitFaultBank1/2`, `O2HeaterFaultBank1/2`,
 `ChronicOilConsumption`, `MultiAirOilStarvation` (FCA view only).
 
 **Symptom / condition / trend subtypes:** `CylinderMisfire`, `CamCrankCorrelation`,
-`LeanCodeBank1/2`, `EvapCodeSmall/Large`, `MultiAirFault`, `HighLoad`,
-`PositiveFuelTrim`, `LowOilPressure`, `OilLevelDecline`.
+`LeanCodeBank1/2`, `RichCodeBank1/2`, `EvapCodeSmall/Large`,
+`CatalystCodeBank1/2`, `O2CircuitBank1/2`, `O2HeaterBank1/2`, `MultiAirFault`,
+`HighLoad`, `PositiveFuelTrim`, `NegativeFuelTrim`, `LowOilPressure`,
+`OilLevelDecline`, `RisingFuelTrim`, `FallingFuelTrim`, `RecurringHighLoad`.
 
 **Object / record types (`@auto/semantic-types`):** `VehicleProfile`,
 `DtcObservation`, `PidReading`, `DiagnosticProblem`, `DiagnosticSolution`,

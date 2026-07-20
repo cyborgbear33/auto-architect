@@ -9,16 +9,26 @@
     "CamCrankCorrelation": "Symptom",
     "LeanCodeBank1": "Symptom",
     "LeanCodeBank2": "Symptom",
+    "RichCodeBank1": "Symptom",
+    "RichCodeBank2": "Symptom",
     "EvapCodeSmall": "Symptom",
     "EvapCodeLarge": "Symptom",
+    "CatalystCodeBank1": "Symptom",
+    "CatalystCodeBank2": "Symptom",
+    "O2CircuitBank1": "Symptom",
+    "O2CircuitBank2": "Symptom",
+    "O2HeaterBank1": "Symptom",
+    "O2HeaterBank2": "Symptom",
     "MultiAirFault": "Symptom",
 
     "HighLoad": "Condition",
     "PositiveFuelTrim": "Condition",
+    "NegativeFuelTrim": "Condition",
     "LowOilPressure": "Condition",
 
     "OilLevelDecline": "Trend",
     "RisingFuelTrim": "Trend",
+    "FallingFuelTrim": "Trend",
     "RecurringHighLoad": "Trend"
   },
   "roles": {
@@ -48,11 +58,35 @@
     "LeanFuelBank2": {
       "equivalentTo": "Engine ⊓ ∃hasDtc.LeanCodeBank2 ⊓ (∃hasCondition.PositiveFuelTrim ⊔ ∃hasTrend.RisingFuelTrim)"
     },
+    "RichFuelBank1": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.RichCodeBank1 ⊓ (∃hasCondition.NegativeFuelTrim ⊔ ∃hasTrend.FallingFuelTrim)"
+    },
+    "RichFuelBank2": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.RichCodeBank2 ⊓ (∃hasCondition.NegativeFuelTrim ⊔ ∃hasTrend.FallingFuelTrim)"
+    },
     "EvapLeakSmall": {
       "equivalentTo": "Engine ⊓ ∃hasDtc.EvapCodeSmall"
     },
     "EvapLeakLarge": {
       "equivalentTo": "Engine ⊓ ∃hasDtc.EvapCodeLarge"
+    },
+    "CatalystEfficiencyBank1": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CatalystCodeBank1"
+    },
+    "CatalystEfficiencyBank2": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CatalystCodeBank2"
+    },
+    "O2CircuitFaultBank1": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.O2CircuitBank1"
+    },
+    "O2CircuitFaultBank2": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.O2CircuitBank2"
+    },
+    "O2HeaterFaultBank1": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.O2HeaterBank1"
+    },
+    "O2HeaterFaultBank2": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.O2HeaterBank2"
     },
     "ChronicOilConsumption": {
       "equivalentTo": "Engine ⊓ ∃hasTrend.OilLevelDecline"
@@ -66,10 +100,19 @@
     "CamCrankCorrelationFault": "SAE-generic: P0016-P0018 family (cam/crank correlation, timing-chain-adjacent).",
     "LeanFuelBank1": "SAE-generic: P0171 + positive LTFT now, or a rising LTFT trend from forecast.",
     "LeanFuelBank2": "SAE-generic: P0174 + positive LTFT now, or a rising LTFT trend from forecast.",
-    "EvapLeakSmall": "SAE-generic: P0442.",
+    "RichFuelBank1": "SAE-generic: P0172 + negative LTFT now, or a falling LTFT trend from forecast.",
+    "RichFuelBank2": "SAE-generic: P0175 + negative LTFT now, or a falling LTFT trend from forecast.",
+    "EvapLeakSmall": "SAE-generic: P0442 / P0456.",
     "EvapLeakLarge": "SAE-generic: P0455.",
+    "CatalystEfficiencyBank1": "SAE-generic: P0420 (DTC-only — no catalyst-temp or Mode 06 gate until A3).",
+    "CatalystEfficiencyBank2": "SAE-generic: P0430 (DTC-only).",
+    "O2CircuitFaultBank1": "SAE-generic: P0130 circuit (DTC-only; voltage-range codes deferred).",
+    "O2CircuitFaultBank2": "SAE-generic: P0150 circuit (DTC-only).",
+    "O2HeaterFaultBank1": "SAE-generic: P0135 heater circuit (DTC-only).",
+    "O2HeaterFaultBank2": "SAE-generic: P0155 heater circuit (DTC-only).",
     "ChronicOilConsumption": "SAE-generic: fed by `forecast` over logged oil-level/odometer samples, not a DTC.",
     "RisingFuelTrim": "Trend evidence from LONG_FUEL_TRIM series (ForecastService) — pairs with lean DTCs.",
+    "FallingFuelTrim": "Trend evidence from LONG_FUEL_TRIM series (ForecastService) — pairs with rich DTCs.",
     "RecurringHighLoad": "Trend evidence from ENGINE_LOAD series (ForecastService) — pairs with misfire DTCs.",
     "MultiAirOilStarvation": "Engine-family-specific (FCA MultiAir electrohydraulic valve actuation): only loaded via the fca-tigershark-2.4 view. See TSB 05047457A — always rule out low/dirty/wrong-viscosity oil BEFORE blaming the MultiAir actuator itself."
   },
@@ -80,8 +123,16 @@
         "CamCrankCorrelationFault",
         "LeanFuelBank1",
         "LeanFuelBank2",
+        "RichFuelBank1",
+        "RichFuelBank2",
         "EvapLeakSmall",
         "EvapLeakLarge",
+        "CatalystEfficiencyBank1",
+        "CatalystEfficiencyBank2",
+        "O2CircuitFaultBank1",
+        "O2CircuitFaultBank2",
+        "O2HeaterFaultBank1",
+        "O2HeaterFaultBank2",
         "ChronicOilConsumption"
       ]
     },
@@ -91,8 +142,16 @@
         "CamCrankCorrelationFault",
         "LeanFuelBank1",
         "LeanFuelBank2",
+        "RichFuelBank1",
+        "RichFuelBank2",
         "EvapLeakSmall",
         "EvapLeakLarge",
+        "CatalystEfficiencyBank1",
+        "CatalystEfficiencyBank2",
+        "O2CircuitFaultBank1",
+        "O2CircuitFaultBank2",
+        "O2HeaterFaultBank1",
+        "O2HeaterFaultBank2",
         "ChronicOilConsumption",
         "MultiAirOilStarvation"
       ]

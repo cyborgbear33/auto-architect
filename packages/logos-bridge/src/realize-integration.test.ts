@@ -3,10 +3,19 @@ import { describe, expect, it } from "vitest";
 import camcrankRealizeFixture from "../../ontology/fixtures/camcrank_realize_fixture.json" with {
   type: "json",
 };
+import catalystRealizeFixture from "../../ontology/fixtures/catalyst_realize_fixture.json" with {
+  type: "json",
+};
 import leanRealizeFixture from "../../ontology/fixtures/lean_realize_fixture.json" with {
   type: "json",
 };
 import misfireRealizeFixture from "../../ontology/fixtures/misfire_realize_fixture.json" with {
+  type: "json",
+};
+import o2RealizeFixture from "../../ontology/fixtures/o2_realize_fixture.json" with {
+  type: "json",
+};
+import richRealizeFixture from "../../ontology/fixtures/rich_realize_fixture.json" with {
   type: "json",
 };
 import { createLogosBridge } from "./index.ts";
@@ -68,6 +77,28 @@ describe.skipIf(!available)("LOGOS realize real subprocess integration", () => {
     const bridge = createLogosBridge();
     const result = await bridge.realize(realizeInputFromFixture(camcrankRealizeFixture));
     expect(result.mostSpecific).toContain("CamCrankCorrelationFault");
+    expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
+  it("proves RichFuelBank1 from P0172 + negative fuel trim", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(richRealizeFixture));
+    expect(result.mostSpecific).toContain("RichFuelBank1");
+    expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
+  it("proves CatalystEfficiencyBank1 from P0420", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(catalystRealizeFixture));
+    expect(result.mostSpecific).toContain("CatalystEfficiencyBank1");
+    expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
+  it("proves O2CircuitFaultBank1 from P0130", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(o2RealizeFixture));
+    expect(result.mostSpecific).toContain("O2CircuitFaultBank1");
+    expect(result.member).not.toContain("O2HeaterFaultBank1");
     expect(result.member).not.toContain("MisfireUnderLoad");
   });
 });

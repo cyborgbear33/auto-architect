@@ -23,12 +23,29 @@
     "fca-tigershark-2.4": {
       "label": "FCA Tigershark 2.4L MultiAir2 (Jeep Renegade / Compass, Fiat 500X, Ram ProMaster City)",
       "view": "fca-tigershark-2.4",
-      "cartridges": ["misfire", "lean-fuel", "evap", "cam-crank-correlation", "fca-tigershark-2.4"]
+      "cartridges": [
+        "misfire",
+        "lean-fuel",
+        "rich-fuel",
+        "evap",
+        "catalyst",
+        "o2-sensor",
+        "cam-crank-correlation",
+        "fca-tigershark-2.4"
+      ]
     },
     "gm-ecotec3-tbd": {
       "label": "GM EcoTec3 family (stub — confirm exact engine once Silverado is added)",
       "view": "generic",
-      "cartridges": ["misfire", "lean-fuel", "evap", "cam-crank-correlation"]
+      "cartridges": [
+        "misfire",
+        "lean-fuel",
+        "rich-fuel",
+        "evap",
+        "catalyst",
+        "o2-sensor",
+        "cam-crank-correlation"
+      ]
     }
   }
 }

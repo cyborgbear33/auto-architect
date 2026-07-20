@@ -7,6 +7,7 @@ import {
   HIGH_LOAD_PCT,
   LTFT_B1_PID,
   OIL_LEVEL_PID,
+  NEGATIVE_TRIM_PCT,
   POSITIVE_TRIM_PCT,
 } from "./forecast.ts";
 
@@ -93,6 +94,20 @@ describe("ForecastService", () => {
     expect(ltft?.flagged).toBe(true);
     expect(ltft?.ontologyTrend).toBe("RisingFuelTrim");
     expect(summary.recognitionTrends).toContain("RisingFuelTrim");
+  });
+
+  it("flags falling LTFT as FallingFuelTrim for recognition", async () => {
+    const store = createMemoryStore();
+    const forecast = new ForecastService(store, fallingBridge());
+    await recordPid(store, LTFT_B1_PID, [
+      { at: "2026-01-01T00:00:00Z", value: NEGATIVE_TRIM_PCT + 2 },
+      { at: "2026-01-02T00:00:00Z", value: NEGATIVE_TRIM_PCT - 5 },
+    ]);
+    const summary = await forecast.summary(JEEP);
+    const ltft = summary.signals.find((s) => s.id === "ltft-b1-falling");
+    expect(ltft?.flagged).toBe(true);
+    expect(ltft?.ontologyTrend).toBe("FallingFuelTrim");
+    expect(summary.recognitionTrends).toContain("FallingFuelTrim");
   });
 
   it("flags recurring high ENGINE_LOAD as RecurringHighLoad", async () => {

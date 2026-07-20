@@ -50,9 +50,21 @@ describe("RecognitionService", () => {
       source: "manual_entry",
       dtcs: [{ code: "P0304", status: "stored" }],
       pids: [{ pid: "ENGINE_LOAD", value: 85, timestamp: "2026-01-01T00:00:00Z" }],
+      freezeFrames: [
+        {
+          dtc: "P0304",
+          readings: [
+            { pid: "ENGINE_LOAD", value: 85, unit: "%", timestamp: "2026-01-01T00:00:00Z" },
+          ],
+        },
+      ],
     });
     const result = await ctx.recognition.recognize(JEEP);
     expect(result.member).toContain("MisfireUnderLoad");
+    const evidence = result.classEvidence?.find((e) => e.className === "MisfireUnderLoad");
+    expect(evidence?.dtcs.map((d) => d.code)).toContain("P0304");
+    expect(evidence?.pids.some((p) => p.pid === "ENGINE_LOAD" && p.thresholdMet)).toBe(true);
+    expect(evidence?.freezeFrames[0]?.dtc).toBe("P0304");
   });
 
   it("404s for an unknown vehicle", async () => {

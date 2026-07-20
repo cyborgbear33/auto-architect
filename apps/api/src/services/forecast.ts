@@ -19,6 +19,9 @@ export const OIL_LEVEL_ADD_MARK_PCT = 15;
 /** Sustained positive LTFT threshold (matches lean-fuel cartridge). */
 export const POSITIVE_TRIM_PCT = 10;
 
+/** Sustained negative LTFT threshold (matches rich-fuel cartridge). */
+export const NEGATIVE_TRIM_PCT = -10;
+
 /** High engine load threshold (matches misfire cartridge). */
 export const HIGH_LOAD_PCT = 70;
 
@@ -101,6 +104,24 @@ const SIGNAL_SPECS: SignalSpec[] = [
     feedsRecognition: true,
   },
   {
+    id: "ltft-b1-falling",
+    pid: LTFT_B1_PID,
+    label: "LTFT bank 1 (rich)",
+    threshold: NEGATIVE_TRIM_PCT,
+    flagFalling: true,
+    ontologyTrend: "FallingFuelTrim",
+    feedsRecognition: true,
+  },
+  {
+    id: "ltft-b2-falling",
+    pid: LTFT_B2_PID,
+    label: "LTFT bank 2 (rich)",
+    threshold: NEGATIVE_TRIM_PCT,
+    flagFalling: true,
+    ontologyTrend: "FallingFuelTrim",
+    feedsRecognition: true,
+  },
+  {
     id: "engine-load",
     pid: ENGINE_LOAD_PID,
     label: "Engine load",
@@ -122,8 +143,9 @@ const SIGNAL_SPECS: SignalSpec[] = [
 
 /**
  * Projects logged PID series toward thresholds. Oil feeds ChronicOilConsumption;
- * rising LTFT / recurring high load feed lean and misfire-under-load via
- * ontology Trends. Coolant is informing-only until a class is declared.
+ * rising/falling LTFT and recurring high load feed lean, rich, and
+ * misfire-under-load via ontology Trends. Coolant is informing-only until a
+ * class is declared.
  */
 export class ForecastService {
   constructor(

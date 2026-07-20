@@ -1,4 +1,4 @@
-import { runPerception } from "@auto/cartridges";
+import { composeAllClassEvidence, runPerception } from "@auto/cartridges";
 import type { LogosBridge } from "@auto/logos-bridge";
 import { dlOntology } from "@auto/ontology";
 import type { ClassNarration, Recognition } from "@auto/semantic-types";
@@ -39,6 +39,7 @@ export class RecognitionService {
 
     const dtcs = await this.store.observations.latestDtcs(vehicleId);
     const pids = await this.store.observations.latestPids(vehicleId);
+    const freezeFrames = await this.store.observations.latestFreezeFrames(vehicleId);
     const abox = runPerception(vehicleId, dtcs, pids, cartridges);
 
     // Trend evidence comes from `forecast` over logged series — fold each
@@ -60,12 +61,20 @@ export class RecognitionService {
         scope: true,
       });
       const narration = await this.narrateClasses(result.mostSpecific);
+      const classEvidence = composeAllClassEvidence(
+        result.mostSpecific,
+        cartridges,
+        dtcs,
+        pids,
+        freezeFrames,
+      );
       return {
         individual: result.individual,
         member: result.member,
         mostSpecific: result.mostSpecific,
         undecided: result.undecided,
         narration,
+        classEvidence,
       };
     } catch (err) {
       throw mapBridgeError(err);

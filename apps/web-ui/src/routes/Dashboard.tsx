@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
 import { DriveSessionsPanel } from "../components/DriveSessionsPanel.tsx";
 import { EvidencePanels } from "../components/EvidencePanels.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
@@ -210,10 +211,12 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
           <ul className="space-y-2">
             {recognitionQ.data?.mostSpecific.map((cls) => {
               const narr = recognitionQ.data?.narration?.find((n) => n.className === cls);
+              const evidence = recognitionQ.data?.classEvidence?.find((e) => e.className === cls);
               return (
                 <li key={cls} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
                   <Pill tone="high">{cls}</Pill>
                   {narr && <p className="mt-1 text-xs text-slate-600">{narr.fluent}</p>}
+                  <ClassEvidencePanel evidence={evidence} />
                 </li>
               );
             })}

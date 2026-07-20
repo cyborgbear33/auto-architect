@@ -16,6 +16,40 @@
     "P0019": { "description": "Crankshaft Position - Camshaft Position Correlation (Bank 2 Sensor B)", "concept": "CamCrankCorrelation", "sae": true },
     "P0171": { "description": "System Too Lean (Bank 1)", "concept": "LeanCodeBank1", "sae": true },
     "P0174": { "description": "System Too Lean (Bank 2)", "concept": "LeanCodeBank2", "sae": true },
+    "P0172": { "description": "System Too Rich (Bank 1)", "concept": "RichCodeBank1", "sae": true },
+    "P0175": { "description": "System Too Rich (Bank 2)", "concept": "RichCodeBank2", "sae": true },
+    "P0420": {
+      "description": "Catalyst System Efficiency Below Threshold (Bank 1)",
+      "concept": "CatalystCodeBank1",
+      "sae": true
+    },
+    "P0430": {
+      "description": "Catalyst System Efficiency Below Threshold (Bank 2)",
+      "concept": "CatalystCodeBank2",
+      "sae": true
+    },
+    "P0130": {
+      "description": "O2 Sensor Circuit (Bank 1 Sensor 1)",
+      "concept": "O2CircuitBank1",
+      "sae": true,
+      "note": "Circuit family only — voltage-range / slow-response codes deferred until related PIDs are ontologized."
+    },
+    "P0150": {
+      "description": "O2 Sensor Circuit (Bank 2 Sensor 1)",
+      "concept": "O2CircuitBank2",
+      "sae": true,
+      "note": "Circuit family only — see P0130 note."
+    },
+    "P0135": {
+      "description": "O2 Sensor Heater Circuit (Bank 1 Sensor 1)",
+      "concept": "O2HeaterBank1",
+      "sae": true
+    },
+    "P0155": {
+      "description": "O2 Sensor Heater Circuit (Bank 2 Sensor 1)",
+      "concept": "O2HeaterBank2",
+      "sae": true
+    },
     "P0442": { "description": "Evaporative Emission System Leak Detected (Small Leak)", "concept": "EvapCodeSmall", "sae": true },
     "P0456": {
       "description": "Evaporative Emission System Leak Detected (Very Small Leak)",

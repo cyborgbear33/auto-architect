@@ -20,7 +20,10 @@ not declare.
 |---|---|
 | `misfire` | SAE-generic P0300–P0304 + load |
 | `lean-fuel` | P0171 / P0174 + fuel trim |
-| `evap` | P0442 / P0455 |
+| `rich-fuel` | P0172 / P0175 + negative fuel trim |
+| `evap` | P0442 / P0455 / P0456 |
+| `catalyst` | P0420 / P0430 (DTC-only) |
+| `o2-sensor` | P0130 / P0150 circuit + P0135 / P0155 heater (DTC-only) |
 | `cam-crank-correlation` | P0016–P0018 family |
 | `fca-tigershark-2.4` | MultiAir oil starvation (OEM view) |
 | `gm-ecotec3-stub` | Inert multi-vehicle extension proof |

@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import type { DiagnosticProblem, ProblemStatus } from "@auto/semantic-types";
 import { useMemo, useState } from "react";
 import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
+import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
@@ -170,14 +171,16 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
           <ul className="space-y-2">
             {undraftedClasses.map((cls) => {
               const narr = recognitionQ.data?.narration?.find((n) => n.className === cls);
+              const evidence = recognitionQ.data?.classEvidence?.find((e) => e.className === cls);
               return (
                 <li
                   key={cls}
                   className="flex items-center justify-between gap-3 rounded-md bg-slate-50 px-3 py-2 text-sm"
                 >
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <span className="font-medium text-slate-800">{cls}</span>
                     {narr && <p className="mt-0.5 text-xs text-slate-500">{narr.fluent}</p>}
+                    <ClassEvidencePanel evidence={evidence} />
                   </div>
                   <button
                     type="button"

@@ -73,6 +73,17 @@ describe("ontology registries", () => {
     expect(lookupDtc("P0316")).toMatchObject({ concept: "CylinderMisfire", sae: true });
   });
 
+  it("maps rich / catalyst / O2 SAE codes onto new Symptom concepts", () => {
+    expect(lookupDtc("P0172")).toMatchObject({ concept: "RichCodeBank1", sae: true });
+    expect(lookupDtc("P0175")).toMatchObject({ concept: "RichCodeBank2", sae: true });
+    expect(lookupDtc("P0420")).toMatchObject({ concept: "CatalystCodeBank1", sae: true });
+    expect(lookupDtc("P0430")).toMatchObject({ concept: "CatalystCodeBank2", sae: true });
+    expect(lookupDtc("P0130")).toMatchObject({ concept: "O2CircuitBank1", sae: true });
+    expect(lookupDtc("P0150")).toMatchObject({ concept: "O2CircuitBank2", sae: true });
+    expect(lookupDtc("P0135")).toMatchObject({ concept: "O2HeaterBank1", sae: true });
+    expect(lookupDtc("P0155")).toMatchObject({ concept: "O2HeaterBank2", sae: true });
+  });
+
   it("returns undefined for an unknown PID key", () => {
     expect(lookupPid("NOT_A_REAL_PID")).toBeUndefined();
   });

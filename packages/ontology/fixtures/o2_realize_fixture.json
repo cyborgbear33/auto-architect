@@ -1,0 +1,35 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "O2CircuitBank1": "Symptom",
+    "O2HeaterBank1": "Symptom",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition",
+    "Condition": "IndependentContinuant"
+  },
+  "roles": {
+    "hasDtc": { "domain": "Engine", "range": "Symptom" },
+    "hasCondition": { "domain": "Engine", "range": "Condition" }
+  },
+  "classes": {
+    "O2CircuitFaultBank1": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.O2CircuitBank1"
+    },
+    "O2HeaterFaultBank1": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.O2HeaterBank1"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": ["Engine"],
+      "p0130": ["O2CircuitBank1"]
+    },
+    "roles": [["hasDtc", "jeep_renegade_engine", "p0130"]]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": ["O2CircuitFaultBank1", "O2HeaterFaultBank1", "MisfireUnderLoad"]
+}
