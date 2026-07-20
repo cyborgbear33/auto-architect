@@ -104,6 +104,12 @@ When adding a PID:
 4. Only then add cartridge perception thresholds
 5. Use the dictionary unit in UI / gauges (do not invent a parallel unit string)
 
+When adding or changing **scan / discover / watch** capabilities (new modes,
+support probes, CLI flags, simulate knobs), refine the operator Mastery Guide
+scan/discovery/troubleshoot chapters in the same change — see
+[`UX_GUIDELINES.md`](UX_GUIDELINES.md) §4 “Keep the Mastery Guide current” and
+[`../VEHICLE_OBD_MASTERY_GUIDE.md`](../VEHICLE_OBD_MASTERY_GUIDE.md).
+
 When tempted to decode OEM enhanced CAN: put that behind an explicit future
 feature and keep standard OBD as the supported path. See `FUTURE_FEATURES.md`
 non-goals.

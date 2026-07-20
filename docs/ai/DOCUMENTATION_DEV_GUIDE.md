@@ -17,6 +17,11 @@ How to create and maintain Markdown in `docs/` for auto-architect.
 3. **Prefer linking** to garden/metalanguage for shared theory; do not duplicate the full lesson here.
 4. **Update docs with behavior changes** when practical (same PR/commit).
 5. **For feature work, update `docs/FUTURE_FEATURES.md`** — Planned Backlog ↔ Implemented History.
+6. **Keep the Mastery Guide honest.** When shipping major vehicle-profile, ontology,
+   cartridge, gateway scan/discover, or operator-workflow changes, refine
+   `docs/VEHICLE_OBD_MASTERY_GUIDE.md` and/or `MasteryGuideService` in the same
+   change. Triggers and scope: [`UX_GUIDELINES.md`](UX_GUIDELINES.md) §4
+   “Keep the Mastery Guide current”.
 
 ## Layered guidance model
 

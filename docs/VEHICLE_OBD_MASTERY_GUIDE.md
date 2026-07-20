@@ -8,6 +8,11 @@ dealer/OEM tools._
 > **In-app:** select a vehicle → **Guide**. That page personalizes this curriculum
 > for the selected profile and offers Markdown download + printer-friendly Print.
 > This file is the shared source text the API fills with vehicle-specific blocks.
+>
+> **Maintainers:** when you ship major vehicle-profile, ontology, cartridge,
+> scan/discover, or operator-workflow changes, refine this file (and
+> `MasteryGuideService` personalization if needed) in the same change. Triggers:
+> [`ai/UX_GUIDELINES.md`](ai/UX_GUIDELINES.md) §4 “Keep the Mastery Guide current”.
 
 ---
 

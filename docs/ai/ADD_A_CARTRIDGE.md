@@ -73,6 +73,9 @@ the appropriate `engineFamilies.*.cartridges` array in `vehicle-profiles.json`
 - Add a short note to `FUTURE_FEATURES.md` Implemented History when shipping
 - If the cartridge is non-trivial, add a focused `docs/ai/<NAME>_CARTRIDGE.md`
   (optional; garden does this for large domains)
+- If the cartridge changes what operators can prove or which PIDs matter on the
+  console path, refine the Mastery Guide ontology / operate chapters
+  (`VEHICLE_OBD_MASTERY_GUIDE.md`; see `UX_GUIDELINES.md` §4)
 
 ## Guidelines that make the solver behave
 

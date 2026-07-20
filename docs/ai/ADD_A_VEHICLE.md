@@ -107,3 +107,6 @@ Wrong vehicle id = evidence lands on the wrong profile. Empty honest scan ≠
 - [ ] Ontology lint green after any OEM fill
 - [ ] At least one realize fixture for a truck-specific headline fault (when OEM cartridge filled)
 - [ ] `FUTURE_FEATURES.md` updated (OEM cartridge row → Implemented when done)
+- [ ] Mastery Guide refined if this vehicle adds new hardware, protocol, or
+      troubleshoot steps operators must know (`VEHICLE_OBD_MASTERY_GUIDE.md` /
+      `MasteryGuideService`; see `UX_GUIDELINES.md` §4)

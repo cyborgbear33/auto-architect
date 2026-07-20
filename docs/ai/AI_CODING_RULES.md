@@ -124,6 +124,9 @@ Adding a vehicle is an extension, not a fork:
 3. Implement or fill the engine-family cartridge.
 4. Register the vehicle + family in `vehicle-profiles.json`.
 5. Run `pnpm lint:ontology`.
+6. Refine the Mastery Guide if the new profile changes hardware, protocol,
+   troubleshooting, or operator workflow (see [`UX_GUIDELINES.md`](UX_GUIDELINES.md)
+   §4 “Keep the Mastery Guide current”).
 
 See [`ADD_A_VEHICLE.md`](ADD_A_VEHICLE.md).
 

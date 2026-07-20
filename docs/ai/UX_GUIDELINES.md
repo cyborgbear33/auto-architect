@@ -78,6 +78,33 @@ History     — Journal
 troubleshoot, personalized per selected vehicle, with Markdown + Print/PDF
 export. Link it from Discovery empty states and Dashboard — do not bury it.
 
+### Keep the Mastery Guide current
+
+The in-app **Guide** (`/guide`) is composed from
+[`docs/VEHICLE_OBD_MASTERY_GUIDE.md`](../VEHICLE_OBD_MASTERY_GUIDE.md) plus
+vehicle-specific blocks in `MasteryGuideService`. Treat it as operator-facing
+product surface — not a one-time doc dump.
+
+**Update the Guide in the same change** when any of these ship:
+
+| Change type | Examples | What to update |
+|---|---|---|
+| Vehicle / profile | New vehicle, engine family, protocol hint, hardware notes (gray adapter, Proxi) | Template hardware/troubleshoot chapters if shared; confirm personalized blocks still read honestly for Jeep vs other profiles |
+| Ontology meaning | New DTC/PID/Mode 06 dictionary rows that operators must understand; new concepts cartridges assert | Ontology chapter + any “what this app can mean” tables |
+| Cartridges / recognition | New fault family, perception PIDs, framing that changes the diagnose path | Ontology + Operate console chapters; mention family coverage honestly |
+| Scanning / discovery | New gateway modes, `discover` probes, CLI flags, default poll set, simulate flags | Discovery + Scan & watch + Troubleshooting + checklist |
+| Console IA / workflow | New nav destinations, Functions/procedures, safety-hold behavior operators must know | Operate console + Troubleshooting + mastery checklist |
+| Explicit non-goals | Something moved in/out of scope (e.g. Mode 0A, enhanced UDS) | “What mastery does *not* mean” |
+
+**Do not** require a Guide edit for pure refactors, typo-only dictionary fills that
+do not change operator workflow, or Debug-only internals.
+
+**How:** edit `docs/VEHICLE_OBD_MASTERY_GUIDE.md` (shared curriculum + tokens),
+adjust `MasteryGuideService` personalization blocks if vehicle-specific prose
+changed, and extend `mastery-guide.test.ts` / Guide UI tests when behavior
+branches (e.g. Jeep-only hardware). Cross-check Discoverability: Dashboard /
+Discovery still link to **Guide**.
+
 Vehicle switcher is global (every page). Same pattern as garden's garden switcher.
 
 ---
@@ -196,4 +223,7 @@ Never leave a blank white panel with no explanation.
 - [ ] Empty / loading / error states exist
 - [ ] Live / polled sections show staleness and avoid loading flashes
 - [ ] Debug mode does not become the only way to use the page
+- [ ] If this PR changes operator workflow (profiles, ontology meaning, scan/discover
+      capabilities, Functions, or nav), the Mastery Guide was refined (see §4
+      “Keep the Mastery Guide current”)
 - [ ] Tests cover the happy path + at least one policy/error path when relevant
