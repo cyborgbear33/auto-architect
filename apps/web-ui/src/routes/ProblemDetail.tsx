@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "../components/Layout.tsx";
+import { ReportDownload } from "../components/ReportDownload.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
 import { api, queryKeys } from "../lib/api.ts";
 import { useAppSelector } from "../store/index.ts";
@@ -70,7 +71,11 @@ export function ProblemDetail() {
 
   return (
     <div>
-      <PageHeader title={problem.triggeredByClass ?? "Diagnostic problem"} subtitle={problem.id} />
+      <PageHeader
+        title={problem.triggeredByClass ?? "Diagnostic problem"}
+        subtitle={problem.id}
+        actions={<ReportDownload problemId={problem.id} />}
+      />
 
       <div className="mb-4">
         <WhatWorkedPanel vehicleId={problem.vehicleId} faultClass={problem.triggeredByClass} />

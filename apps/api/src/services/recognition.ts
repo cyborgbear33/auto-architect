@@ -1,11 +1,16 @@
 import { runPerception } from "@auto/cartridges";
 import type { LogosBridge } from "@auto/logos-bridge";
 import { dlOntology } from "@auto/ontology";
-import type { Recognition } from "@auto/semantic-types";
+import type { ClassNarration, Recognition } from "@auto/semantic-types";
 import { mapBridgeError } from "../lib/bridge-errors.ts";
 import type { Store } from "../store/index.ts";
 import type { ForecastService } from "./forecast.ts";
 import type { VehicleService } from "./vehicle.ts";
+
+function ontologyNotes(): Record<string, string> {
+  const notes = (dlOntology as { notes?: Record<string, string> }).notes;
+  return notes ?? {};
+}
 
 /**
  * Structural recognition: turns a vehicle's latest OBD-II evidence into DL
@@ -54,14 +59,48 @@ export class RecognitionService {
         view,
         scope: true,
       });
+      const narration = await this.narrateClasses(result.mostSpecific);
       return {
         individual: result.individual,
         member: result.member,
         mostSpecific: result.mostSpecific,
         undecided: result.undecided,
+        narration,
       };
     } catch (err) {
       throw mapBridgeError(err);
     }
+  }
+
+  /** Prefer LOGOS verbalize; fall back to ontology notes, then the class name. */
+  private async narrateClasses(classes: string[]): Promise<ClassNarration[]> {
+    const notes = ontologyNotes();
+    const out: ClassNarration[] = [];
+    for (const className of classes) {
+      const note = notes[className];
+      try {
+        const verbalized = note
+          ? await this.bridge.verbalize({ controlledEnglish: note })
+          : await this.bridge.verbalize({ formula: className });
+        if (verbalized.fluent && !verbalized.error) {
+          // Fake echoes input; prefer the richer ontology note when fluent is just the class name.
+          if (note && (verbalized.fluent === className || verbalized.fluent === note)) {
+            out.push({ className, fluent: note, source: "ontology_note" });
+          } else if (verbalized.fluent !== className) {
+            out.push({ className, fluent: verbalized.fluent, source: "verbalize" });
+          } else if (note) {
+            out.push({ className, fluent: note, source: "ontology_note" });
+          } else {
+            out.push({ className, fluent: className, source: "class_name" });
+          }
+          continue;
+        }
+      } catch {
+        /* fall through to note / class name */
+      }
+      if (note) out.push({ className, fluent: note, source: "ontology_note" });
+      else out.push({ className, fluent: className, source: "class_name" });
+    }
+    return out;
   }
 }

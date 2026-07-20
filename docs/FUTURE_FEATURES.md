@@ -44,15 +44,15 @@ multi-piece plans live in the next section.
 | Goal | Status | What exists today | Done when | Closing backlog |
 |---|---|---|---|---|
 | **Scanning** — ingest OBD evidence | **partial** | Gateway `scan`/`watch`/`--simulate`; `POST .../observations`; batches in memory or Postgres | Live MX+ path proven; live gauges; Mode 06 + freeze-frame visible; sessions group a drive | Live MX+ dry-run; Live gauges; Mode 06 UI; Freeze-frame panel; Drive sessions; Durable observation history |
-| **Analysis** — prove fault classes from evidence | **partial** | `RecognitionService` + cartridges → `GET .../recognition`; Dashboard/Diagnosis | Claims shown with evidence + plain-English proof; broader DTC/PID KB | Verbalize; Freeze-frame panel; Mode 06 UI; SAE PID/DTC KB |
-| **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Draft/solve → ranked actions + `confidence`/`certainty`; policy holds | Scores update from confirmed repair outcomes (not cartridge-static only) | Outcome → confidence calibration |
-| **Informing the user** — clear operator surfaces | **partial** | Dashboard/Diagnosis show evidence source; ProblemDetail/Diagnosis show solution history | Live/evidence-rich UI; trust primitives; source labeled | Live gauges; Mode 06 / freeze-frame UI; Verbalize; `@auto/ui-components` |
-| **Recommendations** — what to do next | **partial** | Refresh from proven classes; solution history visible (not yet in priority) | Cost/risk/confidence on cards; history-aware priority | Calibration into `refresh`; Recommendation card richness |
+| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration; lean/cam-crank fixtures; FF/Mode06 UI; broader DTC/PID seed | Broader SAE KB; richer evidence adjacency | SAE PID/DTC KB expansion |
+| **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration on draft/solve + refresh | Family priors polish; counterfactuals UI | Counterfactuals UI; optional LLM advise |
+| **Informing the user** — clear operator surfaces | **partial** | Source badges, narration, FF/Mode06 panels, report export | Live gauges; shared UI package | Live gauges; `@auto/ui-components` |
+| **Recommendations** — what to do next | **partial** | Refresh sets confidence + history-aware priority bump | Cost/risk on cards; status lifecycle UI | Recommendation card richness |
 | **Problem tracking** — open cases through solve | **shipped (MVP)** | `DiagnosticProblem` CRUD/list; create/solve; Diagnosis + ProblemDetail | Filter/reopen/abandon + verify-after-repair caseboard | Problem caseboard + verify-after-repair |
 | **Problem history** — cases over time | **partial** | Problems persist (Postgres); outcome on `log-repair`; Journal is decisions, not a case timeline | Chronological case timeline with mileage/session context | Problem caseboard; Drive sessions; Durable observation history |
-| **Solution history** — what fixed what, confirmed over time | **partial** | Rollup API + “What worked before” panel; Journal still lists decisions | Outcomes feed playbook/recommendation priority | Outcome → confidence calibration |
-| **History → better future decisions** | **partial (narrow)** | Oil PID series → `ForecastService` → may prove oil class → recs refresh. Past outcomes do **not** change ranking | Outcomes + trends inform solve priors and recommendation priority | Outcome → confidence calibration; Durable observation history; Drive sessions; Multi-signal trends |
-| **Reporting** — shareable diagnostic note | **missing** | Journal = audit list only | Export recognition + ranked actions + decisions (+ outcomes) as Markdown/print | Export diagnostic report |
+| **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel; outcomes feed calibration | Stronger verify-before-solved process | X5 verify process |
+| **History → better future decisions** | **partial** | Oil trend + outcome calibration into draft/solve/refresh | Multi-signal trends; session-aware | Multi-signal trends; Drive sessions |
+| **Reporting** — shareable diagnostic note | **partial** | Markdown download/copy (vehicle + problem) | Print/PDF polish | Print-friendly HTML/PDF |
 
 **Spine that already works:** ingest → realize → draft/solve → recommend → policy hold → log-repair → Journal.  
 **Not yet a complete garage product:** live scan UX, evidence-rich informing, outcome-calibrated diagnosis, solution memory, report export.
@@ -97,11 +97,11 @@ into the Journal forever.
 |---|---|---|---|
 | S1 | Validated live MX+ dry-run on Jeep (scan + watch → Dashboard) | todo | Operator checklist; document ports/adapter quirks |
 | S2 | Live gauge strip (RPM, load, fuel trim, coolant) + stale indicators | todo | Poll latest PIDs; units from PID dictionary |
-| S3 | Mode 06 + freeze-frame capture already in batches → **surface in UI** | partial | API exists; UI missing |
+| S3 | Mode 06 + freeze-frame capture already in batches → **surface in UI** | done | `EvidencePanels` on Dashboard |
 | S4 | DriveSession object (start/stop; batches linked by `sessionId`) | todo | Groups watch streams for history/reports |
 | S5 | Retention policy (keep FF/Mode06 forever; downsample high-rate PIDs) | todo | Part of “durable observation history” |
 | S6 | Bluetooth / preferred-adapter discovery | todo | Friction reduction after S1 works manually |
-| S7 | SAE PID/DTC dictionary depth for scan interpretation | partial | Thin seed shipped; expand without inventing meanings |
+| S7 | SAE PID/DTC dictionary depth for scan interpretation | partial | P0305–08 + more Mode 01 PIDs; still not full J1979 |
 
 **Seams:** `apps/obd-gateway`, `ObservationsService`, store batches, Dashboard.  
 **Anti-patterns:** Classifying faults in the gateway; silent simulate-vs-live;
@@ -124,9 +124,9 @@ Expand dictionaries and ontology views so perception has more lawful fuel.
 | # | Work piece | Status | Notes |
 |---|---|---|---|
 | A1 | Evidence panel per `mostCommon` / `mostSpecific` class | todo | Freeze-frame + key PIDs next to claim |
-| A2 | Wire `verbalize` into Recognition API + Diagnosis UI | todo | Bridge already supports; keep Debug for raw DL |
+| A2 | Wire `verbalize` into Recognition API + Diagnosis UI | done | `Recognition.narration` + ontology-note fallback |
 | A3 | Mode 06 as recognition input where ontology allows | todo | Don’t invent monitor meanings |
-| A4 | Broader curated DTC/PID KB + ontology lint parity | partial | Seed + HARDWARE_STANDARDS gates |
+| A4 | Broader curated DTC/PID KB + ontology lint parity | partial | P0305–08 + more Mode 01 PIDs |
 | A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | Stub ≠ support |
 
 **Seams:** cartridges, `RecognitionService`, logos-bridge `realize`/`verbalize`,
@@ -155,8 +155,8 @@ inputs → re-rank. Keep policy defeasible and fail-closed. Optional LLM may
 |---|---|---|---|
 | D1 | Draft/solve + policy holds (MVP path) | done | ActionService + PolicyService |
 | D2 | Surface counterfactuals / disqualified actions in UI | partial | Types exist; UI thin |
-| D3 | Outcome → playbook confidence / action priors | todo | Core of “probabilistic” honesty |
-| D4 | Family-level priors (same engineFamily) with small-sample caution | todo | Shrink toward cartridge defaults |
+| D3 | Outcome → playbook confidence / action priors | done | `calibration.ts` → draft/solve/refresh |
+| D4 | Family-level priors (same engineFamily) with small-sample caution | done | Family buckets + higher `k` |
 | D5 | Optional propose-only LLM advise pass (draft candidates) | todo | Never skip realize/reason/solve |
 
 **Seams:** `ActionService`, `SolverService`, `PolicyService`, cartridges,
@@ -182,8 +182,8 @@ Ship `@auto/ui-components` once patterns repeat twice.
 |---|---|---|---|
 | I1 | Goal-grouped nav + vehicle switcher | done | Dashboard / Diagnosis / Campaigns / Journal |
 | I2 | Evidence source labeling (sim / live / manual) everywhere data shows | done | Dashboard + Diagnosis via `GET .../evidence-provenance` |
-| I3 | Live gauges + Mode 06 + freeze-frame panels | todo | Overlaps Scanning S2/S3 |
-| I4 | Verbalized proofs on Diagnosis / ProblemDetail | todo | Overlaps Analysis A2 |
+| I3 | Live gauges + Mode 06 + freeze-frame panels | partial | FF/Mode06 panels shipped; live gauges still todo |
+| I4 | Verbalized proofs on Diagnosis / ProblemDetail | done | Narration on Dashboard/Diagnosis |
 | I5 | Shared `@auto/ui-components` | todo | Status, empty/error, evidence |
 | I6 | Staleness / “last observation” chrome on Dashboard | todo | Makes scanning honest |
 
@@ -209,9 +209,9 @@ is opened (`generatedByProblem`).
 | # | Work piece | Status | Notes |
 |---|---|---|---|
 | R1 | Refresh from `mostSpecific` + cartridge drafts | done | RecommendationService |
-| R2 | Card richness: confidence, cost/risk, evidence deep-link | todo | UX §8 |
+| R2 | Card richness: confidence, cost/risk, evidence deep-link | partial | Confidence on Dashboard cards |
 | R3 | Status lifecycle in UI (accept / dismiss / convert) | partial | API status endpoint exists |
-| R4 | History-aware priority from solution rollup + calibration | todo | Depends on Solution history + D3 |
+| R4 | History-aware priority from solution rollup + calibration | done | One-step bump when worked≥2 clean |
 | R5 | Campaign-backed recommendations (TSB/recall → actionable card) | partial | Campaigns page exists; weak rec link |
 
 **Seams:** `RecommendationService`, recognition, campaigns, Dashboard.  
@@ -317,7 +317,7 @@ ForecastService carefully with ontology backing.
 | # | Work piece | Status | Notes |
 |---|---|---|---|
 | F1 | Oil-level trend → recognition evidence | done | ForecastService (narrow) |
-| F2 | Outcome → confidence calibration into refresh + solve priors | todo | Flagship for this goal |
+| F2 | Outcome → confidence calibration into refresh + solve priors | done | `calibratePlaybook` |
 | F3 | Multi-signal trends (fuel trim, coolant, load-at-misfire) | todo | Ontology-backed only |
 | F4 | Session-aware trends (per drive, not only global series) | todo | Needs S4 |
 | F5 | Explainability chip: “priority raised because …” | todo | Informing overlap |
@@ -343,10 +343,10 @@ print later. One template, two scopes (vehicle snapshot vs single case).
 
 | # | Work piece | Status | Notes |
 |---|---|---|---|
-| G1 | Report compose service (vehicle \| problem scope) | todo | Pure read aggregation |
-| G2 | Markdown download / copy | todo | First shippable slice |
+| G1 | Report compose service (vehicle \| problem scope) | done | `ReportService` |
+| G2 | Markdown download / copy | done | `ReportDownload` |
 | G3 | Print-friendly HTML / PDF | todo | After Markdown stabilizes |
-| G4 | Include verbalized proofs + campaign refs | todo | Depends on A2 |
+| G4 | Include verbalized proofs + campaign refs | done | Narration + campaigns in Markdown |
 | G5 | Optional “attach last drive session summary” | todo | Needs S4 |
 
 **Seams:** recognition, problems, decisions, campaigns, verbalize, Journal.  
@@ -369,14 +369,10 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Live gauge view (RPM, load, fuel trim, coolant) + staleness | S2, I3, I6 | planned | high | Operators need live PIDs while diagnosing. | `ObservationsService`, Dashboard |
 | Durable observation history + freeze-frame retention | S5, H3 | planned | high | Trends, verify-after-repair, history→decision. | `ObservationsService`, store batches |
 | Continuous drive session recorder | S4, H3, F4, G5 | planned | medium | Groups watch streams for history/reports. | obd-gateway watch, ObservationsService |
-| Freeze-frame detail panel | S3, A1, I3 | planned | medium | Evidence for analysis + informing. | `GET .../freeze-frame`, Diagnosis |
-| Mode 06 monitor results UI | S3, A3, I3 | planned | medium | API has `/mode06`; UI does not. | `GET /api/vehicles/:id/mode06` |
-| Verbalize plain-English proof traces | A2, I4, G4 | planned | medium | Bridge ready; UI shows class names today. | logos-bridge `verbalize`, RecognitionService |
-| Outcome → confidence calibration | D3, D4, R4, F2 | planned | high | Honest probabilistic diagnosis + history loop; rollup (X3) is the read model. | `logRepair`, RecommendationsService, cartridges |
 | Problem caseboard + verify-after-repair + reopen | P2–P5, H2 | planned | medium | Completes problem tracking/history beyond MVP. | `DiagnosticProblem`, Diagnosis UI |
-| Recommendation card richness + status lifecycle UI | R2, R3 | planned | medium | Cost/risk/confidence; accept/dismiss/convert. | Dashboard, RecommendationsService |
+| Recommendation card richness + status lifecycle UI | R2, R3 | planned | medium | Cost/risk; accept/dismiss/convert (confidence shipped). | Dashboard, RecommendationsService |
 | Multi-signal trend expansion (beyond oil) | F3 | planned | medium | Broader history→recognition; ontology-backed only. | ForecastService, recognition |
-| Export diagnostic report (Markdown → print/PDF) | G1–G5 | planned | high | Only product goal still **missing**. | decisions, recognition, verbalize |
+| Print/PDF diagnostic report polish | G3, G5 | planned | medium | Markdown export shipped; print stylesheet next. | `ReportService`, Journal |
 | Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | planned | high | Shared KB; land gates first (`HARDWARE_STANDARDS.md`). | dictionaries, ontology lint |
 | Shared `@auto/ui-components` | I5 | planned | medium | Consistent trust/evidence UI. | `UX_GUIDELINES` |
 
@@ -430,6 +426,12 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Product-goals maturity map + ideal solutions (work pieces S1…G5) | 2026-07 | this file § Product goals / Ideal solutions |
 | Evidence source labeling (I2) | 2026-07 | `GET .../evidence-provenance`, `EvidenceSourceBadge`, Dashboard/Diagnosis |
 | Solution history rollup + What worked panel (X3/X4) | 2026-07 | `SolutionHistoryService`, `GET .../solution-history`, `WhatWorkedPanel` |
+| Outcome → confidence calibration (D3/D4/R4/F2) | 2026-07 | `calibration.ts`, draft/solve/refresh hooks |
+| Lean/cam-crank realize + cam-crank reason fixtures | 2026-07 | `packages/ontology/fixtures/*` |
+| Recognition narration (verbalize + ontology notes) | 2026-07 | `RecognitionService`, Dashboard/Diagnosis |
+| Freeze-frame + Mode 06 UI panels | 2026-07 | `EvidencePanels`, Dashboard |
+| Markdown diagnostic report export | 2026-07 | `ReportService`, `ReportDownload` |
+| DTC P0305–08 + more Mode 01 PID seed rows | 2026-07 | `dtc-dictionary.json`, `pid-dictionary.json` |
 
 ---
 

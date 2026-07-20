@@ -3,6 +3,9 @@ import { describe, expect, it } from "vitest";
 import misfireReasonFixture from "../../ontology/fixtures/misfire_reason_fixture.json" with {
   type: "json",
 };
+import camcrankReasonFixture from "../../ontology/fixtures/camcrank_reason_fixture.json" with {
+  type: "json",
+};
 import oilstarvationReasonFixture from "../../ontology/fixtures/oilstarvation_reason_fixture.json" with {
   type: "json",
 };
@@ -101,6 +104,22 @@ describe.skipIf(!available)("LOGOS reason real subprocess integration", () => {
       res.derived.some(
         (d) => d.formula === "Ought(CheckOilBeforeMultiAirActuator(jeep_renegade_engine))",
       ),
+    ).toBe(true);
+    expect(res.fixpoint).toBe(true);
+  });
+
+  it("realizes CamCrankCorrelationFault and forbids clear-codes-and-drive", async () => {
+    const bridge = createLogosBridge();
+    const res = await bridge.reason(
+      reasonInputFromFixture(camcrankReasonFixture as unknown as FixtureEntry[]),
+    );
+    expect(
+      res.realized.some(
+        (r) => r.individual === "jeep_renegade_engine" && r.class === "CamCrankCorrelationFault",
+      ),
+    ).toBe(true);
+    expect(
+      res.derived.some((d) => d.formula === "Forbid(ClearCodesAndDrive(jeep_renegade_engine))"),
     ).toBe(true);
     expect(res.fixpoint).toBe(true);
   });

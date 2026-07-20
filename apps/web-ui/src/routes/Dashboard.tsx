@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { EvidencePanels } from "../components/EvidencePanels.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import {
   EmptyVehicleState,
@@ -7,6 +8,7 @@ import {
   useSelectedVehicleId,
   vehicleLabel,
 } from "../components/Layout.tsx";
+import { ReportDownload } from "../components/ReportDownload.tsx";
 import { api, queryKeys } from "../lib/api.ts";
 import { useAppSelector } from "../store/index.ts";
 
@@ -70,16 +72,19 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         title={vehicle ? vehicleLabel(vehicle) : "Vehicle"}
         subtitle={vehicle ? `${vehicle.engineFamily} · ${vehicle.id}` : undefined}
         actions={
-          <button
-            type="button"
-            onClick={async () => {
-              await api.refreshRecommendations(vehicleId);
-              qc.invalidateQueries({ queryKey: queryKeys.recommendations(vehicleId) });
-            }}
-            className="rounded-md bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700"
-          >
-            Refresh recommendations
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <ReportDownload vehicleId={vehicleId} />
+            <button
+              type="button"
+              onClick={async () => {
+                await api.refreshRecommendations(vehicleId);
+                qc.invalidateQueries({ queryKey: queryKeys.recommendations(vehicleId) });
+              }}
+              className="rounded-md bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700"
+            >
+              Refresh recommendations
+            </button>
+          </div>
         }
       />
 
@@ -150,13 +155,17 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
             synthesized "Healthy".
           </p>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            {recognitionQ.data?.mostSpecific.map((cls) => (
-              <Pill key={cls} tone="high">
-                {cls}
-              </Pill>
-            ))}
-          </div>
+          <ul className="space-y-2">
+            {recognitionQ.data?.mostSpecific.map((cls) => {
+              const narr = recognitionQ.data?.narration?.find((n) => n.className === cls);
+              return (
+                <li key={cls} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
+                  <Pill tone="high">{cls}</Pill>
+                  {narr && <p className="mt-1 text-xs text-slate-600">{narr.fluent}</p>}
+                </li>
+              );
+            })}
+          </ul>
         )}
         {debugMode && recognitionQ.data?.undecided && recognitionQ.data.undecided.length > 0 && (
           <p className="mt-2 text-xs text-slate-400">
@@ -171,6 +180,10 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         </Link>
       </section>
 
+      <div className="mt-4">
+        <EvidencePanels vehicleId={vehicleId} />
+      </div>
+
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="mb-3 text-sm font-semibold text-slate-700">Recommendations</h2>
         {recommendationsQ.data?.length === 0 && (
@@ -179,9 +192,16 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         <ul className="space-y-2">
           {recommendationsQ.data?.map((rec) => (
             <li key={rec.id} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="font-medium text-slate-800">{rec.title}</span>
-                <Pill tone={rec.priority}>{rec.priority}</Pill>
+                <div className="flex flex-shrink-0 items-center gap-1.5">
+                  {rec.confidence !== undefined && (
+                    <span className="text-xs text-slate-500">
+                      conf {(rec.confidence * 100).toFixed(0)}%
+                    </span>
+                  )}
+                  <Pill tone={rec.priority}>{rec.priority}</Pill>
+                </div>
               </div>
               <p className="mt-1 text-xs text-slate-500">{rec.reason}</p>
             </li>

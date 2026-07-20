@@ -79,6 +79,55 @@
       "mode": "01",
       "pidHex": "0x42"
     },
+    "MAF": {
+      "description": "Mass air flow sensor",
+      "unit": "grams/sec",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x10"
+    },
+    "INTAKE_PRESSURE": {
+      "description": "Intake manifold absolute pressure",
+      "unit": "kPa",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x0B"
+    },
+    "TIMING_ADVANCE": {
+      "description": "Timing advance",
+      "unit": "degrees",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x0E"
+    },
+    "FUEL_LEVEL": {
+      "description": "Fuel tank level input",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x2F"
+    },
+    "BAROMETRIC_PRESSURE": {
+      "description": "Barometric pressure",
+      "unit": "kPa",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x33"
+    },
+    "RUN_TIME": {
+      "description": "Run time since engine start",
+      "unit": "seconds",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x1F"
+    },
+    "DISTANCE_W_MIL": {
+      "description": "Distance traveled while MIL is activated",
+      "unit": "km",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x21"
+    },
     "OIL_PRESSURE_PSI": {
       "description": "Engine oil pressure (manual / gauge)",
       "unit": "psi",

@@ -182,6 +182,10 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Postgres store (Drizzle; migrate-on-init) | shipped | `apps/api/src/store/drizzle.ts`, `apps/api/drizzle/`, `pnpm infra:up` |
 | Evidence source labeling (live / sim / manual) | shipped | `GET .../evidence-provenance`, Dashboard/Diagnosis badges |
 | Solution history rollup (“what worked before”) | shipped | `GET .../solution-history`, Diagnosis/ProblemDetail panel |
+| Outcome → confidence calibration | shipped | `calibration.ts` → draft/solve/recommendation refresh |
+| Recognition narration (verbalize / ontology notes) | shipped | `Recognition.narration`, Dashboard/Diagnosis |
+| Freeze-frame + Mode 06 UI | shipped | `EvidencePanels` on Dashboard |
+| Markdown diagnostic report export | shipped | `GET .../report`, `ReportDownload` |
 | Policy safety holds (`clear-codes-and-drive` under misfire / MultiAir oil starvation / cam-crank) | shipped | `PolicyService`, reason fixtures, Diagnosis UI |
 | Oil-level trend forecast | shipped | `ForecastService` |
 | React UI (5 routes) | shipped | `apps/web-ui` |

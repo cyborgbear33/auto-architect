@@ -98,22 +98,28 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
           </p>
         ) : (
           <ul className="space-y-2">
-            {undraftedClasses.map((cls) => (
-              <li
-                key={cls}
-                className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm"
-              >
-                <span className="font-medium text-slate-800">{cls}</span>
-                <button
-                  type="button"
-                  onClick={() => createProblem.mutate(cls)}
-                  disabled={createProblem.isPending}
-                  className="rounded-md bg-sky-600 px-3 py-1 text-xs font-medium text-white hover:bg-sky-700 disabled:opacity-50"
+            {undraftedClasses.map((cls) => {
+              const narr = recognitionQ.data?.narration?.find((n) => n.className === cls);
+              return (
+                <li
+                  key={cls}
+                  className="flex items-center justify-between gap-3 rounded-md bg-slate-50 px-3 py-2 text-sm"
                 >
-                  Draft diagnostic problem
-                </button>
-              </li>
-            ))}
+                  <div>
+                    <span className="font-medium text-slate-800">{cls}</span>
+                    {narr && <p className="mt-0.5 text-xs text-slate-500">{narr.fluent}</p>}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => createProblem.mutate(cls)}
+                    disabled={createProblem.isPending}
+                    className="flex-shrink-0 rounded-md bg-sky-600 px-3 py-1 text-xs font-medium text-white hover:bg-sky-700 disabled:opacity-50"
+                  >
+                    Draft diagnostic problem
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

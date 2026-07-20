@@ -55,12 +55,27 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         batchCount: 1,
         sourcesSeen: ["simulated"],
       }),
+      getFreezeFrames: vi.fn().mockResolvedValue([]),
+      getMode06: vi.fn().mockResolvedValue([]),
+      getVehicleReport: vi.fn().mockResolvedValue({
+        scope: "vehicle",
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        generatedAt: "2026-07-19T12:00:00.000Z",
+        markdown: "# report",
+      }),
       getForecast: vi.fn().mockResolvedValue({ declining: false, series: [] }),
       getRecognition: vi.fn().mockResolvedValue({
         individual: "veh:jeep-renegade-2015-latitude",
         member: ["Engine", "MisfireUnderLoad"],
         mostSpecific: ["MisfireUnderLoad"],
         undecided: [],
+        narration: [
+          {
+            className: "MisfireUnderLoad",
+            fluent: "P0300-P0304 + high load evidence.",
+            source: "ontology_note",
+          },
+        ],
       }),
       getRecommendations: vi.fn().mockResolvedValue([
         {
@@ -70,6 +85,7 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
           priority: "high",
           status: "new",
           reason: "a sustained misfire can destroy the catalytic converter",
+          confidence: 0.82,
           generatedFromClasses: ["MisfireUnderLoad"],
           createdAt: "2026-01-01T00:00:00Z",
         },

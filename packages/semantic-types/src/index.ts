@@ -265,11 +265,20 @@ export interface DiagnosticProblem {
 
 // --- Recognition (LOGOS realize, camelCased) ------------------------------
 
+/** Plain-English narration for a proven class (verbalize and/or ontology note). */
+export interface ClassNarration {
+  className: string;
+  fluent: string;
+  source: "verbalize" | "ontology_note" | "class_name";
+}
+
 export interface Recognition {
   individual: SemanticId;
   member: string[];
   mostSpecific: string[];
   undecided?: string[];
+  /** Operator-facing explanations for `mostSpecific` classes. */
+  narration?: ClassNarration[];
 }
 
 // --- Recommendations & decision journal -----------------------------------

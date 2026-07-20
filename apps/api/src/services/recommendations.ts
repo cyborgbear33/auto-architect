@@ -2,15 +2,10 @@ import { draftForClass } from "@auto/cartridges";
 import type { Recommendation } from "@auto/semantic-types";
 import { newId, nowIso } from "../lib/ids.ts";
 import type { Store } from "../store/index.ts";
+import { calibratePlaybook } from "./calibration.ts";
 import type { RecognitionService } from "./recognition.ts";
+import type { SolutionHistoryService } from "./solution-history.ts";
 import type { VehicleService } from "./vehicle.ts";
-
-const URGENCY_TO_PRIORITY: Record<string, Recommendation["priority"]> = {
-  critical: "critical",
-  high: "high",
-  medium: "normal",
-  low: "low",
-};
 
 /**
  * Turns "what classes does this vehicle provably belong to right now" into
@@ -18,12 +13,16 @@ const URGENCY_TO_PRIORITY: Record<string, Recommendation["priority"]> = {
  * most-specific fault class a cartridge knows how to frame. Idempotent per
  * (vehicle, class): re-running never duplicates an already-`new`/`viewed`
  * recommendation for the same class.
+ *
+ * Confidence/priority can be adjusted from solution-history outcomes
+ * (shrink toward cartridge priors); classes still come only from realize.
  */
 export class RecommendationService {
   constructor(
     private store: Store,
     private vehicles: VehicleService,
     private recognition: RecognitionService,
+    private solutionHistory: SolutionHistoryService,
   ) {}
 
   async refresh(vehicleId: string): Promise<Recommendation[]> {
@@ -53,13 +52,22 @@ export class RecommendationService {
       if (openClasses.has(className)) continue;
       const draft = draftForClass(vehicleView, className, cartridges);
       if (!draft) continue; // a raw Symptom/Condition, not a framed fault syndrome
+      const history = await this.solutionHistory.forVehicle(vehicleId, className);
+      const calibration = calibratePlaybook({
+        faultClass: className,
+        actions: draft.actions,
+        history,
+        urgency: draft.statement.urgency,
+      });
+      const reasonBase = draft.statement.whyItMatters ?? draft.statement.gap;
       const rec: Recommendation = {
         id: newId("rec"),
         vehicleId,
         title: draft.label,
-        priority: URGENCY_TO_PRIORITY[draft.statement.urgency ?? "medium"] ?? "normal",
+        priority: calibration.priority,
         status: "new",
-        reason: draft.statement.whyItMatters ?? draft.statement.gap,
+        reason: calibration.explain ? `${reasonBase} (${calibration.explain})` : reasonBase,
+        confidence: calibration.recommendationConfidence,
         generatedFromClasses: [className],
         createdAt: nowIso(),
       };

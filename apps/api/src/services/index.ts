@@ -7,6 +7,7 @@ import { ObservationService } from "./observations.ts";
 import { PolicyService } from "./policy.ts";
 import { RecognitionService } from "./recognition.ts";
 import { RecommendationService } from "./recommendations.ts";
+import { ReportService } from "./report.ts";
 import { SolutionHistoryService } from "./solution-history.ts";
 import { SolverService } from "./solver.ts";
 import { VehicleService } from "./vehicle.ts";
@@ -24,6 +25,7 @@ export interface Services {
   recommendations: RecommendationService;
   campaigns: CampaignService;
   solutionHistory: SolutionHistoryService;
+  reports: ReportService;
 }
 
 export function createServices(store: Store, bridge: LogosBridge): Services {
@@ -32,11 +34,31 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
   const recognition = new RecognitionService(store, bridge, vehicles, forecast);
   const policy = new PolicyService(bridge);
   const solver = new SolverService(bridge);
-  const actions = new ActionService(store, vehicles, recognition, policy, solver);
-  const observations = new ObservationService(store, vehicles);
-  const recommendations = new RecommendationService(store, vehicles, recognition);
-  const campaigns = new CampaignService(vehicles);
   const solutionHistory = new SolutionHistoryService(store, vehicles);
+  const actions = new ActionService(
+    store,
+    vehicles,
+    recognition,
+    policy,
+    solver,
+    solutionHistory,
+  );
+  const observations = new ObservationService(store, vehicles);
+  const recommendations = new RecommendationService(
+    store,
+    vehicles,
+    recognition,
+    solutionHistory,
+  );
+  const campaigns = new CampaignService(vehicles);
+  const reports = new ReportService(
+    vehicles,
+    observations,
+    recognition,
+    recommendations,
+    actions,
+    campaigns,
+  );
 
   return {
     store,
@@ -51,6 +73,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     recommendations,
     campaigns,
     solutionHistory,
+    reports,
   };
 }
 
@@ -62,6 +85,7 @@ export {
   PolicyService,
   RecognitionService,
   RecommendationService,
+  ReportService,
   SolutionHistoryService,
   SolverService,
   VehicleService,

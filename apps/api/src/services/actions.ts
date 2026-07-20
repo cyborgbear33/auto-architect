@@ -4,8 +4,10 @@ import type { CreateDiagnosticProblemInput, LogRepairInput } from "@auto/validat
 import { notFound, policyBlocked, validationError } from "../lib/errors.ts";
 import { newId, nowIso } from "../lib/ids.ts";
 import type { Store } from "../store/index.ts";
+import { applyCalibration, calibratePlaybook } from "./calibration.ts";
 import type { PolicyService } from "./policy.ts";
 import type { RecognitionService } from "./recognition.ts";
+import type { SolutionHistoryService } from "./solution-history.ts";
 import type { SolverService } from "./solver.ts";
 import type { VehicleService } from "./vehicle.ts";
 
@@ -22,6 +24,7 @@ export class ActionService {
     private recognition: RecognitionService,
     private policy: PolicyService,
     private solver: SolverService,
+    private solutionHistory: SolutionHistoryService,
   ) {}
 
   /**
@@ -51,6 +54,13 @@ export class ActionService {
           `No cartridge loaded for vehicle "${vehicle.id}" frames class "${input.triggeredByClass}".`,
         );
       }
+      const history = await this.solutionHistory.forVehicle(vehicle.id, input.triggeredByClass);
+      const calibration = calibratePlaybook({
+        faultClass: input.triggeredByClass,
+        actions: draft.actions,
+        history,
+        urgency: draft.statement.urgency,
+      });
       const problem: DiagnosticProblem = {
         id: newId("problem"),
         vehicleId: vehicle.id,
@@ -59,7 +69,7 @@ export class ActionService {
         problemType: "Diagnostic",
         gapType: draft.gapType,
         desiredState: draft.desiredState,
-        actions: draft.actions,
+        actions: applyCalibration(draft.actions, calibration),
         triggeredByClass: input.triggeredByClass,
         createdAt: now,
         updatedAt: now,
@@ -84,9 +94,25 @@ export class ActionService {
   async solveDiagnosticProblem(problemId: string): Promise<DiagnosticProblem> {
     const problem = await this.store.problems.get(problemId);
     if (!problem) throw notFound("DiagnosticProblem", problemId);
-    const solution = await this.solver.solve(problem);
+
+    let actions = problem.actions;
+    if (problem.triggeredByClass && actions.length > 0) {
+      const history = await this.solutionHistory.forVehicle(
+        problem.vehicleId,
+        problem.triggeredByClass,
+      );
+      const calibration = calibratePlaybook({
+        faultClass: problem.triggeredByClass,
+        actions,
+        history,
+        urgency: problem.statement.urgency,
+      });
+      actions = applyCalibration(actions, calibration);
+    }
+
+    const solution = await this.solver.solve({ ...problem, actions });
     const status = solution.kind === "escalate" ? "escalated" : "analyzing";
-    return this.store.problems.update(problemId, { solution, status });
+    return this.store.problems.update(problemId, { solution, status, actions });
   }
 
   async getDiagnosticProblem(problemId: string): Promise<DiagnosticProblem> {

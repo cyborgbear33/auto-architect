@@ -147,6 +147,22 @@ export class AutoApiClient {
     const q = faultClass ? `?class=${enc(faultClass)}` : "";
     return this.request<SolutionHistory>(`/api/vehicles/${enc(vehicleId)}/solution-history${q}`);
   };
+  getVehicleReport = (vehicleId: string) =>
+    this.request<{
+      scope: "vehicle" | "problem";
+      vehicleId: string;
+      problemId?: string;
+      generatedAt: string;
+      markdown: string;
+    }>(`/api/vehicles/${enc(vehicleId)}/report`);
+  getProblemReport = (problemId: string) =>
+    this.request<{
+      scope: "vehicle" | "problem";
+      vehicleId: string;
+      problemId?: string;
+      generatedAt: string;
+      markdown: string;
+    }>(`/api/problems/${enc(problemId)}/report`);
   getFreezeFrames = (vehicleId: string) =>
     this.request<{ freezeFrames: FreezeFrame[] }>(
       `/api/vehicles/${enc(vehicleId)}/freeze-frame`,
@@ -244,4 +260,6 @@ export const queryKeys = {
   decisions: (vehicleId: string) => ["decisions", vehicleId] as const,
   solutionHistory: (vehicleId: string, faultClass?: string) =>
     ["solutionHistory", vehicleId, faultClass ?? null] as const,
+  vehicleReport: (vehicleId: string) => ["vehicleReport", vehicleId] as const,
+  problemReport: (problemId: string) => ["problemReport", problemId] as const,
 };

@@ -1,0 +1,67 @@
+[
+  {
+    "id": "ontology",
+    "kind": "Ontology",
+    "subtypes": {
+      "Engine": "IndependentContinuant",
+      "Symptom": "IndependentContinuant",
+      "CamCrankCorrelation": "Symptom"
+    },
+    "roles": {
+      "hasDtc": { "domain": "Engine", "range": "Symptom" }
+    },
+    "classes": {
+      "CamCrankCorrelationFault": {
+        "equivalentTo": "Engine ⊓ ∃hasDtc.CamCrankCorrelation"
+      }
+    }
+  },
+  {
+    "id": "R_forbid_clear_camcrank",
+    "kind": "Rule",
+    "if": "CamCrankCorrelationFault(x)",
+    "then": "Forbid(ClearCodesAndDrive(x))",
+    "priority": 10,
+    "logic": "FOL⊗ML",
+    "level": "L2"
+  },
+  {
+    "id": "R_ought_stop_camcrank",
+    "kind": "Rule",
+    "if": "CamCrankCorrelationFault(x)",
+    "then": "Ought(StopDrivingAndDiagnose(x))",
+    "priority": 10,
+    "logic": "FOL⊗ML",
+    "level": "L2"
+  },
+  {
+    "id": "C_a1",
+    "kind": "Claim",
+    "formula": "Engine(jeep_renegade_engine)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.99,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  },
+  {
+    "id": "C_a2",
+    "kind": "Claim",
+    "formula": "CamCrankCorrelation(p0016)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.95,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  },
+  {
+    "id": "C_a3",
+    "kind": "Claim",
+    "formula": "hasDtc(jeep_renegade_engine, p0016)",
+    "logic": "FOL",
+    "status": "observed",
+    "confidence": 0.95,
+    "level": "L1",
+    "provenance": { "derived_from": ["obd_gateway"] }
+  }
+]

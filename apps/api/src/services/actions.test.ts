@@ -6,6 +6,7 @@ import { ActionService } from "./actions.ts";
 import { ForecastService } from "./forecast.ts";
 import { PolicyService } from "./policy.ts";
 import { RecognitionService } from "./recognition.ts";
+import { SolutionHistoryService } from "./solution-history.ts";
 import { SolverService } from "./solver.ts";
 import { VehicleService } from "./vehicle.ts";
 
@@ -65,7 +66,15 @@ async function makeCtx() {
   const recognition = new RecognitionService(store, bridge, vehicles, forecast);
   const policy = new PolicyService(bridge);
   const solver = new SolverService(bridge);
-  const actions = new ActionService(store, vehicles, recognition, policy, solver);
+  const solutionHistory = new SolutionHistoryService(store, vehicles);
+  const actions = new ActionService(
+    store,
+    vehicles,
+    recognition,
+    policy,
+    solver,
+    solutionHistory,
+  );
   return { store, actions, vehicles };
 }
 

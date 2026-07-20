@@ -12,8 +12,11 @@ const fixturesDir = resolve(dirname(fileURLToPath(import.meta.url)), "../fixture
 
 const FIXTURES = [
   "misfire_realize_fixture.json",
+  "lean_realize_fixture.json",
+  "camcrank_realize_fixture.json",
   "misfire_reason_fixture.json",
   "oilstarvation_reason_fixture.json",
+  "camcrank_reason_fixture.json",
 ] as const;
 
 describe("ontology fixtures (path + parse)", () => {

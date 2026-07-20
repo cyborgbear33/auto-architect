@@ -79,6 +79,16 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     return s.solutionHistory.forVehicle(id, faultClass);
   });
 
+  app.get("/api/vehicles/:id/report", async (req) => {
+    const { id } = req.params as { id: string };
+    return s.reports.forVehicle(id);
+  });
+
+  app.get("/api/problems/:id/report", async (req) => {
+    const { id } = req.params as { id: string };
+    return s.reports.forProblem(id);
+  });
+
   // --- recognition (LOGOS realize) --------------------------------------------
   app.get("/api/vehicles/:id/recognition", async (req) => {
     const { id } = req.params as { id: string };

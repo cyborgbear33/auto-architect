@@ -1,5 +1,11 @@
 import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
+import camcrankRealizeFixture from "../../ontology/fixtures/camcrank_realize_fixture.json" with {
+  type: "json",
+};
+import leanRealizeFixture from "../../ontology/fixtures/lean_realize_fixture.json" with {
+  type: "json",
+};
 import misfireRealizeFixture from "../../ontology/fixtures/misfire_realize_fixture.json" with {
   type: "json",
 };
@@ -29,9 +35,14 @@ function logosAvailable(): boolean {
 const available = logosAvailable();
 
 /** The fixture is already the flat wire shape `logos realize <file> --json` reads. */
-function realizeInputFromFixture(fixture: typeof misfireRealizeFixture): RealizeInput {
+function realizeInputFromFixture(fixture: {
+  abox: unknown;
+  individual: string;
+  classify: string[];
+  [key: string]: unknown;
+}): RealizeInput {
   const { abox, individual, classify, ...ontology } = fixture;
-  return { ontology, abox: abox as unknown as RealizeInput["abox"], individual, classify };
+  return { ontology, abox: abox as RealizeInput["abox"], individual, classify };
 }
 
 describe.skipIf(!available)("LOGOS realize real subprocess integration", () => {
@@ -44,6 +55,20 @@ describe.skipIf(!available)("LOGOS realize real subprocess integration", () => {
     // No MultiAirFault dtc / LowOilPressure condition is asserted for this
     // individual — the tableau must NOT synthesize membership from nothing.
     expect(result.member).not.toContain("MultiAirOilStarvation");
+  });
+
+  it("proves LeanFuelBank1 from P0171 + positive fuel trim", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(leanRealizeFixture));
+    expect(result.mostSpecific).toContain("LeanFuelBank1");
+    expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
+  it("proves CamCrankCorrelationFault from P0016", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(camcrankRealizeFixture));
+    expect(result.mostSpecific).toContain("CamCrankCorrelationFault");
+    expect(result.member).not.toContain("MisfireUnderLoad");
   });
 });
 

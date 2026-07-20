@@ -1,0 +1,36 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "LeanCodeBank1": "Symptom",
+    "PositiveFuelTrim": "Condition",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": { "domain": "Engine", "range": "Symptom" },
+    "hasCondition": { "domain": "Engine", "range": "Condition" }
+  },
+  "classes": {
+    "LeanFuelBank1": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.LeanCodeBank1 ⊓ ∃hasCondition.PositiveFuelTrim"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": ["Engine"],
+      "p0171": ["LeanCodeBank1"],
+      "pos_trim_1": ["PositiveFuelTrim"]
+    },
+    "roles": [
+      ["hasDtc", "jeep_renegade_engine", "p0171"],
+      ["hasCondition", "jeep_renegade_engine", "pos_trim_1"]
+    ]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": ["LeanFuelBank1", "MisfireUnderLoad"]
+}

@@ -1,0 +1,31 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "CamCrankCorrelation": "Symptom",
+    "CylinderMisfire": "Symptom",
+    "Condition": "IndependentContinuant",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": { "domain": "Engine", "range": "Symptom" },
+    "hasCondition": { "domain": "Engine", "range": "Condition" }
+  },
+  "classes": {
+    "CamCrankCorrelationFault": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CamCrankCorrelation"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": ["Engine"],
+      "p0016": ["CamCrankCorrelation"]
+    },
+    "roles": [["hasDtc", "jeep_renegade_engine", "p0016"]]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": ["CamCrankCorrelationFault", "MisfireUnderLoad"]
+}
