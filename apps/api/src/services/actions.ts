@@ -1,5 +1,10 @@
 import { draftForClass } from "@auto/cartridges";
-import type { DecisionRecord, DiagnosticProblem, ProblemStatus } from "@auto/semantic-types";
+import type {
+  DecisionRecord,
+  DiagnosticProblem,
+  ProblemLifecycleEvent,
+  ProblemStatus,
+} from "@auto/semantic-types";
 import type {
   CreateDiagnosticProblemInput,
   LogRepairInput,
@@ -20,6 +25,24 @@ const REOPENABLE: ReadonlySet<ProblemStatus> = new Set([
   "abandoned",
   "escalated",
 ]);
+
+type LifecycleStamp = Omit<ProblemLifecycleEvent, "id" | "at"> & { at?: string };
+
+function stampLifecycle(
+  problem: DiagnosticProblem,
+  stamp: LifecycleStamp,
+): ProblemLifecycleEvent[] {
+  const event: ProblemLifecycleEvent = {
+    id: newId("life"),
+    at: stamp.at ?? nowIso(),
+    type: stamp.type,
+    ...(stamp.note ? { note: stamp.note } : {}),
+    ...(stamp.verifyResult ? { verifyResult: stamp.verifyResult } : {}),
+    ...(stamp.reopenedFromId ? { reopenedFromId: stamp.reopenedFromId } : {}),
+    ...(stamp.solutionKind ? { solutionKind: stamp.solutionKind } : {}),
+  };
+  return [...(problem.lifecycleEvents ?? []), event];
+}
 
 /**
  * The mutation gate. Every state-changing operation in auto-architect goes
@@ -46,6 +69,11 @@ export class ActionService {
   ): Promise<DiagnosticProblem> {
     const vehicle = await this.vehicles.getOrThrow(input.vehicleId);
     const now = nowIso();
+    const opened: ProblemLifecycleEvent = {
+      id: newId("life"),
+      type: "opened",
+      at: now,
+    };
 
     if (input.triggeredByClass) {
       const cartridges = this.vehicles.cartridgesFor(vehicle);
@@ -81,6 +109,7 @@ export class ActionService {
         desiredState: draft.desiredState,
         actions: applyCalibration(draft.actions, calibration),
         triggeredByClass: input.triggeredByClass,
+        lifecycleEvents: [opened],
         createdAt: now,
         updatedAt: now,
       };
@@ -95,6 +124,7 @@ export class ActionService {
       problemType: "Diagnostic",
       gapType: input.gapType,
       actions: input.actions,
+      lifecycleEvents: [opened],
       createdAt: now,
       updatedAt: now,
     };
@@ -121,8 +151,32 @@ export class ActionService {
     }
 
     const solution = await this.solver.solve({ ...problem, actions });
+    const now = nowIso();
     const status = solution.kind === "escalate" ? "escalated" : "analyzing";
-    return this.store.problems.update(problemId, { solution, status, actions });
+    let lifecycleEvents = stampLifecycle(problem, {
+      type: "ranked",
+      at: now,
+      solutionKind: solution.kind,
+      note: solution.rationale,
+    });
+    if (status === "escalated") {
+      lifecycleEvents = [
+        ...lifecycleEvents,
+        {
+          id: newId("life"),
+          type: "escalated",
+          at: now,
+          note: "Escalated by LOGOS solve",
+          solutionKind: solution.kind,
+        },
+      ];
+    }
+    return this.store.problems.update(problemId, {
+      solution,
+      status,
+      actions,
+      lifecycleEvents,
+    });
   }
 
   async getDiagnosticProblem(problemId: string): Promise<DiagnosticProblem> {
@@ -179,9 +233,15 @@ export class ActionService {
 
     let nextStatus: ProblemStatus = problem.status;
     let verification = problem.verification;
+    let lifecycleEvents = problem.lifecycleEvents;
     if (outcome?.status === "worked") {
       nextStatus = "verifying";
       verification = { startedAt: now };
+      lifecycleEvents = stampLifecycle(problem, {
+        type: "verify_started",
+        at: now,
+        note: `After repair ${input.actionId}`,
+      });
     } else if (outcome && (problem.status === "open" || problem.status === "analyzing")) {
       nextStatus = "analyzing";
     }
@@ -190,6 +250,7 @@ export class ActionService {
       status: nextStatus,
       ...(outcome ? { outcome } : {}),
       ...(verification ? { verification } : {}),
+      ...(lifecycleEvents ? { lifecycleEvents } : {}),
     });
 
     const decision: DecisionRecord = {
@@ -227,20 +288,35 @@ export class ActionService {
     const criteria = problem.desiredState?.successCriteria;
 
     if (!className) {
-      // Manual problems: operator confirms via note; treat verify as passed.
+      const note = input.note ?? "Manual case verified by operator (no triggeredByClass).";
+      let lifecycleEvents = stampLifecycle(problem, {
+        type: "verify_result",
+        at: now,
+        verifyResult: "passed",
+        note,
+      });
+      lifecycleEvents = [
+        ...lifecycleEvents,
+        { id: newId("life"), type: "closed_solved", at: now, verifyResult: "passed", note },
+      ];
       return this.store.problems.update(problem.id, {
         status: "solved",
         verification: {
           startedAt: problem.verification?.startedAt ?? now,
           completedAt: now,
           result: "passed",
-          note: input.note ?? "Manual case verified by operator (no triggeredByClass).",
+          note,
           stillProven: [],
         },
+        lifecycleEvents,
       });
     }
 
     if (stillProven) {
+      const note =
+        input.note ??
+        `${className} still proven after repair` +
+          (criteria ? ` — success criteria: ${criteria}` : "");
       return this.store.problems.update(problem.id, {
         status: "open",
         verification: {
@@ -248,14 +324,31 @@ export class ActionService {
           completedAt: now,
           result: "failed",
           stillProven: [className],
-          note:
-            input.note ??
-            `${className} still proven after repair` +
-              (criteria ? ` — success criteria: ${criteria}` : ""),
+          note,
         },
+        lifecycleEvents: stampLifecycle(problem, {
+          type: "verify_result",
+          at: now,
+          verifyResult: "failed",
+          note,
+        }),
       });
     }
 
+    const note =
+      input.note ??
+      `${className} no longer proven` +
+        (criteria ? ` — success criteria: ${criteria}` : "");
+    let lifecycleEvents = stampLifecycle(problem, {
+      type: "verify_result",
+      at: now,
+      verifyResult: "passed",
+      note,
+    });
+    lifecycleEvents = [
+      ...lifecycleEvents,
+      { id: newId("life"), type: "closed_solved", at: now, verifyResult: "passed", note },
+    ];
     return this.store.problems.update(problem.id, {
       status: "solved",
       verification: {
@@ -263,11 +356,9 @@ export class ActionService {
         completedAt: now,
         result: "passed",
         stillProven: [],
-        note:
-          input.note ??
-          `${className} no longer proven` +
-            (criteria ? ` — success criteria: ${criteria}` : ""),
+        note,
       },
+      lifecycleEvents,
     });
   }
 
@@ -277,7 +368,15 @@ export class ActionService {
       throw conflict("Solved problems are closed — reopen if you need to abandon a mistaken case.");
     }
     if (problem.status === "abandoned") return problem;
-    return this.store.problems.update(problem.id, { status: "abandoned" });
+    const now = nowIso();
+    return this.store.problems.update(problem.id, {
+      status: "abandoned",
+      lifecycleEvents: stampLifecycle(problem, {
+        type: "abandoned",
+        at: now,
+        note: input.note,
+      }),
+    });
   }
 
   async escalateDiagnosticProblem(input: ProblemIdActionInput): Promise<DiagnosticProblem> {
@@ -286,7 +385,15 @@ export class ActionService {
     if (problem.status === "solved" || problem.status === "abandoned") {
       throw conflict(`Cannot escalate a "${problem.status}" problem — reopen it first.`);
     }
-    return this.store.problems.update(problem.id, { status: "escalated" });
+    const now = nowIso();
+    return this.store.problems.update(problem.id, {
+      status: "escalated",
+      lifecycleEvents: stampLifecycle(problem, {
+        type: "escalated",
+        at: now,
+        note: input.note,
+      }),
+    });
   }
 
   /**
@@ -300,10 +407,18 @@ export class ActionService {
         `Only solved/abandoned/escalated problems can be reopened (currently "${problem.status}").`,
       );
     }
+    const now = nowIso();
+    const reopenedFromId = problem.reopenedFromId ?? problem.id;
     return this.store.problems.update(problem.id, {
       status: "open",
-      reopenedFromId: problem.reopenedFromId ?? problem.id,
+      reopenedFromId,
       verification: undefined,
+      lifecycleEvents: stampLifecycle(problem, {
+        type: "reopened",
+        at: now,
+        reopenedFromId,
+        note: input.note,
+      }),
     });
   }
 

@@ -76,7 +76,7 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
 
   app.get("/api/vehicles/:id/forecast", async (req) => {
     const { id } = req.params as { id: string };
-    return s.forecast.oilLevelTrend(id);
+    return s.forecast.summary(id);
   });
 
   app.get("/api/vehicles/:id/solution-history", async (req) => {

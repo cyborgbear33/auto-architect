@@ -100,6 +100,7 @@ export const leanFuelCartridge: Cartridge = {
       "LeanCodeBank1",
       "LeanCodeBank2",
       "PositiveFuelTrim",
+      "RisingFuelTrim",
       "LeanFuelBank1",
       "LeanFuelBank2",
     ],

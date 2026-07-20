@@ -17,7 +17,9 @@
     "PositiveFuelTrim": "Condition",
     "LowOilPressure": "Condition",
 
-    "OilLevelDecline": "Trend"
+    "OilLevelDecline": "Trend",
+    "RisingFuelTrim": "Trend",
+    "RecurringHighLoad": "Trend"
   },
   "roles": {
     "hasDtc": {
@@ -35,16 +37,16 @@
   },
   "classes": {
     "MisfireUnderLoad": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ (∃hasCondition.HighLoad ⊔ ∃hasTrend.RecurringHighLoad)"
     },
     "CamCrankCorrelationFault": {
       "equivalentTo": "Engine ⊓ ∃hasDtc.CamCrankCorrelation"
     },
     "LeanFuelBank1": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.LeanCodeBank1 ⊓ ∃hasCondition.PositiveFuelTrim"
+      "equivalentTo": "Engine ⊓ ∃hasDtc.LeanCodeBank1 ⊓ (∃hasCondition.PositiveFuelTrim ⊔ ∃hasTrend.RisingFuelTrim)"
     },
     "LeanFuelBank2": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.LeanCodeBank2 ⊓ ∃hasCondition.PositiveFuelTrim"
+      "equivalentTo": "Engine ⊓ ∃hasDtc.LeanCodeBank2 ⊓ (∃hasCondition.PositiveFuelTrim ⊔ ∃hasTrend.RisingFuelTrim)"
     },
     "EvapLeakSmall": {
       "equivalentTo": "Engine ⊓ ∃hasDtc.EvapCodeSmall"
@@ -60,13 +62,15 @@
     }
   },
   "notes": {
-    "MisfireUnderLoad": "SAE-generic (any manufacturer): P0300-P0304 + high RPM/MAP evidence.",
+    "MisfireUnderLoad": "SAE-generic (any manufacturer): P0300-P0304 + high load now, or recurring high-load samples from forecast.",
     "CamCrankCorrelationFault": "SAE-generic: P0016-P0018 family (cam/crank correlation, timing-chain-adjacent).",
-    "LeanFuelBank1": "SAE-generic: P0171 + sustained positive long-term fuel trim on bank 1.",
-    "LeanFuelBank2": "SAE-generic: P0174 + sustained positive long-term fuel trim on bank 2.",
+    "LeanFuelBank1": "SAE-generic: P0171 + positive LTFT now, or a rising LTFT trend from forecast.",
+    "LeanFuelBank2": "SAE-generic: P0174 + positive LTFT now, or a rising LTFT trend from forecast.",
     "EvapLeakSmall": "SAE-generic: P0442.",
     "EvapLeakLarge": "SAE-generic: P0455.",
     "ChronicOilConsumption": "SAE-generic: fed by `forecast` over logged oil-level/odometer samples, not a DTC.",
+    "RisingFuelTrim": "Trend evidence from LONG_FUEL_TRIM series (ForecastService) — pairs with lean DTCs.",
+    "RecurringHighLoad": "Trend evidence from ENGINE_LOAD series (ForecastService) — pairs with misfire DTCs.",
     "MultiAirOilStarvation": "Engine-family-specific (FCA MultiAir electrohydraulic valve actuation): only loaded via the fca-tigershark-2.4 view. See TSB 05047457A — always rule out low/dirty/wrong-viscosity oil BEFORE blaming the MultiAir actuator itself."
   },
   "views": {

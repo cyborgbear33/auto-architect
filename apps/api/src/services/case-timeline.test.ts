@@ -46,7 +46,7 @@ describe("CaseTimelineService", () => {
     expect(timeline.events.find((e) => e.type === "verify_result")?.verifyResult).toBe("passed");
   });
 
-  it("includes abandon / reopen lifecycle events", async () => {
+  it("preserves abandon then reopen as durable lifecycle stamps", async () => {
     const problem = await services.actions.createDiagnosticProblem({
       vehicleId: JEEP,
       triggeredByClass: "MisfireUnderLoad",
@@ -59,8 +59,28 @@ describe("CaseTimelineService", () => {
 
     await services.actions.reopenDiagnosticProblem({ problemId: problem.id });
     timeline = await services.caseTimeline.forVehicle(JEEP, problem.id);
-    expect(timeline.events.map((e) => e.type)).toEqual(["opened", "reopened"]);
+    // Durable log keeps abandoned even after status is open again.
+    expect(timeline.events.map((e) => e.type)).toEqual(["opened", "abandoned", "reopened"]);
     expect(timeline.events.find((e) => e.type === "reopened")?.reopenedFromId).toBe(problem.id);
+
+    const stored = await services.actions.getDiagnosticProblem(problem.id);
+    expect(stored.lifecycleEvents?.map((e) => e.type)).toEqual([
+      "opened",
+      "abandoned",
+      "reopened",
+    ]);
+  });
+
+  it("records ranked when solve runs", async () => {
+    const problem = await services.actions.createDiagnosticProblem({
+      vehicleId: JEEP,
+      triggeredByClass: "MisfireUnderLoad",
+      statement: { currentState: "", desiredState: "", gap: "" },
+      actions: [],
+    });
+    await services.actions.solveDiagnosticProblem(problem.id);
+    const timeline = await services.caseTimeline.forVehicle(JEEP, problem.id);
+    expect(timeline.events.map((e) => e.type)).toContain("ranked");
   });
 
   it("returns vehicle-wide events and filters by problemId", async () => {

@@ -189,6 +189,8 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |
 | Problem caseboard + verify-after-repair (P2–P5) | shipped | Diagnosis filters; abandon/escalate/reopen; `worked` → verifying → verify |
 | Case timeline (H2) | shipped | `GET .../case-timeline`, `CaseTimelinePanel` on Diagnosis / ProblemDetail |
+| Durable lifecycle event log | shipped | `lifecycleEvents` on `DiagnosticProblem`; ActionService append-only stamps |
+| Multi-signal trends (F3) | shipped | `ForecastService.summary`; RisingFuelTrim / RecurringHighLoad → realize |
 | Policy safety holds (`clear-codes-and-drive` under misfire / MultiAir oil starvation / cam-crank) | shipped | `PolicyService`, reason fixtures, Diagnosis UI |
 | Oil-level trend forecast | shipped | `ForecastService` |
 | React UI (5 routes) | shipped | `apps/web-ui` |

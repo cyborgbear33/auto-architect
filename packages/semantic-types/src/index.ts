@@ -301,6 +301,8 @@ export interface DiagnosticProblem {
   verification?: ProblemVerification;
   /** Prior case id when this problem was reopened from a closed one. */
   reopenedFromId?: SemanticId;
+  /** Append-only lifecycle stamps (opened, abandon, verify, …). */
+  lifecycleEvents?: ProblemLifecycleEvent[];
   createdAt: IsoTimestamp;
   updatedAt: IsoTimestamp;
 }
@@ -395,6 +397,7 @@ export interface SolutionHistory {
  */
 export type CaseTimelineEventType =
   | "opened"
+  | "ranked"
   | "repair_logged"
   | "verify_started"
   | "verify_result"
@@ -402,6 +405,20 @@ export type CaseTimelineEventType =
   | "abandoned"
   | "escalated"
   | "reopened";
+
+/**
+ * Durable stamp written by ActionService on each lifecycle transition.
+ * Timeline prefers these over synthesizing from current status + updatedAt.
+ */
+export interface ProblemLifecycleEvent {
+  id: string;
+  type: Exclude<CaseTimelineEventType, "repair_logged">;
+  at: IsoTimestamp;
+  note?: string;
+  verifyResult?: "passed" | "failed" | "inconclusive";
+  reopenedFromId?: SemanticId;
+  solutionKind?: string;
+}
 
 export interface CaseTimelineEvent {
   id: string;
@@ -417,6 +434,7 @@ export interface CaseTimelineEvent {
   decisionId?: string;
   reopenedFromId?: SemanticId;
   note?: string;
+  solutionKind?: string;
 }
 
 /** Chronological case timeline for a vehicle (optionally one problem). */

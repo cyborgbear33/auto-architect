@@ -95,6 +95,7 @@ describe("ActionService (the mutation gate)", () => {
     expect(problem.triggeredByClass).toBe("MisfireUnderLoad");
     expect(problem.actions.length).toBeGreaterThan(0);
     expect(problem.desiredState?.successCriteria).toBeTruthy();
+    expect(problem.lifecycleEvents?.map((e) => e.type)).toEqual(["opened"]);
   });
 
   it("rejects a triggeredByClass no loaded cartridge frames", async () => {

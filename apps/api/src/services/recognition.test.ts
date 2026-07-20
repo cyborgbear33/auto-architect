@@ -60,4 +60,50 @@ describe("RecognitionService", () => {
       statusCode: 404,
     });
   });
+
+  it("folds RisingFuelTrim trend evidence into the ABox before realize", async () => {
+    let sawRisingTrim = false;
+    const realizer = (input: RealizeInput): RealizeResult => {
+      sawRisingTrim = Object.values(input.abox.concepts).flat().includes("RisingFuelTrim");
+      return {
+        individual: input.individual,
+        member: sawRisingTrim ? ["LeanFuelBank1"] : [],
+        mostSpecific: sawRisingTrim ? ["LeanFuelBank1"] : [],
+        undecided: [],
+      };
+    };
+    const store = createMemoryStore();
+    await seed(store);
+    const customBridge = new FakeLogosBridge(undefined, realizer, undefined, (input) => ({
+      n: input.series.length,
+      threshold: input.threshold,
+      current: input.series[input.series.length - 1]?.value ?? null,
+      slopePerHour: 0.5,
+      intercept: null,
+      rSquared: 0.9,
+      direction: "rising",
+      willCross: true,
+      hoursToThreshold: 5,
+      crossAtHours: 5,
+    }));
+    const vehicles = new VehicleService(store);
+    const forecast = new ForecastService(store, customBridge);
+    const recognition = new RecognitionService(store, customBridge, vehicles, forecast);
+
+    await store.observations.record({
+      vehicleId: JEEP,
+      capturedAt: "2026-01-01T00:00:00Z",
+      source: "manual_entry",
+      pids: [{ pid: "LONG_FUEL_TRIM_1", value: 8, timestamp: "2026-01-01T00:00:00Z" }],
+    });
+    await store.observations.record({
+      vehicleId: JEEP,
+      capturedAt: "2026-01-02T00:00:00Z",
+      source: "manual_entry",
+      pids: [{ pid: "LONG_FUEL_TRIM_1", value: 15, timestamp: "2026-01-02T00:00:00Z" }],
+    });
+
+    await recognition.recognize(JEEP);
+    expect(sawRisingTrim).toBe(true);
+  });
 });

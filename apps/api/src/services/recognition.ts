@@ -41,13 +41,13 @@ export class RecognitionService {
     const pids = await this.store.observations.latestPids(vehicleId);
     const abox = runPerception(vehicleId, dtcs, pids, cartridges);
 
-    // Trend evidence (ChronicOilConsumption) comes from `forecast` over a
-    // logged series, not an instantaneous PID threshold — fold it into the
-    // ABox as its own Trend individual before realizing.
-    const oilTrend = await this.forecast.oilLevelTrend(vehicleId);
-    if (oilTrend.declining) {
-      const trendId = `${vehicleId}:oil-level-decline`;
-      abox.concepts[trendId] = ["OilLevelDecline"];
+    // Trend evidence comes from `forecast` over logged series — fold each
+    // ontology-backed flag into the ABox before realizing (never invent classes).
+    const forecast = await this.forecast.summary(vehicleId);
+    for (const signal of forecast.signals) {
+      if (!signal.flagged || !signal.ontologyTrend) continue;
+      const trendId = `${vehicleId}:${signal.id}-trend`;
+      abox.concepts[trendId] = [signal.ontologyTrend];
       abox.roles.push(["hasTrend", vehicleId, trendId]);
     }
 

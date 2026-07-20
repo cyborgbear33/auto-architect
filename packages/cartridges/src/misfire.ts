@@ -101,7 +101,7 @@ export const misfireCartridge: Cartridge = {
   ],
   framing: [{ whenClass: "MisfireUnderLoad", priority: 100, build: misfireDraft }],
   requires: {
-    classes: ["CylinderMisfire", "HighLoad", "MisfireUnderLoad"],
+    classes: ["CylinderMisfire", "HighLoad", "RecurringHighLoad", "MisfireUnderLoad"],
     dtcConcepts: ["CylinderMisfire"],
     pids: [ENGINE_LOAD_PID],
   },

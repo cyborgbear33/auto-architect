@@ -1,7 +1,7 @@
 /**
- * Read-model: derive a chronological case narrative from DiagnosticProblem +
- * DecisionRecord. Journal stays the decision audit; this is the case story.
- * Lifecycle stamps without a dedicated event log are best-effort (updatedAt).
+ * Read-model: chronological case narrative from durable lifecycleEvents +
+ * DecisionRecord repairs. Journal stays the decision audit.
+ * Legacy problems without lifecycleEvents fall back to status synthesis.
  */
 import type {
   CaseTimeline,
@@ -9,6 +9,7 @@ import type {
   CaseTimelineEventType,
   DecisionRecord,
   DiagnosticProblem,
+  ProblemLifecycleEvent,
 } from "@auto/semantic-types";
 import type { Store } from "../store/index.ts";
 import type { VehicleService } from "./vehicle.ts";
@@ -16,20 +17,101 @@ import type { VehicleService } from "./vehicle.ts";
 /** Stable tie-break when several events share a timestamp. */
 const TYPE_ORDER: Record<CaseTimelineEventType, number> = {
   opened: 0,
-  repair_logged: 1,
-  verify_started: 2,
-  verify_result: 3,
-  closed_solved: 4,
-  abandoned: 5,
-  escalated: 6,
-  reopened: 7,
+  ranked: 1,
+  repair_logged: 2,
+  verify_started: 3,
+  verify_result: 4,
+  closed_solved: 5,
+  abandoned: 6,
+  escalated: 7,
+  reopened: 8,
 };
 
 function eventId(parts: string[]): string {
   return parts.join(":");
 }
 
-function eventsForProblem(
+function summarizeLifecycle(
+  event: ProblemLifecycleEvent,
+  label: string,
+): string {
+  switch (event.type) {
+    case "opened":
+      return `Opened ${label}`;
+    case "ranked":
+      return `LOGOS ranked next steps${event.solutionKind ? ` (${event.solutionKind})` : ""}`;
+    case "verify_started":
+      return `Verify started for ${label}`;
+    case "verify_result":
+      return `Verify ${event.verifyResult ?? "done"}${event.note ? `: ${event.note}` : ""}`;
+    case "closed_solved":
+      return `Closed solved — ${label}`;
+    case "abandoned":
+      return `Abandoned ${label}`;
+    case "escalated":
+      return `Escalated ${label}`;
+    case "reopened":
+      return `Reopened ${label}`;
+    default:
+      return label;
+  }
+}
+
+function repairEvents(
+  problem: DiagnosticProblem,
+  decisions: DecisionRecord[],
+): CaseTimelineEvent[] {
+  const base = {
+    problemId: problem.id,
+    vehicleId: problem.vehicleId,
+    faultClass: problem.triggeredByClass,
+  };
+  return decisions
+    .filter((d) => d.problemId === problem.id)
+    .sort((a, b) => a.decidedAt.localeCompare(b.decidedAt))
+    .map((d) => {
+      const outcomeBit = d.outcome ? ` — ${d.outcome.status}` : "";
+      return {
+        ...base,
+        id: eventId([problem.id, "repair_logged", d.id]),
+        type: "repair_logged" as const,
+        at: d.decidedAt,
+        summary: `Logged repair ${d.actionId}${outcomeBit}`,
+        actionId: d.actionId,
+        outcomeStatus: d.outcome?.status,
+        decisionId: d.id,
+        note: d.rationale,
+      };
+    });
+}
+
+/** Preferred path: durable lifecycle stamps + decisions. */
+function eventsFromLifecycleLog(
+  problem: DiagnosticProblem,
+  decisions: DecisionRecord[],
+): CaseTimelineEvent[] {
+  const label = problem.triggeredByClass ?? "manual case";
+  const base = {
+    problemId: problem.id,
+    vehicleId: problem.vehicleId,
+    faultClass: problem.triggeredByClass,
+  };
+  const life = (problem.lifecycleEvents ?? []).map((e) => ({
+    ...base,
+    id: e.id,
+    type: e.type as CaseTimelineEventType,
+    at: e.at,
+    summary: summarizeLifecycle(e, label),
+    verifyResult: e.verifyResult,
+    reopenedFromId: e.reopenedFromId,
+    note: e.note,
+    solutionKind: e.solutionKind,
+  }));
+  return [...life, ...repairEvents(problem, decisions)];
+}
+
+/** Legacy problems created before lifecycleEvents existed. */
+function eventsLegacy(
   problem: DiagnosticProblem,
   decisions: DecisionRecord[],
 ): CaseTimelineEvent[] {
@@ -39,34 +121,16 @@ function eventsForProblem(
     faultClass: problem.triggeredByClass,
   };
   const label = problem.triggeredByClass ?? "manual case";
-  const out: CaseTimelineEvent[] = [];
-
-  out.push({
-    ...base,
-    id: eventId([problem.id, "opened", problem.createdAt]),
-    type: "opened",
-    at: problem.createdAt,
-    summary: `Opened ${label}`,
-  });
-
-  const problemDecisions = decisions
-    .filter((d) => d.problemId === problem.id)
-    .sort((a, b) => a.decidedAt.localeCompare(b.decidedAt));
-
-  for (const d of problemDecisions) {
-    const outcomeBit = d.outcome ? ` — ${d.outcome.status}` : "";
-    out.push({
+  const out: CaseTimelineEvent[] = [
+    {
       ...base,
-      id: eventId([problem.id, "repair_logged", d.id]),
-      type: "repair_logged",
-      at: d.decidedAt,
-      summary: `Logged repair ${d.actionId}${outcomeBit}`,
-      actionId: d.actionId,
-      outcomeStatus: d.outcome?.status,
-      decisionId: d.id,
-      note: d.rationale,
-    });
-  }
+      id: eventId([problem.id, "opened", problem.createdAt]),
+      type: "opened",
+      at: problem.createdAt,
+      summary: `Opened ${label}`,
+    },
+    ...repairEvents(problem, decisions),
+  ];
 
   if (problem.verification?.startedAt) {
     out.push({
@@ -77,7 +141,6 @@ function eventsForProblem(
       summary: `Verify started for ${label}`,
     });
   }
-
   if (problem.verification?.completedAt && problem.verification.result) {
     out.push({
       ...base,
@@ -91,7 +154,6 @@ function eventsForProblem(
       note: problem.verification.note,
     });
   }
-
   if (problem.status === "solved") {
     const at = problem.verification?.completedAt ?? problem.updatedAt;
     out.push({
@@ -133,8 +195,17 @@ function eventsForProblem(
       reopenedFromId: problem.reopenedFromId,
     });
   }
-
   return out;
+}
+
+function eventsForProblem(
+  problem: DiagnosticProblem,
+  decisions: DecisionRecord[],
+): CaseTimelineEvent[] {
+  if (problem.lifecycleEvents && problem.lifecycleEvents.length > 0) {
+    return eventsFromLifecycleLog(problem, decisions);
+  }
+  return eventsLegacy(problem, decisions);
 }
 
 export class CaseTimelineService {

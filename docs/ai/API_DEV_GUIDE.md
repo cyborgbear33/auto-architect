@@ -40,7 +40,7 @@ allowed to append evidence; it still does not classify).
 | `RecognitionService` | `realize` | Never invent "Healthy" |
 | `PolicyService` | `reason` | Use `folSafeAtom` for individual ids |
 | `SolverService` | `solve` | Requires `desiredState.successCriteria` on problems |
-| `ForecastService` | optional / helpers | Oil-level trend |
+| `ForecastService` | optional / helpers | Multi-signal trends (`summary`); oil + LTFT + load → realize |
 | `ActionService` | via other services | Sole mutation + DecisionRecord |
 | `ObservationService` | no | Append / query batches; provenance; live gauges |
 | `SolutionHistoryService` | no | Roll up repair outcomes by action / class / family |

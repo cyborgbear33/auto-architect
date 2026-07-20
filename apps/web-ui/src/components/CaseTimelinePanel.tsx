@@ -5,6 +5,7 @@ import { api, queryKeys } from "../lib/api.ts";
 
 const TYPE_LABEL: Record<CaseTimelineEventType, string> = {
   opened: "Opened",
+  ranked: "Ranked",
   repair_logged: "Repair",
   verify_started: "Verify started",
   verify_result: "Verify result",
@@ -16,6 +17,7 @@ const TYPE_LABEL: Record<CaseTimelineEventType, string> = {
 
 const TYPE_DOT: Record<CaseTimelineEventType, string> = {
   opened: "bg-slate-400",
+  ranked: "bg-indigo-500",
   repair_logged: "bg-sky-500",
   verify_started: "bg-amber-400",
   verify_result: "bg-amber-600",

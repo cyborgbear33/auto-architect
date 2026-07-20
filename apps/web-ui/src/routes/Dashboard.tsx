@@ -131,21 +131,42 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-slate-700">Oil-level trend</h2>
-          {forecastQ.data && forecastQ.data.series.length < 2 ? (
-            <p className="text-sm text-slate-400">
-              Not enough oil-level samples yet to forecast (need ≥2).
-            </p>
-          ) : (
-            <div>
-              <Pill tone={forecastQ.data?.declining ? "high" : "normal"}>
-                {forecastQ.data?.declining ? "Declining toward ADD mark" : "Stable"}
-              </Pill>
-              <p className="mt-2 text-xs text-slate-400">
-                {forecastQ.data?.series.length ?? 0} sample(s) logged. Automated version of the W80
-                1500–1700 mile dealer test.
-              </p>
-            </div>
+          <h2 className="mb-3 text-sm font-semibold text-slate-700">Signal trends</h2>
+          <p className="mb-3 text-xs text-slate-400">
+            Ontology-backed flags feed recognition; coolant climb is informing-only.
+          </p>
+          {!forecastQ.data && <p className="text-sm text-slate-400">Loading…</p>}
+          {forecastQ.data && (
+            <ul className="space-y-2">
+              {forecastQ.data.signals.map((signal) => (
+                <li
+                  key={signal.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm"
+                >
+                  <div>
+                    <span className="font-medium text-slate-800">{signal.label}</span>
+                    <span className="ml-2 text-xs text-slate-400">
+                      {signal.series.length} sample(s)
+                      {signal.direction !== "unknown" ? ` · ${signal.direction}` : ""}
+                    </span>
+                    {signal.flagReason && (
+                      <p className="mt-0.5 text-xs text-slate-500">{signal.flagReason}</p>
+                    )}
+                  </div>
+                  <Pill
+                    tone={
+                      signal.flagged ? "high" : signal.flagReason ? "normal" : "low"
+                    }
+                  >
+                    {signal.flagged
+                      ? signal.ontologyTrend ?? "flagged"
+                      : signal.series.length < 2
+                        ? "need ≥2"
+                        : "ok"}
+                  </Pill>
+                </li>
+              ))}
+            </ul>
           )}
         </section>
       </div>

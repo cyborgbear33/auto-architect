@@ -56,9 +56,22 @@ export interface EngineFamilySummary {
   cartridges: string[];
 }
 
+export interface SignalTrend {
+  id: string;
+  pid: string;
+  label: string;
+  series: Array<{ timestamp: string; value: number }>;
+  direction: "rising" | "falling" | "flat" | "unknown";
+  flagged: boolean;
+  flagReason?: string;
+  ontologyTrend?: string;
+}
+
 export interface ForecastSummary {
   declining: boolean;
   series: Array<{ timestamp: string; value: number }>;
+  signals: SignalTrend[];
+  recognitionTrends: string[];
 }
 
 export interface CreateVehicleInput {

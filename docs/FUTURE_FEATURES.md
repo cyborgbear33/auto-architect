@@ -51,11 +51,11 @@ multi-piece plans live in the next section.
 | **Problem tracking** — open cases through solve | **shipped** | Caseboard filters; abandon/escalate/reopen; `worked` → verifying → verify check | — | — |
 | **Problem history** — cases over time | **partial** | Case timeline (problems + decisions); Journal is decision audit | Mileage/session on events; evidence deep-links | Drive sessions; Durable observation history; H3–H5 |
 | **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel; verify-before-solved (`worked` → verifying) | Stronger family priors / sample-size UX | Multi-signal trends |
-| **History → better future decisions** | **partial** | Oil trend + outcome calibration into draft/solve/refresh | Multi-signal trends; session-aware | Multi-signal trends; Drive sessions |
+| **History → better future decisions** | **partial** | Multi-signal trends + outcome calibration into draft/solve/refresh | Session-aware trends | Drive sessions (F4) |
 | **Reporting** — shareable diagnostic note | **partial** | Markdown download/copy (vehicle + problem) | Print/PDF polish | Print-friendly HTML/PDF |
 
 **Spine that already works:** ingest → realize → draft/solve → recommend → policy hold → log-repair → verify → Journal.  
-**Not yet a complete garage product:** live scan UX, drive sessions, multi-signal trends, session-aware history.
+**Not yet a complete garage product:** live scan UX, drive sessions, session-aware history.
 
 **Cross-cutting product strategy (applies to every goal):**
 
@@ -261,7 +261,7 @@ are the evidence spine under each event.
 | # | Work piece | Status | Notes |
 |---|---|---|---|
 | H1 | Durable problem + decision persistence | done | Postgres store |
-| H2 | Case timeline UI (events from problem + decisions) | done | `CaseTimelineService`, Diagnosis + ProblemDetail panels |
+| H2 | Case timeline UI (events from problem + decisions) | done | Durable `lifecycleEvents` + decisions; Diagnosis + ProblemDetail |
 | H3 | Attach odometer / session to case events | todo | Needs S4 + observation metadata |
 | H4 | Filter history by class, status, date, mileage | todo | Caseboard overlap |
 | H5 | Deep link timeline event → evidence batch / freeze-frame | todo | |
@@ -318,7 +318,7 @@ ForecastService carefully with ontology backing.
 |---|---|---|---|
 | F1 | Oil-level trend → recognition evidence | done | ForecastService (narrow) |
 | F2 | Outcome → confidence calibration into refresh + solve priors | done | `calibratePlaybook` |
-| F3 | Multi-signal trends (fuel trim, coolant, load-at-misfire) | todo | Ontology-backed only |
+| F3 | Multi-signal trends (fuel trim, coolant, load-at-misfire) | done | RisingFuelTrim / RecurringHighLoad → realize; coolant informing-only |
 | F4 | Session-aware trends (per drive, not only global series) | todo | Needs S4 |
 | F5 | Explainability chip: “priority raised because …” | todo | Informing overlap |
 
@@ -371,7 +371,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Problem caseboard + verify-after-repair + reopen | P2–P5, X5 | done | medium | Caseboard + verify-before-solved shipped. | `DiagnosticProblem`, Diagnosis UI |
 | Case timeline (problems + decisions) | H2 | done | medium | Case narrative on Diagnosis / ProblemDetail; Journal stays audit. | `CaseTimelineService` |
 | Recommendation card richness + status lifecycle UI | R2, R3 | planned | medium | Cost/risk; accept/dismiss/convert (confidence shipped). | Dashboard, RecommendationsService |
-| Multi-signal trend expansion (beyond oil) | F3 | planned | medium | Broader history→recognition; ontology-backed only. | ForecastService, recognition |
+| Multi-signal trend expansion (beyond oil) | F3 | done | medium | LTFT + load → realize; coolant UI-only. | ForecastService, recognition |
 | Print/PDF diagnostic report polish | G3, G5 | planned | medium | Markdown export shipped; print stylesheet next. | `ReportService`, Journal |
 | Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | planned | high | Shared KB; land gates first (`HARDWARE_STANDARDS.md`). | dictionaries, ontology lint |
 | Shared `@auto/ui-components` | I5 | planned | medium | Consistent trust/evidence UI. | `UX_GUIDELINES` |
@@ -435,6 +435,8 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Live gauge strip + freshness (S2/I6) | 2026-07 | `GET .../live-gauges`, `LiveGaugeStrip`, Dashboard |
 | Problem caseboard + verify-after-repair (P2–P5, X5) | 2026-07 | Diagnosis filters; abandon/escalate/reopen; `worked` → verifying → verify |
 | Case timeline from problems + decisions (H2) | 2026-07 | `CaseTimelineService`, `GET .../case-timeline`, Diagnosis + ProblemDetail |
+| Durable problem lifecycle event log | 2026-07 | `DiagnosticProblem.lifecycleEvents` stamped by ActionService |
+| Multi-signal trends (F3) | 2026-07 | `ForecastService.summary`, RisingFuelTrim / RecurringHighLoad, Dashboard |
 
 ---
 
