@@ -134,5 +134,42 @@ describe("ForecastService", () => {
     expect(coolant?.flagged).toBe(false);
     expect(coolant?.flagReason).toMatch(/informing only/);
     expect(summary.recognitionTrends).not.toContain("CoolantClimb");
+    expect(summary.scope).toBe("vehicle");
+    expect(summary.sessionId).toBeNull();
+  });
+
+  it("scopes series to a drive session when sessionId is set (F4)", async () => {
+    const store = createMemoryStore();
+    const forecast = new ForecastService(store, risingBridge());
+    await store.observations.record({
+      vehicleId: JEEP,
+      capturedAt: "2026-01-01T00:00:00Z",
+      source: "simulated",
+      sessionId: "session:a",
+      pids: [{ pid: LTFT_B1_PID, value: 5, timestamp: "2026-01-01T00:00:00Z" }],
+    });
+    await store.observations.record({
+      vehicleId: JEEP,
+      capturedAt: "2026-01-01T01:00:00Z",
+      source: "simulated",
+      sessionId: "session:a",
+      pids: [{ pid: LTFT_B1_PID, value: 15, timestamp: "2026-01-01T01:00:00Z" }],
+    });
+    await store.observations.record({
+      vehicleId: JEEP,
+      capturedAt: "2026-01-02T00:00:00Z",
+      source: "simulated",
+      sessionId: "session:b",
+      pids: [{ pid: LTFT_B1_PID, value: 20, timestamp: "2026-01-02T00:00:00Z" }],
+    });
+
+    const global = await forecast.summary(JEEP);
+    const scoped = await forecast.summary(JEEP, { sessionId: "session:a" });
+    const ltftGlobal = global.signals.find((s) => s.id === "ltft-b1");
+    const ltftScoped = scoped.signals.find((s) => s.id === "ltft-b1");
+    expect(ltftGlobal?.series).toHaveLength(3);
+    expect(ltftScoped?.series).toHaveLength(2);
+    expect(scoped.scope).toBe("session");
+    expect(scoped.sessionId).toBe("session:a");
   });
 });

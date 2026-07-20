@@ -120,7 +120,8 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
 
   app.get("/api/vehicles/:id/forecast", async (req) => {
     const { id } = req.params as { id: string };
-    return s.forecast.summary(id);
+    const { sessionId } = req.query as { sessionId?: string };
+    return s.forecast.summary(id, sessionId ? { sessionId } : undefined);
   });
 
   app.get("/api/vehicles/:id/solution-history", async (req) => {

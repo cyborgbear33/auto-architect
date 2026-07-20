@@ -190,8 +190,10 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Live gauge strip (RPM/load/STFT/coolant + stale) | shipped | `GET .../live-gauges`, `LiveGaugeStrip` |
 | Problem caseboard + verify-after-repair (P2–P5) | shipped | Diagnosis filters; abandon/escalate/reopen; `worked` → verifying → verify |
 | Case timeline (H2) | shipped | `GET .../case-timeline`, `CaseTimelinePanel` on Diagnosis / ProblemDetail |
+| Odometer / session on case events (H3) | shipped | Stamped on lifecycle + decisions; shown on CaseTimelinePanel |
 | Durable lifecycle event log | shipped | `lifecycleEvents` on `DiagnosticProblem`; ActionService append-only stamps |
 | Multi-signal trends (F3) | shipped | `ForecastService.summary`; RisingFuelTrim / RecurringHighLoad → realize |
+| Session-aware trends (F4) | shipped | `GET .../forecast?sessionId=`; Dashboard scope picker; recognition stays global |
 | Garage JSON + CSV export/import | shipped | `GarageExportService`, Journal Export panel; merge import with batch dedupe |
 | Print-friendly report HTML (G3) | shipped | Report `html` + print CSS; `ReportDownload` Print |
 | Last drive session on reports (G5) | shipped | `DriveSessionSummary` / `lastSession` in Markdown + HTML |

@@ -124,10 +124,11 @@ export function createDrizzleStore(databaseUrl: string): Store {
       return [...byKey.values()];
     },
 
-    async series(vehicleId, pid) {
+    async series(vehicleId, pid, opts) {
       const rows = await batchesFor(vehicleId);
       const out: Array<{ timestamp: string; value: number }> = [];
       for (const batch of rows) {
+        if (opts?.sessionId && batch.sessionId !== opts.sessionId) continue;
         for (const p of batch.pids ?? []) {
           if (p.pid === pid) out.push({ timestamp: p.timestamp, value: p.value });
         }
@@ -184,9 +185,7 @@ export function createDrizzleStore(databaseUrl: string): Store {
     },
 
     async replaceAll(vehicleId, next) {
-      await db
-        .delete(t.observationBatches)
-        .where(eq(t.observationBatches.vehicleId, vehicleId));
+      await db.delete(t.observationBatches).where(eq(t.observationBatches.vehicleId, vehicleId));
       const sorted = [...next].sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
       for (const batch of sorted) {
         await observations.record(batch);

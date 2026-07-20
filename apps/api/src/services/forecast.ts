@@ -51,6 +51,9 @@ export interface ForecastSummary {
   signals: SignalTrend[];
   /** Ontology-backed trends currently flagged for ABox fold-in. */
   recognitionTrends: string[];
+  /** null = all drives (vehicle-global); set when scoped to one session (F4). */
+  sessionId: string | null;
+  scope: "vehicle" | "session";
 }
 
 interface SignalSpec {
@@ -133,17 +136,16 @@ export class ForecastService {
     return { declining: summary.declining, series: summary.series };
   }
 
-  async summary(vehicleId: string): Promise<ForecastSummary> {
+  async summary(vehicleId: string, opts?: { sessionId?: string }): Promise<ForecastSummary> {
+    const sessionId = opts?.sessionId?.trim() || null;
     const signals: SignalTrend[] = [];
     for (const spec of SIGNAL_SPECS) {
-      signals.push(await this.evaluateSignal(vehicleId, spec));
+      signals.push(await this.evaluateSignal(vehicleId, spec, sessionId));
     }
     const oil = signals.find((s) => s.id === "oil-level");
     const recognitionTrends = [
       ...new Set(
-        signals
-          .filter((s) => s.flagged && s.ontologyTrend)
-          .map((s) => s.ontologyTrend as string),
+        signals.filter((s) => s.flagged && s.ontologyTrend).map((s) => s.ontologyTrend as string),
       ),
     ];
     return {
@@ -151,11 +153,21 @@ export class ForecastService {
       series: oil?.series ?? [],
       signals,
       recognitionTrends,
+      sessionId,
+      scope: sessionId ? "session" : "vehicle",
     };
   }
 
-  private async evaluateSignal(vehicleId: string, spec: SignalSpec): Promise<SignalTrend> {
-    const series = await this.store.observations.series(vehicleId, spec.pid);
+  private async evaluateSignal(
+    vehicleId: string,
+    spec: SignalSpec,
+    sessionId: string | null,
+  ): Promise<SignalTrend> {
+    const series = await this.store.observations.series(
+      vehicleId,
+      spec.pid,
+      sessionId ? { sessionId } : undefined,
+    );
     if (series.length < 2) {
       return {
         id: spec.id,

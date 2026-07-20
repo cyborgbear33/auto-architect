@@ -20,29 +20,11 @@ import type { SolutionHistoryService } from "./solution-history.ts";
 import type { SolverService } from "./solver.ts";
 import type { VehicleService } from "./vehicle.ts";
 
-const REOPENABLE: ReadonlySet<ProblemStatus> = new Set([
-  "solved",
-  "abandoned",
-  "escalated",
-]);
+const REOPENABLE: ReadonlySet<ProblemStatus> = new Set(["solved", "abandoned", "escalated"]);
 
-type LifecycleStamp = Omit<ProblemLifecycleEvent, "id" | "at"> & { at?: string };
-
-function stampLifecycle(
-  problem: DiagnosticProblem,
-  stamp: LifecycleStamp,
-): ProblemLifecycleEvent[] {
-  const event: ProblemLifecycleEvent = {
-    id: newId("life"),
-    at: stamp.at ?? nowIso(),
-    type: stamp.type,
-    ...(stamp.note ? { note: stamp.note } : {}),
-    ...(stamp.verifyResult ? { verifyResult: stamp.verifyResult } : {}),
-    ...(stamp.reopenedFromId ? { reopenedFromId: stamp.reopenedFromId } : {}),
-    ...(stamp.solutionKind ? { solutionKind: stamp.solutionKind } : {}),
-  };
-  return [...(problem.lifecycleEvents ?? []), event];
-}
+type LifecycleStamp = Omit<ProblemLifecycleEvent, "id" | "at" | "odometerMiles" | "sessionId"> & {
+  at?: string;
+};
 
 /**
  * The mutation gate. Every state-changing operation in auto-architect goes
@@ -60,6 +42,44 @@ export class ActionService {
     private solutionHistory: SolutionHistoryService,
   ) {}
 
+  /** Snapshot vehicle odometer + open drive session for H3 timeline stamps. */
+  private async evidenceContext(vehicleId: string): Promise<{
+    odometerMiles?: number;
+    sessionId?: string;
+  }> {
+    const vehicle = await this.vehicles.getOrThrow(vehicleId);
+    const open = (await this.store.sessions.listByVehicle(vehicleId)).find((s) => !s.endedAt);
+    return {
+      ...(vehicle.odometerMiles !== undefined ? { odometerMiles: vehicle.odometerMiles } : {}),
+      ...(open ? { sessionId: open.id } : {}),
+    };
+  }
+
+  private async makeLifecycleEvent(
+    vehicleId: string,
+    stamp: LifecycleStamp,
+  ): Promise<ProblemLifecycleEvent> {
+    const ctx = await this.evidenceContext(vehicleId);
+    return {
+      id: newId("life"),
+      at: stamp.at ?? nowIso(),
+      type: stamp.type,
+      ...ctx,
+      ...(stamp.note ? { note: stamp.note } : {}),
+      ...(stamp.verifyResult ? { verifyResult: stamp.verifyResult } : {}),
+      ...(stamp.reopenedFromId ? { reopenedFromId: stamp.reopenedFromId } : {}),
+      ...(stamp.solutionKind ? { solutionKind: stamp.solutionKind } : {}),
+    };
+  }
+
+  private async stampLifecycle(
+    problem: DiagnosticProblem,
+    stamp: LifecycleStamp,
+  ): Promise<ProblemLifecycleEvent[]> {
+    const event = await this.makeLifecycleEvent(problem.vehicleId, stamp);
+    return [...(problem.lifecycleEvents ?? []), event];
+  }
+
   /**
    * Draft a DiagnosticProblem either from a proven fault class (auto-framed by
    * the vehicle's cartridges) or from a manually authored statement/actions.
@@ -69,11 +89,7 @@ export class ActionService {
   ): Promise<DiagnosticProblem> {
     const vehicle = await this.vehicles.getOrThrow(input.vehicleId);
     const now = nowIso();
-    const opened: ProblemLifecycleEvent = {
-      id: newId("life"),
-      type: "opened",
-      at: now,
-    };
+    const opened = await this.makeLifecycleEvent(vehicle.id, { type: "opened", at: now });
 
     if (input.triggeredByClass) {
       const cartridges = this.vehicles.cartridgesFor(vehicle);
@@ -153,7 +169,7 @@ export class ActionService {
     const solution = await this.solver.solve({ ...problem, actions });
     const now = nowIso();
     const status = solution.kind === "escalate" ? "escalated" : "analyzing";
-    let lifecycleEvents = stampLifecycle(problem, {
+    let lifecycleEvents = await this.stampLifecycle(problem, {
       type: "ranked",
       at: now,
       solutionKind: solution.kind,
@@ -162,13 +178,12 @@ export class ActionService {
     if (status === "escalated") {
       lifecycleEvents = [
         ...lifecycleEvents,
-        {
-          id: newId("life"),
+        await this.makeLifecycleEvent(problem.vehicleId, {
           type: "escalated",
           at: now,
           note: "Escalated by LOGOS solve",
           solutionKind: solution.kind,
-        },
+        }),
       ];
     }
     return this.store.problems.update(problemId, {
@@ -234,10 +249,11 @@ export class ActionService {
     let nextStatus: ProblemStatus = problem.status;
     let verification = problem.verification;
     let lifecycleEvents = problem.lifecycleEvents;
+    const ctx = await this.evidenceContext(input.vehicleId);
     if (outcome?.status === "worked") {
       nextStatus = "verifying";
       verification = { startedAt: now };
-      lifecycleEvents = stampLifecycle(problem, {
+      lifecycleEvents = await this.stampLifecycle(problem, {
         type: "verify_started",
         at: now,
         note: `After repair ${input.actionId}`,
@@ -263,6 +279,7 @@ export class ActionService {
       decidedAt: now,
       decidedBy: input.decidedBy,
       outcome,
+      ...ctx,
     };
     return this.store.decisions.create(decision);
   }
@@ -289,7 +306,7 @@ export class ActionService {
 
     if (!className) {
       const note = input.note ?? "Manual case verified by operator (no triggeredByClass).";
-      let lifecycleEvents = stampLifecycle(problem, {
+      let lifecycleEvents = await this.stampLifecycle(problem, {
         type: "verify_result",
         at: now,
         verifyResult: "passed",
@@ -297,7 +314,12 @@ export class ActionService {
       });
       lifecycleEvents = [
         ...lifecycleEvents,
-        { id: newId("life"), type: "closed_solved", at: now, verifyResult: "passed", note },
+        await this.makeLifecycleEvent(problem.vehicleId, {
+          type: "closed_solved",
+          at: now,
+          verifyResult: "passed",
+          note,
+        }),
       ];
       return this.store.problems.update(problem.id, {
         status: "solved",
@@ -326,7 +348,7 @@ export class ActionService {
           stillProven: [className],
           note,
         },
-        lifecycleEvents: stampLifecycle(problem, {
+        lifecycleEvents: await this.stampLifecycle(problem, {
           type: "verify_result",
           at: now,
           verifyResult: "failed",
@@ -337,9 +359,8 @@ export class ActionService {
 
     const note =
       input.note ??
-      `${className} no longer proven` +
-        (criteria ? ` — success criteria: ${criteria}` : "");
-    let lifecycleEvents = stampLifecycle(problem, {
+      `${className} no longer proven` + (criteria ? ` — success criteria: ${criteria}` : "");
+    let lifecycleEvents = await this.stampLifecycle(problem, {
       type: "verify_result",
       at: now,
       verifyResult: "passed",
@@ -347,7 +368,12 @@ export class ActionService {
     });
     lifecycleEvents = [
       ...lifecycleEvents,
-      { id: newId("life"), type: "closed_solved", at: now, verifyResult: "passed", note },
+      await this.makeLifecycleEvent(problem.vehicleId, {
+        type: "closed_solved",
+        at: now,
+        verifyResult: "passed",
+        note,
+      }),
     ];
     return this.store.problems.update(problem.id, {
       status: "solved",
@@ -371,7 +397,7 @@ export class ActionService {
     const now = nowIso();
     return this.store.problems.update(problem.id, {
       status: "abandoned",
-      lifecycleEvents: stampLifecycle(problem, {
+      lifecycleEvents: await this.stampLifecycle(problem, {
         type: "abandoned",
         at: now,
         note: input.note,
@@ -388,7 +414,7 @@ export class ActionService {
     const now = nowIso();
     return this.store.problems.update(problem.id, {
       status: "escalated",
-      lifecycleEvents: stampLifecycle(problem, {
+      lifecycleEvents: await this.stampLifecycle(problem, {
         type: "escalated",
         at: now,
         note: input.note,
@@ -413,7 +439,7 @@ export class ActionService {
       status: "open",
       reopenedFromId,
       verification: undefined,
-      lifecycleEvents: stampLifecycle(problem, {
+      lifecycleEvents: await this.stampLifecycle(problem, {
         type: "reopened",
         at: now,
         reopenedFromId,

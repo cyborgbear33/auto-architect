@@ -151,7 +151,7 @@ enforced by `pnpm lint:ontology` and `packages/cartridges/src/ontology-lint.test
 | `RecognitionService` | `realize` | Prove fault classes from observations; never synthesize "Healthy" |
 | `PolicyService` | `reason` | Safety holds (e.g. forbid clear-codes-and-drive) |
 | `SolverService` | `solve` | Rank diagnostic/repair actions |
-| `ForecastService` | `forecast` / trend helpers | Oil-level decline → `ChronicOilConsumption` evidence |
+| `ForecastService` | `forecast` / trend helpers | Multi-signal trends; optional `sessionId` scope (F4); oil/LTFT/load → recognition |
 | `ActionService` | — | Sole mutation gate + `DecisionRecord` audit |
 | `ObservationService` | — | Ingest batches; provenance; live gauges; retention prune |
 | `DriveSessionService` | — | Start/end/list sessions; simulate upload path |
@@ -175,7 +175,8 @@ Resource reads:
 - `GET /api/vehicles`, `POST /api/vehicles`, `GET /api/vehicles/:id`
 - `GET /api/engine-families`
 - `POST /api/vehicles/:id/observations` (202)
-- `GET /api/vehicles/:id/{dtcs,freeze-frame,mode06,forecast,recognition,recommendations,campaigns,problems,decisions,export,sessions,observation-batches,report}`
+- `GET /api/vehicles/:id/{dtcs,freeze-frame,mode06,forecast,recognition,recommendations,campaigns,problems,decisions,export,sessions,observation-batches,report,case-timeline}`
+- `GET /api/vehicles/:id/forecast?sessionId=` — optional per-drive trend scope (F4)
 - `GET /api/vehicles/:id/export/{observations,dtcs,decisions,problems,timeline}.csv`
 - `GET /api/garage/export` — full garage JSON dump
 - `GET /api/problems/:id`, `GET /api/problems/:id/report`
@@ -252,7 +253,7 @@ Required layers are listed in `docs/ai/TESTING_DEV_GUIDE.md`.
 See [`FUTURE_FEATURES.md`](FUTURE_FEATURES.md) — especially **Product goals**.
 High-level gaps vs a complete garage product:
 
-- Live MX+ dry-run validation (S1); Bluetooth adapter discovery (S6)
-- Odometer on timeline events (H3); session-aware trends (F4)
+- Live MX+ dry-run validation (S1); Bluetooth discovery (S6)
+- Live MX+ watch → auto-link batches to open DriveSession
 - OBD/CAN log import adapters (ELM, candump, MF4)
 - Auth / multi-user; shared UI package; LLM advise loop; full Silverado cartridge

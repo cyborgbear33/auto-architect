@@ -83,6 +83,41 @@ describe("CaseTimelineService", () => {
     expect(timeline.events.map((e) => e.type)).toContain("ranked");
   });
 
+  it("stamps odometer and open session onto lifecycle + repair events (H3)", async () => {
+    await store.vehicles.update(JEEP, { odometerMiles: 98_400 });
+    const session = await services.driveSessions.start({
+      vehicleId: JEEP,
+      label: "H3 stamp drive",
+      source: "simulated",
+    });
+    const problem = await services.actions.createDiagnosticProblem({
+      vehicleId: JEEP,
+      triggeredByClass: "MisfireUnderLoad",
+      statement: { currentState: "", desiredState: "", gap: "" },
+      actions: [],
+    });
+    await services.actions.logRepair({
+      vehicleId: JEEP,
+      problemId: problem.id,
+      actionId: "swap-coil-4",
+      rationale: "with session open",
+      decidedBy: "owner",
+      outcomeStatus: "partial",
+    });
+
+    const timeline = await services.caseTimeline.forVehicle(JEEP, problem.id);
+    const opened = timeline.events.find((e) => e.type === "opened");
+    const repair = timeline.events.find((e) => e.type === "repair_logged");
+    expect(opened?.odometerMiles).toBe(98_400);
+    expect(opened?.sessionId).toBe(session.id);
+    expect(repair?.odometerMiles).toBe(98_400);
+    expect(repair?.sessionId).toBe(session.id);
+
+    const stored = await services.actions.getDiagnosticProblem(problem.id);
+    expect(stored.lifecycleEvents?.[0]?.odometerMiles).toBe(98_400);
+    expect(stored.lifecycleEvents?.[0]?.sessionId).toBe(session.id);
+  });
+
   it("returns vehicle-wide events and filters by problemId", async () => {
     const a = await services.actions.createDiagnosticProblem({
       vehicleId: JEEP,

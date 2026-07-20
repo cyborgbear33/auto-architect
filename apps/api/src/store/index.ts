@@ -49,7 +49,11 @@ export interface ObservationRepository {
   latestFreezeFrames(vehicleId: string): Promise<FreezeFrame[]>;
   latestMode06(vehicleId: string): Promise<Mode06Result[]>;
   /** Every value ever recorded for one PID on one vehicle, in capture order (for `forecast`). */
-  series(vehicleId: string, pid: string): Promise<Array<{ timestamp: string; value: number }>>;
+  series(
+    vehicleId: string,
+    pid: string,
+    opts?: { sessionId?: string },
+  ): Promise<Array<{ timestamp: string; value: number }>>;
   batchCount(vehicleId: string): Promise<number>;
   /** Latest batch source/time + distinct sources seen for this vehicle. */
   provenance(vehicleId: string): Promise<EvidenceProvenance>;

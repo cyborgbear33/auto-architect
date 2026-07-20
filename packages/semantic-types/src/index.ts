@@ -412,6 +412,10 @@ export interface DecisionRecord {
   decidedAt: IsoTimestamp;
   decidedBy: SemanticId;
   outcome?: ProblemOutcome;
+  /** Vehicle odometer snapshot when the repair was logged (H3). */
+  odometerMiles?: number;
+  /** Open drive session at log time, when any (H3). */
+  sessionId?: SemanticId;
 }
 
 /**
@@ -469,6 +473,10 @@ export interface ProblemLifecycleEvent {
   verifyResult?: "passed" | "failed" | "inconclusive";
   reopenedFromId?: SemanticId;
   solutionKind?: string;
+  /** Vehicle odometer snapshot when the transition was stamped (H3). */
+  odometerMiles?: number;
+  /** Open drive session at stamp time, when any (H3). */
+  sessionId?: SemanticId;
 }
 
 export interface CaseTimelineEvent {
@@ -486,6 +494,8 @@ export interface CaseTimelineEvent {
   reopenedFromId?: SemanticId;
   note?: string;
   solutionKind?: string;
+  odometerMiles?: number;
+  sessionId?: SemanticId;
 }
 
 /** Chronological case timeline for a vehicle (optionally one problem). */

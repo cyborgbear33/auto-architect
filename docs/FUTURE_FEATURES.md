@@ -262,7 +262,7 @@ are the evidence spine under each event.
 |---|---|---|---|
 | H1 | Durable problem + decision persistence | done | Postgres store |
 | H2 | Case timeline UI (events from problem + decisions) | done | Durable `lifecycleEvents` + decisions; Diagnosis + ProblemDetail |
-| H3 | Attach odometer / session to case events | todo | Sessions exist; wire into timeline events |
+| H3 | Attach odometer / session to case events | done | Stamped on lifecycle + DecisionRecord; CaseTimelinePanel shows mi / session |
 | H4 | Filter history by class, status, date, mileage | todo | Caseboard overlap |
 | H5 | Deep link timeline event → evidence batch / freeze-frame | todo | |
 
@@ -319,7 +319,7 @@ ForecastService carefully with ontology backing.
 | F1 | Oil-level trend → recognition evidence | done | ForecastService (narrow) |
 | F2 | Outcome → confidence calibration into refresh + solve priors | done | `calibratePlaybook` |
 | F3 | Multi-signal trends (fuel trim, coolant, load-at-misfire) | done | RisingFuelTrim / RecurringHighLoad → realize; coolant informing-only |
-| F4 | Session-aware trends (per drive, not only global series) | todo | Sessions exist; scope forecast series next |
+| F4 | Session-aware trends (per drive, not only global series) | done | `GET .../forecast?sessionId=`; Dashboard drive-scope picker; recognition stays global |
 | F5 | Explainability chip: “priority raised because …” | todo | Informing overlap |
 
 **Seams:** ForecastService, recognition, RecommendationsService, SolverService,
@@ -367,8 +367,8 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Feature | Pieces | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|---|
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | high | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
-| Durable observation history + freeze-frame retention | S5, H3 | done (S5) | high | Prune keeps FF/Mode06/DTCs; hourly PID downsample; H3 still open. | `ObservationService.applyRetention` |
-| Continuous drive session recorder | S4, H3, F4, G5 | done (S4/G5) | medium | Sessions + report attach; live MX+ watch link + H3/F4 remain. | `DriveSessionService`, `ReportService` |
+| Durable observation history + freeze-frame retention | S5, H3 | done | high | Prune + odometer/session on case timeline events. | `ObservationService`, `ActionService` stamps |
+| Continuous drive session recorder | S4, H3, F4, G5 | done | medium | Sessions, report attach, timeline stamps, session-scoped trends. | `DriveSessionService`, `ForecastService` |
 | Problem caseboard + verify-after-repair + reopen | P2–P5, X5 | done | medium | Caseboard + verify-before-solved shipped. | `DiagnosticProblem`, Diagnosis UI |
 | Case timeline (problems + decisions) | H2 | done | medium | Case narrative on Diagnosis / ProblemDetail; Journal stays audit. | `CaseTimelineService` |
 | Recommendation card richness + status lifecycle UI | R2, R3 | planned | medium | Cost/risk; accept/dismiss/convert (confidence shipped). | Dashboard, RecommendationsService |
@@ -443,6 +443,8 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Drive sessions + simulated upload (S4) | 2026-07 | `DriveSessionService`, `drive_sessions` table, Dashboard `DriveSessionsPanel` |
 | Observation retention / PID downsample (S5) | 2026-07 | `applyRetention`, `POST .../observations/prune` |
 | Attach last drive session to diagnostic report (G5) | 2026-07 | `DriveSessionSummary`, `ReportService.lastSession` |
+| Odometer / session on case timeline events (H3) | 2026-07 | lifecycle + DecisionRecord stamps; CaseTimelinePanel |
+| Session-aware signal trends (F4) | 2026-07 | `forecast?sessionId=`, Dashboard drive-scope picker |
 
 ---
 

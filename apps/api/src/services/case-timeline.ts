@@ -31,10 +31,7 @@ function eventId(parts: string[]): string {
   return parts.join(":");
 }
 
-function summarizeLifecycle(
-  event: ProblemLifecycleEvent,
-  label: string,
-): string {
+function summarizeLifecycle(event: ProblemLifecycleEvent, label: string): string {
   switch (event.type) {
     case "opened":
       return `Opened ${label}`;
@@ -81,6 +78,8 @@ function repairEvents(
         outcomeStatus: d.outcome?.status,
         decisionId: d.id,
         note: d.rationale,
+        ...(d.odometerMiles !== undefined ? { odometerMiles: d.odometerMiles } : {}),
+        ...(d.sessionId ? { sessionId: d.sessionId } : {}),
       };
     });
 }
@@ -106,6 +105,8 @@ function eventsFromLifecycleLog(
     reopenedFromId: e.reopenedFromId,
     note: e.note,
     solutionKind: e.solutionKind,
+    ...(e.odometerMiles !== undefined ? { odometerMiles: e.odometerMiles } : {}),
+    ...(e.sessionId ? { sessionId: e.sessionId } : {}),
   }));
   return [...life, ...repairEvents(problem, decisions)];
 }
@@ -182,9 +183,7 @@ function eventsLegacy(
     });
   } else if (
     problem.reopenedFromId &&
-    (problem.status === "open" ||
-      problem.status === "analyzing" ||
-      problem.status === "verifying")
+    (problem.status === "open" || problem.status === "analyzing" || problem.status === "verifying")
   ) {
     out.push({
       ...base,

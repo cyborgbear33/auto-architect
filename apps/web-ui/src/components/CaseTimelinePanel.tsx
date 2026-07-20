@@ -61,6 +61,16 @@ function EventRow({
           <time className="text-xs text-slate-400" dateTime={event.at}>
             {formatWhen(event.at)}
           </time>
+          {event.odometerMiles !== undefined && (
+            <span className="text-xs text-slate-400">
+              {event.odometerMiles.toLocaleString()} mi
+            </span>
+          )}
+          {event.sessionId && (
+            <span className="truncate font-mono text-[11px] text-slate-400" title={event.sessionId}>
+              {event.sessionId.replace(/^session:/, "sess…")}
+            </span>
+          )}
         </div>
         <p className="mt-0.5 text-sm text-slate-700">{event.summary}</p>
         {showProblemLink && (

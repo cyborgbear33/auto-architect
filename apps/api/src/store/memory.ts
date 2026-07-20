@@ -96,9 +96,10 @@ function createObservationRepository(): ObservationRepository {
       return [...byKey.values()];
     },
 
-    async series(vehicleId, pid) {
+    async series(vehicleId, pid, opts) {
       const out: Array<{ timestamp: string; value: number }> = [];
       for (const batch of batchesFor(vehicleId)) {
+        if (opts?.sessionId && batch.sessionId !== opts.sessionId) continue;
         for (const p of batch.pids ?? []) {
           if (p.pid === pid) out.push({ timestamp: p.timestamp, value: p.value });
         }

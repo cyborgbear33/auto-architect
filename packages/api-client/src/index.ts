@@ -88,6 +88,8 @@ export interface ForecastSummary {
   series: Array<{ timestamp: string; value: number }>;
   signals: SignalTrend[];
   recognitionTrends: string[];
+  sessionId: string | null;
+  scope: "vehicle" | "session";
 }
 
 export interface CreateVehicleInput {
@@ -267,8 +269,10 @@ export class AutoApiClient {
     this.request<{ results: Mode06Result[] }>(`/api/vehicles/${enc(vehicleId)}/mode06`).then(
       (r) => r.results,
     );
-  getForecast = (vehicleId: string) =>
-    this.request<ForecastSummary>(`/api/vehicles/${enc(vehicleId)}/forecast`);
+  getForecast = (vehicleId: string, sessionId?: string) => {
+    const q = sessionId ? `?sessionId=${enc(sessionId)}` : "";
+    return this.request<ForecastSummary>(`/api/vehicles/${enc(vehicleId)}/forecast${q}`);
+  };
 
   // --- recognition (LOGOS realize) ------------------------------------------
   getRecognition = (vehicleId: string) =>
@@ -368,7 +372,8 @@ export const queryKeys = {
   liveGauges: (vehicleId: string) => ["liveGauges", vehicleId] as const,
   freezeFrames: (vehicleId: string) => ["freezeFrames", vehicleId] as const,
   mode06: (vehicleId: string) => ["mode06", vehicleId] as const,
-  forecast: (vehicleId: string) => ["forecast", vehicleId] as const,
+  forecast: (vehicleId: string, sessionId?: string | null) =>
+    ["forecast", vehicleId, sessionId ?? null] as const,
   recognition: (vehicleId: string) => ["recognition", vehicleId] as const,
   recommendations: (vehicleId: string) => ["recommendations", vehicleId] as const,
   campaigns: (vehicleId: string) => ["campaigns", vehicleId] as const,

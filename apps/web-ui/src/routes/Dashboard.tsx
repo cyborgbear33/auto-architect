@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { DriveSessionsPanel } from "../components/DriveSessionsPanel.tsx";
 import { EvidencePanels } from "../components/EvidencePanels.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
@@ -40,6 +41,8 @@ export function Dashboard() {
 function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
   const debugMode = useAppSelector((s) => s.ui.debugMode);
   const qc = useQueryClient();
+  /** Empty string = all drives (vehicle-global). */
+  const [trendSessionId, setTrendSessionId] = useState("");
 
   const vehicleQ = useQuery({
     queryKey: queryKeys.vehicle(vehicleId),
@@ -53,9 +56,13 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
     queryKey: queryKeys.evidenceProvenance(vehicleId),
     queryFn: () => api.getEvidenceProvenance(vehicleId),
   });
+  const sessionsQ = useQuery({
+    queryKey: queryKeys.driveSessions(vehicleId),
+    queryFn: () => api.listDriveSessions(vehicleId),
+  });
   const forecastQ = useQuery({
-    queryKey: queryKeys.forecast(vehicleId),
-    queryFn: () => api.getForecast(vehicleId),
+    queryKey: queryKeys.forecast(vehicleId, trendSessionId || null),
+    queryFn: () => api.getForecast(vehicleId, trendSessionId || undefined),
   });
   const recognitionQ = useQuery({
     queryKey: queryKeys.recognition(vehicleId),
@@ -136,10 +143,31 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-slate-700">Signal trends</h2>
-          <p className="mb-3 text-xs text-slate-400">
-            Ontology-backed flags feed recognition; coolant climb is informing-only.
-          </p>
+          <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-700">Signal trends</h2>
+              <p className="mt-0.5 text-xs text-slate-400">
+                Ontology-backed flags feed recognition (always vehicle-global). Scope below is
+                UI-only; coolant climb is informing-only.
+              </p>
+            </div>
+            <label className="flex flex-col gap-0.5 text-xs text-slate-500">
+              Drive scope
+              <select
+                value={trendSessionId}
+                onChange={(e) => setTrendSessionId(e.target.value)}
+                className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700"
+              >
+                <option value="">All drives</option>
+                {(sessionsQ.data ?? []).map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label ?? s.id.replace(/^session:/, "").slice(0, 12)}
+                    {s.endedAt ? "" : " (open)"}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           {!forecastQ.data && <p className="text-sm text-slate-400">Loading…</p>}
           {forecastQ.data && (
             <ul className="space-y-2">

@@ -110,7 +110,9 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         declining: false,
         series: [],
         signals: [],
-        oil: { declining: false, series: [] },
+        recognitionTrends: [],
+        sessionId: null,
+        scope: "vehicle",
       }),
       getRecognition: vi.fn().mockResolvedValue({
         individual: "veh:jeep-renegade-2015-latitude",
