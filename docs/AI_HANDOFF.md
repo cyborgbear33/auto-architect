@@ -84,8 +84,12 @@ wire bug and forgetting to port it to the other. `pnpm check:bridge-drift`
 (also the last, advisory-only step of `pnpm healthcheck`) diffs those files
 against a garden-architect checkout next to this repo as a reminder, not a
 gate. If this project and garden-architect both stabilize further, consider
-extracting a real shared `@seam/logos-bridge-core` package instead of two
-hand-synced copies — tracked in `FUTURE_FEATURES.md`.
+extracting a real shared `@seam/logos-bridge` package instead of two
+hand-synced copies. **That package now lives in sibling
+[`software-architect`](../../software-architect/)** (`@seam/logos-bridge`,
+`@seam/cartridge-kit`, `pnpm spawn:architect`). Migrating `@auto/logos-bridge`
+onto `@seam/*` is the follow-on; until then keep `check:bridge-drift` advisory
+and do **not** invent a third bridge copy.
 
 ---
 
