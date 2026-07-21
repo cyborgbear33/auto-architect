@@ -2,6 +2,7 @@ import type { Recommendation } from "@auto/semantic-types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { api, queryKeys } from "../lib/api.ts";
+import { CalibrationExplainChip } from "./Explainability.tsx";
 
 const URGENCY_STYLES: Record<string, string> = {
   critical: "bg-red-100 text-red-800 border-red-200",
@@ -70,6 +71,7 @@ function RecommendationCard({
             <span className="text-[11px] uppercase tracking-wide text-slate-400">{rec.status}</span>
           </div>
           <p className="mt-1 text-xs text-slate-500">{rec.reason}</p>
+          {rec.calibrationExplain && <CalibrationExplainChip explain={rec.calibrationExplain} />}
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
             {rec.confidence !== undefined && <span>conf {pct(rec.confidence)}</span>}
             {rec.cost !== undefined && <span>cost {pct(rec.cost)}</span>}

@@ -1,9 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { api, queryKeys } from "../lib/api.ts";
+
+function readFocusSessionFromHash(): string | null {
+  if (typeof window === "undefined") return null;
+  const { hash } = window.location;
+  if (!hash.startsWith("#session:")) return null;
+  try {
+    return decodeURIComponent(hash.slice("#session:".length));
+  } catch {
+    return null;
+  }
+}
 
 /** Drive sessions + simulated upload + retention prune (software path). */
 export function DriveSessionsPanel({ vehicleId }: { vehicleId: string }) {
   const qc = useQueryClient();
+  const [focusSessionId, setFocusSessionId] = useState<string | null>(readFocusSessionFromHash);
+
+  useEffect(() => {
+    const onHash = () => setFocusSessionId(readFocusSessionFromHash());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
   const sessionsQ = useQuery({
     queryKey: queryKeys.driveSessions(vehicleId),
     queryFn: () => api.listDriveSessions(vehicleId),
@@ -29,7 +49,10 @@ export function DriveSessionsPanel({ vehicleId }: { vehicleId: string }) {
   });
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4">
+    <section
+      id="drive-sessions"
+      className="scroll-mt-4 rounded-lg border border-slate-200 bg-white p-4"
+    >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-sm font-semibold text-slate-700">Drive sessions</h2>
@@ -75,30 +98,36 @@ export function DriveSessionsPanel({ vehicleId }: { vehicleId: string }) {
         <p className="text-sm text-slate-400">No drive sessions yet.</p>
       )}
       <ul className="space-y-2">
-        {sessionsQ.data?.map((s) => (
-          <li
-            key={s.id}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm"
-          >
-            <div>
-              <span className="font-medium text-slate-800">{s.label ?? s.id}</span>
-              <p className="text-xs text-slate-500">
-                {s.source} · started {new Date(s.startedAt).toLocaleString()}
-                {s.endedAt ? ` · ended ${new Date(s.endedAt).toLocaleString()}` : " · open"}
-                {s.batchCount != null ? ` · ${s.batchCount} batches` : ""}
-              </p>
-            </div>
-            <span
-              className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
-                s.endedAt
-                  ? "border-slate-200 bg-white text-slate-600"
-                  : "border-amber-200 bg-amber-50 text-amber-900"
+        {sessionsQ.data?.map((s) => {
+          const focused = focusSessionId === s.id;
+          return (
+            <li
+              key={s.id}
+              id={`session-${s.id}`}
+              className={`flex flex-wrap items-center justify-between gap-2 rounded-md px-3 py-2 text-sm ${
+                focused ? "border border-sky-300 bg-sky-50 ring-1 ring-sky-200" : "bg-slate-50"
               }`}
             >
-              {s.endedAt ? "closed" : "open"}
-            </span>
-          </li>
-        ))}
+              <div>
+                <span className="font-medium text-slate-800">{s.label ?? s.id}</span>
+                <p className="text-xs text-slate-500">
+                  {s.source} · started {new Date(s.startedAt).toLocaleString()}
+                  {s.endedAt ? ` · ended ${new Date(s.endedAt).toLocaleString()}` : " · open"}
+                  {s.batchCount != null ? ` · ${s.batchCount} batches` : ""}
+                </p>
+              </div>
+              <span
+                className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
+                  s.endedAt
+                    ? "border-slate-200 bg-white text-slate-600"
+                    : "border-amber-200 bg-amber-50 text-amber-900"
+                }`}
+              >
+                {s.endedAt ? "closed" : "open"}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

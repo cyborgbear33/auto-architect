@@ -1,0 +1,50 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "ThrottlePositionCode": "Symptom",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": {
+      "domain": "Engine",
+      "range": "Symptom"
+    },
+    "hasCondition": {
+      "domain": "Engine",
+      "range": "Condition"
+    }
+  },
+  "classes": {
+    "ThrottlePositionSensorFault": {
+      "equivalentTo": "Engine \u2293 \u2203hasDtc.ThrottlePositionCode"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine \u2293 \u2203hasDtc.CylinderMisfire \u2293 \u2203hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": [
+        "Engine"
+      ],
+      "p0122": [
+        "ThrottlePositionCode"
+      ]
+    },
+    "roles": [
+      [
+        "hasDtc",
+        "jeep_renegade_engine",
+        "p0122"
+      ]
+    ]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": [
+    "ThrottlePositionSensorFault",
+    "MisfireUnderLoad"
+  ]
+}

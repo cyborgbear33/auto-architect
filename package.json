@@ -29,7 +29,7 @@
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
-    "obd-gateway:install": "cd apps/obd-gateway && ../../.venv/bin/pip install -r requirements-dev.txt",
+    "obd-gateway:install": "node scripts/install-obd-gateway.mjs",
     "obd-gateway:lint": "cd apps/obd-gateway && ../../.venv/bin/ruff check . && ../../.venv/bin/ruff format --check .",
     "obd-gateway:lint:fix": "cd apps/obd-gateway && ../../.venv/bin/ruff check --fix . && ../../.venv/bin/ruff format .",
     "obd-gateway:test": "cd apps/obd-gateway && ../../.venv/bin/python3 -m pytest",

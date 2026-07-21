@@ -9,6 +9,13 @@ import type {
 import type { ObservationBatchInput } from "@auto/validation";
 import { notFound, validationError } from "../lib/errors.ts";
 import type { Store } from "../store/index.ts";
+import {
+  detectObdLogFormat,
+  type ObdLogImportFormat,
+  type ObdLogImportResult,
+  parseElm327Text,
+  parseObdLogV1,
+} from "./obd-log-import.ts";
 import type { VehicleService } from "./vehicle.ts";
 
 /** Default Operate strip — matches gateway DEFAULT_PIDS “console” subset. */
@@ -45,6 +52,54 @@ export class ObservationService {
     if (input.odometerMiles !== undefined) {
       await this.vehicles.update(input.vehicleId, { odometerMiles: input.odometerMiles });
     }
+  }
+
+  /**
+   * Offline ingest: `obdlog-v1`, ELM327 AT/session text, or JSON ObservationBatch
+   * array. Format `auto` (default) sniffs content. Does not talk to hardware.
+   */
+  async importLog(
+    vehicleId: string,
+    input: { format?: ObdLogImportFormat; text: string },
+  ): Promise<ObdLogImportResult> {
+    await this.vehicles.getOrThrow(vehicleId);
+    const text = input.text ?? "";
+    if (!text.trim()) throw validationError("Import text is empty.");
+    const format =
+      !input.format || input.format === "auto" ? detectObdLogFormat(text) : input.format;
+
+    if (format === "json-batches") {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        throw validationError("json-batches import requires valid JSON.");
+      }
+      if (!Array.isArray(parsed)) {
+        throw validationError("json-batches import expects an array of observation batches.");
+      }
+      let recorded = 0;
+      for (const row of parsed) {
+        const batch = row as ObservationBatchInput;
+        await this.record({ ...batch, vehicleId: batch.vehicleId || vehicleId });
+        recorded += 1;
+      }
+      return { format, batchesRecorded: recorded, linesParsed: recorded, linesSkipped: 0 };
+    }
+
+    const parsed =
+      format === "elm327-text"
+        ? parseElm327Text(text, { vehicleId })
+        : parseObdLogV1(text, { vehicleId });
+    for (const batch of parsed.batches) {
+      await this.record({ ...batch, vehicleId });
+    }
+    return {
+      format,
+      batchesRecorded: parsed.batches.length,
+      linesParsed: parsed.linesParsed,
+      linesSkipped: parsed.linesSkipped,
+    };
   }
 
   async listBatches(vehicleId: string): Promise<ObservationBatch[]> {

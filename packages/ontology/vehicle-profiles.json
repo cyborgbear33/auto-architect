@@ -7,7 +7,7 @@
       "trim": "Latitude",
       "engineFamily": "fca-tigershark-2.4",
       "obdProtocol": "ISO 15765-4 (CAN, 500 kbps)",
-      "notes": "2.4L Tigershark MultiAir2 (sales code ED6/ED8/EDD/EDE range). In scope for Customer Satisfaction Notifications W80 (oil consumption inspection) and W84 (PCM reprogramming) — see known-campaigns.json. Reference adapter: OBDLink MX+ with a gray-type OBD-II adapter/extension between the vehicle DLC and the MX+ for better physical port access and for AlfaOBD Proxi alignment when prompted (does not change ISO 15765-4 by itself). Proxi / module sync: Functions → proc:fca-proxi-alignment. See docs/OPERATOR_OBD_MANUAL.md."
+      "notes": "2.4L Tigershark MultiAir2 (sales code ED6/ED8/EDD/EDE range). In scope for Customer Satisfaction Notifications W80 (oil consumption inspection) and W84 (PCM reprogramming) \u2014 see known-campaigns.json. Reference adapter: OBDLink MX+ with a gray-type OBD-II adapter/extension between the vehicle DLC and the MX+ for better physical port access and for AlfaOBD Proxi alignment when prompted (does not change ISO 15765-4 by itself). Proxi / module sync: Functions \u2192 proc:fca-proxi-alignment. See docs/OPERATOR_OBD_MANUAL.md."
     },
     "veh:silverado-2500hd-2003": {
       "make": "Chevrolet",
@@ -16,7 +16,7 @@
       "trim": "2500 HD",
       "engineFamily": "gm-vortec-6.0",
       "obdProtocol": null,
-      "notes": "Unleaded gasoline 6.0L V8 (Vortec 6000 / LQ4-class on GMT800). Confirm exact RPO from VIN/glovebox sticker when convenient. OBD protocol is typically ELM327 auto-detect on this era (often SAE J1850 VPW on GMT800 — do not hard-force CAN). Shares SAE-generic cartridges; OEM-specific depth lives in gm-vortec-6.0-stub once curated TSBs exist. Do not invent GM-enhanced fault classes."
+      "notes": "Unleaded gasoline 6.0L V8 (Vortec 6000 / LQ4-class on GMT800). Confirm exact RPO from VIN/glovebox sticker when convenient. OBD protocol is typically ELM327 auto-detect on this era (often SAE J1850 VPW on GMT800 \u2014 do not hard-force CAN). Shares SAE-generic cartridges; OEM-specific depth lives in gm-vortec-6.0-stub once curated TSBs exist. Do not invent GM-enhanced fault classes."
     }
   },
   "engineFamilies": {
@@ -32,7 +32,13 @@
         "o2-sensor",
         "egr",
         "secondary-air",
+        "coolant-thermostat",
         "cam-crank-correlation",
+        "ignition-coil",
+        "injector-circuit",
+        "map-sensor",
+        "knock-sensor",
+        "throttle-position",
         "fca-tigershark-2.4"
       ]
     },
@@ -48,7 +54,13 @@
         "o2-sensor",
         "egr",
         "secondary-air",
+        "coolant-thermostat",
         "cam-crank-correlation",
+        "ignition-coil",
+        "injector-circuit",
+        "map-sensor",
+        "knock-sensor",
+        "throttle-position",
         "gm-vortec-6.0-stub"
       ]
     }

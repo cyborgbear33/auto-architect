@@ -6,11 +6,18 @@
  * known manufacturer campaigns.
  */
 
-import type { EngineFamily, KnownCampaign, VehicleProfile } from "@auto/semantic-types";
+import type {
+  CascadeEdge,
+  EngineFamily,
+  KnownCampaign,
+  VehicleProfile,
+} from "@auto/semantic-types";
 import type { ZodError } from "zod";
+import cascadeEdgesJson from "../cascade-edges.json" with { type: "json" };
 import dlOntologyJson from "../dl-ontology.json" with { type: "json" };
 import dtcDictionaryJson from "../dtc-dictionary.json" with { type: "json" };
 import knownCampaignsJson from "../known-campaigns.json" with { type: "json" };
+import manualConditionsJson from "../manual-conditions.json" with { type: "json" };
 import mode06DictionaryJson from "../mode06-dictionary.json" with { type: "json" };
 import pidDictionaryJson from "../pid-dictionary.json" with { type: "json" };
 import specialProceduresJson from "../special-procedures.json" with { type: "json" };
@@ -22,8 +29,11 @@ import {
   type OntologyLintResult,
 } from "./lint.ts";
 import {
+  CascadeEdgesFileSchema,
   DtcDictionaryFileSchema,
   KnownCampaignsFileSchema,
+  type ManualConditionCatalogEntry,
+  ManualConditionsFileSchema,
   type Mode06DictionaryEntry,
   Mode06DictionaryFileSchema,
   type PidDictionaryEntry,
@@ -42,8 +52,12 @@ export type {
   OntologyLintResult,
 } from "./lint.ts";
 export {
+  CascadeEdgesFileSchema,
   DtcDictionaryFileSchema,
   KnownCampaignsFileSchema,
+  type ManualConditionCatalogEntry,
+  ManualConditionCatalogEntrySchema,
+  ManualConditionsFileSchema,
   type Mode06DictionaryEntry,
   Mode06DictionaryEntrySchema,
   Mode06DictionaryFileSchema,
@@ -74,6 +88,8 @@ const vehicleProfilesFile: VehicleProfilesFile =
   VehicleProfilesFileSchema.parse(vehicleProfilesJson);
 const knownCampaignsFile = KnownCampaignsFileSchema.parse(knownCampaignsJson);
 const specialProceduresFile = SpecialProceduresFileSchema.parse(specialProceduresJson);
+const cascadeEdgesFile = CascadeEdgesFileSchema.parse(cascadeEdgesJson);
+const manualConditionsFile = ManualConditionsFileSchema.parse(manualConditionsJson);
 
 const dtcDictionary: Record<string, DtcDictionaryEntry> = dtcDictionaryFile.codes;
 const pidDictionary: Record<string, PidDictionaryEntry> = pidDictionaryFile.pids;
@@ -190,6 +206,30 @@ export function listKnownCampaigns(): KnownCampaign[] {
   return knownCampaigns;
 }
 
+const cascadeEdges: CascadeEdge[] = cascadeEdgesFile.edges.map((e) => ({
+  id: e.id,
+  antecedent: e.antecedent,
+  consequent: e.consequent,
+  band: e.band,
+  rationale: e.rationale,
+  ...(e.horizon ? { horizon: e.horizon } : {}),
+  ...(e.engineFamilies !== undefined ? { engineFamilies: e.engineFamilies } : {}),
+}));
+
+/** Curated cascade edges for CascadePrognosisService (F6/F8). */
+export function listCascadeEdges(): CascadeEdge[] {
+  return cascadeEdges;
+}
+
+/** Operator-entered wear / condition catalog (F8 antecedents). */
+export function listManualConditions(): ManualConditionCatalogEntry[] {
+  return manualConditionsFile.conditions;
+}
+
+export function getManualCondition(id: string): ManualConditionCatalogEntry | undefined {
+  return manualConditionsFile.conditions.find((c) => c.id === id);
+}
+
 export interface TsbEntry {
   id: string;
   title: string;
@@ -250,6 +290,14 @@ export function runOntologyLint(
   if (!proceduresParsed.success) {
     schemaErrors.push(...zodIssues("special-procedures.json", proceduresParsed.error));
   }
+  const cascadeParsed = CascadeEdgesFileSchema.safeParse(cascadeEdgesJson);
+  if (!cascadeParsed.success) {
+    schemaErrors.push(...zodIssues("cascade-edges.json", cascadeParsed.error));
+  }
+  const manualParsed = ManualConditionsFileSchema.safeParse(manualConditionsJson);
+  if (!manualParsed.success) {
+    schemaErrors.push(...zodIssues("manual-conditions.json", manualParsed.error));
+  }
 
   if (
     schemaErrors.length > 0 ||
@@ -258,8 +306,23 @@ export function runOntologyLint(
     !mode06Parsed.success ||
     !profilesParsed.success ||
     !campaignsParsed.success ||
-    !proceduresParsed.success
+    !proceduresParsed.success ||
+    !cascadeParsed.success ||
+    !manualParsed.success
   ) {
+    return { ok: false, errors: schemaErrors, warnings: [] };
+  }
+
+  const catalogIds = new Set(manualParsed.data.conditions.map((c) => c.id));
+  for (const edge of cascadeParsed.data.edges) {
+    if (edge.antecedent.kind === "manualCondition" && !catalogIds.has(edge.antecedent.id)) {
+      schemaErrors.push({
+        code: "cascade_manual_condition_unknown",
+        message: `cascade-edges.json:${edge.id} — manualCondition antecedent "${edge.antecedent.id}" is not in manual-conditions.json`,
+      });
+    }
+  }
+  if (schemaErrors.length > 0) {
     return { ok: false, errors: schemaErrors, warnings: [] };
   }
 

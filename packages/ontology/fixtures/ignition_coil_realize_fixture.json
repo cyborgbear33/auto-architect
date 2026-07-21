@@ -1,0 +1,50 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "IgnitionCoilCircuit": "Symptom",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": {
+      "domain": "Engine",
+      "range": "Symptom"
+    },
+    "hasCondition": {
+      "domain": "Engine",
+      "range": "Condition"
+    }
+  },
+  "classes": {
+    "IgnitionCoilCircuitFault": {
+      "equivalentTo": "Engine \u2293 \u2203hasDtc.IgnitionCoilCircuit"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine \u2293 \u2203hasDtc.CylinderMisfire \u2293 \u2203hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": [
+        "Engine"
+      ],
+      "p0354": [
+        "IgnitionCoilCircuit"
+      ]
+    },
+    "roles": [
+      [
+        "hasDtc",
+        "jeep_renegade_engine",
+        "p0354"
+      ]
+    ]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": [
+    "IgnitionCoilCircuitFault",
+    "MisfireUnderLoad"
+  ]
+}

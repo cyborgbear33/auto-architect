@@ -1,0 +1,50 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "KnockSensorCode": "Symptom",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": {
+      "domain": "Engine",
+      "range": "Symptom"
+    },
+    "hasCondition": {
+      "domain": "Engine",
+      "range": "Condition"
+    }
+  },
+  "classes": {
+    "KnockSensorCircuitFault": {
+      "equivalentTo": "Engine \u2293 \u2203hasDtc.KnockSensorCode"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine \u2293 \u2203hasDtc.CylinderMisfire \u2293 \u2203hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": [
+        "Engine"
+      ],
+      "p0325": [
+        "KnockSensorCode"
+      ]
+    },
+    "roles": [
+      [
+        "hasDtc",
+        "jeep_renegade_engine",
+        "p0325"
+      ]
+    ]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": [
+    "KnockSensorCircuitFault",
+    "MisfireUnderLoad"
+  ]
+}

@@ -911,13 +911,37 @@ export function solutionFromWire(raw: unknown): DiagnosticSolution {
     escalations: asWireArray(r.escalations).map(String),
     counterfactuals: asWireArray(r.counterfactuals).map((item) => {
       const c = asWireObject(item);
+      const flips = asWireArray(c.flips).map((raw) => {
+        const x = asWireObject(raw);
+        return {
+          factor: String(x.factor ?? ""),
+          current: typeof x.current === "number" ? x.current : Number(x.current ?? 0),
+          needed: typeof x.needed === "number" ? x.needed : Number(x.needed ?? 0),
+          direction: x.direction === "decrease" ? ("decrease" as const) : ("increase" as const),
+        };
+      });
+      const robustness = asWireArray(c.robustness).map((raw) => {
+        const x = asWireObject(raw);
+        return {
+          factor: String(x.factor ?? ""),
+          current: typeof x.current === "number" ? x.current : Number(x.current ?? 0),
+          breakEven:
+            typeof x.break_even === "number"
+              ? x.break_even
+              : typeof x.breakEven === "number"
+                ? x.breakEven
+                : Number(x.break_even ?? x.breakEven ?? 0),
+          direction:
+            x.direction === "rises_above" ? ("rises_above" as const) : ("falls_below" as const),
+        };
+      });
       return {
-        actionId: String(c.action_id ?? ""),
+        actionId: String(c.action_id ?? c.actionId ?? ""),
         score: typeof c.score === "number" ? c.score : Number(c.score ?? 0),
-        isTop: c.is_top === true,
+        isTop: c.is_top === true || c.isTop === true,
         rank: typeof c.rank === "number" ? c.rank : Number(c.rank ?? 0),
-        ...(Array.isArray(c.flips) ? { flips: c.flips } : {}),
-        ...(Array.isArray(c.robustness) ? { robustness: c.robustness } : {}),
+        ...(flips.length > 0 ? { flips } : {}),
+        ...(robustness.length > 0 ? { robustness } : {}),
       };
     }),
   };

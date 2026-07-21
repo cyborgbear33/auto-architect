@@ -64,11 +64,7 @@ describe("CaseTimelineService", () => {
     expect(timeline.events.find((e) => e.type === "reopened")?.reopenedFromId).toBe(problem.id);
 
     const stored = await services.actions.getDiagnosticProblem(problem.id);
-    expect(stored.lifecycleEvents?.map((e) => e.type)).toEqual([
-      "opened",
-      "abandoned",
-      "reopened",
-    ]);
+    expect(stored.lifecycleEvents?.map((e) => e.type)).toEqual(["opened", "abandoned", "reopened"]);
   });
 
   it("records ranked when solve runs", async () => {

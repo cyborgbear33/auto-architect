@@ -258,5 +258,5 @@ High-level gaps vs a complete garage product:
 
 - Live MX+ dry-run validation (S1); Bluetooth discovery (S6)
 - Live MX+ watch → auto-link batches to open DriveSession
-- OBD/CAN log import adapters (ELM, candump, MF4)
+- OBD/CAN log import adapters (ELM, candump, MF4) — `obdlog-v1` + ELM327 AT/session text + JSON batches shipped; native candump/MF4 still deferred
 - Auth / multi-user; shared UI package; LLM advise loop; full Silverado cartridge

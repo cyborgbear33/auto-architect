@@ -2,9 +2,11 @@
   "subtypes": {
     "Engine": "IndependentContinuant",
     "Symptom": "IndependentContinuant",
-    "CamCrankCorrelation": "Symptom",
-    "CylinderMisfire": "Symptom",
     "Condition": "IndependentContinuant",
+    "CamCrankCorrelation": "Symptom",
+    "CamCrankSensorCircuit": "Symptom",
+    "FailedVvtMonitor": "Condition",
+    "CylinderMisfire": "Symptom",
     "HighLoad": "Condition"
   },
   "roles": {
@@ -13,7 +15,7 @@
   },
   "classes": {
     "CamCrankCorrelationFault": {
-      "equivalentTo": "Engine ⊓ ∃hasDtc.CamCrankCorrelation"
+      "equivalentTo": "Engine ⊓ (∃hasDtc.CamCrankCorrelation ⊔ ∃hasDtc.CamCrankSensorCircuit ⊔ ∃hasCondition.FailedVvtMonitor)"
     },
     "MisfireUnderLoad": {
       "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"

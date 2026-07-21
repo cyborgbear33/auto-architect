@@ -1,0 +1,31 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "EctCircuitCode": "Symptom",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": { "domain": "Engine", "range": "Symptom" },
+    "hasCondition": { "domain": "Engine", "range": "Condition" }
+  },
+  "classes": {
+    "EctSensorCircuitFault": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.EctCircuitCode"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": ["Engine"],
+      "p0118": ["EctCircuitCode"]
+    },
+    "roles": [["hasDtc", "jeep_renegade_engine", "p0118"]]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": ["EctSensorCircuitFault", "MisfireUnderLoad"]
+}

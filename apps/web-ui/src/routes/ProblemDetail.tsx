@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
+import { CounterfactualsPanel, DisqualifiedActionsPanel } from "../components/Explainability.tsx";
 import { PageHeader } from "../components/Layout.tsx";
 import { ReportDownload } from "../components/ReportDownload.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
@@ -288,10 +289,11 @@ export function ProblemDetail() {
             </ol>
 
             {solution.disqualified.length > 0 && (
-              <p className="mt-3 text-xs text-slate-400">
-                Disqualified: {solution.disqualified.map((d) => d.actionId).join(", ")} (violated a
-                non-negotiable constraint)
-              </p>
+              <DisqualifiedActionsPanel items={solution.disqualified} />
+            )}
+
+            {(solution.counterfactuals?.length ?? 0) > 0 && (
+              <CounterfactualsPanel items={solution.counterfactuals ?? []} />
             )}
           </div>
         )}

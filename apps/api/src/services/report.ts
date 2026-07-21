@@ -341,7 +341,12 @@ function renderMarkdownTable(rows: string[]): string {
   const headCells = cells(header ?? "");
   const thead = `<thead><tr>${headCells.map((c) => `<th>${inlineFormat(c)}</th>`).join("")}</tr></thead>`;
   const tbody = `<tbody>${rest
-    .map((r) => `<tr>${cells(r).map((c) => `<td>${inlineFormat(c)}</td>`).join("")}</tr>`)
+    .map(
+      (r) =>
+        `<tr>${cells(r)
+          .map((c) => `<td>${inlineFormat(c)}</td>`)
+          .join("")}</tr>`,
+    )
     .join("")}</tbody>`;
   return `<table>${thead}${tbody}</table>`;
 }

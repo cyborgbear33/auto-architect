@@ -17,17 +17,9 @@ describe("markdownToPrintHtml", () => {
 
   it("renders tables, code fences, and a custom title", () => {
     const html = markdownToPrintHtml(
-      [
-        "# Mastery",
-        "",
-        "| A | B |",
-        "| --- | --- |",
-        "| 1 | 2 |",
-        "",
-        "```",
-        "scan",
-        "```",
-      ].join("\n"),
+      ["# Mastery", "", "| A | B |", "| --- | --- |", "| 1 | 2 |", "", "```", "scan", "```"].join(
+        "\n",
+      ),
       { title: "Vehicle & OBD mastery" },
     );
     expect(html).toContain("<title>Vehicle &amp; OBD mastery</title>");

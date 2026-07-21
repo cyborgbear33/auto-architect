@@ -13,6 +13,7 @@ type BusyKey =
   | "problems"
   | "timeline"
   | "import"
+  | "obdlog"
   | null;
 
 /**
@@ -22,6 +23,7 @@ type BusyKey =
 export function DataExportPanel({ vehicleId }: { vehicleId: string }) {
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
+  const obdLogRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<BusyKey>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -63,6 +65,22 @@ export function DataExportPanel({ vehicleId }: { vehicleId: string }) {
     });
   }
 
+  async function onImportObdLog(file: File) {
+    await run("obdlog", async () => {
+      const text = await file.text();
+      const format = file.name.toLowerCase().endsWith(".json") ? "json-batches" : ("auto" as const);
+      const result = await api.importObservationLog(vehicleId, { format, text });
+      invalidateAfterImport();
+      void qc.invalidateQueries({ queryKey: queryKeys.cascadePrognosis(vehicleId) });
+      setMessage(
+        `OBD log imported (${result.format}): ${result.batchesRecorded} batch(es), ` +
+          `${result.linesParsed} lines parsed` +
+          (result.linesSkipped ? `, ${result.linesSkipped} skipped` : "") +
+          ".",
+      );
+    });
+  }
+
   const slug = safeFilename(vehicleId);
   const btn =
     "rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50";
@@ -71,8 +89,9 @@ export function DataExportPanel({ vehicleId }: { vehicleId: string }) {
     <section className="rounded-lg border border-slate-200 bg-white p-4">
       <h2 className="mb-1 text-sm font-semibold text-slate-700">Export &amp; import</h2>
       <p className="mb-3 text-xs text-slate-400">
-        JSON dump is the portable garage backup. CSV tables are for spreadsheets and analysis —
-        same spirit as garden-architect&apos;s CSV downloads.
+        JSON dump is the portable garage backup. CSV tables are for spreadsheets. OBD logs
+        (`.obdlog`, ELM327 AT/session dumps, or batches JSON) ingest offline DTC/PID evidence
+        without live hardware — format is auto-detected.
       </p>
 
       <div className="mb-3">
@@ -130,6 +149,33 @@ export function DataExportPanel({ vehicleId }: { vehicleId: string }) {
         </div>
       </div>
 
+      <div className="mb-3">
+        <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          OBD log (offline)
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className={btn}
+            disabled={busy !== null}
+            onClick={() => obdLogRef.current?.click()}
+          >
+            {busy === "obdlog" ? "Importing…" : "Import .obdlog / ELM / JSON…"}
+          </button>
+          <input
+            ref={obdLogRef}
+            type="file"
+            accept=".obdlog,.txt,.log,application/json,.json,text/plain"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (file) void onImportObdLog(file);
+            }}
+          />
+        </div>
+      </div>
+
       <div>
         <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
           CSV (this vehicle)
@@ -142,10 +188,7 @@ export function DataExportPanel({ vehicleId }: { vehicleId: string }) {
             className={btn}
             onClick={() =>
               run("observations", async () => {
-                downloadCsv(
-                  `observations-${slug}.csv`,
-                  await api.exportObservationsCsv(vehicleId),
-                );
+                downloadCsv(`observations-${slug}.csv`, await api.exportObservationsCsv(vehicleId));
                 setMessage("Observations CSV download started.");
               })
             }

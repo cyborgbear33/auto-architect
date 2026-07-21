@@ -74,10 +74,7 @@ function midSupportStatus(
 function buildNarrative(
   vehicle: VehicleProfile,
   report: ObdCapabilityReport,
-  forensics: Pick<
-    DiscoveryForensicsReport,
-    "summary" | "unmappedSupportedPids" | "hardware"
-  >,
+  forensics: Pick<DiscoveryForensicsReport, "summary" | "unmappedSupportedPids" | "hardware">,
 ): string[] {
   const lines: string[] = [];
   const { summary } = forensics;
@@ -157,7 +154,13 @@ function composeMarkdown(report: DiscoveryForensicsReport): string {
       `| ${row.pid} | ${row.support} | ${row.unit ?? "—"} | ${row.inOntology ? "yes" : "no"} | ${row.inDefaultPoll ? "yes" : "—"} | ${row.cartridgeRelevant ? "yes" : "—"} |`,
     );
   }
-  lines.push("", "## Mode 06", "", "| MID | Support | Concept | Ontology |", "| --- | --- | --- | --- |");
+  lines.push(
+    "",
+    "## Mode 06",
+    "",
+    "| MID | Support | Concept | Ontology |",
+    "| --- | --- | --- | --- |",
+  );
   for (const row of report.mode06) {
     lines.push(
       `| ${row.mid} | ${row.support} | ${row.concept ?? "—"} | ${row.inOntology ? "yes" : "no"} |`,

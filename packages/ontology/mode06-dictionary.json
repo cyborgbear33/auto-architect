@@ -51,6 +51,11 @@
       "concept": "FailedEvapMonitorSmall",
       "sae": true
     },
+    "3D": {
+      "description": "Purge Flow Monitor",
+      "concept": "FailedEvapPurgeMonitor",
+      "sae": true
+    },
     "41": {
       "description": "Oxygen Sensor Heater Monitor Bank 1 – Sensor 1",
       "concept": "FailedO2HeaterMonitorBank1",
@@ -91,6 +96,16 @@
       "concept": "FailedEgrMonitor",
       "sae": true
     },
+    "35": {
+      "description": "VVT Monitor Bank 1",
+      "concept": "FailedVvtMonitor",
+      "sae": true
+    },
+    "36": {
+      "description": "VVT Monitor Bank 2",
+      "concept": "FailedVvtMonitor",
+      "sae": true
+    },
     "42": {
       "description": "Oxygen Sensor Heater Monitor Bank 1 – Sensor 2",
       "concept": "FailedO2DownstreamHeaterMonitorBank1",
@@ -103,6 +118,11 @@
     },
     "71": {
       "description": "Secondary Air Monitor 1",
+      "concept": "FailedSecondaryAirMonitor",
+      "sae": true
+    },
+    "72": {
+      "description": "Secondary Air Monitor 2",
       "concept": "FailedSecondaryAirMonitor",
       "sae": true
     }

@@ -82,7 +82,10 @@ function VehicleGuide({ vehicleId }: { vehicleId: string }) {
         <span aria-hidden className="text-sky-300">
           →
         </span>
-        <Link to="/discovery" className="font-medium text-sky-700 underline-offset-2 hover:underline">
+        <Link
+          to="/discovery"
+          className="font-medium text-sky-700 underline-offset-2 hover:underline"
+        >
           Discovery
         </Link>
         <span aria-hidden className="text-sky-300">

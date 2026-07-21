@@ -1,0 +1,32 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "EvapPurgeCode": "Symptom",
+    "FailedEvapPurgeMonitor": "Condition",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": { "domain": "Engine", "range": "Symptom" },
+    "hasCondition": { "domain": "Engine", "range": "Condition" }
+  },
+  "classes": {
+    "EvapPurgeSystemFault": {
+      "equivalentTo": "Engine ⊓ (∃hasDtc.EvapPurgeCode ⊔ ∃hasCondition.FailedEvapPurgeMonitor)"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine ⊓ ∃hasDtc.CylinderMisfire ⊓ ∃hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": ["Engine"],
+      "p0441": ["EvapPurgeCode"]
+    },
+    "roles": [["hasDtc", "jeep_renegade_engine", "p0441"]]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": ["EvapPurgeSystemFault", "MisfireUnderLoad"]
+}

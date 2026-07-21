@@ -2,8 +2,8 @@
 import { spawnSync } from "node:child_process";
 /**
  * Advisory-only check that `packages/logos-bridge`'s domain-agnostic seam
- * files (`bridge.ts`, `serve-client.ts`, `errors.ts`) haven't silently
- * drifted from garden-architect's `@garden/logos-bridge` twin. The two
+ * files (`bridge.ts`, `serve-client.ts`, `errors.ts`, `types.ts`) haven't
+ * silently drifted from garden-architect's `@garden/logos-bridge` twin. The two
  * packages share one wire contract/transport by design (see
  * `docs/AI_HANDOFF.md` §2) — a fix or engine-protocol change made on one
  * side and forgotten on the other is exactly the kind of bug this project's
@@ -83,17 +83,35 @@ function normalize(src) {
       .replace(/\/\/.*$/gm, " ") // line comments
       .replace(/DiagnosticSolution|GardenSolution/g, "__SOLUTION_TYPE__")
       .replace(/@auto\/semantic-types|@garden\/semantic-types/g, "__SEMANTIC_TYPES__")
+      .replace(/@auto\/game-theory|@garden\/game-theory/g, "__GAME_THEORY__")
       .replace(/@auto\/logos-bridge|@garden\/logos-bridge/g, "__PKG_NAME__")
       .replace(/multi-vehicle|multi-bed/gi, "__DOMAIN_ADJ__")
-      // Trailing commas are formatting-only; ignore so Prettier wrap differences
-      // do not look like transport drift.
-      .replace(/,(\s*[}\]])/g, "$1")
+      .replace(/plantParent:\s*"(?:Plant|Engine)"/g, 'plantParent: "__PLANT_PARENT__"')
+      .replace(
+        /plant_parent === "string" \? r\.plant_parent : "(?:Plant|Engine)"/g,
+        'plant_parent === "string" ? r.plant_parent : "__PLANT_PARENT__"',
+      )
+      // Trailing commas + Prettier wrap spaces are formatting-only.
+      .replace(/,(\s*[)\]}])/g, "$1")
+      .replace(/\(\s+/g, "(")
+      .replace(/\s+\)/g, ")")
+      .replace(/\{\s+/g, "{")
+      .replace(/\s+\}/g, "}")
+      .replace(/,\s+/g, ",")
+      .replace(/;\s+/g, ";")
+      .replace(/:\s+/g, ":")
+      .replace(/\s+\./g, ".")
+      // Prettier sometimes wraps ternaries (incl. `Number(...)`) in map callbacks.
+      .replace(
+        /\((typeof\b(?:[^()]|\([^()]*\))*\?(?:[^()]|\([^()]*\))*:(?:[^()]|\([^()]*\))*)\)/g,
+        "$1",
+      )
       .replace(/\s+/g, " ")
       .trim()
   );
 }
 
-const SEAM_FILES = ["bridge.ts", "serve-client.ts", "errors.ts"];
+const SEAM_FILES = ["bridge.ts", "serve-client.ts", "errors.ts", "types.ts"];
 
 log(cyan(`\nauto-architect <-> garden-architect logos-bridge drift check`));
 log(dim(`  comparing against: ${gardenRoot}`));

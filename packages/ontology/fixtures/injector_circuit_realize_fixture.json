@@ -1,0 +1,50 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "InjectorCircuitCode": "Symptom",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": {
+      "domain": "Engine",
+      "range": "Symptom"
+    },
+    "hasCondition": {
+      "domain": "Engine",
+      "range": "Condition"
+    }
+  },
+  "classes": {
+    "InjectorCircuitFault": {
+      "equivalentTo": "Engine \u2293 \u2203hasDtc.InjectorCircuitCode"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine \u2293 \u2203hasDtc.CylinderMisfire \u2293 \u2203hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": [
+        "Engine"
+      ],
+      "p0201": [
+        "InjectorCircuitCode"
+      ]
+    },
+    "roles": [
+      [
+        "hasDtc",
+        "jeep_renegade_engine",
+        "p0201"
+      ]
+    ]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": [
+    "InjectorCircuitFault",
+    "MisfireUnderLoad"
+  ]
+}

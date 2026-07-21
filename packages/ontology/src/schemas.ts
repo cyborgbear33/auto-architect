@@ -138,6 +138,48 @@ export const SpecialProceduresFileSchema = z.object({
   procedures: z.array(SpecialProcedureEntrySchema),
 });
 
+export const ManualConditionCatalogEntrySchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  system: z.string().min(1),
+  description: z.string().min(1).optional(),
+});
+
+export const ManualConditionsFileSchema = z.object({
+  disclaimer: z.string().optional(),
+  conditions: z.array(ManualConditionCatalogEntrySchema).min(1),
+});
+
+export type ManualConditionsFile = z.infer<typeof ManualConditionsFileSchema>;
+export type ManualConditionCatalogEntry = z.infer<typeof ManualConditionCatalogEntrySchema>;
+
+export const CascadeAntecedentSchema = z.object({
+  kind: z.enum(["provenClass", "trend", "openProblemClass", "manualCondition"]),
+  id: z.string().min(1),
+});
+
+export const CascadeConsequentSchema = z.object({
+  kind: z.literal("watchClass"),
+  id: z.string().min(1),
+});
+
+export const CascadeEdgeSchema = z.object({
+  id: z.string().min(1),
+  antecedent: CascadeAntecedentSchema,
+  consequent: CascadeConsequentSchema,
+  band: z.enum(["Watch", "Elevated", "High"]),
+  rationale: z.string().min(1),
+  horizon: z.string().min(1).optional(),
+  engineFamilies: z.array(z.string().min(1)).nullable().optional(),
+});
+
+export const CascadeEdgesFileSchema = z.object({
+  disclaimer: z.string().optional(),
+  edges: z.array(CascadeEdgeSchema),
+});
+
+export type CascadeEdgesFile = z.infer<typeof CascadeEdgesFileSchema>;
+
 export type DtcDictionaryFile = z.infer<typeof DtcDictionaryFileSchema>;
 export type PidDictionaryFile = z.infer<typeof PidDictionaryFileSchema>;
 export type PidDictionaryEntry = z.infer<typeof PidDictionaryEntrySchema>;

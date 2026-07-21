@@ -1,0 +1,50 @@
+{
+  "subtypes": {
+    "Engine": "IndependentContinuant",
+    "Symptom": "IndependentContinuant",
+    "Condition": "IndependentContinuant",
+    "MapSensorCode": "Symptom",
+    "CylinderMisfire": "Symptom",
+    "HighLoad": "Condition"
+  },
+  "roles": {
+    "hasDtc": {
+      "domain": "Engine",
+      "range": "Symptom"
+    },
+    "hasCondition": {
+      "domain": "Engine",
+      "range": "Condition"
+    }
+  },
+  "classes": {
+    "MapSensorFault": {
+      "equivalentTo": "Engine \u2293 \u2203hasDtc.MapSensorCode"
+    },
+    "MisfireUnderLoad": {
+      "equivalentTo": "Engine \u2293 \u2203hasDtc.CylinderMisfire \u2293 \u2203hasCondition.HighLoad"
+    }
+  },
+  "abox": {
+    "concepts": {
+      "jeep_renegade_engine": [
+        "Engine"
+      ],
+      "p0107": [
+        "MapSensorCode"
+      ]
+    },
+    "roles": [
+      [
+        "hasDtc",
+        "jeep_renegade_engine",
+        "p0107"
+      ]
+    ]
+  },
+  "individual": "jeep_renegade_engine",
+  "classify": [
+    "MapSensorFault",
+    "MisfireUnderLoad"
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "disclaimer": "SAE-generic (Pxxxx, digit 2 = 0) codes and their meanings are standardized (SAE J2012) and safe to treat as universal. Manufacturer-enhanced codes (digit 2 = 1, e.g. FCA P1xxx) are NOT reproduced here beyond what public TSB summaries describe, and must be verified against a real service manual / AlfaOBD readout before acting — do not treat this dictionary as authoritative for enhanced codes.",
+  "disclaimer": "SAE-generic (Pxxxx, digit 2 = 0) codes and their meanings are standardized (SAE J2012) and safe to treat as universal. Manufacturer-enhanced codes (digit 2 = 1, e.g. FCA P1xxx) are NOT reproduced here beyond what public TSB summaries describe, and must be verified against a real service manual / AlfaOBD readout before acting \u2014 do not treat this dictionary as authoritative for enhanced codes.",
   "codes": {
     "P0300": {
       "description": "Random/Multiple Cylinder Misfire Detected",
@@ -64,6 +64,81 @@
     "P0019": {
       "description": "Crankshaft Position - Camshaft Position Correlation (Bank 2 Sensor B)",
       "concept": "CamCrankCorrelation",
+      "sae": true
+    },
+    "P0335": {
+      "description": "Crankshaft Position Sensor \"A\" Circuit",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0336": {
+      "description": "Crankshaft Position Sensor \"A\" Circuit Range/Performance",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0337": {
+      "description": "Crankshaft Position Sensor \"A\" Circuit Low",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0338": {
+      "description": "Crankshaft Position Sensor \"A\" Circuit High",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0339": {
+      "description": "Crankshaft Position Sensor \"A\" Circuit Intermittent",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0340": {
+      "description": "Camshaft Position Sensor \"A\" Circuit (Bank 1 or Single Sensor)",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0341": {
+      "description": "Camshaft Position Sensor \"A\" Circuit Range/Performance (Bank 1)",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0342": {
+      "description": "Camshaft Position Sensor \"A\" Circuit Low (Bank 1)",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0343": {
+      "description": "Camshaft Position Sensor \"A\" Circuit High (Bank 1)",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0344": {
+      "description": "Camshaft Position Sensor \"A\" Circuit Intermittent (Bank 1)",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0345": {
+      "description": "Camshaft Position Sensor \"A\" Circuit (Bank 2)",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0346": {
+      "description": "Camshaft Position Sensor \"A\" Circuit Range/Performance (Bank 2)",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0347": {
+      "description": "Camshaft Position Sensor \"A\" Circuit Low (Bank 2)",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0348": {
+      "description": "Camshaft Position Sensor \"A\" Circuit High (Bank 2)",
+      "concept": "CamCrankSensorCircuit",
+      "sae": true
+    },
+    "P0349": {
+      "description": "Camshaft Position Sensor \"A\" Circuit Intermittent (Bank 2)",
+      "concept": "CamCrankSensorCircuit",
       "sae": true
     },
     "P0171": {
@@ -161,11 +236,42 @@
       "concept": "EvapCodeSmall",
       "sae": true
     },
+    "P0440": {
+      "description": "Evaporative Emission Control System Malfunction",
+      "concept": "EvapCodeLarge",
+      "sae": true,
+      "note": "General EVAP system malfunction (SAE J2012); maps to EvapCodeLarge with large-leak / cap-off family."
+    },
+    "P0441": {
+      "description": "Evaporative Emission System Incorrect Purge Flow",
+      "concept": "EvapPurgeCode",
+      "sae": true
+    },
+    "P0443": {
+      "description": "Evaporative Emission System Purge Control Valve Circuit",
+      "concept": "EvapPurgeCode",
+      "sae": true
+    },
+    "P0446": {
+      "description": "Evaporative Emission System Vent Control Circuit",
+      "concept": "EvapVentCode",
+      "sae": true
+    },
+    "P0449": {
+      "description": "Evaporative Emission System Vent Valve/Solenoid Circuit",
+      "concept": "EvapVentCode",
+      "sae": true
+    },
+    "P0496": {
+      "description": "Evaporative Emission System High Purge Flow",
+      "concept": "EvapPurgeCode",
+      "sae": true
+    },
     "P0456": {
       "description": "Evaporative Emission System Leak Detected (Very Small Leak)",
       "concept": "EvapCodeSmall",
       "sae": true,
-      "note": "Same small-leak EVAP family as P0442 (SAE J2012); still maps to EvapCodeSmall — no new fault class."
+      "note": "Same small-leak EVAP family as P0442 (SAE J2012); still maps to EvapCodeSmall \u2014 no new fault class."
     },
     "P0455": {
       "description": "Evaporative Emission System Leak Detected (Large Leak)",
@@ -182,7 +288,7 @@
       "description": "Engine Misfire Detected on Startup (First 1000 Revolutions)",
       "concept": "CylinderMisfire",
       "sae": true,
-      "note": "Startup/first-1000-rev misfire (SAE J2012); same CylinderMisfire concept as P0300–P0308."
+      "note": "Startup/first-1000-rev misfire (SAE J2012); same CylinderMisfire concept as P0300\u2013P0308."
     },
     "P0011": {
       "description": "Intake Camshaft Position Timing Over-Advanced (Bank 1)",
@@ -196,7 +302,7 @@
       "concept": "MultiAirFault",
       "sae": true,
       "engineFamily": "fca-tigershark-2.4",
-      "note": "See P0011 note — same TSB 05047457A pre-check order applies."
+      "note": "See P0011 note \u2014 same TSB 05047457A pre-check order applies."
     },
     "P0136": {
       "description": "O2 Sensor Circuit (Bank 1 Sensor 2)",
@@ -306,6 +412,272 @@
     "P0412": {
       "description": "Secondary Air Injection System Switching Valve A Circuit",
       "concept": "SecondaryAirCode",
+      "sae": true
+    },
+    "P0413": {
+      "description": "Secondary Air Injection System Switching Valve A Circuit Open",
+      "concept": "SecondaryAirCode",
+      "sae": true
+    },
+    "P0414": {
+      "description": "Secondary Air Injection System Switching Valve A Circuit Shorted",
+      "concept": "SecondaryAirCode",
+      "sae": true
+    },
+    "P0415": {
+      "description": "Secondary Air Injection System Switching Valve B Circuit",
+      "concept": "SecondaryAirCode",
+      "sae": true
+    },
+    "P0416": {
+      "description": "Secondary Air Injection System Switching Valve B Circuit Open",
+      "concept": "SecondaryAirCode",
+      "sae": true
+    },
+    "P0417": {
+      "description": "Secondary Air Injection System Switching Valve B Circuit Shorted",
+      "concept": "SecondaryAirCode",
+      "sae": true
+    },
+    "P0418": {
+      "description": "Secondary Air Injection System Relay A Circuit",
+      "concept": "SecondaryAirCode",
+      "sae": true
+    },
+    "P0419": {
+      "description": "Secondary Air Injection System Relay B Circuit",
+      "concept": "SecondaryAirCode",
+      "sae": true
+    },
+    "P0115": {
+      "description": "Engine Coolant Temperature Sensor 1 Circuit",
+      "concept": "EctCircuitCode",
+      "sae": true
+    },
+    "P0116": {
+      "description": "Engine Coolant Temperature Sensor 1 Circuit Range/Performance",
+      "concept": "EctCircuitCode",
+      "sae": true
+    },
+    "P0117": {
+      "description": "Engine Coolant Temperature Sensor 1 Circuit Low",
+      "concept": "EctCircuitCode",
+      "sae": true
+    },
+    "P0118": {
+      "description": "Engine Coolant Temperature Sensor 1 Circuit High",
+      "concept": "EctCircuitCode",
+      "sae": true
+    },
+    "P0119": {
+      "description": "Engine Coolant Temperature Sensor 1 Circuit Intermittent",
+      "concept": "EctCircuitCode",
+      "sae": true
+    },
+    "P0125": {
+      "description": "Insufficient Coolant Temperature for Closed Loop Fuel Control",
+      "concept": "ThermostatCode",
+      "sae": true
+    },
+    "P0126": {
+      "description": "Insufficient Coolant Temperature for Stable Operation",
+      "concept": "ThermostatCode",
+      "sae": true
+    },
+    "P0128": {
+      "description": "Coolant Thermostat (Coolant Temperature Below Thermostat Regulating Temperature)",
+      "concept": "ThermostatCode",
+      "sae": true,
+      "note": "Classic stuck-open thermostat family (SAE J2012). DTC-only \u2014 do not invent COOLANT_TEMP realize thresholds."
+    },
+    "P0351": {
+      "description": "Ignition Coil 1 Primary/Secondary Circuit",
+      "concept": "IgnitionCoilCircuit",
+      "sae": true
+    },
+    "P0352": {
+      "description": "Ignition Coil 2 Primary/Secondary Circuit",
+      "concept": "IgnitionCoilCircuit",
+      "sae": true
+    },
+    "P0353": {
+      "description": "Ignition Coil 3 Primary/Secondary Circuit",
+      "concept": "IgnitionCoilCircuit",
+      "sae": true
+    },
+    "P0354": {
+      "description": "Ignition Coil 4 Primary/Secondary Circuit",
+      "concept": "IgnitionCoilCircuit",
+      "sae": true
+    },
+    "P0355": {
+      "description": "Ignition Coil 5 Primary/Secondary Circuit",
+      "concept": "IgnitionCoilCircuit",
+      "sae": true
+    },
+    "P0356": {
+      "description": "Ignition Coil 6 Primary/Secondary Circuit",
+      "concept": "IgnitionCoilCircuit",
+      "sae": true
+    },
+    "P0357": {
+      "description": "Ignition Coil 7 Primary/Secondary Circuit",
+      "concept": "IgnitionCoilCircuit",
+      "sae": true
+    },
+    "P0358": {
+      "description": "Ignition Coil 8 Primary/Secondary Circuit",
+      "concept": "IgnitionCoilCircuit",
+      "sae": true
+    },
+    "P0201": {
+      "description": "Injector Circuit / Open - Cylinder 1",
+      "concept": "InjectorCircuitCode",
+      "sae": true
+    },
+    "P0202": {
+      "description": "Injector Circuit / Open - Cylinder 2",
+      "concept": "InjectorCircuitCode",
+      "sae": true
+    },
+    "P0203": {
+      "description": "Injector Circuit / Open - Cylinder 3",
+      "concept": "InjectorCircuitCode",
+      "sae": true
+    },
+    "P0204": {
+      "description": "Injector Circuit / Open - Cylinder 4",
+      "concept": "InjectorCircuitCode",
+      "sae": true
+    },
+    "P0205": {
+      "description": "Injector Circuit / Open - Cylinder 5",
+      "concept": "InjectorCircuitCode",
+      "sae": true
+    },
+    "P0206": {
+      "description": "Injector Circuit / Open - Cylinder 6",
+      "concept": "InjectorCircuitCode",
+      "sae": true
+    },
+    "P0207": {
+      "description": "Injector Circuit / Open - Cylinder 7",
+      "concept": "InjectorCircuitCode",
+      "sae": true
+    },
+    "P0208": {
+      "description": "Injector Circuit / Open - Cylinder 8",
+      "concept": "InjectorCircuitCode",
+      "sae": true
+    },
+    "P0105": {
+      "description": "Manifold Absolute Pressure/Barometric Pressure Circuit",
+      "concept": "MapSensorCode",
+      "sae": true
+    },
+    "P0106": {
+      "description": "Manifold Absolute Pressure/Barometric Pressure Circuit Range/Performance",
+      "concept": "MapSensorCode",
+      "sae": true
+    },
+    "P0107": {
+      "description": "Manifold Absolute Pressure/Barometric Pressure Circuit Low",
+      "concept": "MapSensorCode",
+      "sae": true
+    },
+    "P0108": {
+      "description": "Manifold Absolute Pressure/Barometric Pressure Circuit High",
+      "concept": "MapSensorCode",
+      "sae": true
+    },
+    "P0109": {
+      "description": "Manifold Absolute Pressure/Barometric Pressure Circuit Intermittent",
+      "concept": "MapSensorCode",
+      "sae": true
+    },
+    "P0325": {
+      "description": "Knock Sensor 1 Circuit",
+      "concept": "KnockSensorCode",
+      "sae": true
+    },
+    "P0326": {
+      "description": "Knock Sensor 1 Circuit Range/Performance",
+      "concept": "KnockSensorCode",
+      "sae": true
+    },
+    "P0327": {
+      "description": "Knock Sensor 1 Circuit Low",
+      "concept": "KnockSensorCode",
+      "sae": true
+    },
+    "P0328": {
+      "description": "Knock Sensor 1 Circuit High",
+      "concept": "KnockSensorCode",
+      "sae": true
+    },
+    "P0330": {
+      "description": "Knock Sensor 2 Circuit",
+      "concept": "KnockSensorCode",
+      "sae": true
+    },
+    "P0331": {
+      "description": "Knock Sensor 2 Circuit Range/Performance",
+      "concept": "KnockSensorCode",
+      "sae": true
+    },
+    "P0332": {
+      "description": "Knock Sensor 2 Circuit Low",
+      "concept": "KnockSensorCode",
+      "sae": true
+    },
+    "P0333": {
+      "description": "Knock Sensor 2 Circuit High",
+      "concept": "KnockSensorCode",
+      "sae": true
+    },
+    "P0120": {
+      "description": "Throttle/Pedal Position Sensor/Switch A Circuit",
+      "concept": "ThrottlePositionCode",
+      "sae": true
+    },
+    "P0121": {
+      "description": "Throttle/Pedal Position Sensor/Switch A Circuit Range/Performance",
+      "concept": "ThrottlePositionCode",
+      "sae": true
+    },
+    "P0122": {
+      "description": "Throttle/Pedal Position Sensor/Switch A Circuit Low",
+      "concept": "ThrottlePositionCode",
+      "sae": true
+    },
+    "P0123": {
+      "description": "Throttle/Pedal Position Sensor/Switch A Circuit High",
+      "concept": "ThrottlePositionCode",
+      "sae": true
+    },
+    "P0124": {
+      "description": "Throttle/Pedal Position Sensor/Switch A Circuit Intermittent",
+      "concept": "ThrottlePositionCode",
+      "sae": true
+    },
+    "P0220": {
+      "description": "Throttle/Pedal Position Sensor/Switch B Circuit",
+      "concept": "ThrottlePositionCode",
+      "sae": true
+    },
+    "P0221": {
+      "description": "Throttle/Pedal Position Sensor/Switch B Circuit Range/Performance",
+      "concept": "ThrottlePositionCode",
+      "sae": true
+    },
+    "P0222": {
+      "description": "Throttle/Pedal Position Sensor/Switch B Circuit Low",
+      "concept": "ThrottlePositionCode",
+      "sae": true
+    },
+    "P0223": {
+      "description": "Throttle/Pedal Position Sensor/Switch B Circuit High",
+      "concept": "ThrottlePositionCode",
       "sae": true
     }
   }

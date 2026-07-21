@@ -14,9 +14,9 @@ import type {
   Recommendation,
   VehicleProfile,
 } from "@auto/semantic-types";
-import { DISCOVERY_HISTORY_LIMIT } from "./index.ts";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import type { Store } from "./index.ts";
+import { DISCOVERY_HISTORY_LIMIT } from "./index.ts";
 
 const vehicle: VehicleProfile = {
   id: "veh:test-jeep",

@@ -11,10 +11,7 @@ import type {
   Recommendation,
   VehicleProfile,
 } from "@auto/semantic-types";
-import {
-  GARAGE_DUMP_FORMAT,
-  GARAGE_DUMP_VERSION,
-} from "@auto/semantic-types";
+import { GARAGE_DUMP_FORMAT, GARAGE_DUMP_VERSION } from "@auto/semantic-types";
 import { toCsv } from "../lib/csv.ts";
 import type { Store } from "../store/index.ts";
 import type { CaseTimelineService } from "./case-timeline.ts";

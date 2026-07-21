@@ -1,7 +1,10 @@
 import type { CandidateAction } from "@auto/semantic-types";
 import type { Cartridge, FramingResult, VehicleView } from "./types.ts";
 
-/** SAE-generic cam/crank correlation cartridge: P0016-P0018 family (timing-chain-adjacent). */
+/**
+ * SAE-generic cam/crank cartridge: correlation (P0016–P0019), CKP/CMP circuit
+ * (P0335–P0349), and failed Mode 06 VVT monitors ($35/$36).
+ */
 
 function playbook(): CandidateAction[] {
   return [
@@ -60,9 +63,10 @@ function draft(vehicle: VehicleView): FramingResult {
   return {
     label: `${vehicle.label}: cam/crank correlation fault`,
     statement: {
-      currentState: "a camshaft-crankshaft correlation DTC is active",
-      desiredState: "cam/crank correlation within spec and DTC cleared",
-      gap: "not yet known whether this is a sensor/wiring fault or a real timing-chain mechanical fault",
+      currentState:
+        "a cam/crank correlation, CKP/CMP circuit, or failed VVT monitor indication is active",
+      desiredState: "cam/crank correlation within spec and related DTCs cleared",
+      gap: "not yet known whether this is a sensor/wiring fault, VVT actuator issue, or a real timing-chain mechanical fault",
       whyItMatters:
         "a real timing fault risks catastrophic engine damage if driven; a sensor fault is comparatively cheap",
       urgency: "high",
@@ -70,7 +74,7 @@ function draft(vehicle: VehicleView): FramingResult {
     gapType: "causal",
     desiredState: {
       successCriteria:
-        "cam/crank correlation DTC does not return and timing is confirmed within spec",
+        "cam/crank correlation / sensor DTCs do not return and timing is confirmed within spec",
       measurement: "verify timing marks directly and rescan after the repair and a drive cycle",
     },
     actions: playbook(),
@@ -86,10 +90,28 @@ export const camCrankCorrelationCartridge: Cartridge = {
       as: "symptom",
       slot: "cam-crank-correlation",
     },
+    {
+      dtcConcept: "CamCrankSensorCircuit",
+      concept: "CamCrankSensorCircuit",
+      as: "symptom",
+      slot: "cam-crank-sensor",
+    },
+    {
+      mode06Concept: "FailedVvtMonitor",
+      concept: "FailedVvtMonitor",
+      as: "condition",
+      slot: "mode06-vvt",
+    },
   ],
   framing: [{ whenClass: "CamCrankCorrelationFault", priority: 95, build: draft }],
   requires: {
-    classes: ["CamCrankCorrelation", "CamCrankCorrelationFault"],
-    dtcConcepts: ["CamCrankCorrelation"],
+    classes: [
+      "CamCrankCorrelation",
+      "CamCrankSensorCircuit",
+      "FailedVvtMonitor",
+      "CamCrankCorrelationFault",
+    ],
+    dtcConcepts: ["CamCrankCorrelation", "CamCrankSensorCircuit"],
+    mode06Concepts: ["FailedVvtMonitor"],
   },
 };

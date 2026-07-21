@@ -15,6 +15,17 @@ export type Role = "owner" | "technician" | "viewer" | "automation_agent" | "adm
 // --- Vehicle profiles (the multi-vehicle axis) ----------------------------
 
 /**
+ * Operator-asserted mechanical / chassis condition (F8). Never inferred from
+ * OBD alone — used only as cascade-edge antecedents (`manualCondition`).
+ */
+export interface ManualCondition {
+  /** Catalog id, e.g. `BrakePadThin`. */
+  id: string;
+  notedAt: IsoTimestamp;
+  note?: string;
+}
+
+/**
  * One row per vehicle you own. `engineFamily` selects which cartridges
  * (packages/cartridges) get loaded when recognizing this vehicle — see
  * packages/ontology/vehicle-profiles.json.
@@ -30,6 +41,8 @@ export interface VehicleProfile {
   obdProtocol?: string | null;
   odometerMiles?: number;
   notes?: string;
+  /** Operator-entered wear / condition stages for cascade prognosis (F8). */
+  manualConditions?: ManualCondition[];
 }
 
 /** A manufacturer/engine grouping that determines which cartridges apply. */
@@ -524,6 +537,11 @@ export interface Recommendation {
   priority: "low" | "normal" | "high" | "critical";
   status: RecommendationStatus;
   reason: string;
+  /**
+   * Operator-facing calibration note when outcomes moved priority/confidence
+   * (F5). Shown as a chip — not a probability claim.
+   */
+  calibrationExplain?: string;
   confidence?: number;
   /** Rough playbook cost 0–1 from the top suggested action (R2). */
   cost?: number;
@@ -688,4 +706,57 @@ export interface KnownCampaign {
   yearRange: [number, number];
   summary: string;
   reference?: string; // TSB/NHTSA doc id
+}
+
+// --- Cascade prognosis (F6/F7) ----------------------------------------------
+
+/** Ordinal shop prior — never presented as a calibrated probability. */
+export type CascadeBand = "Watch" | "Elevated" | "High";
+
+export type CascadeAntecedentKind =
+  | "provenClass"
+  | "trend"
+  | "openProblemClass"
+  | "manualCondition";
+
+export interface CascadeAntecedentRef {
+  kind: CascadeAntecedentKind;
+  id: string;
+}
+
+export interface CascadeConsequentRef {
+  kind: "watchClass";
+  id: string;
+}
+
+/** Curated antecedent → consequent edge (ontology catalog). */
+export interface CascadeEdge {
+  id: string;
+  antecedent: CascadeAntecedentRef;
+  consequent: CascadeConsequentRef;
+  band: CascadeBand;
+  rationale: string;
+  horizon?: string;
+  /** Null/omit = all families; otherwise only those engineFamily ids. */
+  engineFamilies?: string[] | null;
+}
+
+export interface CascadeWatchItem {
+  edgeId: string;
+  band: CascadeBand;
+  consequentClass: string;
+  rationale: string;
+  horizon?: string;
+  matchedAntecedent: CascadeAntecedentRef;
+  /** Why this edge fired for this vehicle right now. */
+  evidence: string[];
+}
+
+/** On-command propose-only watchlist — does not invent realize membership. */
+export interface CascadePrognosis {
+  vehicleId: SemanticId;
+  generatedAt: IsoTimestamp;
+  items: CascadeWatchItem[];
+  /** Honest empty-state note when nothing matched. */
+  emptyReason?: string;
 }

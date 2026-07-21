@@ -5,7 +5,9 @@ import type { ReactNode } from "react";
  * Mirrors the API print converter’s subset (headings, lists, tables, code).
  */
 export function MarkdownBody({ markdown }: { markdown: string }) {
-  return <div className="space-y-2 text-sm leading-relaxed text-slate-700">{renderBlocks(markdown)}</div>;
+  return (
+    <div className="space-y-2 text-sm leading-relaxed text-slate-700">{renderBlocks(markdown)}</div>
+  );
 }
 
 function renderBlocks(markdown: string): ReactNode[] {
@@ -76,18 +78,18 @@ function renderBlocks(markdown: string): ReactNode[] {
     }
 
     if (line.startsWith("- ") || /^\d+\.\s+/.test(line)) {
-      const items: { ordered: boolean; text: string }[] = [];
+      const items: { id: string; ordered: boolean; text: string }[] = [];
       const ordered = /^\d+\.\s+/.test(line);
       while (i < lines.length) {
         const l = lines[i] ?? "";
         if (ordered && /^\d+\.\s+/.test(l)) {
-          items.push({ ordered: true, text: l.replace(/^\d+\.\s+/, "") });
+          items.push({ id: `L${i}`, ordered: true, text: l.replace(/^\d+\.\s+/, "") });
           i += 1;
         } else if (!ordered && l.startsWith("- ")) {
-          items.push({ ordered: false, text: l.slice(2) });
+          items.push({ id: `L${i}`, ordered: false, text: l.slice(2) });
           i += 1;
         } else if (!ordered && l.startsWith("  - ")) {
-          items.push({ ordered: false, text: l.slice(4) });
+          items.push({ id: `L${i}`, ordered: false, text: l.slice(4) });
           i += 1;
         } else break;
       }
@@ -97,8 +99,8 @@ function renderBlocks(markdown: string): ReactNode[] {
           key={key++}
           className={`my-1 space-y-1 pl-5 ${ordered ? "list-decimal" : "list-disc"}`}
         >
-          {items.map((item, idx) => (
-            <li key={idx}>{inline(item.text)}</li>
+          {items.map((item) => (
+            <li key={item.id}>{inline(item.text)}</li>
           ))}
         </ListTag>,
       );
@@ -154,13 +156,16 @@ function MdTable({ rows }: { rows: string[] }) {
           </tr>
         </thead>
         <tbody>
-          {rest.map((r, idx) => (
-            <tr key={idx} className="border-t border-slate-100">
-              {cells(r).map((c, j) => (
-                <td key={j} className="px-3 py-2 text-slate-700">
-                  {inline(c)}
-                </td>
-              ))}
+          {rest.map((r) => (
+            <tr key={r} className="border-t border-slate-100">
+              {cells(r).map((c, j) => {
+                const col = cells(header)[j] ?? `col-${c}`;
+                return (
+                  <td key={`${col}:${c}`} className="px-3 py-2 text-slate-700">
+                    {inline(c)}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
@@ -174,9 +179,9 @@ function inline(text: string): ReactNode {
   const parts: ReactNode[] = [];
   const re = /(`[^`]+`|\*\*[^*]+\*\*)/g;
   let last = 0;
-  let m: RegExpExecArray | null;
   let k = 0;
-  while ((m = re.exec(text))) {
+  let m = re.exec(text);
+  while (m !== null) {
     if (m.index > last) parts.push(text.slice(last, m.index));
     const token = m[0];
     if (token.startsWith("`")) {
@@ -193,6 +198,7 @@ function inline(text: string): ReactNode {
       );
     }
     last = m.index + token.length;
+    m = re.exec(text);
   }
   if (last < text.length) parts.push(text.slice(last));
   return parts.length === 1 ? parts[0] : parts;

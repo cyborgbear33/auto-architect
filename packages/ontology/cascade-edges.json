@@ -1,0 +1,307 @@
+{
+  "disclaimer": "Curated high-confidence cascade edges (F6/F8). Propose-only watchlist \u2014 never invents proven class membership. Ordinal bands are shop priors, not actuarial probabilities. Engine-family filters gate OEM-specific consequents. manualCondition antecedents require operator-entered stages (never from OBD alone).",
+  "edges": [
+    {
+      "id": "misfire-under-load\u2192catalyst-b1",
+      "antecedent": {
+        "kind": "provenClass",
+        "id": "MisfireUnderLoad"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "CatalystEfficiencyBank1"
+      },
+      "band": "Elevated",
+      "rationale": "Chronic misfire dumps raw fuel into the catalyst and commonly cooks the brick before a P0420 appears.",
+      "horizon": "Often within a few hundred miles of continued misfire under load",
+      "engineFamilies": null
+    },
+    {
+      "id": "lean-bank1\u2192catalyst-b1",
+      "antecedent": {
+        "kind": "provenClass",
+        "id": "LeanFuelBank1"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "CatalystEfficiencyBank1"
+      },
+      "band": "Watch",
+      "rationale": "Sustained lean / high positive trim stresses catalyst light-off and oxygen storage.",
+      "horizon": "Miles to short seasons depending on severity",
+      "engineFamilies": null
+    },
+    {
+      "id": "rising-fuel-trim\u2192lean-bank1",
+      "antecedent": {
+        "kind": "trend",
+        "id": "RisingFuelTrim"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "LeanFuelBank1"
+      },
+      "band": "Watch",
+      "rationale": "A rising LTFT trend is early lean evidence \u2014 watch for a bank-1 lean code and intake/fuel issues.",
+      "horizon": "Next several drive cycles if the trend continues",
+      "engineFamilies": null
+    },
+    {
+      "id": "o2-perf-b1\u2192catalyst-b1",
+      "antecedent": {
+        "kind": "provenClass",
+        "id": "O2PerformanceFaultBank1"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "CatalystEfficiencyBank1"
+      },
+      "band": "Watch",
+      "rationale": "Upstream O2 performance faults corrupt fuel control; catalyst efficiency often follows if ignored.",
+      "horizon": "Variable \u2014 fix the sensor path before chasing the cat",
+      "engineFamilies": null
+    },
+    {
+      "id": "cam-crank\u2192misfire",
+      "antecedent": {
+        "kind": "provenClass",
+        "id": "CamCrankCorrelationFault"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "MisfireUnderLoad"
+      },
+      "band": "Elevated",
+      "rationale": "Timing correlation / CKP-CMP faults commonly present next as misfire under load if the engine keeps running.",
+      "horizon": "Immediate to short-term if driven",
+      "engineFamilies": null
+    },
+    {
+      "id": "oil-decline\u2192multiair-starvation",
+      "antecedent": {
+        "kind": "provenClass",
+        "id": "ChronicOilConsumption"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "MultiAirOilStarvation"
+      },
+      "band": "High",
+      "rationale": "Tigershark MultiAir is oil-actuated \u2014 chronic oil loss is the classic path into oil-starvation actuator damage (TSB family).",
+      "horizon": "Soon if oil level/quality stays neglected",
+      "engineFamilies": [
+        "fca-tigershark-2.4"
+      ]
+    },
+    {
+      "id": "open-misfire-problem\u2192catalyst-b1",
+      "antecedent": {
+        "kind": "openProblemClass",
+        "id": "MisfireUnderLoad"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "CatalystEfficiencyBank1"
+      },
+      "band": "Elevated",
+      "rationale": "An open misfire case that has not been verified closed still implies catalyst risk while the vehicle is driven.",
+      "horizon": "While the case remains open and driven",
+      "engineFamilies": null
+    },
+    {
+      "id": "evap-purge\u2192lean-bank1",
+      "antecedent": {
+        "kind": "provenClass",
+        "id": "EvapPurgeSystemFault"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "LeanFuelBank1"
+      },
+      "band": "Watch",
+      "rationale": "Incorrect / high purge flow dumps vapor into the intake and commonly drives positive fuel trim / lean codes.",
+      "horizon": "Next several drive cycles if purge stays stuck open",
+      "engineFamilies": null
+    },
+    {
+      "id": "pad-thin\u2192rotor-scoring",
+      "antecedent": {
+        "kind": "manualCondition",
+        "id": "BrakePadThin"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "RotorScoringRisk"
+      },
+      "band": "Elevated",
+      "rationale": "Thin pads leave less margin \u2014 continued driving commonly scores rotors before the next pad change.",
+      "horizon": "Soon if driven hard or pads are near minimum",
+      "engineFamilies": null
+    },
+    {
+      "id": "pad-metal\u2192rotor-damage",
+      "antecedent": {
+        "kind": "manualCondition",
+        "id": "BrakePadMetalOnMetal"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "RotorDamageRisk"
+      },
+      "band": "High",
+      "rationale": "Metal-on-metal pad wear machines the rotor face; expect rotor replacement with the pads.",
+      "horizon": "Immediate \u2014 do not keep driving on grinding brakes",
+      "engineFamilies": null
+    },
+    {
+      "id": "rotor-scored\u2192hub-bearing",
+      "antecedent": {
+        "kind": "manualCondition",
+        "id": "RotorScored"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "HubBearingNoiseRisk"
+      },
+      "band": "Watch",
+      "rationale": "Severely scored / heat-damaged rotors and hard stops stress hub assemblies; watch for growl / play next.",
+      "horizon": "Next seasons if vibration and heat keep cycling the hub",
+      "engineFamilies": null
+    },
+    {
+      "id": "fluid-dark\u2192brake-hydraulics",
+      "antecedent": {
+        "kind": "manualCondition",
+        "id": "BrakeFluidDark"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "BrakeHydraulicsCorrosionRisk"
+      },
+      "band": "Elevated",
+      "rationale": "Dark / overdue fluid usually means moisture \u2014 seals and ABS hardware corrode next if ignored.",
+      "horizon": "Seasons if fluid stays neglected",
+      "engineFamilies": null
+    },
+    {
+      "id": "caliper-seized\u2192pad-taper",
+      "antecedent": {
+        "kind": "manualCondition",
+        "id": "BrakeCaliperSeized"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "PadTaperWearRisk"
+      },
+      "band": "Elevated",
+      "rationale": "A sticking caliper forces tapered pad wear on that corner and often the opposite side.",
+      "horizon": "Immediate to short-term while driven",
+      "engineFamilies": null
+    },
+    {
+      "id": "caliper-seized\u2192rotor-heat",
+      "antecedent": {
+        "kind": "manualCondition",
+        "id": "BrakeCaliperSeized"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "RotorHeatSpotRisk"
+      },
+      "band": "High",
+      "rationale": "A seized caliper drags and heat-spots the rotor \u2014 replace or machine with the caliper repair.",
+      "horizon": "Immediate if the wheel is running hot",
+      "engineFamilies": null
+    },
+    {
+      "id": "hub-growl\u2192hub-failure",
+      "antecedent": {
+        "kind": "manualCondition",
+        "id": "HubBearingGrowl"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "WheelHubFailureRisk"
+      },
+      "band": "High",
+      "rationale": "Load-sensitive hub growl commonly progresses to play, ABS tone-ring damage, or hub seizure.",
+      "horizon": "Soon \u2014 do not ignore a growing growl",
+      "engineFamilies": null
+    },
+    {
+      "id": "cv-click\u2192joint-failure",
+      "antecedent": {
+        "kind": "manualCondition",
+        "id": "CvAxleClickOnTurn"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "CvJointFailureRisk"
+      },
+      "band": "Elevated",
+      "rationale": "Outer CV click on lock-steer usually means a torn boot / dry joint heading for axle replacement.",
+      "horizon": "Miles to short seasons depending on severity",
+      "engineFamilies": null
+    },
+    {
+      "id": "belt-cracked\u2192accessory-loss",
+      "antecedent": {
+        "kind": "manualCondition",
+        "id": "SerpentineBeltCracked"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "AccessoryDriveLossRisk"
+      },
+      "band": "Elevated",
+      "rationale": "A cracked belt can shed ribs and strand the alternator / water pump / power steering without warning.",
+      "horizon": "Soon if cracks are deep or chunks missing",
+      "engineFamilies": null
+    },
+    {
+      "id": "hose-soft\u2192coolant-leak",
+      "antecedent": {
+        "kind": "manualCondition",
+        "id": "CoolantHoseSoftOrSwollen"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "CoolantLeakRisk"
+      },
+      "band": "Watch",
+      "rationale": "Soft/swollen hoses commonly split at the end of a heat cycle \u2014 watch for coolant smell and level loss.",
+      "horizon": "Next seasons or next hard heat soak",
+      "engineFamilies": null
+    },
+    {
+      "id": "ignition-coil\u2192misfire",
+      "antecedent": {
+        "kind": "provenClass",
+        "id": "IgnitionCoilCircuitFault"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "MisfireUnderLoad"
+      },
+      "band": "Elevated",
+      "rationale": "Coil circuit faults commonly present next as cylinder misfire under load if driven.",
+      "horizon": "Immediate to short-term if driven",
+      "engineFamilies": null
+    },
+    {
+      "id": "injector-circuit\u2192misfire",
+      "antecedent": {
+        "kind": "provenClass",
+        "id": "InjectorCircuitFault"
+      },
+      "consequent": {
+        "kind": "watchClass",
+        "id": "MisfireUnderLoad"
+      },
+      "band": "Elevated",
+      "rationale": "An open/shorted injector circuit commonly cascades into a hard misfire on that cylinder.",
+      "horizon": "Immediate if the circuit stays open",
+      "engineFamilies": null
+    }
+  ]
+}

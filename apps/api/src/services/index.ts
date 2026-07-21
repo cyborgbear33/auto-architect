@@ -2,6 +2,7 @@ import type { LogosBridge } from "@auto/logos-bridge";
 import type { Store } from "../store/index.ts";
 import { ActionService } from "./actions.ts";
 import { CampaignService } from "./campaigns.ts";
+import { CascadePrognosisService } from "./cascade-prognosis.ts";
 import { CaseTimelineService } from "./case-timeline.ts";
 import { DiscoveryService } from "./discovery.ts";
 import { DriveSessionService } from "./drive-sessions.ts";
@@ -38,6 +39,7 @@ export interface Services {
   caseTimeline: CaseTimelineService;
   garageExport: GarageExportService;
   reports: ReportService;
+  cascadePrognosis: CascadePrognosisService;
 }
 
 export function createServices(store: Store, bridge: LogosBridge): Services {
@@ -73,6 +75,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     campaigns,
     driveSessions,
   );
+  const cascadePrognosis = new CascadePrognosisService(store, vehicles, recognition, forecast);
 
   return {
     store,
@@ -94,12 +97,14 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     caseTimeline,
     garageExport,
     reports,
+    cascadePrognosis,
   };
 }
 
 export {
   ActionService,
   CampaignService,
+  CascadePrognosisService,
   CaseTimelineService,
   DiscoveryService,
   DriveSessionService,

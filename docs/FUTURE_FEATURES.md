@@ -44,14 +44,14 @@ multi-piece plans live in the next section.
 | Goal | Status | What exists today | Done when | Closing backlog |
 |---|---|---|---|---|
 | **Scanning** — ingest OBD evidence | **partial** | Simulate/API ingest; live gauge strip + FF/Mode06 UI; source labels | Live MX+ path proven; drive sessions; retention policy | Live MX+ dry-run; Drive sessions; Durable observation history |
-| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration + evidence; Mode 06 + O2 performance; growing SAE seed | Full J1979/J2012 catalog | SAE PID/DTC KB expansion |
-| **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration on draft/solve + refresh | Family priors polish; counterfactuals UI | Counterfactuals UI; optional LLM advise |
-| **Informing the user** — clear operator surfaces | **partial** | Source badges, narration, FF/Mode06 panels, report export | Live gauges; shared UI package | Live gauges; `@auto/ui-components` |
+| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration + evidence; ~134 P0xxx circuit/emission seed | Full J1979/J2012 catalog | rarer P0xxx / OEM P1xxx |
+| **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration; counterfactuals + disqualified UI | Family priors polish; optional LLM advise | optional LLM advise |
+| **Informing the user** — clear operator surfaces | **partial** | Source badges, narration, FF/Mode06, calibration explain chips | Shared UI package | `@auto/ui-components` |
 | **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert | Deeper campaign→repair playbooks | RecommendationService |
 | **Problem tracking** — open cases through solve | **shipped** | Caseboard filters; abandon/escalate/reopen; `worked` → verifying → verify check | — | — |
-| **Problem history** — cases over time | **partial** | Case timeline (problems + decisions); Journal is decision audit | Mileage/session on events; evidence deep-links | Drive sessions; Durable observation history; H3–H5 |
+| **Problem history** — cases over time | **partial** | Case timeline + filters + evidence/session deep-links | Stronger batch-level evidence anchors | Durable observation history |
 | **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel; verify-before-solved (`worked` → verifying) | Stronger family priors / sample-size UX | Multi-signal trends |
-| **History → better future decisions** | **partial** | Multi-signal trends + outcome calibration into draft/solve/refresh | Cascade prognosis (curated next-failure watchlist) + session-aware explainability | F5–F8; cascade prognosis backlog |
+| **History → better future decisions** | **partial** | Trends + calibration + explainability + cascade watchlist (F6–F8) | Stronger family priors / sample-size UX | optional LLM advise |
 | **Reporting** — shareable diagnostic note | **partial** | Markdown + garage JSON/CSV export/import | Print/PDF polish | Print-friendly HTML/PDF |
 
 **Spine that already works:** ingest → realize → draft/solve → recommend → policy hold → log-repair → verify → Journal.  
@@ -101,7 +101,7 @@ into the Journal forever.
 | S4 | DriveSession object (start/stop; batches linked by `sessionId`) | done | `DriveSessionService`; simulate path; Dashboard panel |
 | S5 | Retention policy (keep FF/Mode06 forever; downsample high-rate PIDs) | done | `applyRetention` / prune; keep evidence; hourly PID downsample |
 | S6 | Bluetooth / preferred-adapter discovery | todo | Friction reduction after S1 works manually |
-| S7 | SAE PID/DTC dictionary depth for scan interpretation | partial | Gateway Mode 01 metadata closed + P0456/P0316; still not full J1979 |
+| S7 | SAE PID/DTC dictionary depth for scan interpretation | partial | ~134 P0xxx + coil/MAP/knock/injector/TPS; still not full J1979 |
 
 **Seams:** `apps/obd-gateway`, `ObservationsService`, store batches, Dashboard.  
 **Anti-patterns:** Classifying faults in the gateway; silent simulate-vs-live;
@@ -126,7 +126,7 @@ Expand dictionaries and ontology views so perception has more lawful fuel.
 | A1 | Evidence panel per `mostSpecific` class | done | `Recognition.classEvidence` + `ClassEvidencePanel` (no Mode 06 in v1) |
 | A2 | Wire `verbalize` into Recognition API + Diagnosis UI | done | `Recognition.narration` + ontology-note fallback |
 | A3 | Mode 06 as recognition input where ontology allows | done | Thin SAE/ISO OBDMID seed → perception → realize; unknown MIDs unlabeled |
-| A4 | Broader curated DTC/PID KB + ontology lint parity | partial | EGR/AIR/downstream O2 + EGR PIDs; still not full J2012 |
+| A4 | Broader curated DTC/PID KB + ontology lint parity | partial | + coil/injector/MAP/knock/TPS circuit families; still not full J2012 |
 | A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | SAE set shared; GM stub inert until real truck |
 
 **Seams:** cartridges, `RecognitionService`, logos-bridge `realize`/`verbalize`,
@@ -154,7 +154,7 @@ inputs → re-rank. Keep policy defeasible and fail-closed. Optional LLM may
 | # | Work piece | Status | Notes |
 |---|---|---|---|
 | D1 | Draft/solve + policy holds (MVP path) | done | ActionService + PolicyService |
-| D2 | Surface counterfactuals / disqualified actions in UI | partial | Types exist; UI thin |
+| D2 | Surface counterfactuals / disqualified actions in UI | done | `Explainability.tsx` on ProblemDetail; FakeLogosBridge emits thin CFs |
 | D3 | Outcome → playbook confidence / action priors | done | `calibration.ts` → draft/solve/refresh |
 | D4 | Family-level priors (same engineFamily) with small-sample caution | done | Family buckets + higher `k` |
 | D5 | Optional propose-only LLM advise pass (draft candidates) | todo | Never skip realize/reason/solve |
@@ -263,8 +263,8 @@ are the evidence spine under each event.
 | H1 | Durable problem + decision persistence | done | Postgres store |
 | H2 | Case timeline UI (events from problem + decisions) | done | Durable `lifecycleEvents` + decisions; Diagnosis + ProblemDetail |
 | H3 | Attach odometer / session to case events | done | Stamped on lifecycle + DecisionRecord; CaseTimelinePanel shows mi / session |
-| H4 | Filter history by class, status, date, mileage | todo | Caseboard overlap |
-| H5 | Deep link timeline event → evidence batch / freeze-frame | todo | |
+| H4 | Filter history by class, status, date, mileage | done | `CaseTimelinePanel` client filters |
+| H5 | Deep link timeline event → evidence batch / freeze-frame | done | Evidence + `#session:…` → DriveSessionsPanel highlight |
 
 **Seams:** problems, decisions, DriveSession, ObservationsService, Diagnosis.  
 **Anti-patterns:** Journal-as-only-history; losing evidence when a problem is
@@ -333,10 +333,10 @@ never invent pad/rotor/bearing state from Mode 01 alone.
 | F2 | Outcome → confidence calibration into refresh + solve priors | done | `calibratePlaybook` |
 | F3 | Multi-signal trends (fuel trim, coolant, load-at-misfire) | done | RisingFuelTrim / RecurringHighLoad → realize; coolant informing-only |
 | F4 | Session-aware trends (per drive, not only global series) | done | `GET .../forecast?sessionId=`; Dashboard drive-scope picker; recognition stays global |
-| F5 | Explainability chip: “priority raised because …” | todo | Informing overlap |
-| F6 | Cascade edge catalog (OBD fault-class → next-risk) in ontology/cartridges | todo | Curated high-confidence common chains only; no ML black box |
-| F7 | On-command CascadePrognosisService + UI (ordinal bands + evidence + horizons) | todo | Inputs: proven classes, open problems, Trends; propose-only vs realize |
-| F8 | Optional mechanical wear layer (operator-entered stages) on same edge schema | todo | Pads/rotors/bearings etc.; never inferred from OBD alone |
+| F5 | Explainability chip: “priority raised because …” | done | `Recommendation.calibrationExplain` + `CalibrationExplainChip` |
+| F6 | Cascade edge catalog (OBD fault-class → next-risk) in ontology/cartridges | done | `cascade-edges.json` + `listCascadeEdges` |
+| F7 | On-command CascadePrognosisService + UI (ordinal bands + evidence + horizons) | done | API + Diagnosis `CascadePrognosisPanel` |
+| F8 | Optional mechanical wear layer (operator-entered stages) on same edge schema | done | 9 conditions (brakes/hub/CV/belt/hose) + cascade edges; Diagnosis checkboxes |
 
 **Seams:** ForecastService, recognition, RecommendationsService, SolverService,
 solution rollups; future `CascadePrognosisService` + ontology cascade edges.  
@@ -390,16 +390,16 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Case timeline (problems + decisions) | H2 | done | medium | Case narrative on Diagnosis / ProblemDetail; Journal stays audit. | `CaseTimelineService` |
 | Recommendation card richness + status lifecycle UI | R2, R3 | done | medium | Cost/risk on cards; accept/dismiss/convert via ActionService. | `RecommendationPanel`, RecommendationService |
 | Multi-signal trend expansion (beyond oil) | F3 | done | medium | LTFT + load → realize; coolant UI-only. | ForecastService, recognition |
-| Cascade prognosis (likely next failures) | F6–F8 | planned | medium (after research) | On-command watchlist of high-confidence cascades from proven/open problems; ordinal bands not fake %. See design note below. | ontology cascade edges, recognition, ForecastService Trends, Diagnosis UI |
+| Cascade prognosis (likely next failures) | F6–F8 | done (thin) | — | On-command watchlist + operator wear stages; ordinal bands. Expand catalog as shop priors harden. | ontology cascade edges, recognition, ForecastService Trends, Diagnosis UI |
 | Print/PDF diagnostic report polish | G3, G5 | done | medium | Print HTML + last-session summary on reports. | `ReportService`, `ReportDownload` |
-| Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | partial | high | Gateway Mode 01 metadata closed; full J1979/J2012 still open. | dictionaries, ontology lint, `test_pid_seed.py` |
+| Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | partial | medium | ~134 curated P0xxx + circuit cartridges; full J2012 still open for rarer codes. | dictionaries, ontology lint, `test_pid_seed.py` |
 | Shared `@auto/ui-components` | I5 | planned | medium | Consistent trust/evidence UI. | `UX_GUIDELINES` |
 
 ### Platform / coverage (support goals, not a goal themselves)
 
 | Feature | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|
-| Expand DTC dictionary beyond Tigershark seed set | partial | medium | Rich/catalyst/O2 circuit+performance+heater + P0457; more P0xxx still open. | `dtc-dictionary.json`, ontology lint |
+| Expand DTC dictionary beyond Tigershark seed set | partial | medium | + coil/injector/MAP/knock/TPS; rarer P0xxx / OEM P1xxx still open. | `dtc-dictionary.json`, ontology lint |
 | Fill GM Vortec 6.0 / Silverado 2500 HD OEM cartridge | planned | high when truck scans available | Profile is 2003 2500 HD gas 6.0L; stub inert until curated GM TSBs. | `gm-vortec-6.0-stub.ts`, vehicle profiles |
 | In-app Proxi / enhanced BCM session over MX+ | planned | low until explicit UDS project | Guided Functions v1 is external AlfaOBD; do not clone AlfaOBD. | future edge path, not Mode 01–07 |
 | Bluetooth auto-discovery / MX+ preferred adapter profile | planned | medium | Less friction for scanning. | `obd_gateway/config.py`, `client.py` |
@@ -525,6 +525,15 @@ actually maintain.
 | Functions panel + FCA Proxi guided procedure | 2026-07 | `special-procedures.json`; `/functions`; start/complete actions; external AlfaOBD |
 | OBD capability discovery (vehicle intelligence report) | 2026-07 | gateway `discover`; API enrich; UI `/discovery`; Jeep gray-adapter hardware context |
 | Vehicle & OBD mastery Guide (personalized + Print/PDF) | 2026-07 | `VEHICLE_OBD_MASTERY_GUIDE.md`; `MasteryGuideService`; UI `/guide` |
+| Counterfactuals + disqualified UI + calibration explain chips (D2/F5) | 2026-07 | `Explainability.tsx`, `Recommendation.calibrationExplain`, FakeLogosBridge CFs |
+| Cam/crank sensor + VVT Mode 06 SAE seed (A4/S7 slice) | 2026-07 | P0335–P0349, Mode 06 $35/$36, widened `CamCrankCorrelationFault` |
+| Case timeline filters + evidence/session deep-links (H4/H5) | 2026-07 | `CaseTimelinePanel` filters; `/#evidence`, `/#session:…` |
+| Cascade prognosis edge catalog + on-command watchlist (F6/F7) | 2026-07 | `cascade-edges.json`, `CascadePrognosisService`, Diagnosis panel |
+| Mechanical wear layer on cascade edges (F8) | 2026-07 | `manual-conditions.json`, `PUT .../manual-conditions`, Diagnosis checkboxes |
+| Offline OBD log import (`obdlog-v1` + ELM327 text + JSON batches) | 2026-07 | `POST .../observations/import-log`, Journal DataExportPanel |
+| Coolant thermostat / ECT SAE KB (P0128 family) | 2026-07 | `coolant-thermostat` cartridge, `CoolantThermostatFault` / `EctSensorCircuitFault` |
+| F8 wear catalog deepen (hub/CV/belt/hose/caliper/fluid) | 2026-07 | `manual-conditions.json` + cascade edges |
+| Circuit DTC catalog (coil/injector/MAP/knock/TPS) | 2026-07 | 5 cartridges; P035x/P020x/P0105–09/P0325–33/P0120–24/P0220–23 |
 
 ---
 

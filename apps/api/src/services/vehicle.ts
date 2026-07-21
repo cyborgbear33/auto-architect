@@ -1,9 +1,14 @@
 import { allCartridges, type Cartridge, resolveCartridgesForEngineFamily } from "@auto/cartridges";
-import { getEngineFamily, getEngineFamilyView, listEngineFamilies } from "@auto/ontology";
-import type { EngineFamily, VehicleProfile } from "@auto/semantic-types";
-import type { CreateVehicleInput } from "@auto/validation";
+import {
+  getEngineFamily,
+  getEngineFamilyView,
+  getManualCondition,
+  listEngineFamilies,
+} from "@auto/ontology";
+import type { EngineFamily, ManualCondition, VehicleProfile } from "@auto/semantic-types";
+import type { CreateVehicleInput, SetManualConditionsInput } from "@auto/validation";
 import { notFound, validationError } from "../lib/errors.ts";
-import { newId } from "../lib/ids.ts";
+import { newId, nowIso } from "../lib/ids.ts";
 import type { Store } from "../store/index.ts";
 
 /**
@@ -32,6 +37,32 @@ export class VehicleService {
 
   async update(id: string, patch: Partial<VehicleProfile>): Promise<VehicleProfile> {
     return this.store.vehicles.update(id, patch);
+  }
+
+  /**
+   * Replace operator-entered mechanical conditions (F8). Unknown catalog ids
+   * are rejected — OBD never invents these stages.
+   */
+  async setManualConditions(id: string, input: SetManualConditionsInput): Promise<VehicleProfile> {
+    await this.getOrThrow(id);
+    const notedAt = nowIso();
+    const seen = new Set<string>();
+    const manualConditions: ManualCondition[] = [];
+    for (const row of input.conditions) {
+      if (seen.has(row.id)) continue;
+      seen.add(row.id);
+      if (!getManualCondition(row.id)) {
+        throw validationError(
+          `Unknown manual condition "${row.id}". Use ids from GET /api/manual-conditions.`,
+        );
+      }
+      manualConditions.push({
+        id: row.id,
+        notedAt,
+        ...(row.note ? { note: row.note } : {}),
+      });
+    }
+    return this.store.vehicles.update(id, { manualConditions });
   }
 
   async create(input: CreateVehicleInput): Promise<VehicleProfile> {

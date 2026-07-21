@@ -80,10 +80,7 @@ export class MasteryGuideService {
 
     let markdown = readFileSync(TEMPLATE_PATH, "utf8");
     // Drop the repo-only preamble tip that duplicates in-app chrome (keep curriculum).
-    markdown = markdown.replace(
-      /> \*\*In-app:\*\*[^\n]+\n> [^\n]+\n> [^\n]+\n\n---\n\n/,
-      "",
-    );
+    markdown = markdown.replace(/> \*\*In-app:\*\*[^\n]+\n> [^\n]+\n> [^\n]+\n\n---\n\n/, "");
     for (const [token, value] of Object.entries(tokens)) {
       markdown = markdown.split(token).join(value);
     }
@@ -139,9 +136,11 @@ export class MasteryGuideService {
         "Jeep: use the gray-type OBD-II adapter between DLC and MX+ for access (and Proxi when prompted).",
       );
     }
-    return ["### Hardware for this profile", "", ...lines.map((l) => (l.startsWith("  -") ? l : `- ${l}`))].join(
-      "\n",
-    );
+    return [
+      "### Hardware for this profile",
+      "",
+      ...lines.map((l) => (l.startsWith("  -") ? l : `- ${l}`)),
+    ].join("\n");
   }
 
   private ontologyBlock(familyLabel: string, familyId: string, cartridges: string[]): string {

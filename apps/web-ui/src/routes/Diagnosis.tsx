@@ -1,7 +1,8 @@
+import type { DiagnosticProblem, ProblemStatus } from "@auto/semantic-types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import type { DiagnosticProblem, ProblemStatus } from "@auto/semantic-types";
 import { useMemo, useState } from "react";
+import { CascadePrognosisPanel } from "../components/CascadePrognosisPanel.tsx";
 import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
 import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
@@ -20,13 +21,7 @@ const STATUS_STYLES: Record<string, string> = {
 
 const ACTIVE: ReadonlySet<ProblemStatus> = new Set(["open", "analyzing", "verifying"]);
 
-type CaseboardFilter =
-  | "active"
-  | "verifying"
-  | "solved"
-  | "escalated"
-  | "abandoned"
-  | "all";
+type CaseboardFilter = "active" | "verifying" | "solved" | "escalated" | "abandoned" | "all";
 
 function StatusPill({ status }: { status: string }) {
   return (
@@ -151,11 +146,11 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
       </div>
 
       <div className="mb-4">
-        <CaseTimelinePanel
-          vehicleId={vehicleId}
-          limit={8}
-          title="Recent case activity"
-        />
+        <CaseTimelinePanel vehicleId={vehicleId} limit={8} title="Recent case activity" />
+      </div>
+
+      <div className="mb-4">
+        <CascadePrognosisPanel vehicleId={vehicleId} />
       </div>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">
@@ -164,8 +159,8 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         </h2>
         {undraftedClasses.length === 0 ? (
           <p className="text-sm text-slate-400">
-            Nothing new to draft — every proven class already has an active case below (or nothing is
-            proven).
+            Nothing new to draft — every proven class already has an active case below (or nothing
+            is proven).
           </p>
         ) : (
           <ul className="space-y-2">
@@ -223,10 +218,7 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         )}
         <ul className="space-y-2">
           {filteredProblems.map((problem) => (
-            <li
-              key={problem.id}
-              className="rounded-md bg-slate-50 px-3 py-2 text-sm"
-            >
+            <li key={problem.id} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <Link
                   to="/problems/$problemId"

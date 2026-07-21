@@ -152,6 +152,17 @@ export const CreateVehicleSchema = z.object({
 });
 export type CreateVehicleInput = z.infer<typeof CreateVehicleSchema>;
 
+/** Replace the vehicle's operator-entered wear / condition stages (F8). */
+export const SetManualConditionsSchema = z.object({
+  conditions: z.array(
+    z.object({
+      id: z.string().min(1),
+      note: z.string().optional(),
+    }),
+  ),
+});
+export type SetManualConditionsInput = z.infer<typeof SetManualConditionsSchema>;
+
 export const RecommendationStatusSchema = z.enum([
   "new",
   "viewed",

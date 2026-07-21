@@ -1,0 +1,59 @@
+{
+  "disclaimer": "Operator-entered mechanical / chassis conditions (F8). Never inferred from Mode 01/03 alone. Ids are cascade-edge antecedent targets (`manualCondition`).",
+  "conditions": [
+    {
+      "id": "BrakePadThin",
+      "label": "Brake pads thin",
+      "system": "brakes",
+      "description": "Pads visibly worn or near minimum thickness on inspection."
+    },
+    {
+      "id": "BrakePadMetalOnMetal",
+      "label": "Pads metal-on-metal",
+      "system": "brakes",
+      "description": "Backing plate contact / grinding — pads consumed."
+    },
+    {
+      "id": "RotorScored",
+      "label": "Rotors scored / grooved",
+      "system": "brakes",
+      "description": "Rotor friction surface scored, grooved, or heat-checked."
+    },
+    {
+      "id": "BrakeFluidDark",
+      "label": "Brake fluid dark / overdue",
+      "system": "brakes",
+      "description": "Fluid looks dark or service interval long overdue — moisture/corrosion risk."
+    },
+    {
+      "id": "BrakeCaliperSeized",
+      "label": "Caliper stuck / seized",
+      "system": "brakes",
+      "description": "Uneven pad wear, hot wheel, or caliper that will not retract freely."
+    },
+    {
+      "id": "HubBearingGrowl",
+      "label": "Hub bearing growl / hum",
+      "system": "chassis",
+      "description": "Growl or hum that changes with cornering load — operator-heard, not from OBD."
+    },
+    {
+      "id": "CvAxleClickOnTurn",
+      "label": "CV axle click on turn",
+      "system": "driveline",
+      "description": "Clicking on lock-steer / sharp turns (classic outer CV joint)."
+    },
+    {
+      "id": "SerpentineBeltCracked",
+      "label": "Serpentine belt cracked",
+      "system": "engine",
+      "description": "Cracks, glazing, missing chunks, or frayed edges on the accessory belt."
+    },
+    {
+      "id": "CoolantHoseSoftOrSwollen",
+      "label": "Coolant hose soft / swollen",
+      "system": "cooling",
+      "description": "Radiator or heater hose soft, swollen, or oil-softened on squeeze."
+    }
+  ]
+}

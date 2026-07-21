@@ -1,15 +1,21 @@
 import { getEngineFamilyCartridges } from "@auto/ontology";
 import { camCrankCorrelationCartridge } from "./cam-crank-correlation.ts";
 import { catalystCartridge } from "./catalyst.ts";
+import { coolantThermostatCartridge } from "./coolant-thermostat.ts";
 import { egrCartridge } from "./egr.ts";
 import { evapCartridge } from "./evap.ts";
 import { fcaTigershark24Cartridge } from "./fca-tigershark-2.4.ts";
 import { gmVortec60StubCartridge } from "./gm-vortec-6.0-stub.ts";
+import { ignitionCoilCartridge } from "./ignition-coil.ts";
+import { injectorCircuitCartridge } from "./injector-circuit.ts";
+import { knockSensorCartridge } from "./knock-sensor.ts";
 import { leanFuelCartridge } from "./lean-fuel.ts";
+import { mapSensorCartridge } from "./map-sensor.ts";
 import { misfireCartridge } from "./misfire.ts";
 import { o2SensorCartridge } from "./o2-sensor.ts";
 import { richFuelCartridge } from "./rich-fuel.ts";
 import { secondaryAirCartridge } from "./secondary-air.ts";
+import { throttlePositionCartridge } from "./throttle-position.ts";
 import type { Cartridge, FramingResult, VehicleView } from "./types.ts";
 
 /** Every cartridge known to the app, keyed by name (packages/ontology/vehicle-profiles.json references these names). */
@@ -22,6 +28,12 @@ export const cartridgeRegistry: Record<string, Cartridge> = {
   [o2SensorCartridge.name]: o2SensorCartridge,
   [egrCartridge.name]: egrCartridge,
   [secondaryAirCartridge.name]: secondaryAirCartridge,
+  [coolantThermostatCartridge.name]: coolantThermostatCartridge,
+  [ignitionCoilCartridge.name]: ignitionCoilCartridge,
+  [injectorCircuitCartridge.name]: injectorCircuitCartridge,
+  [mapSensorCartridge.name]: mapSensorCartridge,
+  [knockSensorCartridge.name]: knockSensorCartridge,
+  [throttlePositionCartridge.name]: throttlePositionCartridge,
   [camCrankCorrelationCartridge.name]: camCrankCorrelationCartridge,
   [fcaTigershark24Cartridge.name]: fcaTigershark24Cartridge,
   [gmVortec60StubCartridge.name]: gmVortec60StubCartridge,

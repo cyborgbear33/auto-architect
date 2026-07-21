@@ -1,10 +1,6 @@
 import type { CandidateAction, SolutionHistory, SolutionRollupBucket } from "@auto/semantic-types";
 import { describe, expect, it } from "vitest";
-import {
-  calibratePlaybook,
-  empiricalSuccessRate,
-  shrinkTowardPrior,
-} from "./calibration.ts";
+import { calibratePlaybook, empiricalSuccessRate, shrinkTowardPrior } from "./calibration.ts";
 
 function bucket(
   overrides: Partial<SolutionRollupBucket> & Pick<SolutionRollupBucket, "actionId" | "faultClass">,
@@ -40,7 +36,9 @@ const actions: CandidateAction[] = [
 describe("calibration math", () => {
   it("computes empirical success with partial as half-credit", () => {
     expect(
-      empiricalSuccessRate(bucket({ actionId: "a", faultClass: "C", worked: 2, partial: 2, failed: 0 })),
+      empiricalSuccessRate(
+        bucket({ actionId: "a", faultClass: "C", worked: 2, partial: 2, failed: 0 }),
+      ),
     ).toEqual({ rate: 0.75, n: 4 });
   });
 

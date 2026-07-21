@@ -161,6 +161,48 @@ function defaultResponder(input: LogosProblemInput): DiagnosticSolution {
   const chosen = ranked.find((r) => r.action.id === recommended)?.action ?? top;
   const confidence = recommended ? (chosen?.confidence ?? null) : null;
 
+  // Thin counterfactuals so UI/tests exercise D2 without a live LOGOS solve.
+  // Not a full UPS sensitivity analysis — just “what would need to move.”
+  const counterfactuals =
+    ranked.length === 0
+      ? undefined
+      : ranked.map((r, i) => {
+          const isTop = r.action.id === recommended || (recommended === null && i === 0);
+          const base = {
+            actionId: r.action.id,
+            score: r.score,
+            isTop,
+            rank: i + 1,
+          };
+          if (isTop) {
+            const conf = r.action.confidence ?? 0.5;
+            return {
+              ...base,
+              robustness: [
+                {
+                  factor: "confidence",
+                  current: conf,
+                  breakEven: Math.max(0, conf - 0.15),
+                  direction: "falls_below" as const,
+                },
+              ],
+            };
+          }
+          const topConf = chosen?.confidence ?? ranked[0]?.action.confidence ?? 0.7;
+          const cur = r.action.confidence ?? 0.4;
+          return {
+            ...base,
+            flips: [
+              {
+                factor: "confidence",
+                current: cur,
+                needed: Math.min(1, topConf + 0.05),
+                direction: "increase" as const,
+              },
+            ],
+          };
+        });
+
   return {
     problemId: input.id,
     types,
@@ -174,6 +216,7 @@ function defaultResponder(input: LogosProblemInput): DiagnosticSolution {
     certainty: confidence !== null ? certaintyLabel(confidence) : "n/a",
     antiPatterns: [],
     escalations,
+    ...(counterfactuals ? { counterfactuals } : {}),
   };
 }
 

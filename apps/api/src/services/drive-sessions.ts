@@ -46,13 +46,18 @@ export class DriveSessionService {
     const sessions = await this.store.sessions.listByVehicle(vehicleId);
     if (sessions.length === 0) return null;
     const ended = sessions
-      .filter((s) => s.endedAt)
+      .map((s, idx) => ({ s, idx }))
+      .filter(({ s }) => s.endedAt)
       .sort((a, b) => {
-        const byEnd = (b.endedAt ?? b.startedAt).localeCompare(a.endedAt ?? a.startedAt);
+        const byEnd = (b.s.endedAt ?? b.s.startedAt).localeCompare(a.s.endedAt ?? a.s.startedAt);
         if (byEnd !== 0) return byEnd;
         // Same-second ends (common in fast simulate tests): prefer later start.
-        return b.startedAt.localeCompare(a.startedAt);
-      });
+        const byStart = b.s.startedAt.localeCompare(a.s.startedAt);
+        if (byStart !== 0) return byStart;
+        // Identical timestamps: prefer the session created later in the store.
+        return b.idx - a.idx;
+      })
+      .map(({ s }) => s);
     const session = ended[0] ?? sessions.find((s) => !s.endedAt) ?? sessions[0];
     if (!session) return null;
     const batches = (await this.store.observations.listBatches(vehicleId)).filter(

@@ -1,9 +1,9 @@
 import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
-import misfireReasonFixture from "../../ontology/fixtures/misfire_reason_fixture.json" with {
+import camcrankReasonFixture from "../../ontology/fixtures/camcrank_reason_fixture.json" with {
   type: "json",
 };
-import camcrankReasonFixture from "../../ontology/fixtures/camcrank_reason_fixture.json" with {
+import misfireReasonFixture from "../../ontology/fixtures/misfire_reason_fixture.json" with {
   type: "json",
 };
 import oilstarvationReasonFixture from "../../ontology/fixtures/oilstarvation_reason_fixture.json" with {

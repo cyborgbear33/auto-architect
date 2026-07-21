@@ -207,8 +207,6 @@ describe("Diagnosis", () => {
 
     fireEvent.click(board().getByRole("button", { name: "Active" }));
     fireEvent.click(await board().findByRole("button", { name: "Abandon" }));
-    await waitFor(() =>
-      expect(api.abandonDiagnosticProblem).toHaveBeenCalledWith("problem:open"),
-    );
+    await waitFor(() => expect(api.abandonDiagnosticProblem).toHaveBeenCalledWith("problem:open"));
   });
 });

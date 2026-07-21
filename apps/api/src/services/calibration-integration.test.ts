@@ -95,6 +95,6 @@ describe("outcome → confidence calibration (integration)", () => {
     const misfire = recs.find((r) => r.generatedFromClasses.includes("MisfireUnderLoad"));
     expect(misfire?.confidence).toBeDefined();
     expect(misfire!.confidence!).toBeGreaterThan(0.5);
-    expect(misfire?.reason).toMatch(/swap-coil-plug|confidence|worked/);
+    expect(misfire?.calibrationExplain).toMatch(/swap-coil-plug|confidence|worked/);
   });
 });

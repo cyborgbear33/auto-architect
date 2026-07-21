@@ -19,11 +19,13 @@ function flowPlaybook(): CandidateAction[] {
       risk: 0.05,
       reversibility: 1,
       tags: ["diagnostic", "measure"],
-      firstStep: "command the EGR valve (if available) and watch for RPM/MAP change — no change suggests stuck/plugged",
+      firstStep:
+        "command the EGR valve (if available) and watch for RPM/MAP change — no change suggests stuck/plugged",
     },
     {
       id: "compare-commanded-egr",
-      description: "compare commanded EGR vs actual response (MAP/RPM) under the conditions that set the code",
+      description:
+        "compare commanded EGR vs actual response (MAP/RPM) under the conditions that set the code",
       impact: 0.45,
       confidence: 0.65,
       infoGain: 0.75,
@@ -88,7 +90,8 @@ function circuitDraft(vehicle: VehicleView): FramingResult {
       currentState: "an EGR control or position-sensor circuit DTC is active",
       desiredState: "no EGR circuit DTC after wiring/sensor/valve repair",
       gap: "whether the fault is wiring vs the valve/sensor assembly is not yet isolated",
-      whyItMatters: "circuit faults disable proper EGR control and can cascade into flow or misfire codes",
+      whyItMatters:
+        "circuit faults disable proper EGR control and can cascade into flow or misfire codes",
       urgency: "medium",
     },
     gapType: "causal",

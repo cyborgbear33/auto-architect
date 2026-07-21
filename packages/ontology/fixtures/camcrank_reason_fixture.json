@@ -5,14 +5,18 @@
     "subtypes": {
       "Engine": "IndependentContinuant",
       "Symptom": "IndependentContinuant",
-      "CamCrankCorrelation": "Symptom"
+      "Condition": "IndependentContinuant",
+      "CamCrankCorrelation": "Symptom",
+      "CamCrankSensorCircuit": "Symptom",
+      "FailedVvtMonitor": "Condition"
     },
     "roles": {
-      "hasDtc": { "domain": "Engine", "range": "Symptom" }
+      "hasDtc": { "domain": "Engine", "range": "Symptom" },
+      "hasCondition": { "domain": "Engine", "range": "Condition" }
     },
     "classes": {
       "CamCrankCorrelationFault": {
-        "equivalentTo": "Engine ⊓ ∃hasDtc.CamCrankCorrelation"
+        "equivalentTo": "Engine ⊓ (∃hasDtc.CamCrankCorrelation ⊔ ∃hasDtc.CamCrankSensorCircuit ⊔ ∃hasCondition.FailedVvtMonitor)"
       }
     }
   },

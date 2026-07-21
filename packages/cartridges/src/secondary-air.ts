@@ -2,7 +2,8 @@ import type { CandidateAction } from "@auto/semantic-types";
 import type { Cartridge, FramingResult, VehicleView } from "./types.ts";
 
 /**
- * SAE-generic secondary air injection cartridge: P0410–P0412 + Mode 06 OBDMID $71.
+ * SAE-generic secondary air injection cartridge: P0410–P0419 + Mode 06
+ * OBDMIDs $71/$72.
  */
 
 function airPlaybook(): CandidateAction[] {
@@ -22,7 +23,8 @@ function airPlaybook(): CandidateAction[] {
     },
     {
       id: "smoke-test-air-system",
-      description: "smoke-test or pressure-check AIR hoses and check valves for leaks / stuck valves",
+      description:
+        "smoke-test or pressure-check AIR hoses and check valves for leaks / stuck valves",
       impact: 0.6,
       confidence: 0.75,
       infoGain: 0.85,
@@ -33,7 +35,8 @@ function airPlaybook(): CandidateAction[] {
     },
     {
       id: "check-air-switching-valve",
-      description: "inspect the AIR switching/combination valve for a stuck-open or stuck-closed condition",
+      description:
+        "inspect the AIR switching/combination valve for a stuck-open or stuck-closed condition",
       impact: 0.5,
       confidence: 0.65,
       infoGain: 0.7,
@@ -52,7 +55,8 @@ function airDraft(vehicle: VehicleView): FramingResult {
         "a secondary air injection system DTC is active, or Mode 06 secondary-air monitor failed",
       desiredState: "no secondary-air DTC across a completed AIR monitor (typically cold-start)",
       gap: "whether the pump, valves, hoses, or control circuit is at fault is not yet isolated",
-      whyItMatters: "failed AIR systems raise cold-start emissions and can set follow-on catalyst codes",
+      whyItMatters:
+        "failed AIR systems raise cold-start emissions and can set follow-on catalyst codes",
       urgency: "low",
     },
     gapType: "causal",

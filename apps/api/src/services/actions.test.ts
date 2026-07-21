@@ -67,14 +67,7 @@ async function makeCtx() {
   const policy = new PolicyService(bridge);
   const solver = new SolverService(bridge);
   const solutionHistory = new SolutionHistoryService(store, vehicles);
-  const actions = new ActionService(
-    store,
-    vehicles,
-    recognition,
-    policy,
-    solver,
-    solutionHistory,
-  );
+  const actions = new ActionService(store, vehicles, recognition, policy, solver, solutionHistory);
   return { store, actions, vehicles };
 }
 

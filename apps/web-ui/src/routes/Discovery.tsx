@@ -1,7 +1,11 @@
-import type { DiscoveryForensicsReport, DiscoveryPidRow, DiscoverySupportStatus } from "@auto/semantic-types";
+import type {
+  DiscoveryForensicsReport,
+  DiscoveryPidRow,
+  DiscoverySupportStatus,
+} from "@auto/semantic-types";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useMemo, useState, type ReactNode } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { ApiError, api, queryKeys } from "../lib/api.ts";
 
@@ -23,8 +27,7 @@ function VehicleDiscovery({ vehicleId }: { vehicleId: string }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const missing =
-    discoveryQ.error instanceof ApiError && discoveryQ.error.statusCode === 404;
+  const missing = discoveryQ.error instanceof ApiError && discoveryQ.error.statusCode === 404;
 
   const filteredMode01 = useMemo(() => {
     const rows = discoveryQ.data?.mode01 ?? [];
@@ -248,9 +251,7 @@ function Mode01Table({ rows }: { rows: DiscoveryPidRow[] }) {
             <tr key={row.pid} className="border-b border-slate-50 last:border-0">
               <td className="px-3 py-2 font-mono text-xs text-slate-800">
                 {row.pid}
-                {row.pidHex ? (
-                  <span className="ml-1 text-slate-400">{row.pidHex}</span>
-                ) : null}
+                {row.pidHex ? <span className="ml-1 text-slate-400">{row.pidHex}</span> : null}
               </td>
               <td className="px-3 py-2">
                 <SupportPill support={row.support} />

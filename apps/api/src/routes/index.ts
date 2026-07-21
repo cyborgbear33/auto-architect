@@ -1,3 +1,4 @@
+import { listManualConditions } from "@auto/ontology";
 import {
   CompleteSpecialProcedureSchema,
   CreateDiagnosticProblemSchema,
@@ -9,6 +10,7 @@ import {
   ObdCapabilityReportSchema,
   ObservationBatchSchema,
   ProblemIdActionSchema,
+  SetManualConditionsSchema,
   SimulateDriveSessionSchema,
   StartDriveSessionSchema,
   StartSpecialProcedureSchema,
@@ -54,6 +56,16 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     return s.vehicles.getOrThrow(id);
   });
 
+  app.get("/api/manual-conditions", async () => ({
+    conditions: listManualConditions(),
+  }));
+
+  app.put("/api/vehicles/:id/manual-conditions", async (req) => {
+    const { id } = req.params as { id: string };
+    const input = SetManualConditionsSchema.parse(req.body);
+    return s.vehicles.setManualConditions(id, input);
+  });
+
   // --- observations (obd-gateway ingest) --------------------------------------
   app.post("/api/vehicles/:id/observations", async (req, reply) => {
     const { id } = req.params as { id: string };
@@ -62,6 +74,15 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     await s.observations.record(input);
     reply.code(202);
     return { accepted: true };
+  });
+
+  app.post("/api/vehicles/:id/observations/import-log", async (req) => {
+    const { id } = req.params as { id: string };
+    const body = req.body as {
+      format?: "obdlog-v1" | "json-batches" | "elm327-text" | "auto";
+      text?: string;
+    };
+    return s.observations.importLog(id, { format: body.format, text: body.text ?? "" });
   });
 
   app.get("/api/vehicles/:id/dtcs", async (req) => {
@@ -167,6 +188,11 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     const { id } = req.params as { id: string };
     const { problemId } = req.query as { problemId?: string };
     return s.caseTimeline.forVehicle(id, problemId);
+  });
+
+  app.get("/api/vehicles/:id/cascade-prognosis", async (req) => {
+    const { id } = req.params as { id: string };
+    return s.cascadePrognosis.forVehicle(id);
   });
 
   // --- garage JSON dump + CSV exports / import --------------------------------

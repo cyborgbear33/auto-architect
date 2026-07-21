@@ -47,6 +47,12 @@ describe("ontology registries", () => {
     }
   });
 
+  it("covers P0335–P0349 CKP/CMP sensor circuit family", () => {
+    for (const code of ["P0335", "P0340", "P0345", "P0349"]) {
+      expect(lookupDtc(code)?.concept).toBe("CamCrankSensorCircuit");
+    }
+  });
+
   it("returns undefined for an unknown DTC", () => {
     expect(lookupDtc("P9999")).toBeUndefined();
   });
@@ -87,6 +93,40 @@ describe("ontology registries", () => {
     expect(lookupDtc("P0316")).toMatchObject({ concept: "CylinderMisfire", sae: true });
   });
 
+  it("covers EVAP purge/vent circuit family", () => {
+    expect(lookupDtc("P0441")?.concept).toBe("EvapPurgeCode");
+    expect(lookupDtc("P0443")?.concept).toBe("EvapPurgeCode");
+    expect(lookupDtc("P0496")?.concept).toBe("EvapPurgeCode");
+    expect(lookupDtc("P0446")?.concept).toBe("EvapVentCode");
+    expect(lookupDtc("P0449")?.concept).toBe("EvapVentCode");
+    expect(lookupDtc("P0440")?.concept).toBe("EvapCodeLarge");
+  });
+
+  it("covers secondary-air switching/relay family P0413–P0419", () => {
+    for (const code of ["P0413", "P0415", "P0418", "P0419"]) {
+      expect(lookupDtc(code)?.concept).toBe("SecondaryAirCode");
+    }
+  });
+
+  it("covers coolant thermostat / ECT circuit family", () => {
+    expect(lookupDtc("P0128")?.concept).toBe("ThermostatCode");
+    expect(lookupDtc("P0125")?.concept).toBe("ThermostatCode");
+    expect(lookupDtc("P0126")?.concept).toBe("ThermostatCode");
+    for (const code of ["P0115", "P0116", "P0117", "P0118", "P0119"]) {
+      expect(lookupDtc(code)?.concept).toBe("EctCircuitCode");
+    }
+  });
+
+  it("covers coil / injector / MAP / knock / TPS circuit families", () => {
+    expect(lookupDtc("P0354")?.concept).toBe("IgnitionCoilCircuit");
+    expect(lookupDtc("P0201")?.concept).toBe("InjectorCircuitCode");
+    expect(lookupDtc("P0107")?.concept).toBe("MapSensorCode");
+    expect(lookupDtc("P0325")?.concept).toBe("KnockSensorCode");
+    expect(lookupDtc("P0330")?.concept).toBe("KnockSensorCode");
+    expect(lookupDtc("P0122")?.concept).toBe("ThrottlePositionCode");
+    expect(lookupDtc("P0221")?.concept).toBe("ThrottlePositionCode");
+  });
+
   it("maps rich / catalyst / O2 SAE codes onto new Symptom concepts", () => {
     expect(lookupDtc("P0172")).toMatchObject({ concept: "RichCodeBank1", sae: true });
     expect(lookupDtc("P0175")).toMatchObject({ concept: "RichCodeBank2", sae: true });
@@ -116,6 +156,7 @@ describe("ontology registries", () => {
       sae: true,
     });
     expect(lookupMode06("3B")).toMatchObject({ concept: "FailedEvapMonitorSmall", sae: true });
+    expect(lookupMode06("3D")).toMatchObject({ concept: "FailedEvapPurgeMonitor", sae: true });
     expect(lookupMode06("A2")).toMatchObject({ concept: "FailedMisfireMonitor", sae: true });
     expect(lookupMode06("01")).toMatchObject({ concept: "FailedO2MonitorBank1", sae: true });
     expect(lookupMode06("05")).toMatchObject({ concept: "FailedO2MonitorBank2", sae: true });
@@ -124,7 +165,10 @@ describe("ontology registries", () => {
       sae: true,
     });
     expect(lookupMode06("31")).toMatchObject({ concept: "FailedEgrMonitor", sae: true });
+    expect(lookupMode06("35")).toMatchObject({ concept: "FailedVvtMonitor", sae: true });
+    expect(lookupMode06("36")).toMatchObject({ concept: "FailedVvtMonitor", sae: true });
     expect(lookupMode06("71")).toMatchObject({ concept: "FailedSecondaryAirMonitor", sae: true });
+    expect(lookupMode06("72")).toMatchObject({ concept: "FailedSecondaryAirMonitor", sae: true });
     expect(lookupMode06("FE")).toBeUndefined();
   });
 

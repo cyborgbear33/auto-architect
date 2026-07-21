@@ -6,8 +6,8 @@ import {
   ForecastService,
   HIGH_LOAD_PCT,
   LTFT_B1_PID,
-  OIL_LEVEL_PID,
   NEGATIVE_TRIM_PCT,
+  OIL_LEVEL_PID,
   POSITIVE_TRIM_PCT,
 } from "./forecast.ts";
 

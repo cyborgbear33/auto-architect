@@ -8,7 +8,10 @@ import { VehicleService } from "./vehicle.ts";
 const JEEP = "veh:jeep-renegade-2015-latitude";
 const TRUCK = "veh:silverado-2500hd-2003";
 
-function sampleReport(vehicleId: string, overrides: Partial<ObdCapabilityReport> = {}): ObdCapabilityReport {
+function sampleReport(
+  vehicleId: string,
+  overrides: Partial<ObdCapabilityReport> = {},
+): ObdCapabilityReport {
   return {
     vehicleId,
     capturedAt: "2026-07-20T12:00:00.000Z",

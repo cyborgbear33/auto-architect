@@ -3,19 +3,40 @@ import { describe, expect, it } from "vitest";
 import camcrankRealizeFixture from "../../ontology/fixtures/camcrank_realize_fixture.json" with {
   type: "json",
 };
+import camcrankSensorRealizeFixture from "../../ontology/fixtures/camcrank_sensor_realize_fixture.json" with {
+  type: "json",
+};
 import catalystRealizeFixture from "../../ontology/fixtures/catalyst_realize_fixture.json" with {
+  type: "json",
+};
+import ectCircuitRealizeFixture from "../../ontology/fixtures/ect_circuit_realize_fixture.json" with {
+  type: "json",
+};
+import egrRealizeFixture from "../../ontology/fixtures/egr_realize_fixture.json" with {
+  type: "json",
+};
+import evapPurgeRealizeFixture from "../../ontology/fixtures/evap_purge_realize_fixture.json" with {
+  type: "json",
+};
+import ignitionCoilRealizeFixture from "../../ontology/fixtures/ignition_coil_realize_fixture.json" with {
+  type: "json",
+};
+import injectorCircuitRealizeFixture from "../../ontology/fixtures/injector_circuit_realize_fixture.json" with {
+  type: "json",
+};
+import knockSensorRealizeFixture from "../../ontology/fixtures/knock_sensor_realize_fixture.json" with {
   type: "json",
 };
 import leanRealizeFixture from "../../ontology/fixtures/lean_realize_fixture.json" with {
   type: "json",
 };
-import mode06CatalystRealizeFixture from "../../ontology/fixtures/mode06_catalyst_realize_fixture.json" with {
+import mapSensorRealizeFixture from "../../ontology/fixtures/map_sensor_realize_fixture.json" with {
   type: "json",
 };
 import misfireRealizeFixture from "../../ontology/fixtures/misfire_realize_fixture.json" with {
   type: "json",
 };
-import o2RealizeFixture from "../../ontology/fixtures/o2_realize_fixture.json" with {
+import mode06CatalystRealizeFixture from "../../ontology/fixtures/mode06_catalyst_realize_fixture.json" with {
   type: "json",
 };
 import o2DownstreamRealizeFixture from "../../ontology/fixtures/o2_downstream_realize_fixture.json" with {
@@ -24,13 +45,19 @@ import o2DownstreamRealizeFixture from "../../ontology/fixtures/o2_downstream_re
 import o2PerformanceRealizeFixture from "../../ontology/fixtures/o2_performance_realize_fixture.json" with {
   type: "json",
 };
-import egrRealizeFixture from "../../ontology/fixtures/egr_realize_fixture.json" with {
+import o2RealizeFixture from "../../ontology/fixtures/o2_realize_fixture.json" with {
+  type: "json",
+};
+import richRealizeFixture from "../../ontology/fixtures/rich_realize_fixture.json" with {
   type: "json",
 };
 import secondaryAirRealizeFixture from "../../ontology/fixtures/secondary_air_realize_fixture.json" with {
   type: "json",
 };
-import richRealizeFixture from "../../ontology/fixtures/rich_realize_fixture.json" with {
+import thermostatRealizeFixture from "../../ontology/fixtures/thermostat_realize_fixture.json" with {
+  type: "json",
+};
+import throttlePositionRealizeFixture from "../../ontology/fixtures/throttle_position_realize_fixture.json" with {
   type: "json",
 };
 import { createLogosBridge } from "./index.ts";
@@ -95,6 +122,13 @@ describe.skipIf(!available)("LOGOS realize real subprocess integration", () => {
     expect(result.member).not.toContain("MisfireUnderLoad");
   });
 
+  it("proves CamCrankCorrelationFault from P0335 sensor circuit", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(camcrankSensorRealizeFixture));
+    expect(result.mostSpecific).toContain("CamCrankCorrelationFault");
+    expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
   it("proves RichFuelBank1 from P0172 + negative fuel trim", async () => {
     const bridge = createLogosBridge();
     const result = await bridge.realize(realizeInputFromFixture(richRealizeFixture));
@@ -143,10 +177,61 @@ describe.skipIf(!available)("LOGOS realize real subprocess integration", () => {
     expect(result.mostSpecific).toContain("EgrFlowFault");
   });
 
+  it("proves EvapPurgeSystemFault from P0441", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(evapPurgeRealizeFixture));
+    expect(result.mostSpecific).toContain("EvapPurgeSystemFault");
+    expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
   it("proves SecondaryAirSystemFault from P0410", async () => {
     const bridge = createLogosBridge();
     const result = await bridge.realize(realizeInputFromFixture(secondaryAirRealizeFixture));
     expect(result.mostSpecific).toContain("SecondaryAirSystemFault");
+  });
+
+  it("proves CoolantThermostatFault from P0128", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(thermostatRealizeFixture));
+    expect(result.mostSpecific).toContain("CoolantThermostatFault");
+    expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
+  it("proves EctSensorCircuitFault from P0118", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(ectCircuitRealizeFixture));
+    expect(result.mostSpecific).toContain("EctSensorCircuitFault");
+    expect(result.member).not.toContain("MisfireUnderLoad");
+  });
+
+  it("proves IgnitionCoilCircuitFault from P0354", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(ignitionCoilRealizeFixture));
+    expect(result.mostSpecific).toContain("IgnitionCoilCircuitFault");
+  });
+
+  it("proves InjectorCircuitFault from P0201", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(injectorCircuitRealizeFixture));
+    expect(result.mostSpecific).toContain("InjectorCircuitFault");
+  });
+
+  it("proves MapSensorFault from P0107", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(mapSensorRealizeFixture));
+    expect(result.mostSpecific).toContain("MapSensorFault");
+  });
+
+  it("proves KnockSensorCircuitFault from P0325", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(knockSensorRealizeFixture));
+    expect(result.mostSpecific).toContain("KnockSensorCircuitFault");
+  });
+
+  it("proves ThrottlePositionSensorFault from P0122", async () => {
+    const bridge = createLogosBridge();
+    const result = await bridge.realize(realizeInputFromFixture(throttlePositionRealizeFixture));
+    expect(result.mostSpecific).toContain("ThrottlePositionSensorFault");
   });
 });
 

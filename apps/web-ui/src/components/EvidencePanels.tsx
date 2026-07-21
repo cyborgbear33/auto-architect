@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { lookupMode06 } from "@auto/ontology";
+import { useQuery } from "@tanstack/react-query";
 import { api, queryKeys } from "../lib/api.ts";
 import { useAppSelector } from "../store/index.ts";
 

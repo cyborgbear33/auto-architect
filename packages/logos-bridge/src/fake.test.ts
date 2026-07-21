@@ -76,6 +76,12 @@ describe("FakeLogosBridge.solve", () => {
     });
     expect(result.disqualified.map((d) => d.actionId)).toEqual(["unsafe-action"]);
     expect(result.recommended).toBe("safe-action");
+    expect(result.counterfactuals?.some((c) => c.isTop && c.actionId === "safe-action")).toBe(true);
+    expect(result.counterfactuals?.find((c) => c.actionId === "safe-action")?.robustness).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ factor: "confidence", direction: "falls_below" }),
+      ]),
+    );
   });
 });
 

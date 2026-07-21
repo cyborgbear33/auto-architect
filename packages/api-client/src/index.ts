@@ -9,12 +9,12 @@
  * auth/tenant headers yet — add them here when Auth lands, not in pages.
  */
 import type {
+  CascadePrognosis,
   CaseTimeline,
   DecisionRecord,
   DiagnosticProblem,
   DiscoveryForensicsReport,
   DriveSession,
-  MasteryGuide,
   DriveSessionSummary,
   DtcObservation,
   EvidenceProvenance,
@@ -23,6 +23,7 @@ import type {
   GarageImportResult,
   KnownCampaign,
   LiveGaugeStrip,
+  MasteryGuide,
   Mode06Result,
   ObservationBatch,
   Recognition,
@@ -203,6 +204,18 @@ export class AutoApiClient {
       method: "POST",
       body: JSON.stringify(input),
     });
+  listManualConditions = () =>
+    this.request<{
+      conditions: Array<{ id: string; label: string; system: string; description?: string }>;
+    }>("/api/manual-conditions").then((r) => r.conditions);
+  setManualConditions = (
+    vehicleId: string,
+    input: { conditions: Array<{ id: string; note?: string }> },
+  ) =>
+    this.request<VehicleProfile>(`/api/vehicles/${enc(vehicleId)}/manual-conditions`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
 
   // --- observations / evidence ----------------------------------------------
   getDtcs = (vehicleId: string) =>
@@ -256,6 +269,21 @@ export class AutoApiClient {
     const q = problemId ? `?problemId=${enc(problemId)}` : "";
     return this.request<CaseTimeline>(`/api/vehicles/${enc(vehicleId)}/case-timeline${q}`);
   };
+  getCascadePrognosis = (vehicleId: string) =>
+    this.request<CascadePrognosis>(`/api/vehicles/${enc(vehicleId)}/cascade-prognosis`);
+  importObservationLog = (
+    vehicleId: string,
+    input: { format?: "obdlog-v1" | "json-batches" | "elm327-text" | "auto"; text: string },
+  ) =>
+    this.request<{
+      format: string;
+      batchesRecorded: number;
+      linesParsed: number;
+      linesSkipped: number;
+    }>(`/api/vehicles/${enc(vehicleId)}/observations/import-log`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
 
   // --- garage export / import -------------------------------------------------
   exportGarage = () => this.request<GarageDump>("/api/garage/export");
@@ -458,6 +486,8 @@ export const queryKeys = {
     ["solutionHistory", vehicleId, faultClass ?? null] as const,
   caseTimeline: (vehicleId: string, problemId?: string) =>
     ["caseTimeline", vehicleId, problemId ?? null] as const,
+  cascadePrognosis: (vehicleId: string) => ["cascadePrognosis", vehicleId] as const,
+  manualConditions: () => ["manualConditions"] as const,
   vehicleReport: (vehicleId: string) => ["vehicleReport", vehicleId] as const,
   problemReport: (problemId: string) => ["problemReport", problemId] as const,
 };
