@@ -1,56 +1,42 @@
 /**
- * @auto/logos-bridge
+ * @auto/logos-bridge — re-export shim over `@seam/logos-bridge`.
  *
- * Node bridge to the LOGOS reasoning engine. It owns the LOGOS wire contract
- * (the snake_case <-> camelCase seam) so the rest of auto-architect only ever
- * sees camelCase DiagnosticProblem/DiagnosticSolution.
+ * Call sites keep importing `@auto/logos-bridge`. Transport, FakeLogos, and wire
+ * types come from software-architect. Vehicle-domain integration fixtures stay
+ * in this package's `*-integration.test.ts` files.
  *
- * Usage:
- *   const bridge = createLogosBridge();                      // warm serve (default)
- *   const bridge = createLogosBridge({ transport: "subprocess" }); // one-shot
- *   const solution = await bridge.solve(logosInput);          // DiagnosticSolution
- *
- * Tests should inject `new FakeLogosBridge()` instead (Python-free).
+ * `DiagnosticSolution` is an alias of seam `Solution` (structurally identical).
  */
-export {
-  createLogosBridge,
-  type ExecFn,
-  type LogosBridge,
-  type LogosBridgeConfig,
-  type LogosTransport,
-} from "./bridge.ts";
-export {
-  LOGOS_ERROR_CODES,
-  LogosBridgeError,
-  LogosInputError,
-  LogosNotAvailableError,
-  LogosProtocolError,
-  LogosSchemaError,
-  LogosSolveError,
-  LogosTimeoutError,
-  throwIfSchemaValidationFailed,
-  throwIfStructuredFailure,
-} from "./errors.ts";
-export { FakeLogosBridge } from "./fake.ts";
-export {
-  createLogosServeClient,
-  type LogosServeClient,
-  payloadFromServeReply,
-  type ServeReply,
-  type ServeRequest,
-} from "./serve-client.ts";
+
+export type { Solution as DiagnosticSolution } from "@seam/logos-bridge";
 export {
   assertWireMetaCompatible,
   compareEngineVersion,
+  createLogosBridge,
+  createLogosServeClient,
+  type ExecFn,
   emptyOntologyLintResult,
   emptyReasonResult,
+  FakeLogosBridge,
   type ForecastInput,
   type ForecastResult,
   forecastResultFromWire,
   fromLogosProblemId,
+  LOGOS_ERROR_CODES,
   LOGOS_MIN_ENGINE_VERSION,
   LOGOS_SCHEMA_VERSION,
+  type LogosBridge,
+  type LogosBridgeConfig,
+  LogosBridgeError,
+  LogosInputError,
+  LogosNotAvailableError,
   type LogosProblemInput,
+  LogosProtocolError,
+  LogosSchemaError,
+  type LogosServeClient,
+  LogosSolveError,
+  LogosTimeoutError,
+  type LogosTransport,
   type LogosWireMeta,
   type OntologyLintCatalogEntry,
   type OntologyLintConfig,
@@ -58,6 +44,7 @@ export {
   type OntologyLintIssue,
   type OntologyLintResult,
   ontologyLintResultFromWire,
+  payloadFromServeReply,
   type RealizeInput,
   type RealizeLimits,
   type RealizeResult,
@@ -73,10 +60,15 @@ export {
   realizeResultFromWire,
   reasonResultFromWire,
   reviseResultFromWire,
+  type ServeReply,
+  type ServeRequest,
+  type Solution,
   type StrategizeInput,
   type StrategizeResult,
   solutionFromWire,
   strategizeResultFromWire,
+  throwIfSchemaValidationFailed,
+  throwIfStructuredFailure,
   toForecastFile,
   toLogosProblemId,
   toOntologyLintFile,
@@ -89,4 +81,4 @@ export {
   type VerbalizeInput,
   type VerbalizeResult,
   verbalizeResultFromWire,
-} from "./types.ts";
+} from "@seam/logos-bridge";

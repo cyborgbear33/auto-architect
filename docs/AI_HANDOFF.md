@@ -59,10 +59,9 @@ and [§ Ideal solutions](FUTURE_FEATURES.md#ideal-solutions-by-goal).
         │
         │  consumed as an external dependency — NOT vendored/copied
         ▼
-   @auto/logos-bridge  (execFile / spawn, injection-safe)
+   @auto/logos-bridge  (thin re-export of @seam/logos-bridge)
         ▲
-        │  camelCase ⇄ snake_case seam; same transport/schema pattern as
-        │  garden's @garden/logos-bridge
+        │  transport + FakeLogos live in software-architect
         │
 /home/cyborgbear/Projects/auto-architect      ← auto-architect: the app (TS + Python)
         pnpm monorepo — Fastify API, React UI, Python obd-gateway
@@ -76,20 +75,14 @@ and [§ Ideal solutions](FUTURE_FEATURES.md#ideal-solutions-by-goal).
 3. `obd-gateway` never imports the bridge or classifies faults — it only POSTs
    validated observations (same edge rule as garden's edge-gateway).
 
-**Keeping the seam in sync:** `@auto/logos-bridge` and `@garden/logos-bridge`
-are two independent copies of the same domain-agnostic transport/salvage
-logic (`bridge.ts`, `serve-client.ts`, `errors.ts`), not a shared package —
-there is currently no automated way to catch one side fixing a real LOGOS
-wire bug and forgetting to port it to the other. `pnpm check:bridge-drift`
-(also the last, advisory-only step of `pnpm healthcheck`) diffs those files
-against a garden-architect checkout next to this repo as a reminder, not a
-gate. If this project and garden-architect both stabilize further, consider
-extracting a real shared `@seam/logos-bridge` package instead of two
-hand-synced copies. **That package now lives in sibling
-[`software-architect`](../../software-architect/)** (`@seam/logos-bridge`,
-`@seam/cartridge-kit`, `pnpm spawn:architect`). Migrating `@auto/logos-bridge`
-onto `@seam/*` is the follow-on; until then keep `check:bridge-drift` advisory
-and do **not** invent a third bridge copy.
+**Shared seam:** `@auto/logos-bridge` is a **re-export shim** over
+[`software-architect`](../../software-architect/) `@seam/logos-bridge`
+(`file:../../../software-architect/packages/logos-bridge`). Call sites still
+import `@auto/logos-bridge`; vehicle realize/reason fixtures stay in this
+repo's `*-integration.test.ts`. `pnpm check:bridge-drift` verifies the shim
+(dependency + no forked transport sources). CI checks out software-architect
+as a sibling so `pnpm install` resolves the `file:` dep. Do **not** reintroduce
+a forked `bridge.ts` / `types.ts` here.
 
 ---
 
@@ -177,12 +170,11 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Ruff lint/format for obd-gateway (healthcheck + CI) | shipped | `apps/obd-gateway/pyproject.toml`, `pnpm obd-gateway:lint` |
 | Generic cartridges (misfire, lean, EVAP, cam/crank) | shipped | `packages/cartridges/src/*.ts` |
 | FCA MultiAir cartridge + GM Vortec 6.0 stub | shipped | `fca-tigershark-2.4.ts`, `gm-vortec-6.0-stub.ts`; vehicle `veh:silverado-2500hd-2003` |
-| `@auto/logos-bridge` + `FakeLogosBridge` | shipped | `packages/logos-bridge` |
+| `@auto/logos-bridge` → `@seam/logos-bridge` re-export + FakeLogosBridge | shipped | `packages/logos-bridge` shim; transport in software-architect |
 | Real-LOGOS integration tests (realize/reason/schema), run for real in CI | shipped | `packages/logos-bridge/src/*-integration.test.ts`, `ontology-lint` CI job only |
 | Ontology Zod registries + engineFamily→view→cartridge lint | shipped | `packages/ontology/src/schemas.ts`, `lint.ts` |
 | API HTTP smoke (`buildApp` + inject) | shipped | `apps/api/src/app.smoke.test.ts` |
-| logos-bridge drift check vs garden-architect (advisory) | shipped | `scripts/check-bridge-drift.mjs` |
-| logos-bridge seam sync with garden (domain renames only) | shipped | `AI_CODING_RULES.md` §10 intentional diffs |
+| logos-bridge shim integrity vs software-architect (advisory) | shipped | `scripts/check-bridge-drift.mjs` |
 | Fastify API (vehicles, observations, recognition, actions) | shipped | `apps/api` |
 | In-memory store + seed Jeep | shipped | `apps/api/src/store/memory.ts` |
 | Postgres store (Drizzle; migrate-on-init) | shipped | `apps/api/src/store/drizzle.ts`, `apps/api/drizzle/`, `pnpm infra:up` |

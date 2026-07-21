@@ -1,29 +1,17 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
 /**
- * Advisory-only check that `packages/logos-bridge`'s domain-agnostic seam
- * files (`bridge.ts`, `serve-client.ts`, `errors.ts`, `types.ts`) haven't
- * silently drifted from garden-architect's `@garden/logos-bridge` twin. The two
- * packages share one wire contract/transport by design (see
- * `docs/AI_HANDOFF.md` §2) — a fix or engine-protocol change made on one
- * side and forgotten on the other is exactly the kind of bug this project's
- * "propose/dispose" discipline is supposed to prevent.
- *
- * This is NOT a hard gate:
- *   - The sibling repo may not be checked out next to this one (CI never has
- *     it) — the check skips cleanly rather than failing.
- *   - Some divergence is expected and fine (different domain types, feature
- *     work landing on one side first). This script flags structural drift
- *     for a human to read, it does not judge whether the drift is a bug.
+ * Advisory check that `@auto/logos-bridge` stays a thin re-export of
+ * `@seam/logos-bridge` (software-architect). After the multiplier cutover,
+ * we no longer diff a forked transport against garden — we confirm the seam
+ * dependency is present and the local package body is still a shim.
  *
  * Usage:
- *   node scripts/check-bridge-drift.mjs          human-readable report, always exit 0
- *   node scripts/check-bridge-drift.mjs --quiet  summary line only
+ *   node scripts/check-bridge-drift.mjs
+ *   node scripts/check-bridge-drift.mjs --quiet
  *
  * Env:
- *   GARDEN_ARCHITECT_PATH   explicit path to the garden-architect checkout
- *                           (the directory containing its own package.json)
- *   SKIP_BRIDGE_DRIFT=1     skip entirely (e.g. on a machine without the sibling)
+ *   SOFTWARE_ARCHITECT_PATH   explicit path to software-architect checkout
+ *   SKIP_BRIDGE_DRIFT=1       skip entirely
  */
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -46,116 +34,80 @@ if (process.env.SKIP_BRIDGE_DRIFT === "1") {
   process.exit(0);
 }
 
-// This machine's layout nests the checkout one level deeper
-// (Projects/garden-architect/garden-architect); a flatter sibling checkout
-// (Projects/garden-architect) is also accepted. First match wins.
 const CANDIDATES = [
-  process.env.GARDEN_ARCHITECT_PATH,
-  resolve(repoRoot, "..", "garden-architect", "garden-architect"),
-  resolve(repoRoot, "..", "garden-architect"),
+  process.env.SOFTWARE_ARCHITECT_PATH,
+  resolve(repoRoot, "..", "software-architect"),
 ].filter(Boolean);
 
-const gardenRoot = CANDIDATES.find((p) =>
+const seamRoot = CANDIDATES.find((p) =>
   existsSync(join(p, "packages", "logos-bridge", "package.json")),
 );
 
-if (!gardenRoot) {
+log(cyan(`\nauto-architect <-> @seam/logos-bridge (software-architect) check`));
+
+const pkgPath = join(repoRoot, "packages", "logos-bridge", "package.json");
+const indexPath = join(repoRoot, "packages", "logos-bridge", "src", "index.ts");
+const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+const dep = pkg.dependencies?.["@seam/logos-bridge"];
+const indexSrc = readFileSync(indexPath, "utf8");
+
+let ok = true;
+
+if (!dep || !String(dep).includes("software-architect/packages/logos-bridge")) {
+  ok = false;
   console.log(
     yellow(
-      "⊘ bridge-drift check: garden-architect checkout not found next to this repo (advisory-only, skipped)",
-    ),
-  );
-  log(yellow("  Tried: " + CANDIDATES.join(", ")));
-  log(yellow("  Set GARDEN_ARCHITECT_PATH to compare."));
-  process.exit(0);
-}
-
-/**
- * Strip comments and collapse whitespace, then neutralize the domain
- * substitutions we KNOW are intentional (result type name, package scope,
- * a couple of vehicle/garden-flavored words in comments) so only real
- * structural drift shows up as a difference.
- */
-function normalize(src) {
-  return (
-    src
-      .replace(/\/\*[\s\S]*?\*\//g, " ") // block comments
-      .replace(/\/\/.*$/gm, " ") // line comments
-      .replace(/DiagnosticSolution|GardenSolution/g, "__SOLUTION_TYPE__")
-      .replace(/@auto\/semantic-types|@garden\/semantic-types/g, "__SEMANTIC_TYPES__")
-      .replace(/@auto\/game-theory|@garden\/game-theory/g, "__GAME_THEORY__")
-      .replace(/@auto\/logos-bridge|@garden\/logos-bridge/g, "__PKG_NAME__")
-      .replace(/multi-vehicle|multi-bed/gi, "__DOMAIN_ADJ__")
-      .replace(/plantParent:\s*"(?:Plant|Engine)"/g, 'plantParent: "__PLANT_PARENT__"')
-      .replace(
-        /plant_parent === "string" \? r\.plant_parent : "(?:Plant|Engine)"/g,
-        'plant_parent === "string" ? r.plant_parent : "__PLANT_PARENT__"',
-      )
-      // Trailing commas + Prettier wrap spaces are formatting-only.
-      .replace(/,(\s*[)\]}])/g, "$1")
-      .replace(/\(\s+/g, "(")
-      .replace(/\s+\)/g, ")")
-      .replace(/\{\s+/g, "{")
-      .replace(/\s+\}/g, "}")
-      .replace(/,\s+/g, ",")
-      .replace(/;\s+/g, ";")
-      .replace(/:\s+/g, ":")
-      .replace(/\s+\./g, ".")
-      // Prettier sometimes wraps ternaries (incl. `Number(...)`) in map callbacks.
-      .replace(
-        /\((typeof\b(?:[^()]|\([^()]*\))*\?(?:[^()]|\([^()]*\))*:(?:[^()]|\([^()]*\))*)\)/g,
-        "$1",
-      )
-      .replace(/\s+/g, " ")
-      .trim()
-  );
-}
-
-const SEAM_FILES = ["bridge.ts", "serve-client.ts", "errors.ts", "types.ts"];
-
-log(cyan(`\nauto-architect <-> garden-architect logos-bridge drift check`));
-log(dim(`  comparing against: ${gardenRoot}`));
-
-let anyDrift = false;
-for (const file of SEAM_FILES) {
-  const autoPath = join(repoRoot, "packages", "logos-bridge", "src", file);
-  const gardenPath = join(gardenRoot, "packages", "logos-bridge", "src", file);
-  if (!existsSync(autoPath) || !existsSync(gardenPath)) {
-    log(yellow(`  ? ${file}: missing on one side, skipped`));
-    continue;
-  }
-  const autoSrc = readFileSync(autoPath, "utf8");
-  const gardenSrc = readFileSync(gardenPath, "utf8");
-  if (normalize(autoSrc) === normalize(gardenSrc)) {
-    log(green(`  ✓ ${file}: in sync (modulo comments/formatting/known domain substitutions)`));
-    continue;
-  }
-  anyDrift = true;
-  log(yellow(`  ⚠ ${file}: structural drift detected`));
-  if (!QUIET) {
-    const diff = spawnSync("diff", ["-u", autoPath, gardenPath], { encoding: "utf8" });
-    const lines = (diff.stdout || "").split("\n").slice(0, 20);
-    for (const l of lines) console.log(dim(`      ${l}`));
-    if ((diff.stdout || "").split("\n").length > 20) console.log(dim("      … (truncated)"));
-  }
-}
-
-if (anyDrift) {
-  log(
-    yellow(
-      "\n⚠ Some seam files differ structurally from garden-architect's copy. Read the diff above: " +
-        "port a real fix/feature both ways, or note here why the divergence is intentional. " +
-        "This never fails CI — it is a reminder, not a gate.",
-    ),
-  );
-  console.log(
-    yellow(
-      "⚠ bridge-drift check: structural drift detected (advisory-only, see above for details)",
+      "⚠ bridge-drift check: @auto/logos-bridge must depend on @seam/logos-bridge via software-architect path",
     ),
   );
 } else {
-  log(green("\n✓ logos-bridge seam files are in sync with garden-architect."));
-  console.log(green("✓ bridge-drift check: in sync with garden-architect"));
+  log(green(`  ✓ package.json depends on @seam/logos-bridge (${dep})`));
+}
+
+if (!/from ["']@seam\/logos-bridge["']/.test(indexSrc)) {
+  ok = false;
+  console.log(
+    yellow(
+      "⚠ bridge-drift check: packages/logos-bridge/src/index.ts must re-export @seam/logos-bridge",
+    ),
+  );
+} else {
+  log(green("  ✓ src/index.ts re-exports @seam/logos-bridge"));
+}
+
+const forked = ["bridge.ts", "fake.ts", "types.ts", "errors.ts", "serve-client.ts"].filter((f) =>
+  existsSync(join(repoRoot, "packages", "logos-bridge", "src", f)),
+);
+if (forked.length) {
+  ok = false;
+  console.log(
+    yellow(`⚠ bridge-drift check: forked transport files still present: ${forked.join(", ")}`),
+  );
+} else {
+  log(green("  ✓ no forked transport sources under packages/logos-bridge/src"));
+}
+
+if (!seamRoot) {
+  log(
+    yellow(
+      "⊘ software-architect checkout not found next to this repo (advisory; CI checks out the sibling)",
+    ),
+  );
+  log(yellow(`  Tried: ${CANDIDATES.join(", ")}`));
+  log(yellow("  Set SOFTWARE_ARCHITECT_PATH to verify the seam tree is present."));
+} else {
+  log(dim(`  seam root: ${seamRoot}`));
+  log(green("  ✓ software-architect/@seam/logos-bridge is available"));
+}
+
+if (ok) {
+  console.log(green("✓ bridge-drift check: @auto/logos-bridge is a seam re-export shim"));
+} else {
+  console.log(
+    yellow(
+      "⚠ bridge-drift check: shim integrity issues (advisory-only — see above; does not fail CI)",
+    ),
+  );
 }
 
 process.exit(0);

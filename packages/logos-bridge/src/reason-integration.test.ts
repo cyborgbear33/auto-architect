@@ -9,8 +9,7 @@ import misfireReasonFixture from "../../ontology/fixtures/misfire_reason_fixture
 import oilstarvationReasonFixture from "../../ontology/fixtures/oilstarvation_reason_fixture.json" with {
   type: "json",
 };
-import { createLogosBridge } from "./index.ts";
-import type { ReasonInput } from "./types.ts";
+import { createLogosBridge, type ReasonInput } from "./index.ts";
 
 /**
  * Exercises the REAL `python3 -m logos reason --json` subprocess (no fake)

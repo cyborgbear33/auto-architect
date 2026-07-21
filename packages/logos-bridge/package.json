@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Node bridge to the LOGOS reasoning engine (subprocess stdin or warm `logos serve` NDJSON daemon). Ported from @garden/logos-bridge — same transport/schema/casing seam, vehicle-domain result types.",
+  "description": "Thin re-export of @seam/logos-bridge for auto-architect. Domain fixtures/integration tests stay here; transport lives in software-architect.",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -15,8 +15,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@auto/game-theory": "workspace:*",
-    "@auto/semantic-types": "workspace:*"
+    "@seam/logos-bridge": "file:../../../software-architect/packages/logos-bridge"
   },
   "devDependencies": {
     "typescript": "^5.7.3",

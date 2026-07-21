@@ -174,12 +174,9 @@ importers:
 
   packages/logos-bridge:
     dependencies:
-      '@auto/game-theory':
-        specifier: workspace:*
-        version: link:../game-theory
-      '@auto/semantic-types':
-        specifier: workspace:*
-        version: link:../semantic-types
+      '@seam/logos-bridge':
+        specifier: file:../../../software-architect/packages/logos-bridge
+        version: file:../software-architect/packages/logos-bridge
     devDependencies:
       typescript:
         specifier: ^5.7.3
@@ -1311,6 +1308,9 @@ packages:
     resolution: {integrity: sha512-BfzEnDJOt9T8M989/lA37EcJgat01wLRnoi5dQf3QzOH7jzpqTAzdDbVfRljVr5r+jzKqpbHeyOfAaXxAd0PAA==}
     cpu: [x64]
     os: [win32]
+
+  '@seam/logos-bridge@file:../software-architect/packages/logos-bridge':
+    resolution: {directory: ../software-architect/packages/logos-bridge, type: directory}
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -3274,6 +3274,8 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.62.2':
     optional: true
+
+  '@seam/logos-bridge@file:../software-architect/packages/logos-bridge': {}
 
   '@standard-schema/spec@1.1.0': {}
 

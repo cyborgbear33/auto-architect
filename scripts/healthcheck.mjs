@@ -202,7 +202,7 @@ async function main() {
     return { ok: r.ok, detail: r.ok ? undefined : "web-ui build failed" };
   });
 
-  step("logos-bridge seam drift vs garden-architect (advisory)", () => {
+  step("logos-bridge seam shim vs software-architect (advisory)", () => {
     const r = run("node", ["scripts/check-bridge-drift.mjs", "--quiet"]);
     process.stdout.write(r.stdout);
     process.stderr.write(r.stderr);

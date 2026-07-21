@@ -60,8 +60,7 @@ import thermostatRealizeFixture from "../../ontology/fixtures/thermostat_realize
 import throttlePositionRealizeFixture from "../../ontology/fixtures/throttle_position_realize_fixture.json" with {
   type: "json",
 };
-import { createLogosBridge } from "./index.ts";
-import type { RealizeInput } from "./types.ts";
+import { createLogosBridge, type RealizeInput } from "./index.ts";
 
 /**
  * Exercises the REAL `python3 -m logos realize --json` subprocess (no fake)
