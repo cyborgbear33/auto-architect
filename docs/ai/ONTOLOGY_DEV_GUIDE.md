@@ -50,6 +50,9 @@ truly SAE-portable.
 - Prefer real TSB/recall grounding over inventing descriptions.
 - Ground SAE-generic codes in SAE J2012 / ISO 15031-6 wording; never guess
   manufacturer-enhanced meanings. See [`HARDWARE_STANDARDS.md`](HARDWARE_STANDARDS.md).
+- **Knowledge-gap export (F11):** accepted proposals export Markdown/JSON *hints*
+  for a human PR into dictionaries/cartridges. Never auto-append to
+  `dl-ontology.json` from the running app.
 
 ## Proving a class before wiring UI
 

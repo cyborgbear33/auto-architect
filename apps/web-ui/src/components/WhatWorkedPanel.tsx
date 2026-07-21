@@ -8,7 +8,16 @@ function summarize(bucket: SolutionRollupBucket): string {
   if (bucket.partial) parts.push(`${bucket.partial} partial`);
   if (bucket.failed) parts.push(`${bucket.failed} failed`);
   if (bucket.inconclusive) parts.push(`${bucket.inconclusive} inconclusive`);
-  return parts.join(" · ") || "no outcomes";
+  const base = parts.join(" · ") || "no outcomes";
+  return `${base} · n=${bucket.totalWithOutcome}`;
+}
+
+function smallNAdvisory(bucket: SolutionRollupBucket): string | null {
+  const n = bucket.totalWithOutcome;
+  if (n === 0) return null;
+  if (bucket.scope === "vehicle" && n < 2) return "Small sample (n<2) — advisory only";
+  if (bucket.scope === "engineFamily" && n < 4) return "Small sample (n<4 family) — advisory only";
+  return null;
 }
 
 function BucketList({
@@ -29,18 +38,24 @@ function BucketList({
         <p className="text-sm text-slate-400">{empty}</p>
       ) : (
         <ul className="space-y-1.5">
-          {buckets.slice(0, 6).map((b) => (
-            <li
-              key={`${b.scope}:${b.actionId}:${b.faultClass ?? ""}`}
-              className="rounded-md bg-slate-50 px-3 py-2 text-sm"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-slate-800">{b.actionId}</span>
-                <span className="text-xs text-slate-500">{summarize(b)}</span>
-              </div>
-              {b.faultClass && <p className="mt-0.5 text-xs text-slate-500">for {b.faultClass}</p>}
-            </li>
-          ))}
+          {buckets.slice(0, 6).map((b) => {
+            const advisory = smallNAdvisory(b);
+            return (
+              <li
+                key={`${b.scope}:${b.actionId}:${b.faultClass ?? ""}`}
+                className="rounded-md bg-slate-50 px-3 py-2 text-sm"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-slate-800">{b.actionId}</span>
+                  <span className="text-xs text-slate-500">{summarize(b)}</span>
+                </div>
+                {b.faultClass && (
+                  <p className="mt-0.5 text-xs text-slate-500">for {b.faultClass}</p>
+                )}
+                {advisory && <p className="mt-0.5 text-[11px] text-amber-700">{advisory}</p>}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

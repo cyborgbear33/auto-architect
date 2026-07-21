@@ -5,7 +5,7 @@ import { conflict, notFound, validationError } from "../lib/errors.ts";
 import { newId, nowIso } from "../lib/ids.ts";
 import type { Store } from "../store/index.ts";
 import type { ActionService } from "./actions.ts";
-import { applyCalibration, calibratePlaybook } from "./calibration.ts";
+import { applyCalibration, bestCalibrationMeta, calibratePlaybook } from "./calibration.ts";
 import type { CampaignService } from "./campaigns.ts";
 import type { RecognitionService } from "./recognition.ts";
 import type { SolutionHistoryService } from "./solution-history.ts";
@@ -81,6 +81,7 @@ export class RecommendationService {
       });
       const calibratedActions = applyCalibration(draft.actions, calibration);
       const richness = playbookCostRisk(calibratedActions);
+      const calMeta = bestCalibrationMeta(calibration);
       const reasonBase = draft.statement.whyItMatters ?? draft.statement.gap;
       const rec: Recommendation = {
         id: newId("rec"),
@@ -90,6 +91,7 @@ export class RecommendationService {
         status: "new",
         reason: reasonBase,
         ...(calibration.explain ? { calibrationExplain: calibration.explain } : {}),
+        ...(calMeta ? { calibrationMeta: calMeta } : {}),
         confidence: calibration.recommendationConfidence,
         ...richness,
         source: "class",

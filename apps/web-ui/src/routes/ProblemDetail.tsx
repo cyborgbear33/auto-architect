@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
 import { CounterfactualsPanel, DisqualifiedActionsPanel } from "../components/Explainability.tsx";
 import { PageHeader } from "../components/Layout.tsx";
+import { LearningCyclePanel } from "../components/LearningCyclePanel.tsx";
 import { ReportDownload } from "../components/ReportDownload.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
 import { api, queryKeys } from "../lib/api.ts";
@@ -193,6 +194,10 @@ export function ProblemDetail() {
 
       <div className="mb-4">
         <WhatWorkedPanel vehicleId={problem.vehicleId} faultClass={problem.triggeredByClass} />
+      </div>
+
+      <div className="mb-4">
+        <LearningCyclePanel vehicleId={problem.vehicleId} problemId={problem.id} limit={1} />
       </div>
 
       <div className="mb-4">

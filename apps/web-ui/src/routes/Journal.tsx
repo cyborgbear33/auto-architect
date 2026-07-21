@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { DataExportPanel } from "../components/DataExportPanel.tsx";
+import { KnowledgeGapPanel } from "../components/KnowledgeGapPanel.tsx";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { api, queryKeys } from "../lib/api.ts";
 
@@ -32,6 +33,10 @@ function VehicleJournal({ vehicleId }: { vehicleId: string }) {
 
       <div className="mb-4">
         <DataExportPanel vehicleId={vehicleId} />
+      </div>
+
+      <div className="mb-4">
+        <KnowledgeGapPanel vehicleId={vehicleId} compact />
       </div>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">

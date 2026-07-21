@@ -405,6 +405,8 @@ export interface CandidateAction {
   violates?: string[];
   firstStep?: string;
   stopConditions?: string;
+  /** Outcome-calibration provenance when create/solve/refresh reweights confidence. */
+  calibrationMeta?: CalibrationMeta;
 }
 
 export interface RankedAction {
@@ -542,6 +544,8 @@ export interface Recommendation {
    * (F5). Shown as a chip — not a probability claim.
    */
   calibrationExplain?: string;
+  /** Structured sample-size / scope for UI (F10) — prefer over parsing explain. */
+  calibrationMeta?: CalibrationMeta;
   confidence?: number;
   /** Rough playbook cost 0–1 from the top suggested action (R2). */
   cost?: number;
@@ -759,4 +763,97 @@ export interface CascadePrognosis {
   items: CascadeWatchItem[];
   /** Honest empty-state note when nothing matched. */
   emptyReason?: string;
+}
+
+// --- Garage Epistemic Loop (F9–F11) ----------------------------------------
+
+/** Where a calibrated confidence came from — never a probability claim. */
+export type CalibrationScope = "vehicle" | "engineFamily" | "prior";
+
+/** Structured sample-size / scope for UI trust chips. */
+export interface CalibrationMeta {
+  scope: CalibrationScope;
+  sampleSize: number;
+  priorConfidence?: number;
+  calibratedConfidence?: number;
+}
+
+/**
+ * Derived learning cycle for one diagnostic problem (compose-only).
+ * id === problemId; no separate cycle table.
+ */
+export interface LearningCycle {
+  id: SemanticId;
+  vehicleId: SemanticId;
+  faultClass?: string;
+  status: ProblemStatus;
+  openedAt: IsoTimestamp;
+  rankedAt?: IsoTimestamp;
+  repairedAt?: IsoTimestamp;
+  verifiedAt?: IsoTimestamp;
+  decisionIds: SemanticId[];
+  outcome?: ProblemOutcome;
+  verification?: ProblemVerification;
+  reopenedFromId?: SemanticId;
+  /** Latest calibration summary for the fault class (from solution history). */
+  priorDelta?: CalibrationMeta & { explain?: string };
+  linkedRecommendationIds?: SemanticId[];
+}
+
+/** Chronological learning cycles for a vehicle (optionally one problem). */
+export interface LearningCycleList {
+  vehicleId: SemanticId;
+  problemIdFilter: SemanticId | null;
+  cycles: LearningCycle[];
+}
+
+export type KnowledgeGapKind =
+  | "unrecognized_dtc"
+  | "undecided_class"
+  | "verify_reopened"
+  | "unframed_class";
+
+export type KnowledgeGapStatus = "new" | "accepted" | "dismissed";
+
+/** Structured hint for a human to land in ontology files — never auto-applied. */
+export interface KnowledgeGapProposedPatch {
+  kind: "dtc_dictionary" | "cascade_edge" | "cartridge_note" | "human_note";
+  /** Suggested JSON fragment or Markdown note for a docs/ontology PR. */
+  hint: string;
+  /** Optional target file path relative to repo root. */
+  targetPath?: string;
+}
+
+export interface KnowledgeGapEvidence {
+  dtcCodes?: string[];
+  classNames?: string[];
+  problemId?: SemanticId;
+  note?: string;
+}
+
+/**
+ * Durable knowledge-gap proposal. Heuristics propose; humans dispose
+ * (accept/dismiss + export). Never writes dl-ontology.json.
+ */
+export interface KnowledgeGapProposal {
+  id: SemanticId;
+  vehicleId: SemanticId;
+  kind: KnowledgeGapKind;
+  status: KnowledgeGapStatus;
+  title: string;
+  rationale: string;
+  evidence: KnowledgeGapEvidence;
+  /** Stable dedupe key: kind + primary evidence. */
+  dedupeKey: string;
+  proposedPatch: KnowledgeGapProposedPatch;
+  createdAt: IsoTimestamp;
+  updatedAt: IsoTimestamp;
+}
+
+/** Markdown + JSON export bundle for accepted (and optionally open) gaps. */
+export interface KnowledgeGapExport {
+  vehicleId: SemanticId;
+  generatedAt: IsoTimestamp;
+  markdown: string;
+  proposals: KnowledgeGapProposal[];
 }

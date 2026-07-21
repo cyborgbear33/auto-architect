@@ -6,13 +6,14 @@
  * actions/recommendations for classes realize already proved.
  */
 import type {
+  CalibrationMeta,
   CandidateAction,
   Recommendation,
   SolutionHistory,
   SolutionRollupBucket,
 } from "@auto/semantic-types";
 
-export type CalibrationScope = "vehicle" | "engineFamily" | "prior";
+export type CalibrationScope = CalibrationMeta["scope"];
 
 export interface CalibratedAction {
   action: CandidateAction;
@@ -79,6 +80,28 @@ function bumpPriority(base: Recommendation["priority"], up: boolean): Recommenda
   return base;
 }
 
+function metaFromCalibrated(c: CalibratedAction): CalibrationMeta {
+  return {
+    scope: c.scope,
+    sampleSize: c.sampleSize,
+    priorConfidence: c.priorConfidence,
+    calibratedConfidence: c.calibratedConfidence,
+  };
+}
+
+/** Best (highest calibrated confidence among sampled) meta for a ClassCalibration. */
+export function bestCalibrationMeta(calibration: ClassCalibration): CalibrationMeta | null {
+  const withSamples = calibration.actions.filter((c) => c.sampleSize > 0);
+  if (withSamples.length === 0) {
+    const first = calibration.actions[0];
+    return first ? metaFromCalibrated(first) : null;
+  }
+  const best = withSamples.reduce((a, b) =>
+    a.calibratedConfidence >= b.calibratedConfidence ? a : b,
+  );
+  return metaFromCalibrated(best);
+}
+
 /**
  * Calibrate playbook actions for one proven fault class using solution history.
  */
@@ -104,7 +127,16 @@ export function calibratePlaybook(input: {
       const { rate, n } = empiricalSuccessRate(vehicleBucket);
       const calibratedConfidence = shrinkTowardPrior(prior, rate, n, kVehicle);
       return {
-        action: { ...action, confidence: calibratedConfidence },
+        action: {
+          ...action,
+          confidence: calibratedConfidence,
+          calibrationMeta: {
+            scope: "vehicle",
+            sampleSize: n,
+            priorConfidence: prior,
+            calibratedConfidence,
+          },
+        },
         priorConfidence: prior,
         calibratedConfidence,
         scope: "vehicle",
@@ -115,7 +147,16 @@ export function calibratePlaybook(input: {
       const { rate, n } = empiricalSuccessRate(familyBucket);
       const calibratedConfidence = shrinkTowardPrior(prior, rate, n, kFamily);
       return {
-        action: { ...action, confidence: calibratedConfidence },
+        action: {
+          ...action,
+          confidence: calibratedConfidence,
+          calibrationMeta: {
+            scope: "engineFamily",
+            sampleSize: n,
+            priorConfidence: prior,
+            calibratedConfidence,
+          },
+        },
         priorConfidence: prior,
         calibratedConfidence,
         scope: "engineFamily",
@@ -123,7 +164,16 @@ export function calibratePlaybook(input: {
       };
     }
     return {
-      action: { ...action, confidence: prior },
+      action: {
+        ...action,
+        confidence: prior,
+        calibrationMeta: {
+          scope: "prior",
+          sampleSize: 0,
+          priorConfidence: prior,
+          calibratedConfidence: prior,
+        },
+      },
       priorConfidence: prior,
       calibratedConfidence: prior,
       scope: "prior",

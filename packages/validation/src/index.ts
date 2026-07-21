@@ -178,6 +178,13 @@ export const MarkRecommendationStatusSchema = z.object({
 });
 export type MarkRecommendationStatusInput = z.infer<typeof MarkRecommendationStatusSchema>;
 
+export const KnowledgeGapStatusSchema = z.enum(["new", "accepted", "dismissed"]);
+
+export const MarkKnowledgeGapStatusSchema = z.object({
+  status: z.enum(["accepted", "dismissed"]),
+});
+export type MarkKnowledgeGapStatusInput = z.infer<typeof MarkKnowledgeGapStatusSchema>;
+
 export const StartSpecialProcedureSchema = z.object({
   vehicleId: z.string().min(1),
   procedureId: z.string().min(1),

@@ -6,7 +6,9 @@ import { CascadePrognosisPanel } from "../components/CascadePrognosisPanel.tsx";
 import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
 import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
+import { KnowledgeGapPanel } from "../components/KnowledgeGapPanel.tsx";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
+import { LearningCyclePanel } from "../components/LearningCyclePanel.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
 import { ApiError, api, queryKeys } from "../lib/api.ts";
 
@@ -143,6 +145,14 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
 
       <div className="mb-4">
         <WhatWorkedPanel vehicleId={vehicleId} />
+      </div>
+
+      <div className="mb-4">
+        <LearningCyclePanel vehicleId={vehicleId} limit={6} />
+      </div>
+
+      <div className="mb-4">
+        <KnowledgeGapPanel vehicleId={vehicleId} />
       </div>
 
       <div className="mb-4">

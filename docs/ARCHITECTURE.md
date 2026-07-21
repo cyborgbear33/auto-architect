@@ -154,12 +154,14 @@ Catalog/cartridge parity is enforced by `pnpm lint:ontology` and
 | `PolicyService` | `reason` | Safety holds (e.g. forbid clear-codes-and-drive) |
 | `SolverService` | `solve` | Rank diagnostic/repair actions |
 | `ForecastService` | `forecast` / trend helpers | Multi-signal trends; optional `sessionId` scope (F4); oil/LTFT/load → recognition |
-| `ActionService` | — | Sole mutation gate + `DecisionRecord` audit |
+| `ActionService` | — | Sole mutation gate + `DecisionRecord` audit (+ knowledge-gap accept/dismiss) |
 | `ObservationService` | — | Ingest batches; provenance; live gauges; retention prune |
 | `DriveSessionService` | — | Start/end/list sessions; simulate upload path |
-| `ReportService` | — | Markdown + print HTML diagnostic reports; last session summary (G5) |
+| `ReportService` | — | Markdown + print HTML diagnostic reports; last session + Learning section (F10) |
 | `CampaignsService` | — | Match vehicle vs known recalls/TSBs |
 | `RecommendationService` | — | Shortlist from proven classes + matched campaigns/TSBs (R5) |
+| `LearningCycleService` | — | Compose LearningCycle read-model from problems/decisions/calibration (F9) |
+| `KnowledgeGapService` | — | Detect/upsert knowledge-gap proposals; export patch hints (F11) |
 | `VehicleService` | — | Profiles, engine families, view resolution |
 
 **FOL atom sanitization:** LOGOS `reason` formula parsing rejects hyphens/colons
@@ -177,8 +179,9 @@ Resource reads:
 - `GET /api/vehicles`, `POST /api/vehicles`, `GET /api/vehicles/:id`
 - `GET /api/engine-families`
 - `POST /api/vehicles/:id/observations` (202)
-- `GET /api/vehicles/:id/{dtcs,freeze-frame,mode06,forecast,recognition,recommendations,campaigns,problems,decisions,export,sessions,observation-batches,report,case-timeline}`
+- `GET /api/vehicles/:id/{dtcs,freeze-frame,mode06,forecast,recognition,recommendations,campaigns,problems,decisions,export,sessions,observation-batches,report,case-timeline,learning-cycles,knowledge-gaps,cascade-prognosis}`
 - `GET /api/vehicles/:id/forecast?sessionId=` — optional per-drive trend scope (F4)
+- `GET /api/vehicles/:id/knowledge-gaps/export` — Markdown + JSON patch bundle (F11)
 - `GET /api/vehicles/:id/export/{observations,dtcs,decisions,problems,timeline}.csv`
 - `GET /api/garage/export` — full garage JSON dump
 - `GET /api/problems/:id`, `GET /api/problems/:id/report`
@@ -195,6 +198,8 @@ Action / mutation:
 - `POST /api/vehicles/:id/recommendations/refresh`
 - `POST /api/recommendations/:id/status` — Zod-validated lifecycle status
 - `POST /api/recommendations/:id/convert` — open case via ActionService + mark converted
+- `POST /api/vehicles/:id/knowledge-gaps/refresh` — detect/upsert gap proposals (F11)
+- `POST /api/knowledge-gaps/:id/status` — accept/dismiss via ActionService + DecisionRecord
 
 No auth today. No OpenAPI export yet (garden has it; auto deferred).
 

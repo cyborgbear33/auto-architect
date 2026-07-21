@@ -181,6 +181,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Evidence source labeling (live / sim / manual) | shipped | `GET .../evidence-provenance`, Dashboard/Diagnosis badges |
 | Solution history rollup (“what worked before”) | shipped | `GET .../solution-history`, Diagnosis/ProblemDetail panel |
 | Outcome → confidence calibration | shipped | `calibration.ts` → draft/solve/recommendation refresh |
+| Garage Epistemic Loop (LearningCycle + knowledge gaps) | shipped | `LearningCycleService`, `KnowledgeGapService`, `calibrationMeta`, Diagnosis/Journal panels |
 | Recommendation richness + lifecycle (R2/R3) | shipped | cost/risk; accept/dismiss/convert; `RecommendationPanel` |
 | Campaign-backed recommendations (R5) | shipped | refresh emits TSB/recall cards; never invents fault classes |
 | Recognition narration (verbalize / ontology notes) | shipped | `Recognition.narration`, Dashboard/Diagnosis |

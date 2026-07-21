@@ -4,6 +4,7 @@ import type {
   DriveSession,
   DtcObservation,
   FreezeFrame,
+  KnowledgeGapProposal,
   Mode06Result,
   ObdCapabilityReport,
   ObservationBatch,
@@ -15,6 +16,7 @@ import { notFound } from "../lib/errors.ts";
 import type {
   DecisionRepository,
   DiscoveryRepository,
+  GapProposalRepository,
   ObservationRepository,
   ProblemRepository,
   RecommendationRepository,
@@ -278,6 +280,7 @@ export function createMemoryStore(): Store {
   let recommendations = createRecommendationRepository();
   let decisions = createDecisionRepository();
   let discovery = createDiscoveryRepository();
+  let gapProposals = createGapProposalRepository();
 
   return {
     driver: "memory" as const,
@@ -302,6 +305,9 @@ export function createMemoryStore(): Store {
     get discovery() {
       return discovery;
     },
+    get gapProposals() {
+      return gapProposals;
+    },
     async init() {
       /* nothing to do for the in-memory driver */
     },
@@ -313,9 +319,36 @@ export function createMemoryStore(): Store {
       recommendations = createRecommendationRepository();
       decisions = createDecisionRepository();
       discovery = createDiscoveryRepository();
+      gapProposals = createGapProposalRepository();
     },
     async close() {
       /* nothing to do for the in-memory driver */
+    },
+  };
+}
+
+function createGapProposalRepository(): GapProposalRepository {
+  const byId = new Map<string, KnowledgeGapProposal>();
+  return {
+    async create(proposal) {
+      byId.set(proposal.id, proposal);
+      return proposal;
+    },
+    async get(id) {
+      return byId.get(id);
+    },
+    async listByVehicle(vehicleId) {
+      return [...byId.values()].filter((p) => p.vehicleId === vehicleId);
+    },
+    async update(id, patch) {
+      const existing = byId.get(id);
+      if (!existing) throw notFound("KnowledgeGapProposal", id);
+      const updated = { ...existing, ...patch, id: existing.id };
+      byId.set(id, updated);
+      return updated;
+    },
+    async getByDedupeKey(vehicleId, dedupeKey) {
+      return [...byId.values()].find((p) => p.vehicleId === vehicleId && p.dedupeKey === dedupeKey);
     },
   };
 }

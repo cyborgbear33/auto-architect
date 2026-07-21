@@ -21,7 +21,10 @@ import type {
   FreezeFrame,
   GarageDump,
   GarageImportResult,
+  KnowledgeGapExport,
+  KnowledgeGapProposal,
   KnownCampaign,
+  LearningCycleList,
   LiveGaugeStrip,
   MasteryGuide,
   Mode06Result,
@@ -269,6 +272,28 @@ export class AutoApiClient {
     const q = problemId ? `?problemId=${enc(problemId)}` : "";
     return this.request<CaseTimeline>(`/api/vehicles/${enc(vehicleId)}/case-timeline${q}`);
   };
+  getLearningCycles = (vehicleId: string, problemId?: string) => {
+    const q = problemId ? `?problemId=${enc(problemId)}` : "";
+    return this.request<LearningCycleList>(`/api/vehicles/${enc(vehicleId)}/learning-cycles${q}`);
+  };
+  getKnowledgeGaps = (vehicleId: string, opts?: { openOnly?: boolean }) => {
+    const q = opts?.openOnly ? "?open=1" : "";
+    return this.request<{ proposals: KnowledgeGapProposal[] }>(
+      `/api/vehicles/${enc(vehicleId)}/knowledge-gaps${q}`,
+    ).then((r) => r.proposals);
+  };
+  refreshKnowledgeGaps = (vehicleId: string) =>
+    this.request<{ proposals: KnowledgeGapProposal[] }>(
+      `/api/vehicles/${enc(vehicleId)}/knowledge-gaps/refresh`,
+      { method: "POST" },
+    ).then((r) => r.proposals);
+  markKnowledgeGapStatus = (id: string, status: "accepted" | "dismissed") =>
+    this.request<KnowledgeGapProposal>(`/api/knowledge-gaps/${enc(id)}/status`, {
+      method: "POST",
+      body: JSON.stringify({ status }),
+    });
+  exportKnowledgeGaps = (vehicleId: string) =>
+    this.request<KnowledgeGapExport>(`/api/vehicles/${enc(vehicleId)}/knowledge-gaps/export`);
   getCascadePrognosis = (vehicleId: string) =>
     this.request<CascadePrognosis>(`/api/vehicles/${enc(vehicleId)}/cascade-prognosis`);
   importObservationLog = (
@@ -486,6 +511,9 @@ export const queryKeys = {
     ["solutionHistory", vehicleId, faultClass ?? null] as const,
   caseTimeline: (vehicleId: string, problemId?: string) =>
     ["caseTimeline", vehicleId, problemId ?? null] as const,
+  learningCycles: (vehicleId: string, problemId?: string) =>
+    ["learningCycles", vehicleId, problemId ?? null] as const,
+  knowledgeGaps: (vehicleId: string) => ["knowledgeGaps", vehicleId] as const,
   cascadePrognosis: (vehicleId: string) => ["cascadePrognosis", vehicleId] as const,
   manualConditions: () => ["manualConditions"] as const,
   vehicleReport: (vehicleId: string) => ["vehicleReport", vehicleId] as const,

@@ -8,6 +8,8 @@ import { DiscoveryService } from "./discovery.ts";
 import { DriveSessionService } from "./drive-sessions.ts";
 import { ForecastService } from "./forecast.ts";
 import { GarageExportService } from "./garage-export.ts";
+import { KnowledgeGapService } from "./knowledge-gaps.ts";
+import { LearningCycleService } from "./learning-cycles.ts";
 import { MasteryGuideService } from "./mastery-guide.ts";
 import { ObservationService } from "./observations.ts";
 import { PolicyService } from "./policy.ts";
@@ -37,6 +39,8 @@ export interface Services {
   specialProcedures: SpecialProcedureService;
   solutionHistory: SolutionHistoryService;
   caseTimeline: CaseTimelineService;
+  learningCycles: LearningCycleService;
+  knowledgeGaps: KnowledgeGapService;
   garageExport: GarageExportService;
   reports: ReportService;
   cascadePrognosis: CascadePrognosisService;
@@ -50,6 +54,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
   const solver = new SolverService(bridge);
   const solutionHistory = new SolutionHistoryService(store, vehicles);
   const caseTimeline = new CaseTimelineService(store, vehicles);
+  const learningCycles = new LearningCycleService(store, vehicles, solutionHistory);
   const garageExport = new GarageExportService(store, vehicles, caseTimeline);
   const actions = new ActionService(store, vehicles, recognition, policy, solver, solutionHistory);
   const observations = new ObservationService(store, vehicles);
@@ -66,6 +71,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     actions,
     campaigns,
   );
+  const knowledgeGaps = new KnowledgeGapService(store, vehicles, recognition);
   const reports = new ReportService(
     vehicles,
     observations,
@@ -74,6 +80,8 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     actions,
     campaigns,
     driveSessions,
+    learningCycles,
+    solutionHistory,
   );
   const cascadePrognosis = new CascadePrognosisService(store, vehicles, recognition, forecast);
 
@@ -95,6 +103,8 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     specialProcedures,
     solutionHistory,
     caseTimeline,
+    learningCycles,
+    knowledgeGaps,
     garageExport,
     reports,
     cascadePrognosis,
@@ -110,6 +120,8 @@ export {
   DriveSessionService,
   ForecastService,
   GarageExportService,
+  KnowledgeGapService,
+  LearningCycleService,
   MasteryGuideService,
   ObservationService,
   PolicyService,

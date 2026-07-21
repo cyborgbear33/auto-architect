@@ -50,9 +50,9 @@ multi-piece plans live in the next section.
 | **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert | Deeper campaign→repair playbooks | RecommendationService |
 | **Problem tracking** — open cases through solve | **shipped** | Caseboard filters; abandon/escalate/reopen; `worked` → verifying → verify check | — | — |
 | **Problem history** — cases over time | **partial** | Case timeline + filters + evidence/session deep-links | Stronger batch-level evidence anchors | Durable observation history |
-| **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel; verify-before-solved (`worked` → verifying) | Stronger family priors / sample-size UX | Multi-signal trends |
-| **History → better future decisions** | **partial** | Trends + calibration + explainability + cascade watchlist (F6–F8) | Stronger family priors / sample-size UX | optional LLM advise |
-| **Reporting** — shareable diagnostic note | **partial** | Markdown + garage JSON/CSV export/import | Print/PDF polish | Print-friendly HTML/PDF |
+| **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel + sample-size UX (F10); verify-before-solved | Live multi-vehicle priors polish | Multi-signal trends |
+| **History → better future decisions** | **partial** | Trends + calibration + LearningCycle + knowledge-gap queue (F9–F11) | Live evidence fuel (S1); optional LLM advise | Live MX+; optional LLM advise |
+| **Reporting** — shareable diagnostic note | **partial** | Markdown + garage JSON/CSV export/import; Learning section | Print/PDF polish | Print-friendly HTML/PDF |
 
 **Spine that already works:** ingest → realize → draft/solve → recommend → policy hold → log-repair → verify → Journal.  
 **Not yet a complete garage product:** live scan UX, drive sessions, session-aware history.
@@ -337,6 +337,9 @@ never invent pad/rotor/bearing state from Mode 01 alone.
 | F6 | Cascade edge catalog (OBD fault-class → next-risk) in ontology/cartridges | done | `cascade-edges.json` + `listCascadeEdges` |
 | F7 | On-command CascadePrognosisService + UI (ordinal bands + evidence + horizons) | done | API + Diagnosis `CascadePrognosisPanel` |
 | F8 | Optional mechanical wear layer (operator-entered stages) on same edge schema | done | 9 conditions (brakes/hub/CV/belt/hose) + cascade edges; Diagnosis checkboxes |
+| F9 | LearningCycle read-model (compose from problems + decisions + calibration) | done | `LearningCycleService`; `GET .../learning-cycles`; Diagnosis/ProblemDetail panel |
+| F10 | Sample-size UX on WhatWorked / recs / calibration chips / reports | done | `calibrationMeta`; n= chips; report Learning section |
+| F11 | KnowledgeGap proposal queue (detect + accept/dismiss + export; never auto-write TBox) | done | `KnowledgeGapService`; store `gapProposals`; Diagnosis/Journal panel |
 
 **Seams:** ForecastService, recognition, RecommendationsService, SolverService,
 solution rollups; future `CascadePrognosisService` + ontology cascade edges.  
@@ -391,6 +394,7 @@ canonical breakdown; backlog rows are schedulable delivery units.
 | Recommendation card richness + status lifecycle UI | R2, R3 | done | medium | Cost/risk on cards; accept/dismiss/convert via ActionService. | `RecommendationPanel`, RecommendationService |
 | Multi-signal trend expansion (beyond oil) | F3 | done | medium | LTFT + load → realize; coolant UI-only. | ForecastService, recognition |
 | Cascade prognosis (likely next failures) | F6–F8 | done (thin) | — | On-command watchlist + operator wear stages; ordinal bands. Expand catalog as shop priors harden. | ontology cascade edges, recognition, ForecastService Trends, Diagnosis UI |
+| Garage Epistemic Loop (LearningCycle + sample-size + knowledge gaps) | F9–F11 | done | — | Co-evolution read-model + propose/dispose gap queue. | LearningCycleService, KnowledgeGapService, calibrationMeta, Diagnosis/Journal |
 | Print/PDF diagnostic report polish | G3, G5 | done | medium | Print HTML + last-session summary on reports. | `ReportService`, `ReportDownload` |
 | Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | partial | medium | ~134 curated P0xxx + circuit cartridges; full J2012 still open for rarer codes. | dictionaries, ontology lint, `test_pid_seed.py` |
 | Shared `@auto/ui-components` | I5 | planned | medium | Consistent trust/evidence UI. | `UX_GUIDELINES` |
@@ -534,6 +538,7 @@ actually maintain.
 | Coolant thermostat / ECT SAE KB (P0128 family) | 2026-07 | `coolant-thermostat` cartridge, `CoolantThermostatFault` / `EctSensorCircuitFault` |
 | F8 wear catalog deepen (hub/CV/belt/hose/caliper/fluid) | 2026-07 | `manual-conditions.json` + cascade edges |
 | Circuit DTC catalog (coil/injector/MAP/knock/TPS) | 2026-07 | 5 cartridges; P035x/P020x/P0105–09/P0325–33/P0120–24/P0220–23 |
+| Garage Epistemic Loop (F9–F11) | 2026-07 | LearningCycleService; calibrationMeta + sample-size UX; KnowledgeGapService + export; Diagnosis/Journal panels |
 
 ---
 

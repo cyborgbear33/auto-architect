@@ -6,6 +6,7 @@ import {
   EndDriveSessionSchema,
   GarageDumpSchema,
   LogRepairSchema,
+  MarkKnowledgeGapStatusSchema,
   MarkRecommendationStatusSchema,
   ObdCapabilityReportSchema,
   ObservationBatchSchema,
@@ -188,6 +189,35 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     const { id } = req.params as { id: string };
     const { problemId } = req.query as { problemId?: string };
     return s.caseTimeline.forVehicle(id, problemId);
+  });
+
+  app.get("/api/vehicles/:id/learning-cycles", async (req) => {
+    const { id } = req.params as { id: string };
+    const { problemId } = req.query as { problemId?: string };
+    return s.learningCycles.forVehicle(id, problemId);
+  });
+
+  app.get("/api/vehicles/:id/knowledge-gaps", async (req) => {
+    const { id } = req.params as { id: string };
+    const { open } = req.query as { open?: string };
+    const proposals = await s.knowledgeGaps.list(id, { openOnly: open === "1" });
+    return { proposals };
+  });
+
+  app.post("/api/vehicles/:id/knowledge-gaps/refresh", async (req) => {
+    const { id } = req.params as { id: string };
+    return { proposals: await s.knowledgeGaps.refresh(id) };
+  });
+
+  app.get("/api/vehicles/:id/knowledge-gaps/export", async (req) => {
+    const { id } = req.params as { id: string };
+    return s.knowledgeGaps.exportBundle(id);
+  });
+
+  app.post("/api/knowledge-gaps/:id/status", async (req) => {
+    const { id } = req.params as { id: string };
+    const { status } = MarkKnowledgeGapStatusSchema.parse(req.body);
+    return s.actions.markKnowledgeGapStatus(id, status);
   });
 
   app.get("/api/vehicles/:id/cascade-prognosis", async (req) => {

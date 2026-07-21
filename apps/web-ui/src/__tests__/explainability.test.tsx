@@ -8,11 +8,15 @@ import {
 } from "../components/Explainability.tsx";
 
 describe("Explainability panels (D2/F5)", () => {
-  it("renders calibration explain chip", () => {
+  it("renders calibration explain chip with sample meta", () => {
     render(
-      <CalibrationExplainChip explain="swap-coil-4 worked 3/3 on this vehicle — priority raised one step" />,
+      <CalibrationExplainChip
+        explain="swap-coil-4 worked 3/3 on this vehicle — priority raised one step"
+        meta={{ scope: "vehicle", sampleSize: 3 }}
+      />,
     );
     expect(screen.getByText(/Why this rank/i)).toBeInTheDocument();
+    expect(screen.getByText(/n=3/)).toBeInTheDocument();
     expect(screen.getByText(/swap-coil-4 worked 3\/3/)).toBeInTheDocument();
   });
 

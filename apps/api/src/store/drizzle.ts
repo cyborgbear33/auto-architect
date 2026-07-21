@@ -25,6 +25,7 @@ import { notFound } from "../lib/errors.ts";
 import type {
   DecisionRepository,
   DiscoveryRepository,
+  GapProposalRepository,
   ObservationRepository,
   ProblemRepository,
   RecommendationRepository,
@@ -399,6 +400,68 @@ export function createDrizzleStore(databaseUrl: string): Store {
     },
   };
 
+  const gapProposals: GapProposalRepository = {
+    async create(proposal) {
+      await db.insert(t.knowledgeGapProposals).values({
+        id: proposal.id,
+        vehicleId: proposal.vehicleId,
+        status: proposal.status,
+        dedupeKey: proposal.dedupeKey,
+        payload: proposal,
+        createdAt: proposal.createdAt,
+        updatedAt: proposal.updatedAt,
+      });
+      return proposal;
+    },
+    async get(id) {
+      const [row] = await db
+        .select()
+        .from(t.knowledgeGapProposals)
+        .where(eq(t.knowledgeGapProposals.id, id))
+        .limit(1);
+      return row?.payload;
+    },
+    async listByVehicle(vehicleId) {
+      const rows = await db
+        .select()
+        .from(t.knowledgeGapProposals)
+        .where(eq(t.knowledgeGapProposals.vehicleId, vehicleId));
+      return rows.map((r) => r.payload);
+    },
+    async update(id, patch) {
+      const [existingRow] = await db
+        .select()
+        .from(t.knowledgeGapProposals)
+        .where(eq(t.knowledgeGapProposals.id, id))
+        .limit(1);
+      if (!existingRow) throw notFound("KnowledgeGapProposal", id);
+      const updated = { ...existingRow.payload, ...patch, id };
+      await db
+        .update(t.knowledgeGapProposals)
+        .set({
+          status: updated.status,
+          dedupeKey: updated.dedupeKey,
+          payload: updated,
+          updatedAt: updated.updatedAt,
+        })
+        .where(eq(t.knowledgeGapProposals.id, id));
+      return updated;
+    },
+    async getByDedupeKey(vehicleId, dedupeKey) {
+      const [row] = await db
+        .select()
+        .from(t.knowledgeGapProposals)
+        .where(
+          and(
+            eq(t.knowledgeGapProposals.vehicleId, vehicleId),
+            eq(t.knowledgeGapProposals.dedupeKey, dedupeKey),
+          ),
+        )
+        .limit(1);
+      return row?.payload;
+    },
+  };
+
   return {
     driver: "postgres" as const,
     vehicles,
@@ -408,12 +471,13 @@ export function createDrizzleStore(databaseUrl: string): Store {
     recommendations,
     decisions,
     discovery,
+    gapProposals,
     async init() {
       await migrate(db, { migrationsFolder: MIGRATIONS_FOLDER });
     },
     async reset() {
       await sql.unsafe(
-        `TRUNCATE vehicles, observation_batches, drive_sessions, problems, recommendations, decisions, discovery_reports;`,
+        `TRUNCATE vehicles, observation_batches, drive_sessions, problems, recommendations, decisions, discovery_reports, knowledge_gap_proposals;`,
       );
     },
     async close() {

@@ -3,6 +3,7 @@ import { getSpecialProcedure } from "@auto/ontology";
 import type {
   DecisionRecord,
   DiagnosticProblem,
+  KnowledgeGapProposal,
   ProblemLifecycleEvent,
   ProblemStatus,
 } from "@auto/semantic-types";
@@ -453,6 +454,37 @@ export class ActionService {
 
   async listDecisions(vehicleId: string): Promise<DecisionRecord[]> {
     return this.store.decisions.listByVehicle(vehicleId);
+  }
+
+  /**
+   * Accept or dismiss a knowledge-gap proposal and write a Journal DecisionRecord.
+   * Never mutates ontology files — export is for human PR work.
+   */
+  async markKnowledgeGapStatus(
+    id: string,
+    status: "accepted" | "dismissed",
+  ): Promise<KnowledgeGapProposal> {
+    const existing = await this.store.gapProposals.get(id);
+    if (!existing) throw notFound("KnowledgeGapProposal", id);
+    if (existing.status === "accepted" || existing.status === "dismissed") {
+      if (existing.status === status) return existing;
+      throw conflict(`Knowledge gap already ${existing.status}; cannot change to ${status}.`);
+    }
+    const now = nowIso();
+    const updated = await this.store.gapProposals.update(id, { status, updatedAt: now });
+    const ctx = await this.evidenceContext(updated.vehicleId);
+    await this.store.decisions.create({
+      id: newId("decision"),
+      vehicleId: updated.vehicleId,
+      problemId: updated.evidence.problemId ?? `gap:${updated.id}`,
+      actionId: `knowledge-gap-${status}`,
+      rationale: `${status} knowledge gap "${updated.title}" (${updated.kind})`,
+      policyAllowed: true,
+      decidedAt: now,
+      decidedBy: "operator",
+      ...ctx,
+    });
+    return updated;
   }
 
   /**

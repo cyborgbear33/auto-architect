@@ -10,6 +10,7 @@ import type {
   DecisionRecord,
   DiagnosticProblem,
   DriveSession,
+  KnowledgeGapProposal,
   ObdCapabilityReport,
   ObservationBatch,
   Recommendation,
@@ -121,6 +122,26 @@ export const discoveryReports = pgTable(
   }),
 );
 
+export const knowledgeGapProposals = pgTable(
+  "knowledge_gap_proposals",
+  {
+    id: text("id").primaryKey(),
+    vehicleId: text("vehicle_id").notNull(),
+    status: text("status").notNull(),
+    dedupeKey: text("dedupe_key").notNull(),
+    payload: jsonb("payload").$type<KnowledgeGapProposal>().notNull(),
+    createdAt: timestamp("created_at", tz).notNull(),
+    updatedAt: timestamp("updated_at", tz).notNull(),
+  },
+  (t) => ({
+    vehicleIdx: index("knowledge_gap_proposals_vehicle_idx").on(t.vehicleId),
+    vehicleDedupeIdx: index("knowledge_gap_proposals_vehicle_dedupe_idx").on(
+      t.vehicleId,
+      t.dedupeKey,
+    ),
+  }),
+);
+
 export const schema = {
   vehicles,
   observationBatches,
@@ -129,4 +150,5 @@ export const schema = {
   recommendations,
   decisions,
   discoveryReports,
+  knowledgeGapProposals,
 };

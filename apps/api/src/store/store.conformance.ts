@@ -9,6 +9,7 @@ import type {
   DecisionRecord,
   DiagnosticProblem,
   DriveSession,
+  KnowledgeGapProposal,
   ObdCapabilityReport,
   ObservationBatch,
   Recommendation,
@@ -242,6 +243,30 @@ export function runStoreConformance(label: string, makeStore: () => Store): void
         `2026-07-20T${String(10 + DISCOVERY_HISTORY_LIMIT + 1).padStart(2, "0")}:00:00.000Z`,
       );
       expect((await store.discovery.latest(vehicle.id))?.capturedAt).toBe(list[0]?.capturedAt);
+    });
+
+    it("stores knowledge gap proposals with dedupe lookup", async () => {
+      await store.vehicles.create(vehicle);
+      const proposal: KnowledgeGapProposal = {
+        id: "gap:1",
+        vehicleId: vehicle.id,
+        kind: "unrecognized_dtc",
+        status: "new",
+        title: "Unrecognized DTC P9999",
+        rationale: "not in dictionary",
+        evidence: { dtcCodes: ["P9999"] },
+        dedupeKey: "unrecognized_dtc:P9999",
+        proposedPatch: { kind: "dtc_dictionary", hint: "{}" },
+        createdAt: "2026-07-21T12:00:00.000Z",
+        updatedAt: "2026-07-21T12:00:00.000Z",
+      };
+      await store.gapProposals.create(proposal);
+      expect(await store.gapProposals.getByDedupeKey(vehicle.id, "unrecognized_dtc:P9999")).toEqual(
+        proposal,
+      );
+      const updated = await store.gapProposals.update(proposal.id, { status: "accepted" });
+      expect(updated.status).toBe("accepted");
+      expect(await store.gapProposals.listByVehicle(vehicle.id)).toHaveLength(1);
     });
 
     it("reset() clears all tables / maps", async () => {

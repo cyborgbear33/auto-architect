@@ -7,16 +7,20 @@ import type {
   DiagnosticProblem,
   DriveSessionSummary,
   EvidenceProvenance,
+  LearningCycle,
   Recognition,
   Recommendation,
+  SolutionHistory,
   VehicleProfile,
 } from "@auto/semantic-types";
 import type { ActionService } from "./actions.ts";
 import type { CampaignService } from "./campaigns.ts";
 import type { DriveSessionService } from "./drive-sessions.ts";
+import type { LearningCycleService } from "./learning-cycles.ts";
 import type { ObservationService } from "./observations.ts";
 import type { RecognitionService } from "./recognition.ts";
 import type { RecommendationService } from "./recommendations.ts";
+import type { SolutionHistoryService } from "./solution-history.ts";
 import type { VehicleService } from "./vehicle.ts";
 
 export interface DiagnosticReport {
@@ -40,6 +44,8 @@ export class ReportService {
     private actions: ActionService,
     private campaigns: CampaignService,
     private driveSessions: DriveSessionService,
+    private learningCycles: LearningCycleService,
+    private solutionHistory: SolutionHistoryService,
   ) {}
 
   async forVehicle(vehicleId: string): Promise<DiagnosticReport> {
@@ -52,6 +58,8 @@ export class ReportService {
       recommendations,
       campaignPack,
       lastSession,
+      cycleList,
+      history,
     ] = await Promise.all([
       this.observations.provenance(vehicleId),
       this.recognition.recognize(vehicleId),
@@ -60,6 +68,8 @@ export class ReportService {
       this.recommendations.list(vehicleId),
       this.campaigns.forVehicle(vehicleId),
       this.driveSessions.summarizeLast(vehicleId),
+      this.learningCycles.forVehicle(vehicleId),
+      this.solutionHistory.forVehicle(vehicleId),
     ]);
     const markdown = composeMarkdown({
       scope: "vehicle",
@@ -72,6 +82,8 @@ export class ReportService {
       campaigns: campaignPack.campaigns.map((c) => c.title),
       tsbs: campaignPack.tsbs.map((t) => t.title),
       lastSession,
+      cycles: cycleList.cycles.slice(0, 8),
+      solutionHistory: history,
     });
     return wrapReport("vehicle", vehicleId, undefined, markdown, lastSession);
   }
@@ -79,13 +91,16 @@ export class ReportService {
   async forProblem(problemId: string): Promise<DiagnosticReport> {
     const problem = await this.actions.getDiagnosticProblem(problemId);
     const vehicle = await this.vehicles.getOrThrow(problem.vehicleId);
-    const [provenance, recognition, decisions, recommendations, lastSession] = await Promise.all([
-      this.observations.provenance(problem.vehicleId),
-      this.recognition.recognize(problem.vehicleId),
-      this.actions.listDecisions(problem.vehicleId),
-      this.recommendations.list(problem.vehicleId),
-      this.driveSessions.summarizeLast(problem.vehicleId),
-    ]);
+    const [provenance, recognition, decisions, recommendations, lastSession, cycleList, history] =
+      await Promise.all([
+        this.observations.provenance(problem.vehicleId),
+        this.recognition.recognize(problem.vehicleId),
+        this.actions.listDecisions(problem.vehicleId),
+        this.recommendations.list(problem.vehicleId),
+        this.driveSessions.summarizeLast(problem.vehicleId),
+        this.learningCycles.forVehicle(problem.vehicleId, problemId),
+        this.solutionHistory.forVehicle(problem.vehicleId, problem.triggeredByClass),
+      ]);
     const relatedDecisions = decisions.filter((d) => d.problemId === problemId);
     const markdown = composeMarkdown({
       scope: "problem",
@@ -101,6 +116,8 @@ export class ReportService {
       tsbs: [],
       focusProblemId: problemId,
       lastSession,
+      cycles: cycleList.cycles,
+      solutionHistory: history,
     });
     return wrapReport("problem", problem.vehicleId, problemId, markdown, lastSession);
   }
@@ -404,6 +421,43 @@ function appendLastSessionSection(lines: string[], summary: DriveSessionSummary 
   lines.push("");
 }
 
+function appendLearningSection(
+  lines: string[],
+  cycles: LearningCycle[],
+  history: SolutionHistory | null,
+): void {
+  lines.push("## Learning");
+  if (cycles.length === 0 && (!history || history.vehicle.length === 0)) {
+    lines.push("No learning cycles or solution outcomes on file yet.");
+    lines.push("");
+    return;
+  }
+  if (cycles.length > 0) {
+    lines.push("### Learning cycles");
+    for (const c of cycles) {
+      const classBit = c.faultClass ? ` (${c.faultClass})` : "";
+      const outcomeBit = c.outcome ? ` — outcome ${c.outcome.status}` : "";
+      const priorBit = c.priorDelta
+        ? ` — prior n=${c.priorDelta.sampleSize} (${c.priorDelta.scope})`
+        : "";
+      lines.push(`- \`${c.id}\` ${c.status}${classBit}${outcomeBit}${priorBit}`);
+      if (c.priorDelta?.explain) lines.push(`  - ${c.priorDelta.explain}`);
+    }
+    lines.push("");
+  }
+  if (history && history.vehicle.length > 0) {
+    lines.push("### What worked (this vehicle)");
+    for (const b of history.vehicle.slice(0, 8)) {
+      const n = b.totalWithOutcome;
+      const advisory = n < 2 ? " — small sample, advisory" : "";
+      lines.push(
+        `- \`${b.actionId}\` / ${b.faultClass ?? "?"} — worked ${b.worked}, failed ${b.failed}, n=${n}${advisory}`,
+      );
+    }
+    lines.push("");
+  }
+}
+
 function composeMarkdown(input: {
   scope: "vehicle" | "problem";
   vehicle: VehicleProfile;
@@ -416,6 +470,8 @@ function composeMarkdown(input: {
   tsbs: string[];
   focusProblemId?: string;
   lastSession: DriveSessionSummary | null;
+  cycles: LearningCycle[];
+  solutionHistory: SolutionHistory | null;
 }): string {
   const v = input.vehicle;
   const label = `${v.year ?? ""} ${v.make} ${v.model} ${v.trim ?? ""}`.replace(/\s+/g, " ").trim();
@@ -442,6 +498,7 @@ function composeMarkdown(input: {
   lines.push("");
 
   appendLastSessionSection(lines, input.lastSession);
+  appendLearningSection(lines, input.cycles, input.solutionHistory);
 
   lines.push("## Proven fault classes");
   if (input.recognition.mostSpecific.length === 0) {

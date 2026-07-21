@@ -1,17 +1,29 @@
-import type { Counterfactual, DisqualifiedAction } from "@auto/semantic-types";
+import type { CalibrationMeta, Counterfactual, DisqualifiedAction } from "@auto/semantic-types";
 
 /**
- * F5 — operator chip for outcome-driven priority/confidence moves.
- * Explicitly not a probability claim.
+ * F5/F10 — operator chip for outcome-driven priority/confidence moves.
+ * Explicitly not a probability claim. Shows sample size when structured meta exists.
  */
-export function CalibrationExplainChip({ explain }: { explain: string }) {
+export function CalibrationExplainChip({
+  explain,
+  meta,
+}: {
+  explain: string;
+  meta?: CalibrationMeta | null;
+}) {
+  const sampleBit =
+    meta && meta.sampleSize > 0
+      ? ` · n=${meta.sampleSize} (${meta.scope})`
+      : meta?.scope === "prior"
+        ? " · prior only"
+        : "";
   return (
     <p
       className="mt-1.5 inline-flex max-w-full items-start gap-1.5 rounded-md border border-violet-200 bg-violet-50 px-2 py-1 text-xs text-violet-900"
       title="Based on logged repair outcomes for this vehicle / engine family — not a calibrated probability."
     >
       <span className="shrink-0 font-semibold uppercase tracking-wide text-violet-700">
-        Why this rank
+        Why this rank{sampleBit}
       </span>
       <span className="min-w-0">{explain}</span>
     </p>

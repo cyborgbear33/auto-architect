@@ -5,6 +5,7 @@ import type {
   DtcObservation,
   EvidenceProvenance,
   FreezeFrame,
+  KnowledgeGapProposal,
   Mode06Result,
   ObdCapabilityReport,
   ObservationBatch,
@@ -33,6 +34,7 @@ export interface Store {
   recommendations: RecommendationRepository;
   decisions: DecisionRepository;
   discovery: DiscoveryRepository;
+  gapProposals: GapProposalRepository;
   init(): Promise<void>;
   reset(): Promise<void>;
   close(): Promise<void>;
@@ -101,6 +103,15 @@ export interface DiscoveryRepository {
   latest(vehicleId: string): Promise<ObdCapabilityReport | undefined>;
   /** Newest first, capped at DISCOVERY_HISTORY_LIMIT. */
   list(vehicleId: string): Promise<ObdCapabilityReport[]>;
+}
+
+export interface GapProposalRepository {
+  create(proposal: KnowledgeGapProposal): Promise<KnowledgeGapProposal>;
+  get(id: string): Promise<KnowledgeGapProposal | undefined>;
+  listByVehicle(vehicleId: string): Promise<KnowledgeGapProposal[]>;
+  update(id: string, patch: Partial<KnowledgeGapProposal>): Promise<KnowledgeGapProposal>;
+  /** Find by stable dedupe key within a vehicle. */
+  getByDedupeKey(vehicleId: string, dedupeKey: string): Promise<KnowledgeGapProposal | undefined>;
 }
 
 /** Build the configured store. Services never learn which adapter this is. */

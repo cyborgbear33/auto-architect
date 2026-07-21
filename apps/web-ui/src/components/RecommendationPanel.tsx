@@ -71,9 +71,16 @@ function RecommendationCard({
             <span className="text-[11px] uppercase tracking-wide text-slate-400">{rec.status}</span>
           </div>
           <p className="mt-1 text-xs text-slate-500">{rec.reason}</p>
-          {rec.calibrationExplain && <CalibrationExplainChip explain={rec.calibrationExplain} />}
+          {rec.calibrationExplain && (
+            <CalibrationExplainChip explain={rec.calibrationExplain} meta={rec.calibrationMeta} />
+          )}
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
             {rec.confidence !== undefined && <span>conf {pct(rec.confidence)}</span>}
+            {rec.calibrationMeta && rec.calibrationMeta.sampleSize > 0 && (
+              <span>
+                n={rec.calibrationMeta.sampleSize} ({rec.calibrationMeta.scope})
+              </span>
+            )}
             {rec.cost !== undefined && <span>cost {pct(rec.cost)}</span>}
             {rec.risk !== undefined && <span>risk {pct(rec.risk)}</span>}
             {faultClass && <span className="font-mono text-slate-600">{faultClass}</span>}
