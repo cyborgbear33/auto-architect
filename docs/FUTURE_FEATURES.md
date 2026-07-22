@@ -686,6 +686,7 @@ actually maintain.
 | DTC-row verified-fix chips (UX2) | 2026-07 | classEvidence join → solution-history chips on Dashboard Active DTCs |
 | Dashboard evidence ingest ritual (UX6) | 2026-07 | Simulate drive + OBD log import on Dashboard; live scan stays Guide/CLI |
 | Plain-English Dashboard (UX5) | 2026-07 | Fluent narration leads next-action + proven classes; DTC title tooltips |
+| Solution narrative cards (X6) | 2026-07 | `SolutionNarrativeCard` on solution-history; WhatWorked stories; A7 prefers lessons |
 
 ---
 
