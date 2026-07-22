@@ -428,7 +428,7 @@ or proprietary enhanced-PID lock-in.
 | Torque/OBDLink: fast live PIDs + custom dash | Gauges shipped; no operator-picked PID layout | **UX3** Saved gauge layout per vehicle (Mode 01 only) | medium |
 | Smog/readiness tiles in consumer apps | No Mode 01 readiness / I/M completeness surface | **UX4** Readiness / monitor completion panel (J1979 PID $01) | high |
 | FORScan/Carista: deep module maps | Full CAN/UDS map is OEM-proprietary; out of MVP scope | **CAN1** Research note + guided discover depth only (no invented bus map) | medium |
-| Plain-English first | Narration exists; still class-id heavy on Dashboard | **UX5** Prefer fluent narration in next-action + DTC tooltips | medium |
+| Plain-English first | Narration leads next-action + proven list; DTC tooltips carry fluent | **UX5** done | — |
 | One-tap scan ritual | Simulate CLI strong; in-UI “run scan” still gateway-ops | **S1** Live MX+ dry-run + Dashboard scan affordance | critical |
 
 **CAN bus mapping principle:** Do not invent a whole-vehicle CAN matrix from
@@ -444,6 +444,7 @@ tool), never fake completeness.
 | Dashboard next-action console (at-a-glance) | UX1 | done | high | Closes BlueDriver/FIXD “what now” clarity gap. | `NextActionConsole`, Dashboard |
 | DTC-row “what worked” from solution history | UX2 | done | high | `DtcWhatWorkedChips` via classEvidence→solution-history; no invented fixes. | Dashboard DTC list, `solutionHistoryUi` |
 | Dashboard one-click simulate / import-log affordance | UX6 | done | medium | `EvidenceIngestPanel` on Dashboard; Journal keeps full export. | Dashboard, importObservationLog, simulateDriveSession |
+| Plain-English next-action + DTC tooltips | UX5 | done | medium | Fluent narration leads at-a-glance + proven list; class ids secondary. | `NextActionConsole`, Dashboard |
 | I/M readiness / monitor completion panel | UX4 | planned | high | Deferred: needs Mode 01 PID $01 STATUS bitfield (gateway + structured type), not a float PID. | `pid_map.py`, observations, Dashboard |
 | Mode 0A permanent DTC capture | S8 | planned | medium | UI can show `permanent` but gateway reads 03+07 only. | `obd_gateway` `read_dtcs` |
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | critical | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
@@ -611,6 +612,7 @@ actually maintain.
 | Dashboard next-action console (UX1) | 2026-07 | `NextActionConsole` — market-informed at-a-glance next step |
 | DTC-row verified-fix chips (UX2) | 2026-07 | classEvidence join → solution-history chips on Dashboard Active DTCs |
 | Dashboard evidence ingest ritual (UX6) | 2026-07 | Simulate drive + OBD log import on Dashboard; live scan stays Guide/CLI |
+| Plain-English Dashboard (UX5) | 2026-07 | Fluent narration leads next-action + proven classes; DTC title tooltips |
 
 ---
 

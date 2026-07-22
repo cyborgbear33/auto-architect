@@ -233,6 +233,8 @@ describe("Dashboard", () => {
     expect(
       await screen.findByText(/Next: Jeep Renegade: cylinder misfire under load/),
     ).toBeInTheDocument();
+    // Plain-English narration appears in the at-a-glance strip (not only class ids).
+    expect(screen.getAllByText(/P0300-P0304 \+ high load evidence/).length).toBeGreaterThan(0);
   });
 
   it("shows verified-fix chips on DTC rows joined via classEvidence", async () => {

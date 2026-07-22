@@ -1,4 +1,4 @@
-import type { DiagnosticProblem, Recommendation } from "@auto/semantic-types";
+import type { ClassNarration, DiagnosticProblem, Recommendation } from "@auto/semantic-types";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { api, queryKeys } from "../lib/api.ts";
@@ -25,10 +25,21 @@ function pickTopRec(recs: Recommendation[]): Recommendation | undefined {
   )[0];
 }
 
+/** Prefer operator-facing narration; fall back to the class id. */
+export function fluentForClass(className: string, narration: ClassNarration[] | undefined): string {
+  const hit = narration?.find((n) => n.className === className);
+  if (hit?.fluent?.trim() && hit.fluent !== className) return hit.fluent.trim();
+  return className;
+}
+
+function clip(text: string, max: number): string {
+  if (text.length <= max) return text;
+  return `${text.slice(0, max - 1)}…`;
+}
+
 /**
  * Dashboard “what now” strip — market apps (BlueDriver / FIXD) win on immediate
- * next-step clarity. We lead with proven classes + top recommendation without
- * turning Dashboard into a second Diagnosis page.
+ * next-step clarity and plain English. Lead with fluent narration + top rec.
  */
 export function NextActionConsole({ vehicleId }: { vehicleId: string }) {
   const recognitionQ = useQuery({
@@ -49,10 +60,12 @@ export function NextActionConsole({ vehicleId }: { vehicleId: string }) {
   });
 
   const proven = recognitionQ.data?.mostSpecific ?? [];
+  const narration = recognitionQ.data?.narration;
   const topRec = pickTopRec(recsQ.data ?? []);
   const activeCases = (problemsQ.data ?? []).filter((p) => ACTIVE.has(p.status));
   const hasEvidence = (provenanceQ.data?.batchCount ?? 0) > 0;
   const loading = recognitionQ.isLoading || recsQ.isLoading || problemsQ.isLoading;
+  const provenFluent = proven.map((cls) => fluentForClass(cls, narration));
 
   let headline: string;
   let detail: string;
@@ -72,23 +85,28 @@ export function NextActionConsole({ vehicleId }: { vehicleId: string }) {
   } else if (proven.length === 0) {
     headline = "Evidence present — nothing proven yet";
     detail =
-      "LOGOS has not confirmed a fault class from current observations. That is honest uncertainty, not “healthy”.";
+      "Nothing is confirmed from current observations. That is honest uncertainty, not a clean bill of health.";
     ctaLabel = "Review Diagnosis";
   } else if (topRec) {
     headline = `Next: ${topRec.title}`;
-    detail =
-      topRec.aemfPlaybook?.slice(0, 180) ||
-      topRec.reason ||
-      "Open recommendation ready — convert to a case or continue on Diagnosis.";
-    if (detail.length >= 180 && topRec.aemfPlaybook) detail = `${detail}…`;
+    const why = topRec.reason?.trim();
+    const narrLead = provenFluent[0];
+    detail = why
+      ? narrLead && narrLead !== topRec.title
+        ? `${why} (${clip(narrLead, 100)})`
+        : why
+      : clip(topRec.aemfPlaybook || narrLead || "Open recommendation ready on Diagnosis.", 220);
     ctaLabel = "Open Diagnosis";
   } else if (activeCases.length > 0) {
     headline = `${activeCases.length} active diagnostic case${activeCases.length === 1 ? "" : "s"}`;
-    detail = `Proven: ${proven.join(", ")}. Continue ranking, repair logging, or verify on Diagnosis.`;
+    detail = `${clip(provenFluent.join("; "), 160)} Continue ranking, repair logging, or verify on Diagnosis.`;
     ctaLabel = "Open Diagnosis";
   } else {
-    headline = `${proven.length} proven class${proven.length === 1 ? "" : "es"} — draft a case`;
-    detail = `${proven.join(", ")}. Refresh recommendations or draft a diagnostic problem.`;
+    headline =
+      proven.length === 1
+        ? `Proven: ${clip(provenFluent[0]!, 80)} — draft a case`
+        : `${proven.length} proven conditions — draft a case`;
+    detail = `${clip(provenFluent.join("; "), 180)} Refresh recommendations or draft a diagnostic problem.`;
     ctaLabel = "Open Diagnosis";
   }
 
@@ -108,12 +126,22 @@ export function NextActionConsole({ vehicleId }: { vehicleId: string }) {
           <p className="mt-1 text-sm text-slate-600">{detail}</p>
           {proven.length > 0 && (
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              {proven.slice(0, 3).map((cls) => (
-                <span key={cls} className="inline-flex flex-col gap-0.5">
-                  <span className="text-xs font-medium text-slate-700">{cls}</span>
-                  <AemfAspectChips className={cls} />
-                </span>
-              ))}
+              {proven.slice(0, 3).map((cls) => {
+                const fluent = fluentForClass(cls, narration);
+                return (
+                  <span key={cls} className="inline-flex max-w-xs flex-col gap-0.5">
+                    <span className="text-xs font-medium leading-snug text-slate-800">
+                      {fluent}
+                    </span>
+                    {fluent !== cls && (
+                      <span className="font-mono text-[10px] text-slate-400" title="Fault class id">
+                        {cls}
+                      </span>
+                    )}
+                    <AemfAspectChips className={cls} />
+                  </span>
+                );
+              })}
               {proven.length > 3 && (
                 <span className="text-xs text-slate-400">+{proven.length - 3} more</span>
               )}

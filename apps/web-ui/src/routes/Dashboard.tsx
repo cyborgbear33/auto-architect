@@ -133,35 +133,47 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
             </p>
           )}
           <ul className="space-y-1.5">
-            {dtcsQ.data?.map((dtc) => (
-              <li
-                key={`${dtc.code}-${dtc.status}`}
-                className="rounded-md bg-slate-50 px-3 py-2 text-sm"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono font-semibold text-slate-800">{dtc.code}</span>
-                  <span className="min-w-0 flex-1 text-slate-500">
-                    {dtc.description?.trim() || lookupDtc(dtc.code)?.description || "—"}
-                  </span>
-                  <Pill
-                    tone={
-                      dtc.status === "permanent"
-                        ? "critical"
-                        : dtc.status === "pending"
-                          ? "low"
-                          : "high"
-                    }
-                  >
-                    {dtc.status}
-                  </Pill>
-                </div>
-                <DtcWhatWorkedChips
-                  vehicleId={vehicleId}
-                  dtcCode={dtc.code}
-                  classEvidence={recognitionQ.data?.classEvidence}
-                />
-              </li>
-            ))}
+            {dtcsQ.data?.map((dtc) => {
+              const desc =
+                dtc.description?.trim() || lookupDtc(dtc.code)?.description || "No description";
+              const linkedClass = recognitionQ.data?.classEvidence?.find((e) =>
+                e.dtcs.some((d) => d.code.toUpperCase() === dtc.code.toUpperCase()),
+              )?.className;
+              const fluent = linkedClass
+                ? recognitionQ.data?.narration?.find((n) => n.className === linkedClass)?.fluent
+                : undefined;
+              const tip = [desc, fluent && fluent !== linkedClass ? fluent : null, linkedClass]
+                .filter(Boolean)
+                .join(" · ");
+              return (
+                <li
+                  key={`${dtc.code}-${dtc.status}`}
+                  className="rounded-md bg-slate-50 px-3 py-2 text-sm"
+                  title={tip}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono font-semibold text-slate-800">{dtc.code}</span>
+                    <span className="min-w-0 flex-1 text-slate-500">{desc}</span>
+                    <Pill
+                      tone={
+                        dtc.status === "permanent"
+                          ? "critical"
+                          : dtc.status === "pending"
+                            ? "low"
+                            : "high"
+                      }
+                    >
+                      {dtc.status}
+                    </Pill>
+                  </div>
+                  <DtcWhatWorkedChips
+                    vehicleId={vehicleId}
+                    dtcCode={dtc.code}
+                    classEvidence={recognitionQ.data?.classEvidence}
+                  />
+                </li>
+              );
+            })}
           </ul>
         </section>
 
@@ -239,9 +251,15 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
               const evidence = recognitionQ.data?.classEvidence?.find((e) => e.className === cls);
               return (
                 <li key={cls} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
-                  <Pill tone="high">{cls}</Pill>
+                  {narr?.fluent && narr.fluent !== cls ? (
+                    <>
+                      <p className="text-sm font-medium text-slate-800">{narr.fluent}</p>
+                      <Pill tone="high">{cls}</Pill>
+                    </>
+                  ) : (
+                    <Pill tone="high">{cls}</Pill>
+                  )}
                   <AemfAspectChips className={cls} />
-                  {narr && <p className="mt-1 text-xs text-slate-600">{narr.fluent}</p>}
                   <AemfPlaybookProse className={cls} />
                   <ClassEvidencePanel evidence={evidence} />
                 </li>
