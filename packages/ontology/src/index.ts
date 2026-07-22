@@ -22,6 +22,7 @@ import mode06DictionaryJson from "../mode06-dictionary.json" with { type: "json"
 import pidDictionaryJson from "../pid-dictionary.json" with { type: "json" };
 import specialProceduresJson from "../special-procedures.json" with { type: "json" };
 import vehicleProfilesJson from "../vehicle-profiles.json" with { type: "json" };
+import vehicleSystemAspectsJson from "../vehicle-system-aspects.json" with { type: "json" };
 import {
   type LintableOntology,
   lintOntology,
@@ -42,6 +43,8 @@ import {
   SpecialProceduresFileSchema,
   type VehicleProfilesFile,
   VehicleProfilesFileSchema,
+  type VehicleSystemAspectId,
+  VehicleSystemAspectsFileSchema,
 } from "./schemas.ts";
 
 export type {
@@ -68,6 +71,9 @@ export {
   SpecialProcedureEntrySchema,
   SpecialProceduresFileSchema,
   VehicleProfilesFileSchema,
+  type VehicleSystemAspectId,
+  VehicleSystemAspectIdSchema,
+  VehicleSystemAspectsFileSchema,
 } from "./schemas.ts";
 export { lintOntology };
 
@@ -90,6 +96,7 @@ const knownCampaignsFile = KnownCampaignsFileSchema.parse(knownCampaignsJson);
 const specialProceduresFile = SpecialProceduresFileSchema.parse(specialProceduresJson);
 const cascadeEdgesFile = CascadeEdgesFileSchema.parse(cascadeEdgesJson);
 const manualConditionsFile = ManualConditionsFileSchema.parse(manualConditionsJson);
+const vehicleSystemAspectsFile = VehicleSystemAspectsFileSchema.parse(vehicleSystemAspectsJson);
 
 const dtcDictionary: Record<string, DtcDictionaryEntry> = dtcDictionaryFile.codes;
 const pidDictionary: Record<string, PidDictionaryEntry> = pidDictionaryFile.pids;
@@ -252,6 +259,53 @@ export function getSpecialProcedure(id: string): SpecialProcedureEntry | undefin
   return specialProceduresFile.procedures.find((p) => p.id === id);
 }
 
+/** Named TBox view class list (fault candidates for realize `classify`). */
+export function classesForView(viewName: string): string[] {
+  const views = (dlOntologyJson as { views?: Record<string, { classes?: string[] }> }).views;
+  const classes = views?.[viewName]?.classes;
+  return Array.isArray(classes) ? [...classes] : [];
+}
+
+/** AEMF aspects for a fault class (empty when unmapped — framing gap, not a realize miss). */
+export function aspectsForClass(className: string): VehicleSystemAspectId[] {
+  return vehicleSystemAspectsFile.byClass[className] ?? [];
+}
+
+export function aspectLabel(aspect: VehicleSystemAspectId): string {
+  return vehicleSystemAspectsFile.aspects[aspect].label;
+}
+
+export function aspectSummary(aspect: VehicleSystemAspectId): string {
+  return vehicleSystemAspectsFile.aspects[aspect].summary;
+}
+
+export function aspectPlaybookGuidance(aspect: VehicleSystemAspectId): string {
+  return vehicleSystemAspectsFile.aspects[aspect].playbookGuidance;
+}
+
+export function listVehicleSystemAspectIds(): VehicleSystemAspectId[] {
+  return ["air", "electricity", "mechanical", "fluid"];
+}
+
+/**
+ * Principled AEMF playbook prose for a proven (or framed) fault class.
+ * Empty when unmapped. Never claims realize membership — situates approach only.
+ */
+export function aemfPlaybookProse(className: string): string | undefined {
+  const aspects = aspectsForClass(className);
+  if (aspects.length === 0) return undefined;
+  const media = aspects.map(aspectLabel).join(" · ");
+  const classNote = vehicleSystemAspectsFile.playbookNotes?.[className];
+  const guidance = aspects.map((a) => `${aspectLabel(a)}: ${aspectPlaybookGuidance(a)}`).join(" ");
+  const parts = [
+    `System media: ${media}.`,
+    classNote,
+    guidance,
+    "Framing only — class membership stays LOGOS-proven from OBD evidence.",
+  ].filter((p): p is string => Boolean(p));
+  return parts.join(" ");
+}
+
 function zodIssues(prefix: string, err: ZodError): OntologyLintIssue[] {
   return err.issues.map((issue) => ({
     code: "registry_schema_invalid",
@@ -298,6 +352,10 @@ export function runOntologyLint(
   if (!manualParsed.success) {
     schemaErrors.push(...zodIssues("manual-conditions.json", manualParsed.error));
   }
+  const aspectsParsed = VehicleSystemAspectsFileSchema.safeParse(vehicleSystemAspectsJson);
+  if (!aspectsParsed.success) {
+    schemaErrors.push(...zodIssues("vehicle-system-aspects.json", aspectsParsed.error));
+  }
 
   if (
     schemaErrors.length > 0 ||
@@ -308,7 +366,8 @@ export function runOntologyLint(
     !campaignsParsed.success ||
     !proceduresParsed.success ||
     !cascadeParsed.success ||
-    !manualParsed.success
+    !manualParsed.success ||
+    !aspectsParsed.success
   ) {
     return { ok: false, errors: schemaErrors, warnings: [] };
   }

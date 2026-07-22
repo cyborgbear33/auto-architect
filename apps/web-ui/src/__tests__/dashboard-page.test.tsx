@@ -144,6 +144,7 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
           createdAt: "2026-01-01T00:00:00Z",
         },
       ]),
+      listProblems: vi.fn().mockResolvedValue([]),
       refreshRecommendations: vi.fn(),
       markRecommendationStatus: vi.fn(),
       convertRecommendation: vi.fn(),
@@ -190,6 +191,19 @@ describe("Dashboard", () => {
       </QueryClientProvider>,
     );
     expect(await screen.findByText(/Latest evidence: Simulated/)).toBeInTheDocument();
+  });
+
+  it("leads with an at-a-glance next action from the top recommendation", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <Dashboard />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText("At a glance")).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Next: Jeep Renegade: cylinder misfire under load/),
+    ).toBeInTheDocument();
   });
 
   it("shows the live gauge strip with units", async () => {

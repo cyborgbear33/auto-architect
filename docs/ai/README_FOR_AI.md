@@ -5,6 +5,9 @@
 > `../metalanguage` connects, current status, and how to continue). This file is
 > the coding-rules read order to consult once you start editing.
 >
+> **Want the whole product story first?** Read **`docs/WALKTHROUGH.md`**
+> (theory + features + technology). Then code against the guides below.
+>
 > **Learning the architecture as a course?** Read
 > **`docs/LESSON_AGENT_DETERMINISTIC_APPS.md`** (pointer) → full lesson in
 > `metalanguage/docs/LESSON_AGENT_DETERMINISTIC_APPS.md` (theory, workshop,
@@ -20,7 +23,7 @@ Before making changes, read files in this order:
 
 1. `docs/ai/GLOBAL_DEV_GUIDE.md`
 2. `docs/ai/AI_CODING_RULES.md`
-3. `docs/ai/CODE_STANDARDS.md` — TS strictness, Biome, `pnpm healthcheck` DoD
+3. `docs/ai/CODE_STANDARDS.md` — TS strictness, Biome, `pnpm healthcheck` / `--full` DoD
 4. `docs/ai/ONTOLOGY_DEV_GUIDE.md`
 5. Domain-specific guide for the change:
    - `UI_DEV_GUIDE.md` — technical/architectural rules for the web-ui

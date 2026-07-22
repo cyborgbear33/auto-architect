@@ -142,6 +142,6 @@ See [`ADD_A_VEHICLE.md`](ADD_A_VEHICLE.md).
 - Gateway: pytest with fakes (no hardware required).
 - UI: React Testing Library; mock `api` module; await async finds.
 - Prefer failing closed on safety holds.
-- Before finishing meaningful work: `pnpm healthcheck` green.
+- Before finishing meaningful work: `pnpm healthcheck --full` green (day-to-day: `pnpm healthcheck`).
 
 See [`TESTING_DEV_GUIDE.md`](TESTING_DEV_GUIDE.md) for the required-layer matrix.

@@ -51,7 +51,8 @@ Then open http://localhost:5173 — the Dashboard should show DTC `P0304` and th
 ## Testing
 
 ```bash
-pnpm healthcheck             # one-shot: typecheck + biome + tests + ontology + gateway + UI build
+pnpm healthcheck             # sanity (default): typecheck ∥ biome ∥ tests ∥ ontology
+pnpm healthcheck --full      # complete DoD (+ gateway + UI build)
 # or discrete:
 pnpm -r typecheck            # every TS package/app
 pnpm lint                    # Biome format/lint
@@ -67,6 +68,7 @@ CI (`.github/workflows/ci.yml`) runs typecheck, Biome, tests, ontology lint, and
 | Doc | Use |
 |---|---|
 | [`docs/AI_HANDOFF.md`](docs/AI_HANDOFF.md) | **Start here** — orientation for humans and AI agents |
+| [`docs/WALKTHROUGH.md`](docs/WALKTHROUGH.md) | Narrative tour — theory, features, technology |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | As-built service graph and contracts |
 | [`docs/FUTURE_FEATURES.md`](docs/FUTURE_FEATURES.md) | Canonical backlog (planned ↔ implemented) |
 | [`docs/ai/README_FOR_AI.md`](docs/ai/README_FOR_AI.md) | Coding-rules read order |

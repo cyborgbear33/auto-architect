@@ -564,6 +564,11 @@ export interface Recommendation {
   generatedFromProcedureIds?: string[];
   /** Discriminator for UI + convert. Defaults to class when omitted (legacy). */
   source?: RecommendationSource;
+  /**
+   * AEMF playbook framing prose (air/electricity/mechanical/fluid).
+   * Situates approach order — never a second realize claim (F12).
+   */
+  aemfPlaybook?: string;
   generatedByProblem?: SemanticId;
   createdAt: IsoTimestamp;
 }

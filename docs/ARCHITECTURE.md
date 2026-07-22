@@ -5,6 +5,7 @@ It explains how the system actually works today, the contracts between layers,
 what is deliberately deferred, and the known limitations worth fixing early.
 
 For *normative rules*, see `docs/ai/*`. For orientation, see `docs/AI_HANDOFF.md`.
+For a narrative theory/features/tech tour, see `docs/WALKTHROUGH.md`.
 For backlog, see `docs/FUTURE_FEATURES.md`.
 
 ---
@@ -247,8 +248,8 @@ Operator detail: [`apps/obd-gateway/README.md`](../apps/obd-gateway/README.md).
   without LOGOS; CI runs them for real only in the `ontology-lint` job
   (`verify` deliberately omits the LOGOS install)
 - Bridge-drift (advisory): `pnpm check:bridge-drift` vs garden-architect's `@garden/logos-bridge`
-- One-shot local gate: `pnpm healthcheck` (typecheck∥biome + tests + well-formedness +
-  gateway + UI build + drift check; auto-sets `LOGOS_PYTHON_BIN` to `.venv` when present)
+- One-shot local gate: `pnpm healthcheck` (sanity: typecheck∥biome∥tests∥ontology) or
+  `pnpm healthcheck --full` (+ gateway + UI build); bridge-drift advisory in both
 - CI: `.github/workflows/ci.yml` — `verify` (Fake path) + `ontology-lint` (real LOGOS)
 
 Unit tests that need LOGOS behavior without Python inject `FakeLogosBridge`.

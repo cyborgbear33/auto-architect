@@ -3,8 +3,9 @@
 ## Commands
 
 ```bash
-pnpm healthcheck             # one-shot summary of everything below
-pnpm healthcheck --fast      # skip obd-gateway lint/tests + web-ui build
+pnpm healthcheck             # one entry point — sanity (default)
+pnpm healthcheck --full      # complete DoD (+ gateway + UI build)
+pnpm healthcheck --fast      # alias for sanity
 pnpm -r typecheck
 pnpm lint                    # Biome check
 pnpm -r test                 # all TS packages/apps (vitest)
@@ -14,7 +15,7 @@ pnpm lint:ontology --check   # soft-skip well-formedness if logos missing; still
 pnpm obd-gateway:lint        # Ruff check + format --check
 pnpm obd-gateway:test        # pytest
 pnpm --filter @auto/web-ui build
-pnpm check:bridge-drift      # advisory: logos-bridge vs garden-architect's copy
+pnpm check:bridge-drift      # advisory: logos-bridge vs software-architect seam
 ```
 
 CI (`.github/workflows/ci.yml`):
@@ -27,7 +28,7 @@ CI (`.github/workflows/ci.yml`):
 ## Required test layers
 
 When you change a seam, cover the matching layer. Docs alone are not enough —
-CI + `pnpm healthcheck` enforce these.
+CI + `pnpm healthcheck --full` enforce these.
 
 | Layer | Where | When required |
 |---|---|---|
@@ -43,13 +44,19 @@ CI + `pnpm healthcheck` enforce these.
 
 ## Healthcheck steps
 
-1. **typecheck ∥ biome** (parallel)
-2. **`pnpm -r test`** (includes ontology parity, API smoke, logos-bridge integration if logos is on `LOGOS_PYTHON_BIN`)
-3. **`pnpm lint:ontology --wellformed-only`** — unique LOGOS `ontology --json` gate (parity already covered by step 2)
-4. **obd-gateway Ruff** (skipped with `--fast` or missing `.venv`)
-5. **obd-gateway pytest** (skipped with `--fast` or missing `.venv`)
-6. **web-ui build** (skipped with `--fast`)
-7. **bridge-drift** (advisory only)
+**Sanity (default `pnpm healthcheck`):**
+
+1. **typecheck ∥ biome ∥ tests ∥ ontology well-formedness** (all parallel)
+2. **bridge-drift** (advisory only)
+
+**Full (`pnpm healthcheck --full`)** adds, after sanity:
+
+3. **obd-gateway Ruff** (skipped if `.venv` missing)
+4. **obd-gateway pytest** (skipped if `.venv` missing)
+5. **web-ui build**
+
+Parity vitest already runs under `pnpm -r test`; the ontology step is the unique
+LOGOS `ontology --json` gate.
 
 If `LOGOS_PYTHON_BIN` is unset and `.venv/bin/python3` exists, healthcheck sets
 `LOGOS_PYTHON_BIN` to that path automatically (same Python obd-gateway uses).
@@ -144,12 +151,17 @@ detect.
 
 ## What "green" means
 
-Before merging meaningful changes, prefer:
+Day-to-day:
 
 ```bash
 pnpm healthcheck
 ```
 
+Before merging meaningful changes:
+
+```bash
+pnpm healthcheck --full
+```
 Or equivalently:
 
 1. `pnpm -r typecheck`

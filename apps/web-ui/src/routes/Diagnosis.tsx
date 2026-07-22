@@ -2,6 +2,8 @@ import type { DiagnosticProblem, ProblemStatus } from "@auto/semantic-types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { AemfAspectChips } from "../components/AemfAspectChips.tsx";
+import { AemfPlaybookProse } from "../components/AemfPlaybookProse.tsx";
 import { CascadePrognosisPanel } from "../components/CascadePrognosisPanel.tsx";
 import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
 import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
@@ -184,6 +186,8 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                 >
                   <div className="min-w-0 flex-1">
                     <span className="font-medium text-slate-800">{cls}</span>
+                    <AemfAspectChips className={cls} />
+                    <AemfPlaybookProse className={cls} />
                     {narr && <p className="mt-0.5 text-xs text-slate-500">{narr.fluent}</p>}
                     <ClassEvidencePanel evidence={evidence} />
                   </div>
@@ -239,6 +243,9 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                     {problem.triggeredByClass ?? "manual"}
                   </span>
                   <span className="ml-2 text-slate-500">{problem.statement.currentState}</span>
+                  {problem.triggeredByClass && (
+                    <AemfAspectChips className={problem.triggeredByClass} />
+                  )}
                   {problem.verification?.result && (
                     <span className="mt-0.5 block text-xs text-slate-500">
                       verify: {problem.verification.result}

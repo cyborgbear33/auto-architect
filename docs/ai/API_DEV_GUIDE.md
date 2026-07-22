@@ -37,7 +37,7 @@ allowed to append evidence; it still does not classify).
 
 | Service | May call LOGOS? | Notes |
 |---|---|---|
-| `RecognitionService` | `realize` | Never invent "Healthy" |
+| `RecognitionService` | `realize` (batched `classify` under `scope:auto`) | Never invent "Healthy"; never one-shot the full view TBox (disjunctive classes hang the engine) |
 | `PolicyService` | `reason` | Use `folSafeAtom` for individual ids |
 | `SolverService` | `solve` | Requires `desiredState.successCriteria` on problems |
 | `ForecastService` | optional / helpers | Multi-signal trends (`summary`); optional `sessionId` scope; oil + LTFT + load → realize |

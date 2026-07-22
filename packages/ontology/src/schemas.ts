@@ -180,6 +180,32 @@ export const CascadeEdgesFileSchema = z.object({
 
 export type CascadeEdgesFile = z.infer<typeof CascadeEdgesFileSchema>;
 
+/** AEMF media axes — framing only, not realize membership. */
+export const VehicleSystemAspectIdSchema = z.enum(["air", "electricity", "mechanical", "fluid"]);
+
+export const VehicleSystemAspectDefSchema = z.object({
+  label: z.string().min(1),
+  summary: z.string().min(1),
+  /** Ordered approach guidance for playbooks situated in this medium. */
+  playbookGuidance: z.string().min(1),
+});
+
+export const VehicleSystemAspectsFileSchema = z.object({
+  disclaimer: z.string().optional(),
+  aspects: z.object({
+    air: VehicleSystemAspectDefSchema,
+    electricity: VehicleSystemAspectDefSchema,
+    mechanical: VehicleSystemAspectDefSchema,
+    fluid: VehicleSystemAspectDefSchema,
+  }),
+  byClass: z.record(z.array(VehicleSystemAspectIdSchema).min(1)),
+  /** Optional per-class playbook order / caution — framing only. */
+  playbookNotes: z.record(z.string().min(1)).optional(),
+});
+
+export type VehicleSystemAspectId = z.infer<typeof VehicleSystemAspectIdSchema>;
+export type VehicleSystemAspectsFile = z.infer<typeof VehicleSystemAspectsFileSchema>;
+
 export type DtcDictionaryFile = z.infer<typeof DtcDictionaryFileSchema>;
 export type PidDictionaryFile = z.infer<typeof PidDictionaryFileSchema>;
 export type PidDictionaryEntry = z.infer<typeof PidDictionaryEntrySchema>;

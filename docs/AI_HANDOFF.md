@@ -6,6 +6,9 @@ repeating them. Goal: after this, you know **what the project is, how it's set
 up, what it does, exactly where it stands, and how to continue** — safely and in
 the established style.
 
+**Narrative tour of this product:** theory, feature journey, and technology in
+one place — [`docs/WALKTHROUGH.md`](WALKTHROUGH.md).
+
 **Learning the pattern (theory + practice):** if you want a complete lesson on
 building an agent + deterministic ontology/reasoning app — with a runnable
 LOGOS workshop and garden-architect as the original worked example — start at
@@ -113,7 +116,8 @@ pnpm install                       # also runs scripts/setup-solver.mjs --check
 **Run & verify:**
 
 ```bash
-pnpm healthcheck             # one-shot: typecheck + biome + tests + ontology + gateway + UI build
+pnpm healthcheck             # sanity (default): typecheck ∥ biome ∥ tests ∥ ontology
+pnpm healthcheck --full      # complete DoD (+ gateway + UI build)
 # or discrete:
 pnpm -r typecheck
 pnpm lint
@@ -238,12 +242,13 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 
 | Doc | Use |
 |---|---|
+| [`WALKTHROUGH.md`](WALKTHROUGH.md) | **Narrative tour** — theory + features + technology |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | As-built service graph and contracts |
 | [`FUTURE_FEATURES.md`](FUTURE_FEATURES.md) | Canonical backlog |
 | [`ai/README_FOR_AI.md`](ai/README_FOR_AI.md) | Read order for coding |
 | [`ai/GLOBAL_DEV_GUIDE.md`](ai/GLOBAL_DEV_GUIDE.md) | Stack + monorepo invariants |
 | [`ai/AI_CODING_RULES.md`](ai/AI_CODING_RULES.md) | Ontology-first coding rules |
-| [`ai/CODE_STANDARDS.md`](ai/CODE_STANDARDS.md) | TS / Biome / `pnpm healthcheck` DoD |
+| [`ai/CODE_STANDARDS.md`](ai/CODE_STANDARDS.md) | TS / Biome / `pnpm healthcheck` (sanity) + `--full` DoD |
 | [`ai/UX_GUIDELINES.md`](ai/UX_GUIDELINES.md) | Product UX / trust / IA |
 | [`ai/UI_DEV_GUIDE.md`](ai/UI_DEV_GUIDE.md) | React/TanStack technical rules |
 | [`ai/API_DEV_GUIDE.md`](ai/API_DEV_GUIDE.md) | Fastify routes + ActionService gate |

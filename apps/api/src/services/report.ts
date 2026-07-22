@@ -552,6 +552,9 @@ function composeMarkdown(input: {
       if (r.risk !== undefined) bits.push(`risk ${(r.risk * 100).toFixed(0)}%`);
       if (r.status !== "new") bits.push(r.status);
       lines.push(`- **${r.title}** (${bits.join(" · ")}) — ${r.reason}`);
+      if (r.aemfPlaybook) {
+        lines.push(`  - Playbook framing: ${r.aemfPlaybook}`);
+      }
       if (r.generatedFromClasses.length > 0) {
         lines.push(`  - Classes: ${r.generatedFromClasses.join(", ")}`);
       }

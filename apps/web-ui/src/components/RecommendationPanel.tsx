@@ -2,6 +2,8 @@ import type { Recommendation } from "@auto/semantic-types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { api, queryKeys } from "../lib/api.ts";
+import { AemfAspectChips } from "./AemfAspectChips.tsx";
+import { AemfPlaybookProse } from "./AemfPlaybookProse.tsx";
 import { CalibrationExplainChip } from "./Explainability.tsx";
 
 const URGENCY_STYLES: Record<string, string> = {
@@ -71,6 +73,10 @@ function RecommendationCard({
             <span className="text-[11px] uppercase tracking-wide text-slate-400">{rec.status}</span>
           </div>
           <p className="mt-1 text-xs text-slate-500">{rec.reason}</p>
+          {faultClass && <AemfAspectChips className={faultClass} />}
+          {(rec.aemfPlaybook || faultClass) && (
+            <AemfPlaybookProse className={faultClass} prose={rec.aemfPlaybook} />
+          )}
           {rec.calibrationExplain && (
             <CalibrationExplainChip explain={rec.calibrationExplain} meta={rec.calibrationMeta} />
           )}

@@ -2,6 +2,8 @@ import { lookupDtc } from "@auto/ontology";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { AemfAspectChips } from "../components/AemfAspectChips.tsx";
+import { AemfPlaybookProse } from "../components/AemfPlaybookProse.tsx";
 import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
 import { DriveSessionsPanel } from "../components/DriveSessionsPanel.tsx";
 import { EvidencePanels } from "../components/EvidencePanels.tsx";
@@ -13,6 +15,7 @@ import {
   vehicleLabel,
 } from "../components/Layout.tsx";
 import { LiveGaugeStrip } from "../components/LiveGaugeStrip.tsx";
+import { NextActionConsole } from "../components/NextActionConsole.tsx";
 import { RecommendationPanel } from "../components/RecommendationPanel.tsx";
 import { ReportDownload } from "../components/ReportDownload.tsx";
 import { api, queryKeys } from "../lib/api.ts";
@@ -105,6 +108,8 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
       <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
         <EvidenceSourceBadge provenance={provenanceQ.data} />
       </div>
+
+      <NextActionConsole vehicleId={vehicleId} />
 
       <div className="mb-4">
         <LiveGaugeStrip vehicleId={vehicleId} />
@@ -224,7 +229,9 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
               return (
                 <li key={cls} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
                   <Pill tone="high">{cls}</Pill>
+                  <AemfAspectChips className={cls} />
                   {narr && <p className="mt-1 text-xs text-slate-600">{narr.fluent}</p>}
+                  <AemfPlaybookProse className={cls} />
                   <ClassEvidencePanel evidence={evidence} />
                 </li>
               );

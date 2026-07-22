@@ -164,7 +164,7 @@ streaming or polled OBD evidence:
 
 | Page | One job |
 |---|---|
-| Dashboard | Present condition: DTCs, proven classes, oil trend, top recommendations |
+| Dashboard | Present condition + **at-a-glance next action**; DTCs, proven classes, trends, recommendations |
 | Diagnosis | Draft/solve problems from proven classes; demonstrate safety holds |
 | Problem detail | Show solution + ranked actions; log repair outcome |
 | Campaigns | Match recalls/TSBs for the selected vehicle |

@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useState } from "react";
+import { AemfAspectChips } from "../components/AemfAspectChips.tsx";
+import { AemfPlaybookProse } from "../components/AemfPlaybookProse.tsx";
 import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
 import { CounterfactualsPanel, DisqualifiedActionsPanel } from "../components/Explainability.tsx";
 import { PageHeader } from "../components/Layout.tsx";
@@ -223,6 +225,12 @@ export function ProblemDetail() {
             <dd className="text-slate-700">{problem.statement.whyItMatters ?? "—"}</dd>
           </div>
         </dl>
+        {problem.triggeredByClass && (
+          <div className="mt-3">
+            <AemfAspectChips className={problem.triggeredByClass} />
+            <AemfPlaybookProse className={problem.triggeredByClass} />
+          </div>
+        )}
         {problem.desiredState?.successCriteria && (
           <p className="mt-3 rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-500">
             <span className="font-semibold">Success criteria:</span>{" "}

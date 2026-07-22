@@ -20,6 +20,7 @@ Then return here for the automotive domain swap:
 
 | Guide | Use |
 |---|---|
+| [`WALKTHROUGH.md`](WALKTHROUGH.md) | Auto-architect narrative: theory + features + tech |
 | [`AI_HANDOFF.md`](AI_HANDOFF.md) | Cross-repo orientation for auto-architect |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | As-built service graph |
 | [`ai/ADD_A_CARTRIDGE.md`](ai/ADD_A_CARTRIDGE.md) | Extend a diagnostic domain without brain surgery |

@@ -32,7 +32,7 @@ async function composeCycle(
   problem: DiagnosticProblem,
   decisions: DecisionRecord[],
   recommendations: Recommendation[],
-  solutionHistory: SolutionHistoryService,
+  historyForClass: (faultClass: string) => ReturnType<SolutionHistoryService["forVehicle"]>,
 ): Promise<LearningCycle> {
   const problemDecisions = decisions
     .filter((d) => d.problemId === problem.id)
@@ -49,7 +49,7 @@ async function composeCycle(
 
   let priorDelta: LearningCycle["priorDelta"];
   if (problem.triggeredByClass && problem.actions.length > 0) {
-    const history = await solutionHistory.forVehicle(problem.vehicleId, problem.triggeredByClass);
+    const history = await historyForClass(problem.triggeredByClass);
     const calibration = calibratePlaybook({
       faultClass: problem.triggeredByClass,
       actions: problem.actions,
@@ -111,10 +111,23 @@ export class LearningCycleService {
     const decisions = await this.store.decisions.listByVehicle(vehicleId);
     const recommendations = await this.store.recommendations.listByVehicle(vehicleId);
 
+    /** One history fetch per fault class — avoids N+1 across cycles. */
+    const historyByClass = new Map<
+      string,
+      Awaited<ReturnType<SolutionHistoryService["forVehicle"]>>
+    >();
+    const historyForClass = async (faultClass: string) => {
+      const cached = historyByClass.get(faultClass);
+      if (cached) return cached;
+      const history = await this.solutionHistory.forVehicle(vehicleId, faultClass);
+      historyByClass.set(faultClass, history);
+      return history;
+    };
+
     const cycles: LearningCycle[] = [];
     for (const problem of problems) {
       if (!isCycleWorthy(problem, decisions)) continue;
-      cycles.push(await composeCycle(problem, decisions, recommendations, this.solutionHistory));
+      cycles.push(await composeCycle(problem, decisions, recommendations, historyForClass));
     }
 
     cycles.sort((a, b) => b.openedAt.localeCompare(a.openedAt));

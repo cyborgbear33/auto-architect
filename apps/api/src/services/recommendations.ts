@@ -1,5 +1,5 @@
 import { draftForClass } from "@auto/cartridges";
-import { listSpecialProcedures } from "@auto/ontology";
+import { aemfPlaybookProse, listSpecialProcedures } from "@auto/ontology";
 import type { CandidateAction, DiagnosticProblem, Recommendation } from "@auto/semantic-types";
 import { conflict, notFound, validationError } from "../lib/errors.ts";
 import { newId, nowIso } from "../lib/ids.ts";
@@ -83,6 +83,7 @@ export class RecommendationService {
       const richness = playbookCostRisk(calibratedActions);
       const calMeta = bestCalibrationMeta(calibration);
       const reasonBase = draft.statement.whyItMatters ?? draft.statement.gap;
+      const aemfPlaybook = aemfPlaybookProse(className);
       const rec: Recommendation = {
         id: newId("rec"),
         vehicleId,
@@ -90,6 +91,7 @@ export class RecommendationService {
         priority: calibration.priority,
         status: "new",
         reason: reasonBase,
+        ...(aemfPlaybook ? { aemfPlaybook } : {}),
         ...(calibration.explain ? { calibrationExplain: calibration.explain } : {}),
         ...(calMeta ? { calibrationMeta: calMeta } : {}),
         confidence: calibration.recommendationConfidence,

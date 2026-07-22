@@ -55,7 +55,31 @@ multi-piece plans live in the next section.
 | **Reporting** — shareable diagnostic note | **partial** | Markdown + garage JSON/CSV export/import; Learning section | Print/PDF polish | Print-friendly HTML/PDF |
 
 **Spine that already works:** ingest → realize → draft/solve → recommend → policy hold → log-repair → verify → Journal.  
-**Not yet a complete garage product:** live scan UX, drive sessions, session-aware history.
+**Not yet a complete garage product:** live scan UX reliability, second-vehicle OEM depth, richer AEMF framing.
+
+### North star — “You are the vehicle”
+
+Learn everything lawfully available from OBD-II / CAN (and guided enhanced
+sessions when scoped): be informed, recommend, decide, enact (or guide)
+actions, and remember outcomes for sure reference. The operator experiences a
+principled companion that models the vehicle’s state — never invents meaning
+outside propose/dispose.
+
+**Ontological learning tactic — AEMF (Air / Electricity / Mechanical / Fluid):**
+every fault class, recommendation, and playbook should be situable in one or
+more of these media. Delivery and ranking stay evidence-backed; AEMF is framing
+for comprehension and playbook selection, not a second classifier.
+
+| Aspect | Typical OBD/CAN signals | Example classes |
+|---|---|---|
+| **Air** | MAF/MAP, O2, fuel trim, EVAP, EGR, secondary air | Lean/Rich, Evap*, Catalyst*, O2*, Egr*, SecondaryAir* |
+| **Electricity** | Circuit DTCs, coil/injector/sensor circuits, heaters | *CircuitFault, IgnitionCoil*, Injector*, Knock*, TPS*, O2Heater* |
+| **Mechanical** | Misfire under load, cam/crank correlation, VVT Mode 06 | MisfireUnderLoad, CamCrankCorrelationFault |
+| **Fluid** | Oil trends, coolant/thermostat, MultiAir oil starvation | ChronicOilConsumption, Coolant*, MultiAirOilStarvation |
+
+**Integrity boundary for actuation:** Mode 01–07 + guided external procedures
+remain the default. Bi-directional UDS / flashing stay out of scope until an
+explicit enhanced-session project — memory and recommendations must still work.
 
 **Cross-cutting product strategy (applies to every goal):**
 
@@ -70,6 +94,10 @@ multi-piece plans live in the next section.
    alone and still leave the spine green.
 5. **Prefer reuse over new surfaces** — extend Dashboard / Diagnosis / Journal /
    ProblemDetail before inventing nav items.
+6. **AEMF framing** — prefer situating proven classes and recommendations in
+   air/electricity/mechanical/fluid without inventing membership.
+7. **Continuous improvement** — discover → log here → build by value/priority
+   (integrity → live evidence → ontology depth → UX polish).
 
 ---
 
@@ -340,12 +368,16 @@ never invent pad/rotor/bearing state from Mode 01 alone.
 | F9 | LearningCycle read-model (compose from problems + decisions + calibration) | done | `LearningCycleService`; `GET .../learning-cycles`; Diagnosis/ProblemDetail panel |
 | F10 | Sample-size UX on WhatWorked / recs / calibration chips / reports | done | `calibrationMeta`; n= chips; report Learning section |
 | F11 | KnowledgeGap proposal queue (detect + accept/dismiss + export; never auto-write TBox) | done | `KnowledgeGapService`; store `gapProposals`; Diagnosis/Journal panel |
+| F12 | AEMF aspect catalog (air/electricity/mechanical/fluid) on fault classes | done | Catalog + chips + per-aspect/class playbook prose on recs / Diagnosis / ProblemDetail |
+| F13 | Logos-bridge subprocess via temp file (not stdin) for reliable realize | done | `@seam/logos-bridge` `runJson` writes temp JSON path (no stdin hang) |
+| F14 | Batched realize classify (avoid full-view tableau hang) | done | RecognitionService chunks view classes; scope:auto per batch |
 
 **Seams:** ForecastService, recognition, RecommendationsService, SolverService,
-solution rollups; future `CascadePrognosisService` + ontology cascade edges.  
+solution rollups; CascadePrognosisService + ontology cascade edges; AEMF catalog.  
 **Anti-patterns:** Black-box ML ranking; silent priority changes; using
 simulated history to calibrate production priors; presenting actuarial
-failure % without outcome backing; inventing mechanical wear from the bus.
+failure % without outcome backing; inventing mechanical wear from the bus;
+using AEMF as a second realize engine.
 
 ---
 
@@ -382,11 +414,44 @@ Ordered roughly by product-goal impact. Prefer closing **partial** / **missing**
 goals before nice-to-haves. Ideal-solution piece ids (S1, A2, …) are the
 canonical breakdown; backlog rows are schedulable delivery units.
 
+### Market UX research (2026) → backlog seeds
+
+Competitive scan (BlueDriver, FIXD, OBDLink + Torque/FORScan, Car Scanner ELM,
+Carista/OBDeleven coding apps). Auto-architect’s differentiator remains
+propose/dispose + durable garage memory — we steal *clarity*, not subscriptions
+or proprietary enhanced-PID lock-in.
+
+| Insight from market | Our gap | Backlog response | Priority |
+|---|---|---|---|
+| BlueDriver/FIXD: immediate “what fixed this / what next” | Dashboard listed evidence without a single next-step hero | **UX1** Next-action console (done this cycle) | — |
+| BlueDriver: verified-fix reports from shop outcomes | WhatWorked exists but not next to DTC rows | **UX2** DTC-row “what worked” chips from solution history | high |
+| Torque/OBDLink: fast live PIDs + custom dash | Gauges shipped; no operator-picked PID layout | **UX3** Saved gauge layout per vehicle (Mode 01 only) | medium |
+| Smog/readiness tiles in consumer apps | No Mode 01 readiness / I/M completeness surface | **UX4** Readiness / monitor completion panel (J1979 PID $01) | high |
+| FORScan/Carista: deep module maps | Full CAN/UDS map is OEM-proprietary; out of MVP scope | **CAN1** Research note + guided discover depth only (no invented bus map) | medium |
+| Plain-English first | Narration exists; still class-id heavy on Dashboard | **UX5** Prefer fluent narration in next-action + DTC tooltips | medium |
+| One-tap scan ritual | Simulate CLI strong; in-UI “run scan” still gateway-ops | **S1** Live MX+ dry-run + Dashboard scan affordance | critical |
+
+**CAN bus mapping principle:** Do not invent a whole-vehicle CAN matrix from
+generic OBD-II. Map *what we can lawfully observe* (Mode 01–07, discovery bits,
+freeze frame, Mode 06 seeds) and grow OEM cartridges from evidence + TSBs.
+Enhanced UDS/module trees stay behind an explicit project (Functions / external
+tool), never fake completeness.
+
 ### Closes product goals (prefer these)
 
 | Feature | Pieces | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|---|
-| Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | high | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
+| Dashboard next-action console (at-a-glance) | UX1 | done | high | Closes BlueDriver/FIXD “what now” clarity gap. | `NextActionConsole`, Dashboard |
+| DTC-row “what worked” from solution history | UX2 | planned | high | Verified-fix adjacency without inventing fixes. | `WhatWorkedPanel`, Dashboard DTC list |
+| I/M readiness / monitor completion panel | UX4 | planned | high | Market-standard smog prep; OBD Mode 01 PID $01. | gateway PID, Dashboard |
+| Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | critical | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
+| Saved per-vehicle gauge layout | UX3 | planned | medium | Torque-like customization within Mode 01 support. | LiveGaugeStrip, vehicle prefs |
+| CAN/UDS map research → discover depth only | CAN1 | planned | medium | Honest boundary vs FORScan fantasy maps. | Discovery, `OBD_EDGE_CONTRACT` |
+| Logos-bridge subprocess temp-file transport (fix stdin hang) | F13 | done | critical | Unblocks live realize/recognition/gap refresh. | `@seam/logos-bridge` in software-architect |
+| Batched recognize classify (full-view tableau hang) | F14 | done | critical | Full view + MisfireUnderLoad ⊔ defs hung; batch of 4 under scope:auto. | RecognitionService, `classesForView` |
+| AEMF vehicle-system aspects (air/elec/mech/fluid) | F12 | done | high | Catalog, chips, and principled playbook prose. | `vehicle-system-aspects.json`, Diagnosis, recs, ProblemDetail |
+| AEMF playbook / recommendation framing | F12 | done | medium | `aemfPlaybookProse` + `Recommendation.aemfPlaybook`; Diagnosis / ProblemDetail panels. | ontology helpers, RecommendationService, web-ui |
+| Logos tableau perf for disjunctive fault classes | F14 | planned | medium | Upstream metalanguage: realize full view without batching. | metalanguage engine |
 | Durable observation history + freeze-frame retention | S5, H3 | done | high | Prune + odometer/session on case timeline events. | `ObservationService`, `ActionService` stamps |
 | Continuous drive session recorder | S4, H3, F4, G5 | done | medium | Sessions, report attach, timeline stamps, session-scoped trends. | `DriveSessionService`, `ForecastService` |
 | Problem caseboard + verify-after-repair + reopen | P2–P5, X5 | done | medium | Caseboard + verify-before-solved shipped. | `DiagnosticProblem`, Diagnosis UI |
@@ -539,6 +604,9 @@ actually maintain.
 | F8 wear catalog deepen (hub/CV/belt/hose/caliper/fluid) | 2026-07 | `manual-conditions.json` + cascade edges |
 | Circuit DTC catalog (coil/injector/MAP/knock/TPS) | 2026-07 | 5 cartridges; P035x/P020x/P0105–09/P0325–33/P0120–24/P0220–23 |
 | Garage Epistemic Loop (F9–F11) | 2026-07 | LearningCycleService; calibrationMeta + sample-size UX; KnowledgeGapService + export; Diagnosis/Journal panels |
+| AEMF framing + playbook prose (F12) | 2026-07 | `vehicle-system-aspects.json`; chips + prose on Diagnosis/recs/ProblemDetail/Dashboard |
+| Batched realize + bridge temp-file (F13/F14) | 2026-07 | Recognition classify batches; logos-bridge temp JSON (software-architect) |
+| Dashboard next-action console (UX1) | 2026-07 | `NextActionConsole` — market-informed at-a-glance next step |
 
 ---
 

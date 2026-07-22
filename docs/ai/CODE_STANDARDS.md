@@ -8,18 +8,18 @@ Definition of Done for TypeScript/React/Fastify work.
 
 ## 1. Definition of Done
 
-Before finishing meaningful work:
+One entry point:
 
 ```bash
-pnpm healthcheck
+pnpm healthcheck           # sanity (default) — typecheck ∥ biome ∥ tests ∥ ontology
+pnpm healthcheck --full    # complete DoD — + obd-gateway lint/tests + web-ui build
 ```
 
-That one command runs typecheck, Biome, unit tests, ontology lint (advisory if
-LOGOS missing), obd-gateway tests (skipped with warning if `.venv` missing), and
-a web-ui production build. Use `pnpm healthcheck --fast` to skip gateway tests
-and the UI build during quick iteration.
+Before finishing meaningful work or opening a PR, run **`pnpm healthcheck --full`**.
+Day-to-day iteration: plain `pnpm healthcheck` (sanity). `--fast` remains an alias
+for sanity.
 
-CI enforces the same gates (plus a hard ontology-lint job).
+CI enforces the full gate as discrete jobs (plus a hard ontology-lint job).
 
 ---
 
@@ -81,7 +81,7 @@ pnpm obd-gateway:lint       # check
 pnpm obd-gateway:lint:fix  # apply fixes + format
 ```
 
-Wired into `pnpm healthcheck` and CI `verify`. Do not add flake8/black alongside Ruff.
+Wired into `pnpm healthcheck --full` and CI `verify`. Do not add flake8/black alongside Ruff.
 
 ---
 

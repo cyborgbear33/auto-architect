@@ -43,6 +43,7 @@ Do not mix OEM wiring tips into the fundamental lesson pointer.
 ## Required entry points (do not delete)
 
 - `docs/AI_HANDOFF.md`
+- `docs/WALKTHROUGH.md` (narrative theory / features / technology)
 - `docs/ARCHITECTURE.md`
 - `docs/FUTURE_FEATURES.md`
 - `docs/ai/README_FOR_AI.md`

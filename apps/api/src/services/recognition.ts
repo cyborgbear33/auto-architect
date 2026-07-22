@@ -1,15 +1,24 @@
 import { composeAllClassEvidence, runPerception } from "@auto/cartridges";
 import type { LogosBridge } from "@auto/logos-bridge";
-import { dlOntology } from "@auto/ontology";
+import { classesForView, dlOntology } from "@auto/ontology";
 import type { ClassNarration, Recognition } from "@auto/semantic-types";
 import { mapBridgeError } from "../lib/bridge-errors.ts";
 import type { Store } from "../store/index.ts";
 import type { ForecastService } from "./forecast.ts";
 import type { VehicleService } from "./vehicle.ts";
 
+/** Keep classify batches small — MisfireUnderLoad ⊔ defs explode the tableau past ~6 peers. */
+const REALIZE_CLASSIFY_BATCH = 4;
+
 function ontologyNotes(): Record<string, string> {
   const notes = (dlOntology as { notes?: Record<string, string> }).notes;
   return notes ?? {};
+}
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
 }
 
 /**
@@ -54,16 +63,37 @@ export class RecognitionService {
     }
 
     try {
-      const result = await this.bridge.realize({
-        ontology: dlOntology,
-        abox,
-        individual: vehicleId,
-        view,
-        scope: true,
-      });
-      const narration = await this.narrateClasses(result.mostSpecific);
+      // Batch `classify` under scope:auto — a single realize over the full view
+      // TBox hangs the engine when disjunctive classes (e.g. MisfireUnderLoad) meet evidence.
+      const classifyAll = classesForView(view);
+      const results =
+        classifyAll.length > 0
+          ? await this.bridge.realizeMany(
+              chunk(classifyAll, REALIZE_CLASSIFY_BATCH).map((classify) => ({
+                ontology: dlOntology,
+                abox,
+                individual: vehicleId,
+                classify,
+                scope: true as const,
+              })),
+            )
+          : [
+              await this.bridge.realize({
+                ontology: dlOntology,
+                abox,
+                individual: vehicleId,
+                view,
+                scope: true,
+              }),
+            ];
+
+      const member = [...new Set(results.flatMap((r) => r.member))];
+      const mostSpecific = [...new Set(results.flatMap((r) => r.mostSpecific))];
+      const undecided = [...new Set(results.flatMap((r) => r.undecided))];
+
+      const narration = await this.narrateClasses(mostSpecific);
       const classEvidence = composeAllClassEvidence(
-        result.mostSpecific,
+        mostSpecific,
         cartridges,
         dtcs,
         pids,
@@ -71,10 +101,10 @@ export class RecognitionService {
         mode06,
       );
       return {
-        individual: result.individual,
-        member: result.member,
-        mostSpecific: result.mostSpecific,
-        undecided: result.undecided,
+        individual: vehicleId,
+        member,
+        mostSpecific,
+        undecided,
         narration,
         classEvidence,
       };

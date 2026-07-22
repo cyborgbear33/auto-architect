@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  aemfPlaybookProse,
+  aspectsForClass,
   campaignsForEngineFamily,
   getEngineFamilyCartridges,
   getEngineFamilyView,
@@ -15,6 +17,15 @@ import {
 } from "./index.ts";
 
 describe("ontology registries", () => {
+  it("frames MisfireUnderLoad with AEMF mechanical→air playbook prose", () => {
+    expect(aspectsForClass("MisfireUnderLoad")).toEqual(["mechanical", "air"]);
+    const prose = aemfPlaybookProse("MisfireUnderLoad");
+    expect(prose).toMatch(/System media: Mechanical · Air/);
+    expect(prose).toMatch(/mechanical → air/i);
+    expect(prose).toMatch(/LOGOS-proven/);
+    expect(aemfPlaybookProse("NotARealClass")).toBeUndefined();
+  });
+
   it("resolves the Jeep Renegade profile to the fca-tigershark-2.4 engine family", () => {
     const vehicle = getVehicleProfile("veh:jeep-renegade-2015-latitude");
     expect(vehicle?.engineFamily).toBe("fca-tigershark-2.4");
