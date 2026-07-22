@@ -2,11 +2,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { api, queryKeys } from "../lib/api.ts";
+import { GatewayScanCommands } from "./GatewayScanCommands.tsx";
 
 /**
- * Dashboard ingest ritual (UX6) — get Mode 01–07 evidence on file without
- * burying import on Journal. Live MX+ stays Guide/CLI; simulate + OBD log are
- * honest software paths (source labels stay visible elsewhere).
+ * Dashboard ingest ritual (UX6 + S1 affordance) — simulate/import in-UI;
+ * live MX+ via copyable gateway CLI (browser never invents a live scan).
  */
 export function EvidenceIngestPanel({ vehicleId }: { vehicleId: string }) {
   const qc = useQueryClient();
@@ -66,8 +66,8 @@ export function EvidenceIngestPanel({ vehicleId }: { vehicleId: string }) {
     >
       <h2 className="text-sm font-semibold text-slate-700">Get evidence on file</h2>
       <p className="mt-0.5 text-xs text-slate-400">
-        Live MX+ scan is via gateway/CLI (see Guide). Without hardware: import an OBD log or
-        simulate a short drive — never mistaken for a clean bill of health.
+        Without hardware: import an OBD log or simulate a short drive. Live MX+ commands are
+        below — never mistaken for a clean bill of health.
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button
@@ -111,6 +111,7 @@ export function EvidenceIngestPanel({ vehicleId }: { vehicleId: string }) {
         </Link>
       </div>
       {message && <p className="mt-2 text-xs text-slate-600">{message}</p>}
+      <GatewayScanCommands vehicleId={vehicleId} />
     </section>
   );
 }

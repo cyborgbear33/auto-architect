@@ -270,6 +270,9 @@ describe("Dashboard", () => {
     expect(await screen.findByText("Get evidence on file")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Simulate drive session/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Import OBD log/i })).toBeInTheDocument();
+    expect(screen.getByText(/Live MX\+ \/ gateway/)).toBeInTheDocument();
+    expect(screen.getByText(/Dry-run simulate scan/)).toBeInTheDocument();
+    expect(screen.getByText(/Live MX\+ scan → API/)).toBeInTheDocument();
   });
 
   it("shows the live gauge strip with units", async () => {

@@ -148,6 +148,8 @@ allow**, then deepen meaning in the ontology — without cloning AlfaOBD.
 
 - [ ] Pair MX+ on Linux with the Jeep + gray adapter; document working
       `AUTO_OBD_PORT` / quirks in a short note here or in the gateway README.
+- [x] Dashboard “Get evidence on file” includes copyable dry-run / live scan /
+      watch commands for the selected vehicle id (browser never invents live).
 - [ ] One-shot `scan` → Dashboard shows live/sim source badge, DTCs (with
       dictionary text), gauges.
 - [ ] Confirm freeze frame and Mode 06 appear when the ECU has them (or note

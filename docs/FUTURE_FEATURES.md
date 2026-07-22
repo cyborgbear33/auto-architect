@@ -123,7 +123,7 @@ into the Journal forever.
 
 | # | Work piece | Status | Notes |
 |---|---|---|---|
-| S1 | Validated live MX+ dry-run on Jeep (scan + watch → Dashboard) | todo | Checklist + gray MX+ access adapter noted in `OPERATOR_OBD_MANUAL.md` |
+| S1 | Validated live MX+ dry-run on Jeep (scan + watch → Dashboard) | partial | Dashboard copyable gateway commands shipped; hardware validation still operator checklist |
 | S2 | Live gauge strip (RPM, load, fuel trim, coolant) + stale indicators | done | `GET .../live-gauges`, `LiveGaugeStrip` |
 | S3 | Mode 06 + freeze-frame capture already in batches → **surface in UI** | done | Edge `read_freeze_frames` / `read_mode06` + `EvidencePanels` |
 | S4 | DriveSession object (start/stop; batches linked by `sessionId`) | done | `DriveSessionService`; simulate path; Dashboard panel |
@@ -430,7 +430,7 @@ or proprietary enhanced-PID lock-in.
 | Shop tools: permanent DTCs after clear | Gateway now captures Mode 0A (thin AT) | **S8** done | — |
 | FORScan/Carista: deep module maps | Full CAN/UDS map is OEM-proprietary; out of MVP scope | **CAN1** Research note + guided discover depth only (no invented bus map) | medium |
 | Plain-English first | Narration leads next-action + proven list; DTC tooltips carry fluent | **UX5** done | — |
-| One-tap scan ritual | Simulate CLI strong; in-UI “run scan” still gateway-ops | **S1** Live MX+ dry-run + Dashboard scan affordance | critical |
+| One-tap scan ritual | Dashboard copyable dry-run/live/watch; browser still cannot hit MX+ | **S1** hardware validation still open | critical |
 
 **CAN bus mapping principle:** Do not invent a whole-vehicle CAN matrix from
 generic OBD-II. Map *what we can lawfully observe* (Mode 01–07, discovery bits,
@@ -448,7 +448,7 @@ tool), never fake completeness.
 | Plain-English next-action + DTC tooltips | UX5 | done | medium | Fluent narration leads at-a-glance + proven list; class ids secondary. | `NextActionConsole`, Dashboard |
 | I/M readiness / monitor completion panel | UX4 | done | high | Gateway STATUS → batch `imStatus`; readiness API + Dashboard monitor tiles; never invent from empty DTCs. | `im_status.py`, `ImStatusObservation`, `ReadinessPanel` |
 | Mode 0A permanent DTC capture | S8 | done | medium | Thin `GET_PERMANENT_DTC` (Mode 0A) in gateway; UI already paints `permanent`. | `obd_gateway/mode0a.py`, `read_dtcs` |
-| Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | critical | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
+| Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | partial | critical | `GatewayScanCommands` on Dashboard; live MX+ dry-run still needs operator hardware. | `EvidenceIngestPanel`, OPERATOR_OBD_MANUAL |
 | Saved per-vehicle gauge layout | UX3 | done | medium | Customize chips + `?pids=` live-gauges; localStorage per vehicle (Mode 01 allowlist). | `normalizeLiveGaugePids`, LiveGaugeStrip, `gaugeLayoutPrefs` |
 | CAN/UDS map research → discover depth only | CAN1 | partial | medium | Discovery page states lawful observe boundary (no invented OEM CAN/UDS maps). Deeper guided-discover depth still open. | Discovery, `OBD_EDGE_CONTRACT` |
 | Logos-bridge subprocess temp-file transport (fix stdin hang) | F13 | done | critical | Unblocks live realize/recognition/gap refresh. | `@seam/logos-bridge` in software-architect |
