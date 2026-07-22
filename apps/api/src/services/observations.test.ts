@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMemoryStore } from "../store/index.ts";
 import { seed } from "../store/seed.ts";
+import { normalizeLiveGaugePids } from "@auto/semantic-types";
 import {
   enrichDtcDescription,
   LIVE_GAUGE_STALE_AFTER_MS,
@@ -110,6 +111,12 @@ describe("ObservationService.liveGauges", () => {
     const strip = await observations.liveGauges(JEEP);
     expect(strip.stale).toBe(true);
     expect(strip.ageMs).toBeGreaterThan(LIVE_GAUGE_STALE_AFTER_MS);
+  });
+});
+
+describe("normalizeLiveGaugePids", () => {
+  it("caps Mode 01 choices and rejects unknowns", () => {
+    expect(normalizeLiveGaugePids(["SPEED", "FAKE", "RPM", "SPEED"])).toEqual(["SPEED", "RPM"]);
   });
 });
 

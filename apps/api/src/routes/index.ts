@@ -1,4 +1,5 @@
 import { listManualConditions } from "@auto/ontology";
+import { normalizeLiveGaugePids } from "@auto/semantic-types";
 import {
   CompleteSpecialProcedureSchema,
   CreateDiagnosticProblemSchema,
@@ -98,7 +99,16 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
 
   app.get("/api/vehicles/:id/live-gauges", async (req) => {
     const { id } = req.params as { id: string };
-    return s.observations.liveGauges(id);
+    const raw = (req.query as { pids?: string }).pids;
+    const pids = raw
+      ? normalizeLiveGaugePids(
+          raw
+            .split(",")
+            .map((p) => p.trim())
+            .filter(Boolean),
+        )
+      : undefined;
+    return s.observations.liveGauges(id, pids);
   });
 
   app.get("/api/vehicles/:id/readiness", async (req) => {

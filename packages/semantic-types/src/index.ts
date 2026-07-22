@@ -297,6 +297,56 @@ export interface LiveGaugeStrip {
   gauges: LiveGaugeReading[];
 }
 
+/** Default Operate strip — Mode 01 console subset (gateway-aligned). */
+export const DEFAULT_LIVE_GAUGE_PIDS = [
+  "RPM",
+  "ENGINE_LOAD",
+  "SHORT_FUEL_TRIM_1",
+  "COOLANT_TEMP",
+] as const;
+
+/**
+ * Operator-pickable Mode 01 PIDs for saved gauge layouts (UX3).
+ * Must stay within gateway `STANDARD_PID_COMMANDS` — never enhanced/OEM-only.
+ */
+export const LIVE_GAUGE_PID_CHOICES = [
+  "RPM",
+  "SPEED",
+  "ENGINE_LOAD",
+  "ABSOLUTE_LOAD",
+  "COOLANT_TEMP",
+  "INTAKE_TEMP",
+  "THROTTLE_POS",
+  "SHORT_FUEL_TRIM_1",
+  "LONG_FUEL_TRIM_1",
+  "MAF",
+  "INTAKE_PRESSURE",
+  "CONTROL_MODULE_VOLTAGE",
+  "FUEL_LEVEL",
+  "TIMING_ADVANCE",
+  "O2_B1S1",
+  "RUN_TIME",
+] as const;
+
+export const MAX_LIVE_GAUGE_PIDS = 6;
+
+const LIVE_GAUGE_PID_CHOICE_SET = new Set<string>(LIVE_GAUGE_PID_CHOICES);
+
+/** Keep 1…MAX Mode 01 choices; fall back to default when empty/invalid. */
+export function normalizeLiveGaugePids(requested: readonly string[] | undefined | null): string[] {
+  if (!requested?.length) return [...DEFAULT_LIVE_GAUGE_PIDS];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of requested) {
+    const pid = raw.trim();
+    if (!pid || !LIVE_GAUGE_PID_CHOICE_SET.has(pid) || seen.has(pid)) continue;
+    seen.add(pid);
+    out.push(pid);
+    if (out.length >= MAX_LIVE_GAUGE_PIDS) break;
+  }
+  return out.length > 0 ? out : [...DEFAULT_LIVE_GAUGE_PIDS];
+}
+
 /**
  * I/M readiness / monitor completion (J1979 Mode 01 PID $01).
  * Until the gateway captures STATUS bitfields, `available` stays false —

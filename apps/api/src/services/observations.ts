@@ -1,11 +1,12 @@
 import { lookupDtc, lookupPid } from "@auto/ontology";
-import type {
-  DtcObservation,
-  EvidenceProvenance,
-  ImReadiness,
-  LiveGaugeStrip,
-  ObservationBatch,
-  RetentionResult,
+import {
+  DEFAULT_LIVE_GAUGE_PIDS,
+  type DtcObservation,
+  type EvidenceProvenance,
+  type ImReadiness,
+  type LiveGaugeStrip,
+  type ObservationBatch,
+  type RetentionResult,
 } from "@auto/semantic-types";
 import type { ObservationBatchInput } from "@auto/validation";
 import { notFound, validationError } from "../lib/errors.ts";
@@ -19,13 +20,8 @@ import {
 } from "./obd-log-import.ts";
 import type { VehicleService } from "./vehicle.ts";
 
-/** Default Operate strip — matches gateway DEFAULT_PIDS “console” subset. */
-export const DEFAULT_LIVE_GAUGE_PIDS = [
-  "RPM",
-  "ENGINE_LOAD",
-  "SHORT_FUEL_TRIM_1",
-  "COOLANT_TEMP",
-] as const;
+/** Re-export for discovery + existing import sites. */
+export { DEFAULT_LIVE_GAUGE_PIDS };
 
 /** Age above this → strip marked stale (live watch should refresh faster). */
 export const LIVE_GAUGE_STALE_AFTER_MS = 15_000;
