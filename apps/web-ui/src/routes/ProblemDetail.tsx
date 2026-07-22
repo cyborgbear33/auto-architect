@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AemfAspectChips } from "../components/AemfAspectChips.tsx";
 import { AemfPlaybookProse } from "../components/AemfPlaybookProse.tsx";
 import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
+import { CausalModelPanel } from "../components/CausalModelPanel.tsx";
 import { CounterfactualsPanel, DisqualifiedActionsPanel } from "../components/Explainability.tsx";
 import { PageHeader } from "../components/Layout.tsx";
 import { LearningCyclePanel } from "../components/LearningCyclePanel.tsx";
@@ -238,6 +239,8 @@ export function ProblemDetail() {
           </p>
         )}
       </section>
+
+      {problem.causalModel && <CausalModelPanel model={problem.causalModel} />}
 
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
         <div className="mb-3 flex items-center justify-between">

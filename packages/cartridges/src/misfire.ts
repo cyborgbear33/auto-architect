@@ -79,6 +79,20 @@ function misfireDraft(vehicle: VehicleView): FramingResult {
         "rescan for stored/pending misfire DTCs after the recommended test/repair and a drive cycle",
     },
     actions: misfirePlaybook(),
+    causalModel: {
+      symptoms: [
+        "cylinder misfire DTC active (P0300–P0304 family)",
+        "high engine load condition supporting under-load misfire",
+      ],
+      possibleCauses: [
+        "ignition coil or spark plug fault on the misfiring cylinder",
+        "fuel injector delivery fault on the misfiring cylinder",
+        "mechanical issue (compression, valve, head gasket) on that cylinder",
+      ],
+      mostLikelyCauses: [
+        "ignition (coil/plug) — confirm with a swap test before replacing parts at random",
+      ],
+    },
   };
 }
 

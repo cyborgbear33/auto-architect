@@ -1,4 +1,9 @@
-import type { CandidateAction, DtcObservation, GapType } from "@auto/semantic-types";
+import type {
+  CandidateAction,
+  CausalModel,
+  DtcObservation,
+  GapType,
+} from "@auto/semantic-types";
 
 /** One ABox assertion set: named concept individuals + typed role edges. */
 export interface AboxAssertions {
@@ -53,6 +58,11 @@ export interface FramingResult {
     measurement?: string;
   };
   actions: CandidateAction[];
+  /**
+   * Optional teaching-grade cause catalog (A6). Merged with live classEvidence
+   * by `composeCausalModel` — never invents realize membership or root causes.
+   */
+  causalModel?: CausalModel;
 }
 
 export interface FramingRule {

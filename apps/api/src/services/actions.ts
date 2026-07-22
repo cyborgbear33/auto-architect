@@ -1,4 +1,4 @@
-import { draftForClass } from "@auto/cartridges";
+import { composeCausalModel, composeClassEvidence, draftForClass } from "@auto/cartridges";
 import { getSpecialProcedure } from "@auto/ontology";
 import type {
   DecisionRecord,
@@ -112,6 +112,15 @@ export class ActionService {
           `No cartridge loaded for vehicle "${vehicle.id}" frames class "${input.triggeredByClass}".`,
         );
       }
+      const evidence = composeClassEvidence(
+        input.triggeredByClass,
+        cartridges,
+        vehicleView.dtcs,
+        vehicleView.pids,
+        await this.store.observations.latestFreezeFrames(vehicle.id),
+        await this.store.observations.latestMode06(vehicle.id),
+      );
+      const causalModel = composeCausalModel({ draft, evidence });
       const history = await this.solutionHistory.forVehicle(vehicle.id, input.triggeredByClass);
       const calibration = calibratePlaybook({
         faultClass: input.triggeredByClass,
@@ -127,6 +136,7 @@ export class ActionService {
         problemType: "Diagnostic",
         gapType: draft.gapType,
         desiredState: draft.desiredState,
+        causalModel,
         actions: applyCalibration(draft.actions, calibration),
         triggeredByClass: input.triggeredByClass,
         lifecycleEvents: [opened],
@@ -156,7 +166,10 @@ export class ActionService {
     if (!problem) throw notFound("DiagnosticProblem", problemId);
 
     let actions = problem.actions;
+    let causalModel = problem.causalModel;
     if (problem.triggeredByClass && actions.length > 0) {
+      const vehicle = await this.vehicles.getOrThrow(problem.vehicleId);
+      const cartridges = this.vehicles.cartridgesFor(vehicle);
       const history = await this.solutionHistory.forVehicle(
         problem.vehicleId,
         problem.triggeredByClass,
@@ -168,9 +181,32 @@ export class ActionService {
         urgency: problem.statement.urgency,
       });
       actions = applyCalibration(actions, calibration);
+
+      // Refresh teaching-grade causes with latest evidence before LOGOS dispose.
+      const vehicleView = {
+        vehicleId: vehicle.id,
+        label: `${vehicle.year ?? ""} ${vehicle.make} ${vehicle.model} ${vehicle.trim ?? ""}`
+          .replace(/\s+/g, " ")
+          .trim(),
+        engineFamily: vehicle.engineFamily,
+        dtcs: await this.store.observations.latestDtcs(vehicle.id),
+        pids: await this.store.observations.latestPids(vehicle.id),
+      };
+      const draft = draftForClass(vehicleView, problem.triggeredByClass, cartridges);
+      if (draft) {
+        const evidence = composeClassEvidence(
+          problem.triggeredByClass,
+          cartridges,
+          vehicleView.dtcs,
+          vehicleView.pids,
+          await this.store.observations.latestFreezeFrames(vehicle.id),
+          await this.store.observations.latestMode06(vehicle.id),
+        );
+        causalModel = composeCausalModel({ draft, evidence });
+      }
     }
 
-    const solution = await this.solver.solve({ ...problem, actions });
+    const solution = await this.solver.solve({ ...problem, actions, causalModel });
     const now = nowIso();
     const status = solution.kind === "escalate" ? "escalated" : "analyzing";
     let lifecycleEvents = await this.stampLifecycle(problem, {
@@ -194,6 +230,7 @@ export class ActionService {
       solution,
       status,
       actions,
+      causalModel,
       lifecycleEvents,
     });
   }

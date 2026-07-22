@@ -68,6 +68,21 @@ function leanDraft(bank: 1 | 2): (vehicle: VehicleView) => FramingResult {
         "monitor long-term fuel trim on the affected bank and rescan for the lean DTC after the repair",
     },
     actions: leanPlaybook(bank),
+    causalModel: {
+      symptoms: [
+        `bank ${bank} lean DTC`,
+        "sustained positive long-term fuel trim on the affected bank",
+      ],
+      possibleCauses: [
+        "vacuum / unmetered air leak on the intake path for this bank",
+        "MAF or MAP measurement error skewing fueling",
+        "weak or clogged fuel injector / low fuel pressure on this bank",
+        "exhaust leak before the O2 sensor faking a lean reading",
+      ],
+      mostLikelyCauses: [
+        "unmetered air (vacuum leak) or fuel delivery shortfall — prove with smoke / fuel pressure before sensor replacement",
+      ],
+    },
   });
 }
 

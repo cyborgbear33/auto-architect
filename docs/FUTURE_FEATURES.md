@@ -172,7 +172,7 @@ has more lawful fuel. Populate `CausalModel` from cartridge catalogs + current
 | A3 | Mode 06 as recognition input where ontology allows | done | Thin SAE/ISO OBDMID seed → perception → realize; unknown MIDs unlabeled |
 | A4 | Broader curated DTC/PID KB + ontology lint parity | partial | + coil/injector/MAP/knock/TPS circuit families; still not full J2012 |
 | A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | SAE set shared; GM stub inert until real truck |
-| A6 | Populate `CausalModel` on draft/solve from cartridge cause catalogs + live `classEvidence` | planned | Symptoms / possibleCauses / mostLikelyCauses; never invents realize membership |
+| A6 | Populate `CausalModel` on draft/solve from cartridge cause catalogs + live `classEvidence` | done | `composeCausalModel`; misfire/lean authored; fallback from playbook; ProblemDetail panel |
 | A7 | Apprentice **causal brief** read-model + Diagnosis/ProblemDetail panel | planned | Compose evidence + ontology/AEMF + WhatWorked/LearningCycle → why / how we know / prove next |
 
 **Seams:** cartridges, `RecognitionService`, logos-bridge `realize`/`verbalize`,
@@ -506,7 +506,7 @@ healthy; history never invents a fix that was not logged and verified.
 
 | Feature | Pieces | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|---|
-| Causal model on draft/solve (cartridge + evidence) | A6 | planned | critical | Unlocks teaching-grade differentials without a second classifier. | `CausalModel`, cartridges, ActionService draft/solve |
+| Causal model on draft/solve (cartridge + evidence) | A6 | done | critical | `composeCausalModel` on draft/solve; thin ProblemDetail causes panel; A7 still owns full brief. | `causal-model.ts`, ActionService, `CausalModelPanel` |
 | Apprentice causal brief (why / evidence / prove next) | A7 | planned | critical | Single informative diagnosis surface from data + ontology + history. | Diagnosis, ProblemDetail, AEMF, WhatWorked, LearningCycle |
 | Solution narrative cards (not just n=) | X6 | planned | high | Makes history teach “what fixed what and how we know.” | solution-history, LearningCycle, A7 |
 | Vehicle dossier + VIN/odo ritual on Diagnosis | V1 | planned | high | Apprentice must know *which* vehicle/systems before causes. | VehicleProfile, discovery, campaigns |

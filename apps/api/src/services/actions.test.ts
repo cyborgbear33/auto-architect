@@ -89,6 +89,9 @@ describe("ActionService (the mutation gate)", () => {
     expect(problem.actions.length).toBeGreaterThan(0);
     expect(problem.desiredState?.successCriteria).toBeTruthy();
     expect(problem.lifecycleEvents?.map((e) => e.type)).toEqual(["opened"]);
+    expect(problem.causalModel?.mostLikelyCauses?.[0]).toMatch(/ignition/i);
+    expect(problem.causalModel?.possibleCauses?.length).toBeGreaterThan(0);
+    expect(problem.causalModel?.rootCauses).toBeUndefined();
   });
 
   it("rejects a triggeredByClass no loaded cartridge frames", async () => {

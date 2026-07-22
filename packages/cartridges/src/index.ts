@@ -1,4 +1,10 @@
 export { camCrankCorrelationCartridge } from "./cam-crank-correlation.ts";
+export {
+  composeCausalModel,
+  mostLikelyCausesFromActions,
+  possibleCausesFromActions,
+  symptomsFromEvidence,
+} from "./causal-model.ts";
 export { catalystCartridge } from "./catalyst.ts";
 export {
   type ClassEvidenceBundle,
