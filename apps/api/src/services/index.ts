@@ -4,6 +4,7 @@ import { ActionService } from "./actions.ts";
 import { CampaignService } from "./campaigns.ts";
 import { CascadePrognosisService } from "./cascade-prognosis.ts";
 import { CaseTimelineService } from "./case-timeline.ts";
+import { CausalBriefService } from "./causal-brief.ts";
 import { DiscoveryService } from "./discovery.ts";
 import { DriveSessionService } from "./drive-sessions.ts";
 import { ForecastService } from "./forecast.ts";
@@ -44,6 +45,7 @@ export interface Services {
   garageExport: GarageExportService;
   reports: ReportService;
   cascadePrognosis: CascadePrognosisService;
+  causalBriefs: CausalBriefService;
 }
 
 export function createServices(store: Store, bridge: LogosBridge): Services {
@@ -84,6 +86,13 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     solutionHistory,
   );
   const cascadePrognosis = new CascadePrognosisService(store, vehicles, recognition, forecast);
+  const causalBriefs = new CausalBriefService(
+    store,
+    vehicles,
+    recognition,
+    solutionHistory,
+    learningCycles,
+  );
 
   return {
     store,
@@ -108,6 +117,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     garageExport,
     reports,
     cascadePrognosis,
+    causalBriefs,
   };
 }
 
@@ -116,6 +126,7 @@ export {
   CampaignService,
   CascadePrognosisService,
   CaseTimelineService,
+  CausalBriefService,
   DiscoveryService,
   DriveSessionService,
   ForecastService,

@@ -18,7 +18,7 @@ import {
   StartSpecialProcedureSchema,
 } from "@auto/validation";
 import type { FastifyInstance, FastifyReply } from "fastify";
-import { notFound } from "../lib/errors.ts";
+import { notFound, validationError } from "../lib/errors.ts";
 import type { Services } from "../services/index.ts";
 
 function sendCsv(reply: FastifyReply, filename: string, csv: string) {
@@ -210,6 +210,20 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     const { id } = req.params as { id: string };
     const { problemId } = req.query as { problemId?: string };
     return s.learningCycles.forVehicle(id, problemId);
+  });
+
+  app.get("/api/vehicles/:id/causal-brief", async (req) => {
+    const { id } = req.params as { id: string };
+    const { class: faultClass } = req.query as { class?: string };
+    if (!faultClass?.trim()) {
+      throw validationError('Query parameter "class" is required for causal brief.');
+    }
+    return s.causalBriefs.forClass(id, faultClass.trim());
+  });
+
+  app.get("/api/problems/:id/causal-brief", async (req) => {
+    const { id } = req.params as { id: string };
+    return s.causalBriefs.forProblem(id);
   });
 
   app.get("/api/vehicles/:id/knowledge-gaps", async (req) => {

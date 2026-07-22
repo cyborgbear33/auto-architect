@@ -173,7 +173,7 @@ has more lawful fuel. Populate `CausalModel` from cartridge catalogs + current
 | A4 | Broader curated DTC/PID KB + ontology lint parity | partial | + coil/injector/MAP/knock/TPS circuit families; still not full J2012 |
 | A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | SAE set shared; GM stub inert until real truck |
 | A6 | Populate `CausalModel` on draft/solve from cartridge cause catalogs + live `classEvidence` | done | `composeCausalModel`; misfire/lean authored; fallback from playbook; ProblemDetail panel |
-| A7 | Apprentice **causal brief** read-model + Diagnosis/ProblemDetail panel | planned | Compose evidence + ontology/AEMF + WhatWorked/LearningCycle → why / how we know / prove next |
+| A7 | Apprentice **causal brief** read-model + Diagnosis/ProblemDetail panel | done | `CausalBriefService` + panel: why / how we know / prove next + AEMF + history |
 
 **Seams:** cartridges, `RecognitionService`, logos-bridge `realize`/`verbalize`,
 dictionaries, Diagnosis/Dashboard, `CausalModel`, solution-history.  
@@ -507,7 +507,7 @@ healthy; history never invents a fix that was not logged and verified.
 | Feature | Pieces | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|---|
 | Causal model on draft/solve (cartridge + evidence) | A6 | done | critical | `composeCausalModel` on draft/solve; thin ProblemDetail causes panel; A7 still owns full brief. | `causal-model.ts`, ActionService, `CausalModelPanel` |
-| Apprentice causal brief (why / evidence / prove next) | A7 | planned | critical | Single informative diagnosis surface from data + ontology + history. | Diagnosis, ProblemDetail, AEMF, WhatWorked, LearningCycle |
+| Apprentice causal brief (why / evidence / prove next) | A7 | done | critical | `GET …/causal-brief` + Diagnosis/ProblemDetail `CausalBriefPanel`. | `CausalBriefService`, CausalBriefPanel |
 | Solution narrative cards (not just n=) | X6 | planned | high | Makes history teach “what fixed what and how we know.” | solution-history, LearningCycle, A7 |
 | Vehicle dossier + VIN/odo ritual on Diagnosis | V1 | planned | high | Apprentice must know *which* vehicle/systems before causes. | VehicleProfile, discovery, campaigns |
 | Diagnosis fluent-first proven classes | I7 | planned | medium | Parity with UX5; less jargon barrier. | Recognition.narration, Diagnosis |

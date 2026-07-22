@@ -485,6 +485,28 @@ export interface CausalModel {
 }
 
 /**
+ * A7 — composed apprentice lesson for one fault class / problem.
+ * Compose-only from CausalModel + AEMF + narration + history; never invents membership.
+ */
+export interface CausalBrief {
+  vehicleId: SemanticId;
+  faultClass: string;
+  problemId?: SemanticId;
+  /** One-sentence “why we think this is happening.” */
+  why: string;
+  /** Evidence / narration bullets — how we know. */
+  howWeKnow: string[];
+  /** Cheapest informative next checks (propose-only). */
+  whatToProveNext: string[];
+  /** AEMF approach framing when mapped. */
+  aemfPlaybook?: string;
+  /** This vehicle / family outcome notes (sample-size honest). */
+  historyNotes: string[];
+  causalModel: CausalModel;
+  integrityNote: string;
+}
+
+/**
  * A proposed diagnostic/repair action scored by the solver. Mirrors LOGOS's
  * `Action`. `id` is a free-form plan key (e.g. "swap-coil-1-4"), not a
  * SemanticId — candidate actions are hypothetical until logged as a repair.

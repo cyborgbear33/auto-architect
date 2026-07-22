@@ -4,7 +4,14 @@ import type { CausalModel } from "@auto/semantic-types";
  * Thin A6 surface — teaching-grade causes on a problem. Full apprentice brief
  * composition (history + AEMF story) is A7.
  */
-export function CausalModelPanel({ model }: { model: CausalModel }) {
+export function CausalModelPanel({
+  model,
+  embedded = false,
+}: {
+  model: CausalModel;
+  /** Nest inside CausalBriefPanel without a second card chrome. */
+  embedded?: boolean;
+}) {
   const hasAny =
     (model.symptoms?.length ?? 0) > 0 ||
     (model.possibleCauses?.length ?? 0) > 0 ||
@@ -13,8 +20,12 @@ export function CausalModelPanel({ model }: { model: CausalModel }) {
 
   if (!hasAny) return null;
 
+  const shell = embedded
+    ? "mt-3 border-t border-sky-100 pt-3"
+    : "mt-4 rounded-lg border border-slate-200 bg-white p-4";
+
   return (
-    <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+    <section className={shell}>
       <h2 className="text-sm font-semibold text-slate-700">Causes (teaching model)</h2>
       <p className="mt-0.5 text-xs text-slate-400">
         From cartridge catalog + current evidence — not a proven root cause until verified.

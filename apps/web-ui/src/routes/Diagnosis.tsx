@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AemfAspectChips } from "../components/AemfAspectChips.tsx";
 import { AemfPlaybookProse } from "../components/AemfPlaybookProse.tsx";
+import { CausalBriefPanel } from "../components/CausalBriefPanel.tsx";
 import { CascadePrognosisPanel } from "../components/CascadePrognosisPanel.tsx";
 import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
 import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
@@ -190,6 +191,7 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                     <AemfPlaybookProse className={cls} />
                     {narr && <p className="mt-0.5 text-xs text-slate-500">{narr.fluent}</p>}
                     <ClassEvidencePanel evidence={evidence} />
+                    <CausalBriefPanel vehicleId={vehicleId} faultClass={cls} />
                   </div>
                   <button
                     type="button"

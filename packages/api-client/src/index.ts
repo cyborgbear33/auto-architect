@@ -11,6 +11,7 @@
 import type {
   CascadePrognosis,
   CaseTimeline,
+  CausalBrief,
   DecisionRecord,
   DiagnosticProblem,
   DiscoveryForensicsReport,
@@ -282,6 +283,12 @@ export class AutoApiClient {
     const q = problemId ? `?problemId=${enc(problemId)}` : "";
     return this.request<LearningCycleList>(`/api/vehicles/${enc(vehicleId)}/learning-cycles${q}`);
   };
+  getCausalBriefForClass = (vehicleId: string, faultClass: string) =>
+    this.request<CausalBrief>(
+      `/api/vehicles/${enc(vehicleId)}/causal-brief?class=${enc(faultClass)}`,
+    );
+  getCausalBriefForProblem = (problemId: string) =>
+    this.request<CausalBrief>(`/api/problems/${enc(problemId)}/causal-brief`);
   getKnowledgeGaps = (vehicleId: string, opts?: { openOnly?: boolean }) => {
     const q = opts?.openOnly ? "?open=1" : "";
     return this.request<{ proposals: KnowledgeGapProposal[] }>(
@@ -523,6 +530,9 @@ export const queryKeys = {
     ["caseTimeline", vehicleId, problemId ?? null] as const,
   learningCycles: (vehicleId: string, problemId?: string) =>
     ["learningCycles", vehicleId, problemId ?? null] as const,
+  causalBriefClass: (vehicleId: string, faultClass: string) =>
+    ["causalBrief", "class", vehicleId, faultClass] as const,
+  causalBriefProblem: (problemId: string) => ["causalBrief", "problem", problemId] as const,
   knowledgeGaps: (vehicleId: string) => ["knowledgeGaps", vehicleId] as const,
   cascadePrognosis: (vehicleId: string) => ["cascadePrognosis", vehicleId] as const,
   manualConditions: () => ["manualConditions"] as const,
