@@ -27,6 +27,7 @@ from .batch import build_observation_batch, parse_manual_pids, parse_simulated_m
 from .client import ObdGatewayClient
 from .config import DEFAULT_PIDS, GatewayConfig
 from .discovery import build_simulated_capability_report
+from .im_status import simulated_im_status
 
 logger = logging.getLogger("obd_gateway.cli")
 
@@ -97,6 +98,11 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="MID:TID:VALUE:MIN:MAX[:pass|fail]",
         help="e.g. 21:01:0.8:0:0.5:fail (repeatable, only with --simulate)",
     )
+    parser.add_argument(
+        "--no-im-status",
+        action="store_true",
+        help="skip Mode 01 PID $01 STATUS / I/M readiness this cycle",
+    )
     parser.add_argument("-v", "--verbose", action="store_true")
 
     sub = parser.add_subparsers(dest="mode", required=True)
@@ -149,6 +155,7 @@ def run_once(
     manual_pids = parse_manual_pids(args.manual_pid)
     freeze_frames: list[dict] = []
     mode06: list[dict] = []
+    im_status: dict | None = None
     if client is None:
         pid_readings: list[dict] = []
         dtcs = _parse_simulated_dtcs(args.simulate_dtc)
@@ -160,6 +167,9 @@ def run_once(
                     "readings": list(manual_pids),
                 }
             ]
+        if not args.no_im_status:
+            # Software path: incomplete EVAP/catalyst — not a smog-ready invent.
+            im_status = simulated_im_status(incomplete_evap=True)
     else:
         pid_readings = client.read_pids(config.pids)
         dtcs = [] if args.no_dtcs else client.read_dtcs()
@@ -167,6 +177,8 @@ def run_once(
             freeze_frames = client.read_freeze_frames()
         if not args.no_mode06:
             mode06 = client.read_mode06()
+        if not args.no_im_status:
+            im_status = client.read_im_status()
     batch = build_observation_batch(
         vehicle_id=config.vehicle_id,
         pid_readings=pid_readings,
@@ -174,6 +186,7 @@ def run_once(
         manual_pids=manual_pids,
         freeze_frames=freeze_frames,
         mode06=mode06,
+        im_status=im_status,
         odometer_miles=args.odometer_miles,
         source="simulated" if client is None else "obd_gateway",
     )

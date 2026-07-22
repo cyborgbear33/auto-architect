@@ -143,6 +143,25 @@ export class DriveSessionService {
           { pid: "COOLANT_TEMP", value: 88 + i, unit: "°C", timestamp: capturedAt },
         ],
         ...(i === 2 ? { dtcs: [{ code: "P0304", status: "pending" as const }] } : {}),
+        // Last point carries Mode 01 STATUS so Dashboard readiness has software evidence.
+        ...(i === points.length - 1
+          ? {
+              imStatus: {
+                mil: false,
+                dtcCount: 0,
+                ignitionType: "spark",
+                allComplete: false,
+                monitors: [
+                  { name: "MISFIRE_MONITORING", available: true, complete: true },
+                  { name: "FUEL_SYSTEM_MONITORING", available: true, complete: true },
+                  { name: "COMPONENT_MONITORING", available: true, complete: true },
+                  { name: "CATALYST_MONITORING", available: true, complete: false },
+                  { name: "EVAPORATIVE_SYSTEM_MONITORING", available: true, complete: false },
+                  { name: "OXYGEN_SENSOR_MONITORING", available: true, complete: true },
+                ],
+              },
+            }
+          : {}),
       };
       await this.observations.record(batch);
       batches.push(batch);

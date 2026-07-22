@@ -4,6 +4,7 @@ import { seed } from "../store/seed.ts";
 import { normalizeLiveGaugePids } from "@auto/semantic-types";
 import {
   enrichDtcDescription,
+  imReadinessFromStatus,
   LIVE_GAUGE_STALE_AFTER_MS,
   ObservationService,
 } from "./observations.ts";
@@ -130,7 +131,7 @@ describe("ObservationService.readiness", () => {
     await seed(store);
   });
 
-  it("stays unsupported until STATUS bitfield capture exists (no smog-ready invent)", async () => {
+  it("stays no_data when batches lack imStatus (no smog-ready invent)", async () => {
     await observations.record({
       vehicleId: JEEP,
       capturedAt: new Date().toISOString(),
@@ -142,9 +143,54 @@ describe("ObservationService.readiness", () => {
     expect(readiness).toMatchObject({
       vehicleId: JEEP,
       available: false,
-      status: "unsupported",
+      status: "no_data",
       requiredPid: "STATUS",
     });
     expect(readiness.message.toLowerCase()).toContain("not a smog-ready");
+  });
+
+  it("surfaces incomplete monitors from captured imStatus", async () => {
+    const capturedAt = new Date().toISOString();
+    await observations.record({
+      vehicleId: JEEP,
+      capturedAt,
+      source: "simulated",
+      imStatus: {
+        mil: false,
+        dtcCount: 0,
+        ignitionType: "spark",
+        allComplete: false,
+        monitors: [
+          { name: "MISFIRE_MONITORING", available: true, complete: true },
+          { name: "EVAPORATIVE_SYSTEM_MONITORING", available: true, complete: false },
+        ],
+      },
+    });
+    const readiness = await observations.readiness(JEEP);
+    expect(readiness).toMatchObject({
+      available: true,
+      status: "incomplete",
+      mil: false,
+      capturedAt,
+    });
+    expect(readiness.monitors).toHaveLength(2);
+  });
+});
+
+describe("imReadinessFromStatus", () => {
+  it("marks complete only when allComplete is true", () => {
+    const r = imReadinessFromStatus(
+      JEEP,
+      {
+        mil: false,
+        dtcCount: 0,
+        ignitionType: "spark",
+        allComplete: true,
+        monitors: [{ name: "MISFIRE_MONITORING", available: true, complete: true }],
+      },
+      { source: "obd_gateway", capturedAt: "2026-07-22T00:00:00.000Z" },
+    );
+    expect(r.status).toBe("complete");
+    expect(r.message.toLowerCase()).toContain("not a legal smog");
   });
 });

@@ -37,7 +37,7 @@ Classification, policy, and ranking live exclusively in `apps/api`.
 
 | Mode | Content | Status |
 |---|---|---|
-| 01 | Live PIDs | primary |
+| 01 | Live PIDs + STATUS ($01) I/M bitfield | primary; STATUS → structured `imStatus` (not a float PID) |
 | 02 | Freeze frame | gateway populates when ECU exposes a freeze DTC + Mode 02 PIDs |
 | 03 / 07 / 0A | Stored / pending / permanent DTCs | 03/07 via python-OBD; 0A via thin `GET_PERMANENT_DTC` (`force=True`) |
 | 06 | On-board monitor results | gateway populates SAE-seed OBDMIDs when ECU supports them |

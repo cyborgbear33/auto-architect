@@ -33,6 +33,7 @@ export function DriveSessionsPanel({ vehicleId }: { vehicleId: string }) {
     void qc.invalidateQueries({ queryKey: queryKeys.driveSessions(vehicleId) });
     void qc.invalidateQueries({ queryKey: queryKeys.evidenceProvenance(vehicleId) });
     void qc.invalidateQueries({ queryKey: queryKeys.liveGaugesRoot(vehicleId) });
+    void qc.invalidateQueries({ queryKey: queryKeys.readiness(vehicleId) });
     void qc.invalidateQueries({ queryKey: queryKeys.dtcs(vehicleId) });
     void qc.invalidateQueries({ queryKey: queryKeys.forecast(vehicleId) });
     void qc.invalidateQueries({ queryKey: queryKeys.recognition(vehicleId) });

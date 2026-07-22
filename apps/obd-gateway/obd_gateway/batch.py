@@ -83,6 +83,7 @@ def build_observation_batch(
     manual_pids: list[dict[str, Any]] | None = None,
     freeze_frames: list[dict[str, Any]] | None = None,
     mode06: list[dict[str, Any]] | None = None,
+    im_status: dict[str, Any] | None = None,
     odometer_miles: float | None = None,
     source: str = "obd_gateway",
     captured_at: str | None = None,
@@ -114,4 +115,6 @@ def build_observation_batch(
     if mode06:
         # Keep null min/max/passed — Zod Mode06ResultSchema requires those keys.
         batch["mode06"] = list(mode06)
+    if im_status is not None:
+        batch["imStatus"] = im_status
     return batch

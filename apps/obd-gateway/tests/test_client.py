@@ -107,6 +107,46 @@ def test_read_dtcs_skips_null_mode_0a():
     assert all(d["status"] != "permanent" for d in dtcs)
 
 
+class FakeStatusTest:
+    def __init__(self, name, available, complete):
+        self.name = name
+        self.available = available
+        self.complete = complete
+
+
+class FakeStatus:
+    def __init__(self):
+        self.MIL = False
+        self.DTC_count = 1
+        self.ignition_type = "spark"
+        self.MISFIRE_MONITORING = FakeStatusTest("MISFIRE_MONITORING", True, True)
+        self.EVAPORATIVE_SYSTEM_MONITORING = FakeStatusTest(
+            "EVAPORATIVE_SYSTEM_MONITORING", True, False
+        )
+        self.UNUSED = FakeStatusTest("UNUSED", False, False)
+
+
+def test_read_im_status_serializes_available_monitors():
+    fake = FakeConnection(
+        supported={obd.commands.STATUS},
+        responses={obd.commands.STATUS: FakeStatus()},
+    )
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
+    im = client.read_im_status()
+    assert im is not None
+    assert im["mil"] is False
+    assert im["dtcCount"] == 1
+    assert im["allComplete"] is False
+    names = {m["name"] for m in im["monitors"]}
+    assert names == {"MISFIRE_MONITORING", "EVAPORATIVE_SYSTEM_MONITORING"}
+
+
+def test_read_im_status_none_when_unsupported():
+    fake = FakeConnection(supported=set(), responses={})
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
+    assert client.read_im_status() is None
+
+
 def test_read_pids_requires_connection_first():
     client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"))
     try:

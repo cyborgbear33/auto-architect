@@ -4,6 +4,7 @@ import {
   type DtcObservation,
   type EvidenceProvenance,
   type ImReadiness,
+  type ImStatusObservation,
   type LiveGaugeStrip,
   type ObservationBatch,
   type RetentionResult,
@@ -188,22 +189,65 @@ export class ObservationService {
 
   /**
    * I/M readiness / monitor completion (J1979 Mode 01 PID $01 STATUS).
-   * Thin honesty seam: until the gateway captures the STATUS bitfield as
-   * structured evidence, never invent complete/incomplete from empty DTCs.
+   * Uses the latest batch that carries structured `imStatus` — never invents
+   * complete/incomplete from empty DTCs alone.
    */
   async readiness(vehicleId: string): Promise<ImReadiness> {
     await this.vehicles.getOrThrow(vehicleId);
-    return {
-      vehicleId,
-      available: false,
-      status: "unsupported",
-      requiredPid: "STATUS",
-      message:
-        "I/M monitor readiness needs Mode 01 PID $01 (STATUS bitfield). The gateway does not capture that yet — empty DTCs are not a smog-ready claim.",
-      source: null,
-      capturedAt: null,
-    };
+    const batches = await this.store.observations.listBatches(vehicleId);
+    const withStatus = [...batches]
+      .reverse()
+      .find((b) => b.imStatus !== undefined && b.imStatus !== null);
+
+    if (!withStatus?.imStatus) {
+      const hasBatches = batches.length > 0;
+      return {
+        vehicleId,
+        available: false,
+        status: hasBatches ? "no_data" : "unsupported",
+        requiredPid: "STATUS",
+        message: hasBatches
+          ? "Observations on file, but none include Mode 01 PID $01 STATUS yet. Run a gateway scan (or simulate) — empty DTCs are still not a smog-ready claim."
+          : "I/M monitor readiness needs Mode 01 PID $01 (STATUS bitfield). No STATUS capture on file yet — empty DTCs are not a smog-ready claim.",
+        source: null,
+        capturedAt: null,
+      };
+    }
+
+    return imReadinessFromStatus(vehicleId, withStatus.imStatus, {
+      source: withStatus.source,
+      capturedAt: withStatus.capturedAt,
+    });
   }
+}
+
+/** Pure mapping — exported for unit tests. */
+export function imReadinessFromStatus(
+  vehicleId: string,
+  im: ImStatusObservation,
+  meta: { source: ObservationBatch["source"]; capturedAt: string },
+): ImReadiness {
+  const status = im.allComplete ? "complete" : "incomplete";
+  const incomplete = im.monitors.filter((m) => m.available && !m.complete);
+  const message = im.allComplete
+    ? "All available I/M monitors report complete (Mode 01 PID $01). Still not a legal smog certificate — confirm with your jurisdiction."
+    : incomplete.length > 0
+      ? `${incomplete.length} available monitor(s) incomplete (e.g. ${incomplete[0]!.name}). Not ready to claim monitor completion.`
+      : "STATUS captured but no available monitors were reported.";
+
+  return {
+    vehicleId,
+    available: true,
+    status,
+    requiredPid: "STATUS",
+    message,
+    source: meta.source,
+    capturedAt: meta.capturedAt,
+    mil: im.mil,
+    dtcCount: im.dtcCount,
+    ignitionType: im.ignitionType,
+    monitors: im.monitors,
+  };
 }
 
 function shortPidLabel(pid: string, description?: string): string {
@@ -231,7 +275,10 @@ export function enrichDtcDescription(dtc: DtcObservation): DtcObservation {
 
 function isEvidenceBatch(b: ObservationBatch): boolean {
   return (
-    (b.dtcs?.length ?? 0) > 0 || (b.freezeFrames?.length ?? 0) > 0 || (b.mode06?.length ?? 0) > 0
+    (b.dtcs?.length ?? 0) > 0 ||
+    (b.freezeFrames?.length ?? 0) > 0 ||
+    (b.mode06?.length ?? 0) > 0 ||
+    b.imStatus !== undefined
   );
 }
 

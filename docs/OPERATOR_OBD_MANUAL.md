@@ -169,8 +169,8 @@ allow**, then deepen meaning in the ontology — without cloning AlfaOBD.
 - [ ] Drive cycles until readiness / Mode 06 tests populate where possible.
 - [ ] Grow `mode06-dictionary.json` only with SAE/ISO OBDMID meaning (never
       invent TID charts).
-- [ ] Optionally surface readiness / incomplete monitors more clearly in UI
-      (backlog polish).
+- [x] Mode 01 PID $01 STATUS → `imStatus` on observation batches; Dashboard
+      I/M panel shows complete/incomplete monitors (not a smog certificate).
 
 ### Phase D — Freeze frame & permanence
 

@@ -426,7 +426,7 @@ or proprietary enhanced-PID lock-in.
 | BlueDriver/FIXD: immediate “what fixed this / what next” | Dashboard listed evidence without a single next-step hero | **UX1** Next-action console (done this cycle) | — |
 | BlueDriver: verified-fix reports from shop outcomes | WhatWorked exists but not next to DTC rows | **UX2** DTC-row “what worked” chips from solution history | high |
 | Torque/OBDLink: fast live PIDs + custom dash | Per-vehicle Mode 01 layout + Customize on Live gauges | **UX3** done (local prefs; not garage-export) | — |
-| Smog/readiness tiles in consumer apps | Thin honesty panel shipped; no STATUS bitfield yet | **UX4** complete/incomplete tiles after PID $01 capture | high |
+| Smog/readiness tiles in consumer apps | STATUS → `imStatus` + Dashboard monitor tiles | **UX4** done (still not a legal smog cert) | — |
 | Shop tools: permanent DTCs after clear | Gateway now captures Mode 0A (thin AT) | **S8** done | — |
 | FORScan/Carista: deep module maps | Full CAN/UDS map is OEM-proprietary; out of MVP scope | **CAN1** Research note + guided discover depth only (no invented bus map) | medium |
 | Plain-English first | Narration leads next-action + proven list; DTC tooltips carry fluent | **UX5** done | — |
@@ -446,7 +446,7 @@ tool), never fake completeness.
 | DTC-row “what worked” from solution history | UX2 | done | high | `DtcWhatWorkedChips` via classEvidence→solution-history; no invented fixes. | Dashboard DTC list, `solutionHistoryUi` |
 | Dashboard one-click simulate / import-log affordance | UX6 | done | medium | `EvidenceIngestPanel` on Dashboard; Journal keeps full export. | Dashboard, importObservationLog, simulateDriveSession |
 | Plain-English next-action + DTC tooltips | UX5 | done | medium | Fluent narration leads at-a-glance + proven list; class ids secondary. | `NextActionConsole`, Dashboard |
-| I/M readiness / monitor completion panel | UX4 | partial | high | Thin honesty seam shipped (`GET …/readiness` + Dashboard panel). Complete/incomplete tiles still need Mode 01 PID $01 STATUS bitfield capture (not a float PID). | `ImReadiness`, observations, `ReadinessPanel` |
+| I/M readiness / monitor completion panel | UX4 | done | high | Gateway STATUS → batch `imStatus`; readiness API + Dashboard monitor tiles; never invent from empty DTCs. | `im_status.py`, `ImStatusObservation`, `ReadinessPanel` |
 | Mode 0A permanent DTC capture | S8 | done | medium | Thin `GET_PERMANENT_DTC` (Mode 0A) in gateway; UI already paints `permanent`. | `obd_gateway/mode0a.py`, `read_dtcs` |
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | critical | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
 | Saved per-vehicle gauge layout | UX3 | done | medium | Customize chips + `?pids=` live-gauges; localStorage per vehicle (Mode 01 allowlist). | `normalizeLiveGaugePids`, LiveGaugeStrip, `gaugeLayoutPrefs` |

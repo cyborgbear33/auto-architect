@@ -35,6 +35,20 @@ export const Mode06ResultSchema = z.object({
   passed: z.boolean().nullable(),
 });
 
+export const ImMonitorStatusSchema = z.object({
+  name: z.string().min(1),
+  available: z.boolean(),
+  complete: z.boolean(),
+});
+
+export const ImStatusObservationSchema = z.object({
+  mil: z.boolean(),
+  dtcCount: z.number().int().nonnegative(),
+  ignitionType: z.string(),
+  monitors: z.array(ImMonitorStatusSchema),
+  allComplete: z.boolean(),
+});
+
 export const ObservationSourceSchema = z.enum([
   "obd_gateway",
   "manual_entry",
@@ -52,6 +66,7 @@ export const ObservationBatchSchema = z.object({
   pids: z.array(PidReadingSchema).optional(),
   freezeFrames: z.array(FreezeFrameSchema).optional(),
   mode06: z.array(Mode06ResultSchema).optional(),
+  imStatus: ImStatusObservationSchema.optional(),
 });
 export type ObservationBatchInput = z.infer<typeof ObservationBatchSchema>;
 

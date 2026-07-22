@@ -15,6 +15,7 @@ import obd
 
 from .config import GatewayConfig
 from .discovery import now_iso as discovery_now_iso
+from .im_status import serialize_im_status
 from .mode0a import GET_PERMANENT_DTC
 from .pid_map import (
     FREEZE_FRAME_PID_COMMANDS,
@@ -71,10 +72,10 @@ def _freeze_dtc_code(value: Any) -> str | None:
 
 class ObdGatewayClient:
     """Connects to an ELM327-compatible adapter (OBDLink MX+ included) and
-    reads Mode 01 PIDs, Mode 02 freeze frame, Mode 03/07/0A DTCs, and Mode 06
-    monitor results. Never writes state beyond an optional explicit
-    `clear_dtcs()` call the CLI gates behind a confirmation flag — mirrors
-    ActionService's mutation gate, one level down."""
+    reads Mode 01 PIDs (+ STATUS I/M bitfield), Mode 02 freeze frame,
+    Mode 03/07/0A DTCs, and Mode 06 monitor results. Never writes state beyond
+    an optional explicit `clear_dtcs()` call the CLI gates behind a confirmation
+    flag — mirrors ActionService's mutation gate, one level down."""
 
     def __init__(self, config: GatewayConfig, connection: obd.OBD | None = None):
         self.config = config
@@ -219,6 +220,19 @@ class ObdGatewayClient:
             )
 
         return [{"dtc": dtc, "readings": readings}]
+
+    def read_im_status(self) -> dict[str, Any] | None:
+        """Mode 01 PID $01 STATUS bitfield → ImStatusObservation dict, or None
+        when unsupported / null (never invent complete monitors)."""
+        conn = self._require_connection()
+        cmd = obd.commands.STATUS
+        if not conn.supports(cmd):
+            logger.debug("ECU does not support STATUS (Mode 01 PID $01)")
+            return None
+        response = conn.query(cmd)
+        if response.is_null() or response.value is None:
+            return None
+        return serialize_im_status(response.value)
 
     def read_mode06(self) -> list[dict[str, Any]]:
         """Mode 06 on-board monitor tests for OBDMIDs in STANDARD_MODE06_COMMANDS.

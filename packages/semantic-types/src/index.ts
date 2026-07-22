@@ -206,6 +206,29 @@ export interface DiscoveryForensicsReport {
   html: string;
 }
 
+/** One I/M monitor from Mode 01 PID $01 (STATUS bitfield). */
+export interface ImMonitorStatus {
+  /** SAE-style name, e.g. MISFIRE_MONITORING */
+  name: string;
+  available: boolean;
+  complete: boolean;
+}
+
+/**
+ * Structured Mode 01 PID $01 STATUS — not a float PID.
+ * Gateway captures this; never invent from empty DTCs.
+ */
+export interface ImStatusObservation {
+  mil: boolean;
+  dtcCount: number;
+  /** python-OBD ignition_type: typically "spark" or "compression". */
+  ignitionType: string;
+  /** Supported monitors only (unavailable bits omitted). */
+  monitors: ImMonitorStatus[];
+  /** True when every available monitor is complete. */
+  allComplete: boolean;
+}
+
 /** The single envelope obd-gateway posts to `POST /api/vehicles/:id/observations`. */
 export interface ObservationBatch {
   vehicleId: SemanticId;
@@ -218,6 +241,8 @@ export interface ObservationBatch {
   pids?: PidReading[];
   freezeFrames?: FreezeFrame[];
   mode06?: Mode06Result[];
+  /** Mode 01 PID $01 STATUS bitfield (I/M readiness). */
+  imStatus?: ImStatusObservation;
 }
 
 /** One continuous observation window (live watch or simulated drive). */
@@ -349,7 +374,7 @@ export function normalizeLiveGaugePids(requested: readonly string[] | undefined 
 
 /**
  * I/M readiness / monitor completion (J1979 Mode 01 PID $01).
- * Until the gateway captures STATUS bitfields, `available` stays false —
+ * `complete` / `incomplete` only when a batch carries `imStatus` —
  * never invent a “ready for smog” claim from empty DTCs.
  */
 export type ImReadinessStatus = "unsupported" | "no_data" | "complete" | "incomplete";
@@ -360,10 +385,14 @@ export interface ImReadiness {
   status: ImReadinessStatus;
   /** Operator-facing honesty about what we can and cannot claim. */
   message: string;
-  /** SAE Mode 01 PID that will feed this once captured. */
+  /** SAE Mode 01 PID that feeds this. */
   requiredPid: "STATUS";
   source?: ObservationSource | null;
   capturedAt?: IsoTimestamp | null;
+  mil?: boolean;
+  dtcCount?: number;
+  ignitionType?: string;
+  monitors?: ImMonitorStatus[];
 }
 
 // --- Problem/Solution vocabulary (LOGOS-facing) ---------------------------
