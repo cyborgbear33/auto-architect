@@ -7,6 +7,7 @@ FakeLogosBridge in @auto/logos-bridge.
 import obd
 from obd_gateway.client import ObdGatewayClient
 from obd_gateway.config import GatewayConfig
+from obd_gateway.mode0a import GET_PERMANENT_DTC
 
 
 class FakeResponse:
@@ -28,7 +29,7 @@ class FakeConnection:
     def supports(self, command):
         return command in self._supported
 
-    def query(self, command):
+    def query(self, command, force=False):  # noqa: ARG002 — mirrors python-OBD
         return FakeResponse(self._responses.get(command))
 
     def close(self):
@@ -75,6 +76,35 @@ def test_read_dtcs_tags_stored_and_pending():
         "description": "Cylinder 4 Misfire Detected",
     } in dtcs
     assert {"code": "P0171", "status": "pending", "description": "System Too Lean"} in dtcs
+
+
+def test_read_dtcs_tags_permanent_mode_0a():
+    fake = FakeConnection(
+        supported={obd.commands.GET_CURRENT_DTC, GET_PERMANENT_DTC},
+        responses={
+            obd.commands.GET_DTC: [],
+            obd.commands.GET_CURRENT_DTC: [],
+            GET_PERMANENT_DTC: [("P0420", "Catalyst System Efficiency Below Threshold")],
+        },
+    )
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
+    dtcs = client.read_dtcs()
+    assert {
+        "code": "P0420",
+        "status": "permanent",
+        "description": "Catalyst System Efficiency Below Threshold",
+    } in dtcs
+
+
+def test_read_dtcs_skips_null_mode_0a():
+    fake = FakeConnection(
+        supported=set(),
+        responses={obd.commands.GET_DTC: [("P0304", "misfire")]},
+    )
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
+    dtcs = client.read_dtcs()
+    assert dtcs == [{"code": "P0304", "status": "stored", "description": "misfire"}]
+    assert all(d["status"] != "permanent" for d in dtcs)
 
 
 def test_read_pids_requires_connection_first():

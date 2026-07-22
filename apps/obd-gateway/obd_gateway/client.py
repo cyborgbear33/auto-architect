@@ -15,6 +15,7 @@ import obd
 
 from .config import GatewayConfig
 from .discovery import now_iso as discovery_now_iso
+from .mode0a import GET_PERMANENT_DTC
 from .pid_map import (
     FREEZE_FRAME_PID_COMMANDS,
     MANUAL_ONLY_PIDS,
@@ -70,7 +71,7 @@ def _freeze_dtc_code(value: Any) -> str | None:
 
 class ObdGatewayClient:
     """Connects to an ELM327-compatible adapter (OBDLink MX+ included) and
-    reads Mode 01 PIDs, Mode 02 freeze frame, Mode 03/07 DTCs, and Mode 06
+    reads Mode 01 PIDs, Mode 02 freeze frame, Mode 03/07/0A DTCs, and Mode 06
     monitor results. Never writes state beyond an optional explicit
     `clear_dtcs()` call the CLI gates behind a confirmation flag — mirrors
     ActionService's mutation gate, one level down."""
@@ -145,8 +146,11 @@ class ObdGatewayClient:
         return readings
 
     def read_dtcs(self) -> list[dict[str, Any]]:
-        """Reads stored (Mode 03) + pending (Mode 07) DTCs and tags each with
-        its status, matching `DtcObservationSchema`."""
+        """Reads stored (Mode 03), pending (Mode 07), and permanent (Mode 0A)
+        DTCs and tags each with its status, matching `DtcObservationSchema`.
+        Mode 0A uses a thin custom command — python-OBD has no GET_PERMANENT_DTC
+        and never lists 0A in Mode 01 support bitmaps, so we force the query and
+        treat null/empty as no permanent codes (never invent)."""
         conn = self._require_connection()
         dtcs: list[dict[str, Any]] = []
         stored = conn.query(obd.commands.GET_DTC)
@@ -160,7 +164,21 @@ class ObdGatewayClient:
                     dtcs.append(
                         {"code": code, "status": "pending", "description": description or None}
                     )
+        permanent = self._query_permanent_dtcs(conn)
+        if permanent is not None and not permanent.is_null() and permanent.value:
+            for code, description in permanent.value:
+                dtcs.append(
+                    {"code": code, "status": "permanent", "description": description or None}
+                )
         return dtcs
+
+    def _query_permanent_dtcs(self, conn: obd.OBD) -> Any:
+        """Mode 0A via force=True when the connection supports kwargs (live OBD)."""
+        try:
+            return conn.query(GET_PERMANENT_DTC, force=True)
+        except TypeError:
+            # Test doubles that only accept the command positional.
+            return conn.query(GET_PERMANENT_DTC)
 
     def read_freeze_frames(self) -> list[dict[str, Any]]:
         """Mode 02 freeze frame for the DTC that triggered it. Omits the whole

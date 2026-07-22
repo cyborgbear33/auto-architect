@@ -427,6 +427,7 @@ or proprietary enhanced-PID lock-in.
 | BlueDriver: verified-fix reports from shop outcomes | WhatWorked exists but not next to DTC rows | **UX2** DTC-row “what worked” chips from solution history | high |
 | Torque/OBDLink: fast live PIDs + custom dash | Gauges shipped; no operator-picked PID layout | **UX3** Saved gauge layout per vehicle (Mode 01 only) | medium |
 | Smog/readiness tiles in consumer apps | Thin honesty panel shipped; no STATUS bitfield yet | **UX4** complete/incomplete tiles after PID $01 capture | high |
+| Shop tools: permanent DTCs after clear | Gateway now captures Mode 0A (thin AT) | **S8** done | — |
 | FORScan/Carista: deep module maps | Full CAN/UDS map is OEM-proprietary; out of MVP scope | **CAN1** Research note + guided discover depth only (no invented bus map) | medium |
 | Plain-English first | Narration leads next-action + proven list; DTC tooltips carry fluent | **UX5** done | — |
 | One-tap scan ritual | Simulate CLI strong; in-UI “run scan” still gateway-ops | **S1** Live MX+ dry-run + Dashboard scan affordance | critical |
@@ -446,7 +447,7 @@ tool), never fake completeness.
 | Dashboard one-click simulate / import-log affordance | UX6 | done | medium | `EvidenceIngestPanel` on Dashboard; Journal keeps full export. | Dashboard, importObservationLog, simulateDriveSession |
 | Plain-English next-action + DTC tooltips | UX5 | done | medium | Fluent narration leads at-a-glance + proven list; class ids secondary. | `NextActionConsole`, Dashboard |
 | I/M readiness / monitor completion panel | UX4 | partial | high | Thin honesty seam shipped (`GET …/readiness` + Dashboard panel). Complete/incomplete tiles still need Mode 01 PID $01 STATUS bitfield capture (not a float PID). | `ImReadiness`, observations, `ReadinessPanel` |
-| Mode 0A permanent DTC capture | S8 | planned | medium | UI can show `permanent` but gateway reads 03+07 only. | `obd_gateway` `read_dtcs` |
+| Mode 0A permanent DTC capture | S8 | done | medium | Thin `GET_PERMANENT_DTC` (Mode 0A) in gateway; UI already paints `permanent`. | `obd_gateway/mode0a.py`, `read_dtcs` |
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | critical | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
 | Saved per-vehicle gauge layout | UX3 | planned | medium | Torque-like customization within Mode 01 support. | LiveGaugeStrip, vehicle prefs |
 | CAN/UDS map research → discover depth only | CAN1 | partial | medium | Discovery page states lawful observe boundary (no invented OEM CAN/UDS maps). Deeper guided-discover depth still open. | Discovery, `OBD_EDGE_CONTRACT` |

@@ -72,7 +72,7 @@ one for access.
 | Mode 02 freeze frame | Conditions when a DTC set | Gateway populates when ECU has a frame |
 | Mode 03 / 07 DTCs | Stored / pending codes + dictionary text | Primary path |
 | Mode 06 monitors | Catalyst / O2 / EVAP / EGR / … pass-fail | SAE-seed OBDMIDs when ECU supports |
-| Mode 0A permanent DTCs | Survived clear | Schema-aware; not yet in python-OBD path |
+| Mode 0A permanent DTCs | Survived clear | Thin AT path (`obd_gateway.mode0a`); null → no invent |
 | Drive / watch sessions | Trends over a trip | `watch` + DriveSession when used |
 | Manual PIDs | Oil pressure/level (Jeep MultiAir path) | `--manual-pid` only |
 | Campaigns / TSBs | Known Jeep W80/W84 / TSB cards | Curated JSON, not from the bus |
@@ -175,8 +175,8 @@ allow**, then deepen meaning in the ontology — without cloning AlfaOBD.
 ### Phase D — Freeze frame & permanence
 
 - [ ] Capture FF on real DTCs; verify ClassEvidence / report include them.
-- [ ] When python-OBD (or a thin AT command path) supports Mode 0A, add
-      permanent DTCs without weakening the “no clear from edge” rule.
+- [x] Mode 0A permanent DTCs via thin AT path (`GET_PERMANENT_DTC`); clear
+      still gated — never invent permanence from empty Mode 0A.
 
 ### Phase E — Session-grade diagnostics
 

@@ -39,7 +39,7 @@ Classification, policy, and ranking live exclusively in `apps/api`.
 |---|---|---|
 | 01 | Live PIDs | primary |
 | 02 | Freeze frame | gateway populates when ECU exposes a freeze DTC + Mode 02 PIDs |
-| 03 / 07 / 0A | Stored / pending / permanent DTCs | 03/07 primary; 0A not in python-OBD yet |
+| 03 / 07 / 0A | Stored / pending / permanent DTCs | 03/07 via python-OBD; 0A via thin `GET_PERMANENT_DTC` (`force=True`) |
 | 06 | On-board monitor results | gateway populates SAE-seed OBDMIDs when ECU supports them |
 
 Manual / simulated PIDs are allowed for tests (`--manual-pid`, `--simulate`).

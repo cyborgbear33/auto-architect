@@ -56,6 +56,15 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         batchCount: 1,
         sourcesSeen: ["simulated"],
       }),
+      getReadiness: vi.fn().mockResolvedValue({
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        available: false,
+        status: "unsupported",
+        requiredPid: "STATUS",
+        message: "I/M monitor readiness needs Mode 01 PID $01 (STATUS bitfield).",
+        source: null,
+        capturedAt: null,
+      }),
       getLiveGauges: vi.fn().mockResolvedValue({
         vehicleId: "veh:jeep-renegade-2015-latitude",
         source: "simulated",
