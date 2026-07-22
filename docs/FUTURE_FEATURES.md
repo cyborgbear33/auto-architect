@@ -443,8 +443,8 @@ tool), never fake completeness.
 |---|---|---|---|---|---|
 | Dashboard next-action console (at-a-glance) | UX1 | done | high | Closes BlueDriver/FIXD “what now” clarity gap. | `NextActionConsole`, Dashboard |
 | DTC-row “what worked” from solution history | UX2 | done | high | `DtcWhatWorkedChips` via classEvidence→solution-history; no invented fixes. | Dashboard DTC list, `solutionHistoryUi` |
-| I/M readiness / monitor completion panel | UX4 | planned | high | Needs Mode 01 PID $01 STATUS bitfield (not float PID); gateway + structured type. | `pid_map.py`, observations, Dashboard |
-| Dashboard one-click simulate / import-log affordance | UX6 | planned | medium | Empty next-action only links Guide; Journal already has import. | Dashboard, DataExportPanel patterns |
+| Dashboard one-click simulate / import-log affordance | UX6 | done | medium | `EvidenceIngestPanel` on Dashboard; Journal keeps full export. | Dashboard, importObservationLog, simulateDriveSession |
+| I/M readiness / monitor completion panel | UX4 | planned | high | Deferred: needs Mode 01 PID $01 STATUS bitfield (gateway + structured type), not a float PID. | `pid_map.py`, observations, Dashboard |
 | Mode 0A permanent DTC capture | S8 | planned | medium | UI can show `permanent` but gateway reads 03+07 only. | `obd_gateway` `read_dtcs` |
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | critical | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
 | Saved per-vehicle gauge layout | UX3 | planned | medium | Torque-like customization within Mode 01 support. | LiveGaugeStrip, vehicle prefs |
@@ -610,6 +610,7 @@ actually maintain.
 | Batched realize + bridge temp-file (F13/F14) | 2026-07 | Recognition classify batches; logos-bridge temp JSON (software-architect) |
 | Dashboard next-action console (UX1) | 2026-07 | `NextActionConsole` — market-informed at-a-glance next step |
 | DTC-row verified-fix chips (UX2) | 2026-07 | classEvidence join → solution-history chips on Dashboard Active DTCs |
+| Dashboard evidence ingest ritual (UX6) | 2026-07 | Simulate drive + OBD log import on Dashboard; live scan stays Guide/CLI |
 
 ---
 

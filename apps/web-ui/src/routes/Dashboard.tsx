@@ -7,6 +7,7 @@ import { AemfPlaybookProse } from "../components/AemfPlaybookProse.tsx";
 import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
 import { DriveSessionsPanel } from "../components/DriveSessionsPanel.tsx";
 import { DtcWhatWorkedChips } from "../components/DtcWhatWorkedChips.tsx";
+import { EvidenceIngestPanel } from "../components/EvidenceIngestPanel.tsx";
 import { EvidencePanels } from "../components/EvidencePanels.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import {
@@ -111,6 +112,8 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
       </div>
 
       <NextActionConsole vehicleId={vehicleId} />
+
+      <EvidenceIngestPanel vehicleId={vehicleId} />
 
       <div className="mb-4">
         <LiveGaugeStrip vehicleId={vehicleId} />

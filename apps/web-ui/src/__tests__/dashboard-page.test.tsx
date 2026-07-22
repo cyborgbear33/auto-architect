@@ -249,6 +249,18 @@ describe("Dashboard", () => {
     expect(section.getByText("n=2")).toBeInTheDocument();
   });
 
+  it("offers Dashboard evidence ingest without hardware", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <Dashboard />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText("Get evidence on file")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Simulate drive session/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Import OBD log/i })).toBeInTheDocument();
+  });
+
   it("shows the live gauge strip with units", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(

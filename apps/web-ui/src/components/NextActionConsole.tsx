@@ -66,7 +66,7 @@ export function NextActionConsole({ vehicleId }: { vehicleId: string }) {
   } else if (!hasEvidence && proven.length === 0) {
     headline = "No OBD evidence on file yet";
     detail =
-      "Run a live scan or simulate Mode 01–07 evidence. Empty is not a clean bill of health.";
+      "Import an OBD log or simulate a drive below — or follow the Guide for live MX+. Empty is not a clean bill of health.";
     ctaLabel = "How to scan (Guide)";
     ctaTo = "/guide";
   } else if (proven.length === 0) {
