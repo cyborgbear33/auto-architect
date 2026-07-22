@@ -43,11 +43,11 @@ multi-piece plans live in the next section.
 
 | Goal | Status | What exists today | Done when | Closing backlog |
 |---|---|---|---|---|
-| **Scanning** — ingest OBD evidence | **partial** | Simulate/API ingest; live gauge strip + FF/Mode06 UI; source labels | Live MX+ path proven; drive sessions; retention policy | Live MX+ dry-run; Drive sessions; Durable observation history |
-| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration + evidence; ~134 P0xxx circuit/emission seed | Full J1979/J2012 catalog | rarer P0xxx / OEM P1xxx |
-| **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration; counterfactuals + disqualified UI | Family priors polish; optional LLM advise | optional LLM advise |
-| **Informing the user** — clear operator surfaces | **partial** | Source badges, narration, FF/Mode06, calibration explain chips | Shared UI package | `@auto/ui-components` |
-| **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert | Deeper campaign→repair playbooks | RecommendationService |
+| **Scanning** — ingest OBD evidence | **partial** | Simulate/API ingest; live gauge strip + FF/Mode06 UI; source labels | Live MX+ path proven; drive sessions; retention policy | Live MX+ dry-run (S1 hardware); GatewayScanCommands UI done |
+| **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration + evidence; ~134 P0xxx circuit/emission seed | Full J1979/J2012 catalog + teaching-grade cause briefs | A4/S7; **A6–A7** causal model + apprentice brief |
+| **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration; counterfactuals + disqualified UI | Ranked steps *and* understandable differentials | **A6–A7**, X6; D5 LLM only after structured causes |
+| **Informing the user** — clear operator / apprentice surfaces | **partial** | Source badges, narration, AEMF, calibration chips, empty-evidence honesty | Apprentice can explain vehicle + problem + fix from the UI | **A7**, I7, V1; I5 package |
+| **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert | Deeper campaign→repair playbooks tied into briefs | R6 → A7; RecommendationService |
 | **Problem tracking** — open cases through solve | **shipped** | Caseboard filters; abandon/escalate/reopen; `worked` → verifying → verify check | — | — |
 | **Problem history** — cases over time | **partial** | Case timeline + filters + evidence/session deep-links | Stronger batch-level evidence anchors | Durable observation history |
 | **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel + sample-size UX (F10); verify-before-solved | Live multi-vehicle priors polish | Multi-signal trends |
@@ -81,6 +81,15 @@ for comprehension and playbook selection, not a second classifier.
 remain the default. Bi-directional UDS / flashing stay out of scope until an
 explicit enhanced-session project — memory and recommendations must still work.
 
+**Apprentice diagnoser tactic — teach, don’t just rank:**
+The operator (and future apprentice) should leave each case understanding
+(1) the vehicle identity and systems in play, (2) what evidence proved which
+fault class, (3) *why* that class tends to happen (causes / differentials),
+(4) what to try next and how history on *this* vehicle informs it, and
+(5) what “fixed” meant last time. Ranking without teaching is incomplete.
+`CausalModel` on `DiagnosticProblem` exists but is unused — fill it from
+cartridges + evidence (propose); LOGOS still disposes membership.
+
 **Cross-cutting product strategy (applies to every goal):**
 
 1. **Propose / dispose stays sacred** — heuristics and LLMs may suggest; LOGOS
@@ -96,8 +105,12 @@ explicit enhanced-session project — memory and recommendations must still work
    ProblemDetail before inventing nav items.
 6. **AEMF framing** — prefer situating proven classes and recommendations in
    air/electricity/mechanical/fluid without inventing membership.
-7. **Continuous improvement** — discover → log here → build by value/priority
-   (integrity → live evidence → ontology depth → UX polish).
+7. **Teach the differential** — every proven class should eventually carry a
+   causal brief (symptoms → possible causes → what evidence supports now →
+   what to prove next), composed from ontology + live data + this vehicle’s
+   history — never from invented realize membership.
+8. **Continuous improvement** — discover → log here → build by value/priority
+   (integrity → causal teaching spine → live evidence → ontology depth → UX).
 
 ---
 
@@ -141,13 +154,16 @@ building a “scan dashboard” that bypasses `POST .../observations`.
 
 **Ideal product.** Recognition answers: *which fault classes are proven from
 current evidence?* Each proven class shows supporting DTCs/PIDs/freeze-frame/
-Mode 06 and a short plain-English proof. Undecided / not-proven stays visible —
-the system never invents “Healthy.” Cartridge coverage grows with the SAE KB
-and engine-family views, not with ad-hoc UI strings.
+Mode 06 and a short plain-English proof **plus a teaching-grade causal brief**
+(why this happens, differentials, what to prove next). Undecided / not-proven
+stays visible — the system never invents “Healthy.” Cartridge coverage grows
+with the SAE KB and engine-family views, not with ad-hoc UI strings.
 
 **Strategy.** Keep **perceive → realize** as the only path to class membership.
-Invest in *explanation and evidence adjacency*, not alternate classifiers.
-Expand dictionaries and ontology views so perception has more lawful fuel.
+Invest in *explanation, causal structure, and evidence adjacency*, not
+alternate classifiers. Expand dictionaries and ontology views so perception
+has more lawful fuel. Populate `CausalModel` from cartridge catalogs + current
+`classEvidence` (propose); compose apprentice briefs from that + AEMF + history.
 
 | # | Work piece | Status | Notes |
 |---|---|---|---|
@@ -156,28 +172,33 @@ Expand dictionaries and ontology views so perception has more lawful fuel.
 | A3 | Mode 06 as recognition input where ontology allows | done | Thin SAE/ISO OBDMID seed → perception → realize; unknown MIDs unlabeled |
 | A4 | Broader curated DTC/PID KB + ontology lint parity | partial | + coil/injector/MAP/knock/TPS circuit families; still not full J2012 |
 | A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | SAE set shared; GM stub inert until real truck |
+| A6 | Populate `CausalModel` on draft/solve from cartridge cause catalogs + live `classEvidence` | planned | Symptoms / possibleCauses / mostLikelyCauses; never invents realize membership |
+| A7 | Apprentice **causal brief** read-model + Diagnosis/ProblemDetail panel | planned | Compose evidence + ontology/AEMF + WhatWorked/LearningCycle → why / how we know / prove next |
 
 **Seams:** cartridges, `RecognitionService`, logos-bridge `realize`/`verbalize`,
-dictionaries, Diagnosis/Dashboard.  
+dictionaries, Diagnosis/Dashboard, `CausalModel`, solution-history.  
 **Anti-patterns:** UI-only “likely misfire” badges; LLM classifying without
-realize; hiding undecided membership.
+realize; hiding undecided membership; causal prose that invents class membership.
 
 ---
 
 ### 3. Diagnosis (probabilistic) — ranked next steps under uncertainty
 
 **Ideal product.** A diagnostic case is a first-class `DiagnosticProblem` with
-clear current/desired state. `solve` returns ranked actions with honest
-uncertainty: solver scores *plus* priors from this vehicle’s (and optionally
-engine-family) confirmed outcomes. Policy can forbid unsafe shortcuts
-(e.g. clear-codes under oil starvation). Counterfactuals explain “why not #1.”
-Probability language is calibrated — never fake precision.
+clear current/desired state **and a filled causal model the apprentice can
+read**. `solve` returns ranked actions with honest uncertainty: solver scores
+*plus* priors from this vehicle’s (and optionally engine-family) confirmed
+outcomes. Policy can forbid unsafe shortcuts (e.g. clear-codes under oil
+starvation). Counterfactuals explain “why not #1.” Differentials explain
+“why coil before injector.” Probability language is calibrated — never fake
+precision.
 
 **Strategy.** Today’s solve is **scoring under constraints**, not Bayesian
 posteriors. Do not pretend otherwise. Close the loop:
 `log-repair` outcomes → empirical priors → adjust playbook confidence / solve
-inputs → re-rank. Keep policy defeasible and fail-closed. Optional LLM may
-*propose* framing or candidate actions; LOGOS still disposes.
+inputs → re-rank. Keep policy defeasible and fail-closed. Prefer **A6/A7
+structured causes** before optional LLM; LLM may *propose* framing or
+candidate causes/actions against that structure; LOGOS still disposes.
 
 | # | Work piece | Status | Notes |
 |---|---|---|---|
@@ -185,7 +206,7 @@ inputs → re-rank. Keep policy defeasible and fail-closed. Optional LLM may
 | D2 | Surface counterfactuals / disqualified actions in UI | done | `Explainability.tsx` on ProblemDetail; FakeLogosBridge emits thin CFs |
 | D3 | Outcome → playbook confidence / action priors | done | `calibration.ts` → draft/solve/refresh |
 | D4 | Family-level priors (same engineFamily) with small-sample caution | done | Family buckets + higher `k` |
-| D5 | Optional propose-only LLM advise pass (draft candidates) | todo | Never skip realize/reason/solve |
+| D5 | Optional propose-only LLM advise pass (draft candidates / cause gloss) | planned | After A6/A7; never skip realize/reason/solve; never invent membership |
 
 **Seams:** `ActionService`, `SolverService`, `PolicyService`, cartridges,
 `ProblemOutcome` / `DecisionRecord`.  
@@ -214,10 +235,12 @@ Ship `@auto/ui-components` once patterns repeat twice.
 | I4 | Verbalized proofs on Diagnosis / ProblemDetail | done | Narration on Dashboard/Diagnosis |
 | I5 | Shared `@auto/ui-components` | partial | Thin EmptyEvidenceState in web-ui; full package later |
 | I6 | Staleness / “last observation” chrome on Dashboard | done | Fresh/Stale badge on gauge strip |
+| I7 | Diagnosis proven list: fluent narration primary, class id secondary | planned | Parity with UX5 Dashboard; less jargon-first for apprentices |
+| V1 | Vehicle dossier strip on Diagnosis (profile + VIN/odo ritual + discovery + campaigns) | planned | Identity completeness before deep causal teaching; never invent VIN |
 
-**Seams:** web-ui pages, `UX_GUIDELINES`, api-client queryKeys.  
+**Seams:** web-ui pages, `UX_GUIDELINES`, api-client queryKeys, vehicle profiles.  
 **Anti-patterns:** Flat 17-item nav; theorem-prover chrome in operator mode;
-claims without evidence.
+claims without evidence; teaching panels that hide which vehicle they are about.
 
 ---
 
@@ -241,8 +264,9 @@ is opened (`generatedByProblem`).
 | R3 | Status lifecycle in UI (accept / dismiss / convert) | done | Accept/dismiss + convert→ActionService; open-only shortlist |
 | R4 | History-aware priority from solution rollup + calibration | done | One-step bump when worked≥2 clean |
 | R5 | Campaign-backed recommendations (TSB/recall → actionable card) | done | Refresh emits W80/W84/TSB cards; empty classes; Campaigns link |
+| R6 | Campaign/TSB steps linked into A7 causal brief (“OEM also says…”) | planned | Applicability only — never invents a proven fault class |
 
-**Seams:** `RecommendationService`, recognition, campaigns, Dashboard.  
+**Seams:** `RecommendationService`, recognition, campaigns, Dashboard, A7.  
 **Anti-patterns:** Recommendations that invent fault classes; burying cost/risk;
 refresh that ignores policy holds for unsafe actions.
 
@@ -293,10 +317,11 @@ are the evidence spine under each event.
 | H3 | Attach odometer / session to case events | done | Stamped on lifecycle + DecisionRecord; CaseTimelinePanel shows mi / session |
 | H4 | Filter history by class, status, date, mileage | done | `CaseTimelinePanel` client filters |
 | H5 | Deep link timeline event → evidence batch / freeze-frame | done | Evidence + `#session:…` → DriveSessionsPanel highlight |
+| H6 | Operator-entered complaint / symptom journal → framing input | planned | Human symptoms (rough idle, smell, stall) enrich draft framing; never invent realize classes |
 
 **Seams:** problems, decisions, DriveSession, ObservationsService, Diagnosis.  
 **Anti-patterns:** Journal-as-only-history; losing evidence when a problem is
-marked solved.
+marked solved; treating complaints as proven fault classes.
 
 ---
 
@@ -319,8 +344,9 @@ confirmation (“worked after 50 mi verify”) over assuming solve ≡ fixed.
 | X3 | Rollup API: by vehicle, class, engineFamily, actionId | done | `GET .../solution-history?class=` |
 | X4 | “What worked before” panel on Diagnosis / ProblemDetail | done | `WhatWorkedPanel` |
 | X5 | Require / encourage outcome + verify before terminal solved | done | `log-repair` worked → verifying; verify closes or reopens |
+| X6 | Solution narrative cards for apprentices | planned | “Action → class → outcome → verify → why believed” — not just n= counts; feeds A7 |
 
-**Seams:** `DecisionRecord`, `ProblemOutcome`, RecommendationsService, Journal.  
+**Seams:** `DecisionRecord`, `ProblemOutcome`, RecommendationsService, Journal, A7.  
 **Anti-patterns:** Outcomes that never get recorded; rollups that ignore
 sample size; treating dismissed recommendations as confirmed fixes.
 
@@ -438,10 +464,56 @@ freeze frame, Mode 06 seeds) and grow OEM cartridges from evidence + TSBs.
 Enhanced UDS/module trees stay behind an explicit project (Functions / external
 tool), never fake completeness.
 
+### Discovery — apprentice-smart diagnosis (2026-07-22)
+
+**Product ask:** Be the smartest *and* most informative diagnoser — pull all
+lawful vehicle information; diagnose from **symptoms + live data + ontology +
+vehicle history**; explain causes so an apprentice fully understands the
+vehicle, the problem, and the solutions.
+
+**What already ships (spine is real):** perceive → realize → draft/solve →
+recommend → verify → Journal; AEMF framing; fluent narration (membership
+proofs); classEvidence; WhatWorked / LearningCycle / calibration; counterfactuals;
+cascade watchlist; case timeline. Types include `CausalModel` on
+`DiagnosticProblem` but cartridges **do not fill it**.
+
+**Market / pedagogy gap (vs shop mentors + consumer apps):** BlueDriver/FIXD
+lead with “what next” and verified-fix stats; good mentors teach
+*differentials* (“why coil before injector,” “how EVAP leak tests work”). We
+rank and prove membership well; we under-teach **cause structure** and
+**history-as-story**. Ontology `notes` are SAE-membership glosses, not root-cause
+lessons. Diagnosis UI is still more class-id-forward than Dashboard UX5.
+
+| Insight | Our gap | Backlog response | Priority |
+|---|---|---|---|
+| Mentors narrate causes + differentials | `CausalModel` unused; notes ≠ teaching | **A6** fill causal model from cartridges + evidence | critical |
+| Apprentice needs one “why / how we know / prove next” surface | Panels are fragmented (AEMF, evidence, WhatWorked, CFs) | **A7** composed causal brief on Diagnosis + ProblemDetail | critical |
+| “What fixed it” should teach, not only count | Solution history is n= rollups | **X6** solution narrative cards → feed A7 | high |
+| Know the vehicle before deep diagnosis | VIN/odo optional; no Diagnosis dossier | **V1** vehicle dossier + identity ritual | high |
+| Human complaints matter (smell, stall, rough) | Only bus symptoms enter perception | **H6** complaint/symptom journal → framing only | medium |
+| Plain English on Diagnosis | Fluent primary on Dashboard; Diagnosis still jargon-heavy | **I7** fluent-first proven list | medium |
+| OEM TSB context in the lesson | Campaigns are parallel cards | **R6** link campaign steps into A7 brief | medium |
+| Optional LLM gloss | D5 planned without structured fuel | **D5** only after A6/A7 | medium |
+
+**Build order (logical):**
+`A6` → `A7` (+ `I7` polish) → `X6` → `V1` ∥ `H6` ∥ continue `A4` → `R6` → `D5`.
+
+**Integrity:** Causal briefs and LLM advise may *propose* causes and lessons;
+realize still owns class membership; empty DTCs / missing STATUS never mean
+healthy; history never invents a fix that was not logged and verified.
+
 ### Closes product goals (prefer these)
 
 | Feature | Pieces | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|---|
+| Causal model on draft/solve (cartridge + evidence) | A6 | planned | critical | Unlocks teaching-grade differentials without a second classifier. | `CausalModel`, cartridges, ActionService draft/solve |
+| Apprentice causal brief (why / evidence / prove next) | A7 | planned | critical | Single informative diagnosis surface from data + ontology + history. | Diagnosis, ProblemDetail, AEMF, WhatWorked, LearningCycle |
+| Solution narrative cards (not just n=) | X6 | planned | high | Makes history teach “what fixed what and how we know.” | solution-history, LearningCycle, A7 |
+| Vehicle dossier + VIN/odo ritual on Diagnosis | V1 | planned | high | Apprentice must know *which* vehicle/systems before causes. | VehicleProfile, discovery, campaigns |
+| Diagnosis fluent-first proven classes | I7 | planned | medium | Parity with UX5; less jargon barrier. | Recognition.narration, Diagnosis |
+| Operator complaint / symptom journal → framing | H6 | planned | medium | Human symptoms enrich cases without inventing realize classes. | DiagnosticProblem framing, Journal |
+| Campaign/TSB steps inside causal brief | R6 | planned | medium | OEM context in the lesson, still applicability-only. | known-campaigns, A7 |
+| Propose-only LLM advise (causes/framing gloss) | D5 | planned | medium | After A6/A7 so advise has structured fuel; LOGOS disposes. | logos-bridge / agent-service, A7 |
 | Dashboard next-action console (at-a-glance) | UX1 | done | high | Closes BlueDriver/FIXD “what now” clarity gap. | `NextActionConsole`, Dashboard |
 | DTC-row “what worked” from solution history | UX2 | done | high | `DtcWhatWorkedChips` via classEvidence→solution-history; no invented fixes. | Dashboard DTC list, `solutionHistoryUi` |
 | Dashboard one-click simulate / import-log affordance | UX6 | done | medium | `EvidenceIngestPanel` on Dashboard; Journal keeps full export. | Dashboard, importObservationLog, simulateDriveSession |
