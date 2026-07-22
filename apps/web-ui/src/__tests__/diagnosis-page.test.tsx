@@ -46,6 +46,23 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         member: ["Engine", "MisfireUnderLoad"],
         mostSpecific: ["MisfireUnderLoad"],
         undecided: [],
+        narration: [
+          {
+            className: "MisfireUnderLoad",
+            fluent: "Cylinder misfire under high load (plain English).",
+            source: "ontology_note",
+          },
+        ],
+      }),
+      getCausalBriefForClass: vi.fn().mockResolvedValue({
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        faultClass: "MisfireUnderLoad",
+        why: "Most likely: ignition",
+        howWeKnow: ["Cylinder misfire under high load (plain English)."],
+        whatToProveNext: ["swap coil"],
+        historyNotes: ["No confirmed outcomes yet."],
+        causalModel: { symptoms: ["P0304"], mostLikelyCauses: ["ignition"] },
+        integrityNote: "Teaching brief only.",
       }),
       getEvidenceProvenance: vi.fn().mockResolvedValue({
         latestSource: "obd_gateway",
@@ -106,9 +123,12 @@ function renderDiagnosis() {
 describe("Diagnosis", () => {
   it("offers to draft a diagnostic problem for a proven, not-yet-drafted class", async () => {
     renderDiagnosis();
-    const heading = await screen.findByText("Proven, not-yet-drafted fault classes");
+    const heading = await screen.findByText("Proven, not-yet-drafted");
     const section = within(heading.closest("section")!);
     const button = await section.findByRole("button", { name: "Draft diagnostic problem" });
+    expect(
+      section.getByText("Cylinder misfire under high load (plain English)."),
+    ).toBeInTheDocument();
     expect(section.getByText("MisfireUnderLoad")).toBeInTheDocument();
     fireEvent.click(button);
     await waitFor(() =>

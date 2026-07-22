@@ -235,7 +235,7 @@ Ship `@auto/ui-components` once patterns repeat twice.
 | I4 | Verbalized proofs on Diagnosis / ProblemDetail | done | Narration on Dashboard/Diagnosis |
 | I5 | Shared `@auto/ui-components` | partial | Thin EmptyEvidenceState in web-ui; full package later |
 | I6 | Staleness / “last observation” chrome on Dashboard | done | Fresh/Stale badge on gauge strip |
-| I7 | Diagnosis proven list: fluent narration primary, class id secondary | planned | Parity with UX5 Dashboard; less jargon-first for apprentices |
+| I7 | Diagnosis proven list: fluent narration primary, class id secondary | done | Undrafted + caseboard lead with fluent; class id mono secondary |
 | V1 | Vehicle dossier strip on Diagnosis (profile + VIN/odo ritual + discovery + campaigns) | planned | Identity completeness before deep causal teaching; never invent VIN |
 
 **Seams:** web-ui pages, `UX_GUIDELINES`, api-client queryKeys, vehicle profiles.  
@@ -491,7 +491,7 @@ lessons. Diagnosis UI is still more class-id-forward than Dashboard UX5.
 | “What fixed it” should teach, not only count | Solution history is n= rollups | **X6** solution narrative cards → feed A7 | high |
 | Know the vehicle before deep diagnosis | VIN/odo optional; no Diagnosis dossier | **V1** vehicle dossier + identity ritual | high |
 | Human complaints matter (smell, stall, rough) | Only bus symptoms enter perception | **H6** complaint/symptom journal → framing only | medium |
-| Plain English on Diagnosis | Fluent primary on Dashboard; Diagnosis still jargon-heavy | **I7** fluent-first proven list | medium |
+| Plain English on Diagnosis | Fluent primary on Diagnosis proven list + caseboard | **I7** done | — |
 | OEM TSB context in the lesson | Campaigns are parallel cards | **R6** link campaign steps into A7 brief | medium |
 | Optional LLM gloss | D5 planned without structured fuel | **D5** only after A6/A7 | medium |
 
@@ -510,7 +510,7 @@ healthy; history never invents a fix that was not logged and verified.
 | Apprentice causal brief (why / evidence / prove next) | A7 | done | critical | `GET …/causal-brief` + Diagnosis/ProblemDetail `CausalBriefPanel`. | `CausalBriefService`, CausalBriefPanel |
 | Solution narrative cards (not just n=) | X6 | planned | high | Makes history teach “what fixed what and how we know.” | solution-history, LearningCycle, A7 |
 | Vehicle dossier + VIN/odo ritual on Diagnosis | V1 | planned | high | Apprentice must know *which* vehicle/systems before causes. | VehicleProfile, discovery, campaigns |
-| Diagnosis fluent-first proven classes | I7 | planned | medium | Parity with UX5; less jargon barrier. | Recognition.narration, Diagnosis |
+| Diagnosis fluent-first proven classes | I7 | done | medium | Proven list + caseboard lead with fluent; class ids secondary. | `fluentForClass`, Diagnosis |
 | Operator complaint / symptom journal → framing | H6 | planned | medium | Human symptoms enrich cases without inventing realize classes. | DiagnosticProblem framing, Journal |
 | Campaign/TSB steps inside causal brief | R6 | planned | medium | OEM context in the lesson, still applicability-only. | known-campaigns, A7 |
 | Propose-only LLM advise (causes/framing gloss) | D5 | planned | medium | After A6/A7 so advise has structured fuel; LOGOS disposes. | logos-bridge / agent-service, A7 |

@@ -12,6 +12,7 @@ import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import { KnowledgeGapPanel } from "../components/KnowledgeGapPanel.tsx";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { LearningCyclePanel } from "../components/LearningCyclePanel.tsx";
+import { fluentForClass } from "../components/NextActionConsole.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
 import { ApiError, api, queryKeys } from "../lib/api.ts";
 
@@ -168,8 +169,11 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="mb-2 text-sm font-semibold text-slate-700">
-          Proven, not-yet-drafted fault classes
+          Proven, not-yet-drafted
         </h2>
+        <p className="mb-2 text-xs text-slate-400">
+          Plain-English first (I7) — LOGOS class ids stay secondary for apprentices.
+        </p>
         {undraftedClasses.length === 0 ? (
           <p className="text-sm text-slate-400">
             Nothing new to draft — every proven class already has an active case below (or nothing
@@ -178,7 +182,7 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         ) : (
           <ul className="space-y-2">
             {undraftedClasses.map((cls) => {
-              const narr = recognitionQ.data?.narration?.find((n) => n.className === cls);
+              const fluent = fluentForClass(cls, recognitionQ.data?.narration);
               const evidence = recognitionQ.data?.classEvidence?.find((e) => e.className === cls);
               return (
                 <li
@@ -186,10 +190,12 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                   className="flex items-center justify-between gap-3 rounded-md bg-slate-50 px-3 py-2 text-sm"
                 >
                   <div className="min-w-0 flex-1">
-                    <span className="font-medium text-slate-800">{cls}</span>
+                    <p className="font-medium text-slate-800">{fluent}</p>
+                    {fluent !== cls && (
+                      <p className="mt-0.5 font-mono text-[11px] text-slate-400">{cls}</p>
+                    )}
                     <AemfAspectChips className={cls} />
                     <AemfPlaybookProse className={cls} />
-                    {narr && <p className="mt-0.5 text-xs text-slate-500">{narr.fluent}</p>}
                     <ClassEvidencePanel evidence={evidence} />
                     <CausalBriefPanel vehicleId={vehicleId} faultClass={cls} />
                   </div>
@@ -233,7 +239,11 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
           <p className="text-sm text-slate-400">No problems in this filter.</p>
         )}
         <ul className="space-y-2">
-          {filteredProblems.map((problem) => (
+          {filteredProblems.map((problem) => {
+            const classFluent = problem.triggeredByClass
+              ? fluentForClass(problem.triggeredByClass, recognitionQ.data?.narration)
+              : null;
+            return (
             <li key={problem.id} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <Link
@@ -241,10 +251,19 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                   params={{ problemId: problem.id }}
                   className="min-w-0 flex-1 hover:underline"
                 >
-                  <span className="font-medium text-slate-800">
-                    {problem.triggeredByClass ?? "manual"}
-                  </span>
-                  <span className="ml-2 text-slate-500">{problem.statement.currentState}</span>
+                  {problem.triggeredByClass && classFluent ? (
+                    <>
+                      <span className="font-medium text-slate-800">{classFluent}</span>
+                      {classFluent !== problem.triggeredByClass && (
+                        <span className="ml-2 font-mono text-[11px] text-slate-400">
+                          {problem.triggeredByClass}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="font-medium text-slate-800">manual</span>
+                  )}
+                  <span className="mt-0.5 block text-slate-500">{problem.statement.currentState}</span>
                   {problem.triggeredByClass && (
                     <AemfAspectChips className={problem.triggeredByClass} />
                   )}
@@ -300,7 +319,8 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                 )}
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       </section>
 
