@@ -21,6 +21,7 @@ import type {
   FreezeFrame,
   GarageDump,
   GarageImportResult,
+  ImReadiness,
   KnowledgeGapExport,
   KnowledgeGapProposal,
   KnownCampaign,
@@ -229,6 +230,8 @@ export class AutoApiClient {
     this.request<EvidenceProvenance>(`/api/vehicles/${enc(vehicleId)}/evidence-provenance`);
   getLiveGauges = (vehicleId: string) =>
     this.request<LiveGaugeStrip>(`/api/vehicles/${enc(vehicleId)}/live-gauges`);
+  getReadiness = (vehicleId: string) =>
+    this.request<ImReadiness>(`/api/vehicles/${enc(vehicleId)}/readiness`);
   listObservationBatches = (vehicleId: string) =>
     this.request<{ batches: ObservationBatch[] }>(
       `/api/vehicles/${enc(vehicleId)}/observation-batches`,
@@ -492,6 +495,7 @@ export const queryKeys = {
   dtcs: (vehicleId: string) => ["dtcs", vehicleId] as const,
   evidenceProvenance: (vehicleId: string) => ["evidenceProvenance", vehicleId] as const,
   liveGauges: (vehicleId: string) => ["liveGauges", vehicleId] as const,
+  readiness: (vehicleId: string) => ["readiness", vehicleId] as const,
   freezeFrames: (vehicleId: string) => ["freezeFrames", vehicleId] as const,
   mode06: (vehicleId: string) => ["mode06", vehicleId] as const,
   discovery: (vehicleId: string) => ["discovery", vehicleId] as const,

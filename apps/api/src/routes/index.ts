@@ -101,6 +101,11 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
     return s.observations.liveGauges(id);
   });
 
+  app.get("/api/vehicles/:id/readiness", async (req) => {
+    const { id } = req.params as { id: string };
+    return s.observations.readiness(id);
+  });
+
   app.get("/api/vehicles/:id/freeze-frame", async (req) => {
     const { id } = req.params as { id: string };
     return { freezeFrames: await s.observations.latestFreezeFrames(id) };

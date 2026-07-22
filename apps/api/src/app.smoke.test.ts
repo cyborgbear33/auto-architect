@@ -49,6 +49,18 @@ describe("API HTTP smoke (buildApp + inject)", () => {
     expect(provenance.statusCode).toBe(200);
     expect(provenance.json()).toMatchObject({ batchCount: 0, latestSource: null });
 
+    const readiness = await app.inject({
+      method: "GET",
+      url: `/api/vehicles/${id}/readiness`,
+    });
+    expect(readiness.statusCode).toBe(200);
+    expect(readiness.json()).toMatchObject({
+      vehicleId: id,
+      available: false,
+      status: "unsupported",
+      requiredPid: "STATUS",
+    });
+
     const history = await app.inject({
       method: "GET",
       url: `/api/vehicles/${id}/solution-history`,

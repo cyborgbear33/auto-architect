@@ -112,3 +112,32 @@ describe("ObservationService.liveGauges", () => {
     expect(strip.ageMs).toBeGreaterThan(LIVE_GAUGE_STALE_AFTER_MS);
   });
 });
+
+describe("ObservationService.readiness", () => {
+  const store = createMemoryStore();
+  const vehicles = new VehicleService(store);
+  const observations = new ObservationService(store, vehicles);
+
+  beforeEach(async () => {
+    await store.reset();
+    await seed(store);
+  });
+
+  it("stays unsupported until STATUS bitfield capture exists (no smog-ready invent)", async () => {
+    await observations.record({
+      vehicleId: JEEP,
+      capturedAt: new Date().toISOString(),
+      source: "simulated",
+      dtcs: [],
+      pids: [{ pid: "RPM", value: 800, timestamp: new Date().toISOString() }],
+    });
+    const readiness = await observations.readiness(JEEP);
+    expect(readiness).toMatchObject({
+      vehicleId: JEEP,
+      available: false,
+      status: "unsupported",
+      requiredPid: "STATUS",
+    });
+    expect(readiness.message.toLowerCase()).toContain("not a smog-ready");
+  });
+});

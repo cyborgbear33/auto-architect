@@ -2,6 +2,7 @@ import { lookupDtc, lookupPid } from "@auto/ontology";
 import type {
   DtcObservation,
   EvidenceProvenance,
+  ImReadiness,
   LiveGaugeStrip,
   ObservationBatch,
   RetentionResult,
@@ -186,6 +187,25 @@ export class ObservationService {
       stale,
       staleAfterMs: LIVE_GAUGE_STALE_AFTER_MS,
       gauges,
+    };
+  }
+
+  /**
+   * I/M readiness / monitor completion (J1979 Mode 01 PID $01 STATUS).
+   * Thin honesty seam: until the gateway captures the STATUS bitfield as
+   * structured evidence, never invent complete/incomplete from empty DTCs.
+   */
+  async readiness(vehicleId: string): Promise<ImReadiness> {
+    await this.vehicles.getOrThrow(vehicleId);
+    return {
+      vehicleId,
+      available: false,
+      status: "unsupported",
+      requiredPid: "STATUS",
+      message:
+        "I/M monitor readiness needs Mode 01 PID $01 (STATUS bitfield). The gateway does not capture that yet — empty DTCs are not a smog-ready claim.",
+      source: null,
+      capturedAt: null,
     };
   }
 }

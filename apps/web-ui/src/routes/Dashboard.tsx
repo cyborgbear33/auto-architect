@@ -8,6 +8,7 @@ import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
 import { DriveSessionsPanel } from "../components/DriveSessionsPanel.tsx";
 import { DtcWhatWorkedChips } from "../components/DtcWhatWorkedChips.tsx";
 import { EvidenceIngestPanel } from "../components/EvidenceIngestPanel.tsx";
+import { ReadinessPanel } from "../components/ReadinessPanel.tsx";
 import { EvidencePanels } from "../components/EvidencePanels.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import {
@@ -112,6 +113,8 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
       </div>
 
       <NextActionConsole vehicleId={vehicleId} />
+
+      <ReadinessPanel vehicleId={vehicleId} />
 
       <EvidenceIngestPanel vehicleId={vehicleId} />
 

@@ -426,7 +426,7 @@ or proprietary enhanced-PID lock-in.
 | BlueDriver/FIXD: immediate “what fixed this / what next” | Dashboard listed evidence without a single next-step hero | **UX1** Next-action console (done this cycle) | — |
 | BlueDriver: verified-fix reports from shop outcomes | WhatWorked exists but not next to DTC rows | **UX2** DTC-row “what worked” chips from solution history | high |
 | Torque/OBDLink: fast live PIDs + custom dash | Gauges shipped; no operator-picked PID layout | **UX3** Saved gauge layout per vehicle (Mode 01 only) | medium |
-| Smog/readiness tiles in consumer apps | No Mode 01 readiness / I/M completeness surface | **UX4** Readiness / monitor completion panel (J1979 PID $01) | high |
+| Smog/readiness tiles in consumer apps | Thin honesty panel shipped; no STATUS bitfield yet | **UX4** complete/incomplete tiles after PID $01 capture | high |
 | FORScan/Carista: deep module maps | Full CAN/UDS map is OEM-proprietary; out of MVP scope | **CAN1** Research note + guided discover depth only (no invented bus map) | medium |
 | Plain-English first | Narration leads next-action + proven list; DTC tooltips carry fluent | **UX5** done | — |
 | One-tap scan ritual | Simulate CLI strong; in-UI “run scan” still gateway-ops | **S1** Live MX+ dry-run + Dashboard scan affordance | critical |
@@ -445,11 +445,11 @@ tool), never fake completeness.
 | DTC-row “what worked” from solution history | UX2 | done | high | `DtcWhatWorkedChips` via classEvidence→solution-history; no invented fixes. | Dashboard DTC list, `solutionHistoryUi` |
 | Dashboard one-click simulate / import-log affordance | UX6 | done | medium | `EvidenceIngestPanel` on Dashboard; Journal keeps full export. | Dashboard, importObservationLog, simulateDriveSession |
 | Plain-English next-action + DTC tooltips | UX5 | done | medium | Fluent narration leads at-a-glance + proven list; class ids secondary. | `NextActionConsole`, Dashboard |
-| I/M readiness / monitor completion panel | UX4 | planned | high | Deferred: needs Mode 01 PID $01 STATUS bitfield (gateway + structured type), not a float PID. | `pid_map.py`, observations, Dashboard |
+| I/M readiness / monitor completion panel | UX4 | partial | high | Thin honesty seam shipped (`GET …/readiness` + Dashboard panel). Complete/incomplete tiles still need Mode 01 PID $01 STATUS bitfield capture (not a float PID). | `ImReadiness`, observations, `ReadinessPanel` |
 | Mode 0A permanent DTC capture | S8 | planned | medium | UI can show `permanent` but gateway reads 03+07 only. | `obd_gateway` `read_dtcs` |
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | critical | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
 | Saved per-vehicle gauge layout | UX3 | planned | medium | Torque-like customization within Mode 01 support. | LiveGaugeStrip, vehicle prefs |
-| CAN/UDS map research → discover depth only | CAN1 | planned | medium | Honest boundary vs FORScan fantasy maps. | Discovery, `OBD_EDGE_CONTRACT` |
+| CAN/UDS map research → discover depth only | CAN1 | partial | medium | Discovery page states lawful observe boundary (no invented OEM CAN/UDS maps). Deeper guided-discover depth still open. | Discovery, `OBD_EDGE_CONTRACT` |
 | Logos-bridge subprocess temp-file transport (fix stdin hang) | F13 | done | critical | Unblocks live realize/recognition/gap refresh. | `@seam/logos-bridge` in software-architect |
 | Batched recognize classify (full-view tableau hang) | F14 | done | critical | Full view + MisfireUnderLoad ⊔ defs hung; batch of 4 under scope:auto. | RecognitionService, `classesForView` |
 | AEMF vehicle-system aspects (air/elec/mech/fluid) | F12 | done | high | Catalog, chips, and principled playbook prose. | `vehicle-system-aspects.json`, Diagnosis, recs, ProblemDetail |

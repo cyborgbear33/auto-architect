@@ -297,6 +297,25 @@ export interface LiveGaugeStrip {
   gauges: LiveGaugeReading[];
 }
 
+/**
+ * I/M readiness / monitor completion (J1979 Mode 01 PID $01).
+ * Until the gateway captures STATUS bitfields, `available` stays false —
+ * never invent a “ready for smog” claim from empty DTCs.
+ */
+export type ImReadinessStatus = "unsupported" | "no_data" | "complete" | "incomplete";
+
+export interface ImReadiness {
+  vehicleId: SemanticId;
+  available: boolean;
+  status: ImReadinessStatus;
+  /** Operator-facing honesty about what we can and cannot claim. */
+  message: string;
+  /** SAE Mode 01 PID that will feed this once captured. */
+  requiredPid: "STATUS";
+  source?: ObservationSource | null;
+  capturedAt?: IsoTimestamp | null;
+}
+
 // --- Problem/Solution vocabulary (LOGOS-facing) ---------------------------
 
 export type ProblemType =

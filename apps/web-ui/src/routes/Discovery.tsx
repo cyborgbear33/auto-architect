@@ -79,6 +79,15 @@ function VehicleDiscovery({ vehicleId }: { vehicleId: string }) {
         subtitle="Vehicle intelligence — what this ECU + OBDLink MX+ can expose, mapped to ontology"
       />
 
+      <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+        <p className="font-medium text-slate-800">Lawful observe boundary</p>
+        <p className="mt-1 text-slate-600">
+          Discovery maps Mode 01–07 support bits and ontology links from what the adapter can
+          report. It is not a full OEM CAN/UDS module tree (FORScan-style maps stay out of
+          scope) — grow depth from evidence, not invented bus matrices.
+        </p>
+      </div>
+
       {discoveryQ.isLoading && <p className="text-sm text-slate-400">Loading discovery…</p>}
 
       {missing && (
