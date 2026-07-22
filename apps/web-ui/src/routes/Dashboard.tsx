@@ -6,6 +6,7 @@ import { AemfAspectChips } from "../components/AemfAspectChips.tsx";
 import { AemfPlaybookProse } from "../components/AemfPlaybookProse.tsx";
 import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
 import { DriveSessionsPanel } from "../components/DriveSessionsPanel.tsx";
+import { DtcWhatWorkedChips } from "../components/DtcWhatWorkedChips.tsx";
 import { EvidencePanels } from "../components/EvidencePanels.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import {
@@ -132,23 +133,30 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
             {dtcsQ.data?.map((dtc) => (
               <li
                 key={`${dtc.code}-${dtc.status}`}
-                className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm"
+                className="rounded-md bg-slate-50 px-3 py-2 text-sm"
               >
-                <span className="font-mono font-semibold text-slate-800">{dtc.code}</span>
-                <span className="text-slate-500">
-                  {dtc.description?.trim() || lookupDtc(dtc.code)?.description || "—"}
-                </span>
-                <Pill
-                  tone={
-                    dtc.status === "permanent"
-                      ? "critical"
-                      : dtc.status === "pending"
-                        ? "low"
-                        : "high"
-                  }
-                >
-                  {dtc.status}
-                </Pill>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono font-semibold text-slate-800">{dtc.code}</span>
+                  <span className="min-w-0 flex-1 text-slate-500">
+                    {dtc.description?.trim() || lookupDtc(dtc.code)?.description || "—"}
+                  </span>
+                  <Pill
+                    tone={
+                      dtc.status === "permanent"
+                        ? "critical"
+                        : dtc.status === "pending"
+                          ? "low"
+                          : "high"
+                    }
+                  >
+                    {dtc.status}
+                  </Pill>
+                </div>
+                <DtcWhatWorkedChips
+                  vehicleId={vehicleId}
+                  dtcCode={dtc.code}
+                  classEvidence={recognitionQ.data?.classEvidence}
+                />
               </li>
             ))}
           </ul>

@@ -1,24 +1,7 @@
 import type { SolutionRollupBucket } from "@auto/semantic-types";
 import { useQuery } from "@tanstack/react-query";
 import { api, queryKeys } from "../lib/api.ts";
-
-function summarize(bucket: SolutionRollupBucket): string {
-  const parts: string[] = [];
-  if (bucket.worked) parts.push(`${bucket.worked} worked`);
-  if (bucket.partial) parts.push(`${bucket.partial} partial`);
-  if (bucket.failed) parts.push(`${bucket.failed} failed`);
-  if (bucket.inconclusive) parts.push(`${bucket.inconclusive} inconclusive`);
-  const base = parts.join(" · ") || "no outcomes";
-  return `${base} · n=${bucket.totalWithOutcome}`;
-}
-
-function smallNAdvisory(bucket: SolutionRollupBucket): string | null {
-  const n = bucket.totalWithOutcome;
-  if (n === 0) return null;
-  if (bucket.scope === "vehicle" && n < 2) return "Small sample (n<2) — advisory only";
-  if (bucket.scope === "engineFamily" && n < 4) return "Small sample (n<4 family) — advisory only";
-  return null;
-}
+import { smallNAdvisory, summarizeBucket } from "./solutionHistoryUi.ts";
 
 function BucketList({
   title,
@@ -47,7 +30,7 @@ function BucketList({
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-mono text-slate-800">{b.actionId}</span>
-                  <span className="text-xs text-slate-500">{summarize(b)}</span>
+                  <span className="text-xs text-slate-500">{summarizeBucket(b)}</span>
                 </div>
                 {b.faultClass && (
                   <p className="mt-0.5 text-xs text-slate-500">for {b.faultClass}</p>

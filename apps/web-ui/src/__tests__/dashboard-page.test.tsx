@@ -127,6 +127,35 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
             source: "ontology_note",
           },
         ],
+        classEvidence: [
+          {
+            className: "MisfireUnderLoad",
+            dtcs: [{ code: "P0304", status: "stored", description: "Cylinder 4 Misfire" }],
+            pids: [],
+            freezeFrames: [],
+            mode06: [],
+          },
+        ],
+      }),
+      getSolutionHistory: vi.fn().mockResolvedValue({
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        engineFamily: "fca-tigershark-2.4",
+        faultClassFilter: "MisfireUnderLoad",
+        vehicle: [
+          {
+            actionId: "swap-coil-plug",
+            faultClass: "MisfireUnderLoad",
+            scope: "vehicle",
+            engineFamily: "fca-tigershark-2.4",
+            worked: 2,
+            partial: 0,
+            failed: 0,
+            inconclusive: 0,
+            totalWithOutcome: 2,
+            lastDecidedAt: "2026-01-01T00:00:00Z",
+          },
+        ],
+        engineFamilyRollup: [],
       }),
       getRecommendations: vi.fn().mockResolvedValue([
         {
@@ -204,6 +233,20 @@ describe("Dashboard", () => {
     expect(
       await screen.findByText(/Next: Jeep Renegade: cylinder misfire under load/),
     ).toBeInTheDocument();
+  });
+
+  it("shows verified-fix chips on DTC rows joined via classEvidence", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <Dashboard />
+      </QueryClientProvider>,
+    );
+    const heading = await screen.findByText("Active DTCs");
+    const section = within(heading.closest("section")!);
+    expect(await section.findByText("swap-coil-plug")).toBeInTheDocument();
+    expect(section.getByText("Worked")).toBeInTheDocument();
+    expect(section.getByText("n=2")).toBeInTheDocument();
   });
 
   it("shows the live gauge strip with units", async () => {

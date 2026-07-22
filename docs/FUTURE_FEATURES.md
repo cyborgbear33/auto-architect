@@ -442,8 +442,10 @@ tool), never fake completeness.
 | Feature | Pieces | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|---|
 | Dashboard next-action console (at-a-glance) | UX1 | done | high | Closes BlueDriver/FIXD “what now” clarity gap. | `NextActionConsole`, Dashboard |
-| DTC-row “what worked” from solution history | UX2 | planned | high | Verified-fix adjacency without inventing fixes. | `WhatWorkedPanel`, Dashboard DTC list |
-| I/M readiness / monitor completion panel | UX4 | planned | high | Market-standard smog prep; OBD Mode 01 PID $01. | gateway PID, Dashboard |
+| DTC-row “what worked” from solution history | UX2 | done | high | `DtcWhatWorkedChips` via classEvidence→solution-history; no invented fixes. | Dashboard DTC list, `solutionHistoryUi` |
+| I/M readiness / monitor completion panel | UX4 | planned | high | Needs Mode 01 PID $01 STATUS bitfield (not float PID); gateway + structured type. | `pid_map.py`, observations, Dashboard |
+| Dashboard one-click simulate / import-log affordance | UX6 | planned | medium | Empty next-action only links Guide; Journal already has import. | Dashboard, DataExportPanel patterns |
+| Mode 0A permanent DTC capture | S8 | planned | medium | UI can show `permanent` but gateway reads 03+07 only. | `obd_gateway` `read_dtcs` |
 | Live OBDLink MX+ dry-run (scan/watch → Dashboard) | S1 | planned | critical | Validates real scanning path CI never sees. | `apps/obd-gateway`, Dashboard |
 | Saved per-vehicle gauge layout | UX3 | planned | medium | Torque-like customization within Mode 01 support. | LiveGaugeStrip, vehicle prefs |
 | CAN/UDS map research → discover depth only | CAN1 | planned | medium | Honest boundary vs FORScan fantasy maps. | Discovery, `OBD_EDGE_CONTRACT` |
@@ -607,6 +609,7 @@ actually maintain.
 | AEMF framing + playbook prose (F12) | 2026-07 | `vehicle-system-aspects.json`; chips + prose on Diagnosis/recs/ProblemDetail/Dashboard |
 | Batched realize + bridge temp-file (F13/F14) | 2026-07 | Recognition classify batches; logos-bridge temp JSON (software-architect) |
 | Dashboard next-action console (UX1) | 2026-07 | `NextActionConsole` — market-informed at-a-glance next step |
+| DTC-row verified-fix chips (UX2) | 2026-07 | classEvidence join → solution-history chips on Dashboard Active DTCs |
 
 ---
 
