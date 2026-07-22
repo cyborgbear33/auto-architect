@@ -42,7 +42,11 @@ function createVehicleRepository(): VehicleRepository {
     async update(id, patch) {
       const existing = byId.get(id);
       if (!existing) throw notFound("Vehicle", id);
-      const updated = { ...existing, ...patch };
+      const updated: VehicleProfile = { ...existing, ...patch };
+      // Explicit undefined clears optional identity fields (V1 VIN/odo ritual).
+      for (const key of Object.keys(patch) as (keyof VehicleProfile)[]) {
+        if (patch[key] === undefined) delete updated[key];
+      }
       byId.set(id, updated);
       return updated;
     },

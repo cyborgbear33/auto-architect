@@ -167,6 +167,17 @@ export const CreateVehicleSchema = z.object({
 });
 export type CreateVehicleInput = z.infer<typeof CreateVehicleSchema>;
 
+/** V1 — operator identity ritual; never invents a VIN. Null clears the field. */
+export const PatchVehicleIdentitySchema = z
+  .object({
+    vin: z.string().trim().min(1).max(32).nullable().optional(),
+    odometerMiles: z.number().nonnegative().nullable().optional(),
+  })
+  .refine((v) => v.vin !== undefined || v.odometerMiles !== undefined, {
+    message: "Provide vin and/or odometerMiles.",
+  });
+export type PatchVehicleIdentityInput = z.infer<typeof PatchVehicleIdentitySchema>;
+
 /** Replace the vehicle's operator-entered wear / condition stages (F8). */
 export const SetManualConditionsSchema = z.object({
   conditions: z.array(

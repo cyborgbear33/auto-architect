@@ -78,6 +78,17 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         engineFamilyRollup: [],
         narratives: [],
       }),
+      getVehicle: vi.fn().mockResolvedValue({
+        id: "veh:jeep-renegade-2015-latitude",
+        make: "Jeep",
+        model: "Renegade",
+        year: 2015,
+        trim: "Latitude",
+        engineFamily: "fca-tigershark-2.4",
+      }),
+      getDiscovery: vi.fn().mockRejectedValue(new FakeApiError("No discovery", 404)),
+      getCampaigns: vi.fn().mockResolvedValue({ campaigns: [], tsbs: [] }),
+      patchVehicleIdentity: vi.fn(),
       getCaseTimeline: vi.fn().mockResolvedValue({
         vehicleId: "veh:jeep-renegade-2015-latitude",
         problemIdFilter: null,
@@ -122,6 +133,16 @@ function renderDiagnosis() {
 }
 
 describe("Diagnosis", () => {
+  it("shows a vehicle dossier strip with identity ritual when VIN is missing", async () => {
+    renderDiagnosis();
+    expect(await screen.findByText("Vehicle dossier")).toBeInTheDocument();
+    expect(screen.getByText(/2015 Jeep Renegade Latitude/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Not recorded — enter before claiming identity/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Discovery not run/)).toBeInTheDocument();
+  });
+
   it("offers to draft a diagnostic problem for a proven, not-yet-drafted class", async () => {
     renderDiagnosis();
     const heading = await screen.findByText("Proven, not-yet-drafted");

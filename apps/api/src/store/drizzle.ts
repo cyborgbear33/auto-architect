@@ -69,7 +69,11 @@ export function createDrizzleStore(databaseUrl: string): Store {
     async update(id, patch) {
       const existing = await vehicles.get(id);
       if (!existing) throw notFound("Vehicle", id);
-      const updated = { ...existing, ...patch, id };
+      const updated: VehicleProfile = { ...existing, ...patch, id };
+      // Explicit undefined clears optional identity fields (V1 VIN/odo ritual).
+      for (const key of Object.keys(patch) as (keyof VehicleProfile)[]) {
+        if (patch[key] === undefined) delete updated[key];
+      }
       await db.update(t.vehicles).set(vehicleRow(updated)).where(eq(t.vehicles.id, id));
       return updated;
     },

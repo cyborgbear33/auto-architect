@@ -13,6 +13,7 @@ import { KnowledgeGapPanel } from "../components/KnowledgeGapPanel.tsx";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { LearningCyclePanel } from "../components/LearningCyclePanel.tsx";
 import { fluentForClass } from "../components/NextActionConsole.tsx";
+import { VehicleDossierStrip } from "../components/VehicleDossierStrip.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
 import { ApiError, api, queryKeys } from "../lib/api.ts";
 
@@ -142,6 +143,8 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         title="Diagnosis"
         subtitle="Caseboard: draft → solve → repair → verify → close (or abandon / escalate / reopen)"
       />
+
+      <VehicleDossierStrip vehicleId={vehicleId} />
 
       <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
         <EvidenceSourceBadge provenance={provenanceQ.data} />

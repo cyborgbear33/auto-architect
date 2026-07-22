@@ -200,6 +200,14 @@ export class AutoApiClient {
   listVehicles = () =>
     this.request<{ vehicles: VehicleProfile[] }>("/api/vehicles").then((r) => r.vehicles);
   getVehicle = (id: string) => this.request<VehicleProfile>(`/api/vehicles/${enc(id)}`);
+  patchVehicleIdentity = (
+    id: string,
+    input: { vin?: string | null; odometerMiles?: number | null },
+  ) =>
+    this.request<VehicleProfile>(`/api/vehicles/${enc(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
   listEngineFamilies = () =>
     this.request<{ engineFamilies: EngineFamilySummary[] }>("/api/engine-families").then(
       (r) => r.engineFamilies,

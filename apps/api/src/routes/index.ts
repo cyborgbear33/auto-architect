@@ -11,6 +11,7 @@ import {
   MarkRecommendationStatusSchema,
   ObdCapabilityReportSchema,
   ObservationBatchSchema,
+  PatchVehicleIdentitySchema,
   ProblemIdActionSchema,
   SetManualConditionsSchema,
   SimulateDriveSessionSchema,
@@ -56,6 +57,12 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
   app.get("/api/vehicles/:id", async (req) => {
     const { id } = req.params as { id: string };
     return s.vehicles.getOrThrow(id);
+  });
+
+  app.patch("/api/vehicles/:id", async (req) => {
+    const { id } = req.params as { id: string };
+    const input = PatchVehicleIdentitySchema.parse(req.body);
+    return s.vehicles.patchIdentity(id, input);
   });
 
   app.get("/api/manual-conditions", async () => ({

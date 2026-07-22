@@ -6,7 +6,11 @@ import {
   listEngineFamilies,
 } from "@auto/ontology";
 import type { EngineFamily, ManualCondition, VehicleProfile } from "@auto/semantic-types";
-import type { CreateVehicleInput, SetManualConditionsInput } from "@auto/validation";
+import type {
+  CreateVehicleInput,
+  PatchVehicleIdentityInput,
+  SetManualConditionsInput,
+} from "@auto/validation";
 import { notFound, validationError } from "../lib/errors.ts";
 import { newId, nowIso } from "../lib/ids.ts";
 import type { Store } from "../store/index.ts";
@@ -36,6 +40,22 @@ export class VehicleService {
   }
 
   async update(id: string, patch: Partial<VehicleProfile>): Promise<VehicleProfile> {
+    return this.store.vehicles.update(id, patch);
+  }
+
+  /**
+   * V1 — set VIN / odometer from operator ritual. Never invents a VIN;
+   * null clears the field so missing identity stays honest.
+   */
+  async patchIdentity(id: string, input: PatchVehicleIdentityInput): Promise<VehicleProfile> {
+    await this.getOrThrow(id);
+    const patch: Partial<VehicleProfile> = {};
+    if (input.vin !== undefined) {
+      patch.vin = input.vin === null ? undefined : input.vin;
+    }
+    if (input.odometerMiles !== undefined) {
+      patch.odometerMiles = input.odometerMiles === null ? undefined : input.odometerMiles;
+    }
     return this.store.vehicles.update(id, patch);
   }
 
