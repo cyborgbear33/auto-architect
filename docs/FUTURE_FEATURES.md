@@ -212,7 +212,7 @@ Ship `@auto/ui-components` once patterns repeat twice.
 | I2 | Evidence source labeling (sim / live / manual) everywhere data shows | done | Dashboard + Diagnosis via `GET .../evidence-provenance` |
 | I3 | Live gauges + Mode 06 + freeze-frame panels | done | Gauges + FF/Mode06 on Dashboard |
 | I4 | Verbalized proofs on Diagnosis / ProblemDetail | done | Narration on Dashboard/Diagnosis |
-| I5 | Shared `@auto/ui-components` | todo | Status, empty/error, evidence |
+| I5 | Shared `@auto/ui-components` | partial | Thin EmptyEvidenceState in web-ui; full package later |
 | I6 | Staleness / “last observation” chrome on Dashboard | done | Fresh/Stale badge on gauge strip |
 
 **Seams:** web-ui pages, `UX_GUIDELINES`, api-client queryKeys.  
@@ -466,7 +466,7 @@ tool), never fake completeness.
 | Garage Epistemic Loop (LearningCycle + sample-size + knowledge gaps) | F9–F11 | done | — | Co-evolution read-model + propose/dispose gap queue. | LearningCycleService, KnowledgeGapService, calibrationMeta, Diagnosis/Journal |
 | Print/PDF diagnostic report polish | G3, G5 | done | medium | Print HTML + last-session summary on reports. | `ReportService`, `ReportDownload` |
 | Comprehensive SAE/ISO PID & DTC knowledge base | S7, A4 | partial | medium | ~134 curated P0xxx + circuit cartridges; full J2012 still open for rarer codes. | dictionaries, ontology lint, `test_pid_seed.py` |
-| Shared `@auto/ui-components` | I5 | planned | medium | Consistent trust/evidence UI. | `UX_GUIDELINES` |
+| Shared `@auto/ui-components` | I5 | partial | medium | Thin `EmptyEvidenceState` in web-ui (DTCs/PIDs/FF/Mode06/sessions); full package still open. | `EmptyEvidenceState.tsx`, UX_GUIDELINES |
 
 ### Platform / coverage (support goals, not a goal themselves)
 

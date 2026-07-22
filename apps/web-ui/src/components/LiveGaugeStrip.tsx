@@ -13,6 +13,7 @@ import {
   resetGaugeLayout,
   saveGaugeLayout,
 } from "../lib/gaugeLayoutPrefs.ts";
+import { EmptyEvidenceState } from "./EmptyEvidenceState.tsx";
 
 function formatValue(g: LiveGaugeReading): string {
   if (g.value === null || Number.isNaN(g.value)) return "—";
@@ -161,9 +162,9 @@ export function LiveGaugeStrip({ vehicleId }: { vehicleId: string }) {
         </p>
       )}
       {!strip?.capturedAt && !gaugesQ.isLoading && (
-        <p className="mt-3 text-xs text-slate-400">
-          No PID samples yet — simulate a scan or connect the adapter.
-        </p>
+        <div className="mt-3">
+          <EmptyEvidenceState kind="pids" ingestLink />
+        </div>
       )}
     </section>
   );

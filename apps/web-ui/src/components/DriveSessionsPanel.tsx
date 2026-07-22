@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api, queryKeys } from "../lib/api.ts";
+import { EmptyEvidenceState } from "./EmptyEvidenceState.tsx";
 
 function readFocusSessionFromHash(): string | null {
   if (typeof window === "undefined") return null;
@@ -95,9 +96,7 @@ export function DriveSessionsPanel({ vehicleId }: { vehicleId: string }) {
       )}
 
       {sessionsQ.isLoading && <p className="text-sm text-slate-400">Loading…</p>}
-      {sessionsQ.data?.length === 0 && (
-        <p className="text-sm text-slate-400">No drive sessions yet.</p>
-      )}
+      {sessionsQ.data?.length === 0 && <EmptyEvidenceState kind="sessions" ingestLink />}
       <ul className="space-y-2">
         {sessionsQ.data?.map((s) => {
           const focused = focusSessionId === s.id;

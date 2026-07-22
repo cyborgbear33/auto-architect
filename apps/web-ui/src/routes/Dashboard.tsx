@@ -7,6 +7,7 @@ import { AemfPlaybookProse } from "../components/AemfPlaybookProse.tsx";
 import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
 import { DriveSessionsPanel } from "../components/DriveSessionsPanel.tsx";
 import { DtcWhatWorkedChips } from "../components/DtcWhatWorkedChips.tsx";
+import { EmptyEvidenceState } from "../components/EmptyEvidenceState.tsx";
 import { EvidenceIngestPanel } from "../components/EvidenceIngestPanel.tsx";
 import { ReadinessPanel } from "../components/ReadinessPanel.tsx";
 import { EvidencePanels } from "../components/EvidencePanels.tsx";
@@ -130,11 +131,7 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         <section className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">
           <h2 className="mb-3 text-sm font-semibold text-slate-700">Active DTCs</h2>
           {dtcsQ.isLoading && <p className="text-sm text-slate-400">Loading…</p>}
-          {dtcsQ.data?.length === 0 && (
-            <p className="text-sm text-slate-400">
-              No DTCs on file. Nothing to report — not the same as "healthy".
-            </p>
-          )}
+          {dtcsQ.data?.length === 0 && <EmptyEvidenceState kind="dtcs" ingestLink />}
           <ul className="space-y-1.5">
             {dtcsQ.data?.map((dtc) => {
               const desc =
