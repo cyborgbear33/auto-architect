@@ -591,6 +591,11 @@ export interface DiagnosticProblem {
   causalModel?: CausalModel;
   actions: CandidateAction[];
   triggeredByClass?: string;
+  /**
+   * H6 — operator-entered complaints / human symptoms (rough idle, smell, stall).
+   * Framing-only; never invents realize membership or fault classes.
+   */
+  operatorComplaints?: string[];
   solution?: DiagnosticSolution;
   outcome?: ProblemOutcome;
   /** Set while status is `verifying` or after a verify check. */

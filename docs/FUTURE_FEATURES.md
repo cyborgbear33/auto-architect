@@ -317,7 +317,7 @@ are the evidence spine under each event.
 | H3 | Attach odometer / session to case events | done | Stamped on lifecycle + DecisionRecord; CaseTimelinePanel shows mi / session |
 | H4 | Filter history by class, status, date, mileage | done | `CaseTimelinePanel` client filters |
 | H5 | Deep link timeline event → evidence batch / freeze-frame | done | Evidence + `#session:…` → DriveSessionsPanel highlight |
-| H6 | Operator-entered complaint / symptom journal → framing input | planned | Human symptoms (rough idle, smell, stall) enrich draft framing; never invent realize classes |
+| H6 | Operator-entered complaint / symptom journal → framing input | done | Draft chips → `operatorComplaints` enrich statement/symptoms; never invent realize classes |
 
 **Seams:** problems, decisions, DriveSession, ObservationsService, Diagnosis.  
 **Anti-patterns:** Journal-as-only-history; losing evidence when a problem is
@@ -490,13 +490,13 @@ lessons. Diagnosis UI is still more class-id-forward than Dashboard UX5.
 | Apprentice needs one “why / how we know / prove next” surface | Panels are fragmented (AEMF, evidence, WhatWorked, CFs) | **A7** composed causal brief on Diagnosis + ProblemDetail | critical |
 | “What fixed it” should teach, not only count | Solution history is n= rollups | **X6** done — narrative cards feed A7 | — |
 | Know the vehicle before deep diagnosis | VIN/odo optional; no Diagnosis dossier | **V1** done — dossier + identity ritual | — |
-| Human complaints matter (smell, stall, rough) | Only bus symptoms enter perception | **H6** complaint/symptom journal → framing only | medium |
+| Human complaints matter (smell, stall, rough) | Only bus symptoms enter perception | **H6** done — framing-only complaints | — |
 | Plain English on Diagnosis | Fluent primary on Diagnosis proven list + caseboard | **I7** done | — |
 | OEM TSB context in the lesson | Campaigns are parallel cards | **R6** link campaign steps into A7 brief | medium |
 | Optional LLM gloss | D5 planned without structured fuel | **D5** only after A6/A7 | medium |
 
 **Build order (logical):**
-`A6` → `A7` (+ `I7` polish) → `X6` → `V1` (done) → `H6` ∥ continue `A4` → `R6` → `D5`.
+`A6` → `A7` (+ `I7` polish) → `X6` → `V1` → `H6` (done) → continue `A4` → `R6` → `D5`.
 
 **Integrity:** Causal briefs and LLM advise may *propose* causes and lessons;
 realize still owns class membership; empty DTCs / missing STATUS never mean
@@ -511,7 +511,7 @@ healthy; history never invents a fix that was not logged and verified.
 | Solution narrative cards (not just n=) | X6 | done | high | `narratives[]` on solution-history; WhatWorked stories; A7 prefers lessons over n=. | solution-history, WhatWorkedPanel, A7 |
 | Vehicle dossier + VIN/odo ritual on Diagnosis | V1 | done | high | Dossier strip + PATCH identity; discovery/campaigns links; never invents VIN. | VehicleDossierStrip, VehicleService |
 | Diagnosis fluent-first proven classes | I7 | done | medium | Proven list + caseboard lead with fluent; class ids secondary. | `fluentForClass`, Diagnosis |
-| Operator complaint / symptom journal → framing | H6 | planned | medium | Human symptoms enrich cases without inventing realize classes. | DiagnosticProblem framing, Journal |
+| Operator complaint / symptom journal → framing | H6 | done | medium | Draft chips → `operatorComplaints` on create; statement + causal symptoms only. | complaint-framing, Diagnosis, ProblemDetail |
 | Campaign/TSB steps inside causal brief | R6 | planned | medium | OEM context in the lesson, still applicability-only. | known-campaigns, A7 |
 | Propose-only LLM advise (causes/framing gloss) | D5 | planned | medium | After A6/A7 so advise has structured fuel; LOGOS disposes. | logos-bridge / agent-service, A7 |
 | Dashboard next-action console (at-a-glance) | UX1 | done | high | Closes BlueDriver/FIXD “what now” clarity gap. | `NextActionConsole`, Dashboard |
@@ -688,6 +688,7 @@ actually maintain.
 | Plain-English Dashboard (UX5) | 2026-07 | Fluent narration leads next-action + proven classes; DTC title tooltips |
 | Solution narrative cards (X6) | 2026-07 | `SolutionNarrativeCard` on solution-history; WhatWorked stories; A7 prefers lessons |
 | Vehicle dossier on Diagnosis (V1) | 2026-07 | Identity strip + PATCH VIN/odo; discovery + campaign links; never invents VIN |
+| Operator complaint framing (H6) | 2026-07 | Diagnosis chips → `operatorComplaints`; enrich statement/symptoms only |
 
 ---
 

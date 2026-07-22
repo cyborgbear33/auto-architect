@@ -2,6 +2,7 @@ import { listManualConditions } from "@auto/ontology";
 import { normalizeLiveGaugePids } from "@auto/semantic-types";
 import {
   CompleteSpecialProcedureSchema,
+  CreateDiagnosticProblemFromClassSchema,
   CreateDiagnosticProblemSchema,
   CreateVehicleSchema,
   EndDriveSessionSchema,
@@ -396,11 +397,15 @@ export async function registerRoutes(app: FastifyInstance, s: Services): Promise
   app.post("/api/actions/create-diagnostic-problem", async (req, reply) => {
     const body = req.body as Record<string, unknown>;
     if (body.triggeredByClass) {
+      const fromClass = CreateDiagnosticProblemFromClassSchema.parse(body);
       const problem = await s.actions.createDiagnosticProblem({
-        vehicleId: String(body.vehicleId),
-        triggeredByClass: String(body.triggeredByClass),
+        vehicleId: fromClass.vehicleId,
+        triggeredByClass: fromClass.triggeredByClass,
         statement: { currentState: "", desiredState: "", gap: "" },
         actions: [],
+        ...(fromClass.operatorComplaints
+          ? { operatorComplaints: fromClass.operatorComplaints }
+          : {}),
       });
       reply.code(201);
       return problem;

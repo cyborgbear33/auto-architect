@@ -115,10 +115,14 @@ export const CandidateActionSchema = z.object({
   stopConditions: z.string().optional(),
 });
 
+/** H6 — human symptoms for framing only (never realize membership). */
+export const OperatorComplaintsSchema = z.array(z.string().trim().min(1).max(200)).max(8);
+
 export const CreateDiagnosticProblemSchema = z.object({
   vehicleId: z.string().min(1),
   statement: ProblemStatementSchema,
   triggeredByClass: z.string().optional(),
+  operatorComplaints: OperatorComplaintsSchema.optional(),
   gapType: z
     .enum([
       "knowledge",
@@ -136,6 +140,16 @@ export const CreateDiagnosticProblemSchema = z.object({
   actions: z.array(CandidateActionSchema).default([]),
 });
 export type CreateDiagnosticProblemInput = z.infer<typeof CreateDiagnosticProblemSchema>;
+
+/** Draft-from-class path: statement is cartridge-owned; complaints enrich framing. */
+export const CreateDiagnosticProblemFromClassSchema = z.object({
+  vehicleId: z.string().min(1),
+  triggeredByClass: z.string().min(1),
+  operatorComplaints: OperatorComplaintsSchema.optional(),
+});
+export type CreateDiagnosticProblemFromClassInput = z.infer<
+  typeof CreateDiagnosticProblemFromClassSchema
+>;
 
 export const LogRepairSchema = z.object({
   vehicleId: z.string().min(1),

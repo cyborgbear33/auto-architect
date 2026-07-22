@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { CreateDiagnosticProblemSchema, LogRepairSchema, ObservationBatchSchema } from "./index.ts";
+import {
+  CreateDiagnosticProblemFromClassSchema,
+  CreateDiagnosticProblemSchema,
+  LogRepairSchema,
+  ObservationBatchSchema,
+} from "./index.ts";
 
 describe("ObservationBatchSchema", () => {
   it("accepts a well-formed obd-gateway batch", () => {
@@ -32,6 +37,25 @@ describe("CreateDiagnosticProblemSchema", () => {
       statement: { currentState: "a", desiredState: "b", gap: "c" },
     });
     expect(parsed.actions).toEqual([]);
+  });
+
+  it("accepts optional operator complaints on the from-class path", () => {
+    const parsed = CreateDiagnosticProblemFromClassSchema.parse({
+      vehicleId: "veh:x",
+      triggeredByClass: "MisfireUnderLoad",
+      operatorComplaints: ["rough idle", "stall"],
+    });
+    expect(parsed.operatorComplaints).toEqual(["rough idle", "stall"]);
+  });
+
+  it("rejects oversized operator complaint lists", () => {
+    expect(() =>
+      CreateDiagnosticProblemFromClassSchema.parse({
+        vehicleId: "veh:x",
+        triggeredByClass: "MisfireUnderLoad",
+        operatorComplaints: Array.from({ length: 9 }, (_, i) => `symptom ${i}`),
+      }),
+    ).toThrow();
   });
 });
 

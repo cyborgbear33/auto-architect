@@ -226,6 +226,26 @@ export function ProblemDetail() {
             <dd className="text-slate-700">{problem.statement.whyItMatters ?? "—"}</dd>
           </div>
         </dl>
+        {problem.operatorComplaints && problem.operatorComplaints.length > 0 && (
+          <div className="mt-3 rounded-md border border-amber-100 bg-amber-50/40 px-3 py-2">
+            <p className="text-xs font-semibold uppercase text-slate-400">
+              Operator complaints
+            </p>
+            <ul className="mt-1 flex flex-wrap gap-1.5">
+              {problem.operatorComplaints.map((c) => (
+                <li
+                  key={c}
+                  className="rounded-full bg-white px-2.5 py-0.5 text-xs text-slate-700 ring-1 ring-amber-200"
+                >
+                  {c}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-1 text-[11px] text-slate-500">
+              Framing only — not a LOGOS-proven fault class.
+            </p>
+          </div>
+        )}
         {problem.triggeredByClass && (
           <div className="mt-3">
             <AemfAspectChips className={problem.triggeredByClass} />

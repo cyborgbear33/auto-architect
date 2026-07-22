@@ -18,6 +18,7 @@ import { conflict, notFound, policyBlocked, validationError } from "../lib/error
 import { newId, nowIso } from "../lib/ids.ts";
 import type { Store } from "../store/index.ts";
 import { applyCalibration, calibratePlaybook } from "./calibration.ts";
+import { enrichFramingWithComplaints, normalizeComplaints } from "./complaint-framing.ts";
 import type { PolicyService } from "./policy.ts";
 import type { RecognitionService } from "./recognition.ts";
 import type { SolutionHistoryService } from "./solution-history.ts";
@@ -121,6 +122,8 @@ export class ActionService {
         await this.store.observations.latestMode06(vehicle.id),
       );
       const causalModel = composeCausalModel({ draft, evidence });
+      const complaints = normalizeComplaints(input.operatorComplaints);
+      const framed = enrichFramingWithComplaints(draft.statement, causalModel, complaints);
       const history = await this.solutionHistory.forVehicle(vehicle.id, input.triggeredByClass);
       const calibration = calibratePlaybook({
         faultClass: input.triggeredByClass,
@@ -132,13 +135,14 @@ export class ActionService {
         id: newId("problem"),
         vehicleId: vehicle.id,
         status: "open",
-        statement: draft.statement,
+        statement: framed.statement,
         problemType: "Diagnostic",
         gapType: draft.gapType,
         desiredState: draft.desiredState,
-        causalModel,
+        causalModel: framed.causalModel,
         actions: applyCalibration(draft.actions, calibration),
         triggeredByClass: input.triggeredByClass,
+        ...(complaints.length > 0 ? { operatorComplaints: complaints } : {}),
         lifecycleEvents: [opened],
         createdAt: now,
         updatedAt: now,
@@ -146,6 +150,7 @@ export class ActionService {
       return this.store.problems.create(problem);
     }
 
+    const complaints = normalizeComplaints(input.operatorComplaints);
     const problem: DiagnosticProblem = {
       id: newId("problem"),
       vehicleId: vehicle.id,
@@ -154,6 +159,7 @@ export class ActionService {
       problemType: "Diagnostic",
       gapType: input.gapType,
       actions: input.actions,
+      ...(complaints.length > 0 ? { operatorComplaints: complaints } : {}),
       lifecycleEvents: [opened],
       createdAt: now,
       updatedAt: now,

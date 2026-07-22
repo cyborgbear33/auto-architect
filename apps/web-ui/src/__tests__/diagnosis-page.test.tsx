@@ -161,6 +161,22 @@ describe("Diagnosis", () => {
     );
   });
 
+  it("passes operator complaints into draft framing (H6)", async () => {
+    renderDiagnosis();
+    const heading = await screen.findByText("Proven, not-yet-drafted");
+    const section = within(heading.closest("section")!);
+    expect(section.getByText(/Operator complaints/)).toBeInTheDocument();
+    fireEvent.click(section.getByRole("button", { name: "rough idle" }));
+    fireEvent.click(await section.findByRole("button", { name: "Draft diagnostic problem" }));
+    await waitFor(() =>
+      expect(api.createDiagnosticProblem).toHaveBeenCalledWith({
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        triggeredByClass: "MisfireUnderLoad",
+        operatorComplaints: ["rough idle"],
+      }),
+    );
+  });
+
   it("shows a green allowed message when clear-codes-and-drive is not blocked", async () => {
     vi.mocked(api.requestClearCodesAndDrive).mockResolvedValueOnce({
       allowed: true,

@@ -449,7 +449,11 @@ export class AutoApiClient {
       `/api/vehicles/${enc(vehicleId)}/problems`,
     ).then((r) => r.problems);
   getProblem = (id: string) => this.request<DiagnosticProblem>(`/api/problems/${enc(id)}`);
-  createDiagnosticProblem = (input: { vehicleId: string; triggeredByClass: string }) =>
+  createDiagnosticProblem = (input: {
+    vehicleId: string;
+    triggeredByClass: string;
+    operatorComplaints?: string[];
+  }) =>
     this.request<DiagnosticProblem>("/api/actions/create-diagnostic-problem", {
       method: "POST",
       body: JSON.stringify(input),

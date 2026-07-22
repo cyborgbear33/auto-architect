@@ -94,6 +94,23 @@ describe("ActionService (the mutation gate)", () => {
     expect(problem.causalModel?.rootCauses).toBeUndefined();
   });
 
+  it("enriches framing with operator complaints without inventing classes (H6)", async () => {
+    const problem = await ctx.actions.createDiagnosticProblem({
+      vehicleId: JEEP,
+      triggeredByClass: "MisfireUnderLoad",
+      statement: { currentState: "", desiredState: "", gap: "" },
+      actions: [],
+      operatorComplaints: ["rough idle", "fuel smell"],
+    });
+    expect(problem.operatorComplaints).toEqual(["rough idle", "fuel smell"]);
+    expect(problem.triggeredByClass).toBe("MisfireUnderLoad");
+    expect(problem.statement.currentState).toMatch(/Operator reports: rough idle; fuel smell/);
+    expect(problem.causalModel?.symptoms).toEqual(
+      expect.arrayContaining(["operator: rough idle", "operator: fuel smell"]),
+    );
+    expect(problem.causalModel?.rootCauses).toBeUndefined();
+  });
+
   it("rejects a triggeredByClass no loaded cartridge frames", async () => {
     await expect(
       ctx.actions.createDiagnosticProblem({

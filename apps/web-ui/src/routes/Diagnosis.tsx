@@ -52,9 +52,20 @@ export function Diagnosis() {
   return <VehicleDiagnosis vehicleId={vehicleId} />;
 }
 
+const COMPLAINT_CHIPS = [
+  "rough idle",
+  "fuel smell",
+  "stall",
+  "hesitation",
+  "vibration",
+  "poor fuel economy",
+] as const;
+
 function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
   const qc = useQueryClient();
   const [filter, setFilter] = useState<CaseboardFilter>("active");
+  const [complaints, setComplaints] = useState<string[]>([]);
+  const [complaintDraft, setComplaintDraft] = useState("");
   const [clearCodesResult, setClearCodesResult] = useState<
     | { kind: "allowed"; obligations: string[] }
     | { kind: "blocked"; message: string; details: unknown }
@@ -96,9 +107,23 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
 
   const createProblem = useMutation({
     mutationFn: (triggeredByClass: string) =>
-      api.createDiagnosticProblem({ vehicleId, triggeredByClass }),
-    onSuccess: invalidateProblems,
+      api.createDiagnosticProblem({
+        vehicleId,
+        triggeredByClass,
+        ...(complaints.length > 0 ? { operatorComplaints: complaints } : {}),
+      }),
+    onSuccess: () => {
+      setComplaints([]);
+      setComplaintDraft("");
+      invalidateProblems();
+    },
   });
+
+  const addComplaint = (raw: string) => {
+    const t = raw.trim().replace(/\s+/g, " ");
+    if (!t || complaints.some((c) => c.toLowerCase() === t.toLowerCase())) return;
+    setComplaints((prev) => [...prev, t].slice(0, 8));
+  };
 
   const abandon = useMutation({
     mutationFn: (problemId: string) => api.abandonDiagnosticProblem(problemId),
@@ -177,6 +202,79 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         <p className="mb-2 text-xs text-slate-400">
           Plain-English first (I7) — LOGOS class ids stay secondary for apprentices.
         </p>
+
+        <div className="mb-3 rounded-md border border-amber-100 bg-amber-50/50 px-3 py-2">
+          <p className="text-xs font-semibold text-slate-700">Operator complaints (framing only)</p>
+          <p className="mt-0.5 text-[11px] text-slate-500">
+            Human symptoms enrich the case statement — they never invent a proven fault class.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {COMPLAINT_CHIPS.map((chip) => {
+              const on = complaints.some((c) => c.toLowerCase() === chip);
+              return (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() =>
+                    on
+                      ? setComplaints((prev) => prev.filter((c) => c.toLowerCase() !== chip))
+                      : addComplaint(chip)
+                  }
+                  className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${
+                    on
+                      ? "border-amber-300 bg-amber-100 text-amber-900"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  }`}
+                >
+                  {chip}
+                </button>
+              );
+            })}
+          </div>
+          <form
+            className="mt-2 flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              addComplaint(complaintDraft);
+              setComplaintDraft("");
+            }}
+          >
+            <input
+              className="min-w-0 flex-1 rounded border border-slate-200 px-2 py-1 text-xs"
+              value={complaintDraft}
+              onChange={(e) => setComplaintDraft(e.target.value)}
+              placeholder="Other symptom (optional)"
+              maxLength={200}
+            />
+            <button
+              type="submit"
+              className="shrink-0 text-xs font-medium text-sky-700 hover:underline"
+            >
+              Add
+            </button>
+          </form>
+          {complaints.length > 0 && (
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {complaints.map((c) => (
+                <li
+                  key={c}
+                  className="inline-flex items-center gap-1 rounded bg-white px-2 py-0.5 text-[11px] text-slate-700 ring-1 ring-slate-200"
+                >
+                  {c}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${c}`}
+                    className="text-slate-400 hover:text-slate-700"
+                    onClick={() => setComplaints((prev) => prev.filter((x) => x !== c))}
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         {undraftedClasses.length === 0 ? (
           <p className="text-sm text-slate-400">
             Nothing new to draft — every proven class already has an active case below (or nothing
