@@ -76,6 +76,7 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         faultClassFilter: null,
         vehicle: [],
         engineFamilyRollup: [],
+        narratives: [],
       }),
       getCaseTimeline: vi.fn().mockResolvedValue({
         vehicleId: "veh:jeep-renegade-2015-latitude",

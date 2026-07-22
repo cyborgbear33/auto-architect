@@ -45,7 +45,7 @@ multi-piece plans live in the next section.
 |---|---|---|---|---|
 | **Scanning** — ingest OBD evidence | **partial** | Simulate/API ingest; live gauge strip + FF/Mode06 UI; source labels | Live MX+ path proven; drive sessions; retention policy | Live MX+ dry-run (S1 hardware); GatewayScanCommands UI done |
 | **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration + evidence; ~134 P0xxx circuit/emission seed | Full J1979/J2012 catalog + teaching-grade cause briefs | A4/S7; **A6–A7** causal model + apprentice brief |
-| **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration; counterfactuals + disqualified UI | Ranked steps *and* understandable differentials | **A6–A7**, X6; D5 LLM only after structured causes |
+| **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration; counterfactuals + disqualified UI | Ranked steps *and* understandable differentials | **A6–A7**, **X6**; D5 LLM only after structured causes |
 | **Informing the user** — clear operator / apprentice surfaces | **partial** | Source badges, narration, AEMF, calibration chips, empty-evidence honesty | Apprentice can explain vehicle + problem + fix from the UI | **A7**, I7, V1; I5 package |
 | **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert | Deeper campaign→repair playbooks tied into briefs | R6 → A7; RecommendationService |
 | **Problem tracking** — open cases through solve | **shipped** | Caseboard filters; abandon/escalate/reopen; `worked` → verifying → verify check | — | — |
@@ -344,7 +344,7 @@ confirmation (“worked after 50 mi verify”) over assuming solve ≡ fixed.
 | X3 | Rollup API: by vehicle, class, engineFamily, actionId | done | `GET .../solution-history?class=` |
 | X4 | “What worked before” panel on Diagnosis / ProblemDetail | done | `WhatWorkedPanel` |
 | X5 | Require / encourage outcome + verify before terminal solved | done | `log-repair` worked → verifying; verify closes or reopens |
-| X6 | Solution narrative cards for apprentices | planned | “Action → class → outcome → verify → why believed” — not just n= counts; feeds A7 |
+| X6 | Solution narrative cards for apprentices | done | `SolutionNarrativeCard` on solution-history; WhatWorked stories + A7 historyNotes prefer lessons |
 
 **Seams:** `DecisionRecord`, `ProblemOutcome`, RecommendationsService, Journal, A7.  
 **Anti-patterns:** Outcomes that never get recorded; rollups that ignore
@@ -488,7 +488,7 @@ lessons. Diagnosis UI is still more class-id-forward than Dashboard UX5.
 |---|---|---|---|
 | Mentors narrate causes + differentials | `CausalModel` unused; notes ≠ teaching | **A6** fill causal model from cartridges + evidence | critical |
 | Apprentice needs one “why / how we know / prove next” surface | Panels are fragmented (AEMF, evidence, WhatWorked, CFs) | **A7** composed causal brief on Diagnosis + ProblemDetail | critical |
-| “What fixed it” should teach, not only count | Solution history is n= rollups | **X6** solution narrative cards → feed A7 | high |
+| “What fixed it” should teach, not only count | Solution history is n= rollups | **X6** done — narrative cards feed A7 | — |
 | Know the vehicle before deep diagnosis | VIN/odo optional; no Diagnosis dossier | **V1** vehicle dossier + identity ritual | high |
 | Human complaints matter (smell, stall, rough) | Only bus symptoms enter perception | **H6** complaint/symptom journal → framing only | medium |
 | Plain English on Diagnosis | Fluent primary on Diagnosis proven list + caseboard | **I7** done | — |
@@ -496,7 +496,7 @@ lessons. Diagnosis UI is still more class-id-forward than Dashboard UX5.
 | Optional LLM gloss | D5 planned without structured fuel | **D5** only after A6/A7 | medium |
 
 **Build order (logical):**
-`A6` → `A7` (+ `I7` polish) → `X6` → `V1` ∥ `H6` ∥ continue `A4` → `R6` → `D5`.
+`A6` → `A7` (+ `I7` polish) → `X6` (done) → `V1` ∥ `H6` ∥ continue `A4` → `R6` → `D5`.
 
 **Integrity:** Causal briefs and LLM advise may *propose* causes and lessons;
 realize still owns class membership; empty DTCs / missing STATUS never mean
@@ -508,7 +508,7 @@ healthy; history never invents a fix that was not logged and verified.
 |---|---|---|---|---|---|
 | Causal model on draft/solve (cartridge + evidence) | A6 | done | critical | `composeCausalModel` on draft/solve; thin ProblemDetail causes panel; A7 still owns full brief. | `causal-model.ts`, ActionService, `CausalModelPanel` |
 | Apprentice causal brief (why / evidence / prove next) | A7 | done | critical | `GET …/causal-brief` + Diagnosis/ProblemDetail `CausalBriefPanel`. | `CausalBriefService`, CausalBriefPanel |
-| Solution narrative cards (not just n=) | X6 | planned | high | Makes history teach “what fixed what and how we know.” | solution-history, LearningCycle, A7 |
+| Solution narrative cards (not just n=) | X6 | done | high | `narratives[]` on solution-history; WhatWorked stories; A7 prefers lessons over n=. | solution-history, WhatWorkedPanel, A7 |
 | Vehicle dossier + VIN/odo ritual on Diagnosis | V1 | planned | high | Apprentice must know *which* vehicle/systems before causes. | VehicleProfile, discovery, campaigns |
 | Diagnosis fluent-first proven classes | I7 | done | medium | Proven list + caseboard lead with fluent; class ids secondary. | `fluentForClass`, Diagnosis |
 | Operator complaint / symptom journal → framing | H6 | planned | medium | Human symptoms enrich cases without inventing realize classes. | DiagnosticProblem framing, Journal |

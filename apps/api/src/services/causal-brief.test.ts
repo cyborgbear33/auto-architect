@@ -29,7 +29,7 @@ describe("composeCausalBriefSections", () => {
 });
 
 describe("historyNotesFromSolutionHistory", () => {
-  it("prefers vehicle worked buckets over empty family", () => {
+  it("prefers narrative lessons over n= rollups", () => {
     const notes = historyNotesFromSolutionHistory({
       vehicleId: "veh:x",
       engineFamily: "fca-tigershark-2.4",
@@ -49,6 +49,45 @@ describe("historyNotesFromSolutionHistory", () => {
         },
       ],
       engineFamilyRollup: [],
+      narratives: [
+        {
+          decisionId: "dec:1",
+          problemId: "prob:1",
+          actionId: "swap-coil-plug",
+          faultClass: "MisfireUnderLoad",
+          outcome: "worked",
+          verify: "passed",
+          whyBelieved: "coil #4 misfire counts dropped",
+          decidedAt: "2026-01-01T00:00:00Z",
+          lesson:
+            "swap-coil-plug → MisfireUnderLoad → worked → verify passed — why believed: coil #4 misfire counts dropped",
+        },
+      ],
+    });
+    expect(notes[0]).toMatch(/why believed: coil #4/);
+  });
+
+  it("falls back to vehicle worked buckets when narratives empty", () => {
+    const notes = historyNotesFromSolutionHistory({
+      vehicleId: "veh:x",
+      engineFamily: "fca-tigershark-2.4",
+      faultClassFilter: "MisfireUnderLoad",
+      vehicle: [
+        {
+          actionId: "swap-coil-plug",
+          faultClass: "MisfireUnderLoad",
+          scope: "vehicle",
+          engineFamily: "fca-tigershark-2.4",
+          worked: 2,
+          partial: 0,
+          failed: 0,
+          inconclusive: 0,
+          totalWithOutcome: 2,
+          lastDecidedAt: "2026-01-01T00:00:00Z",
+        },
+      ],
+      engineFamilyRollup: [],
+      narratives: [],
     });
     expect(notes[0]).toMatch(/swap-coil-plug worked 2\/2/);
   });

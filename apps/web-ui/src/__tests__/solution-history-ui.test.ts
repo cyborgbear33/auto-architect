@@ -61,6 +61,7 @@ describe("solutionHistoryUi", () => {
           lastDecidedAt: null,
         },
       ],
+      narratives: [],
     });
     expect(tops.map((b) => b.actionId)).toEqual(["swap-coil-plug"]);
   });

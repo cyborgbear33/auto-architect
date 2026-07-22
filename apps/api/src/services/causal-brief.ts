@@ -18,10 +18,16 @@ export const CAUSAL_BRIEF_INTEGRITY =
 
 export function historyNotesFromSolutionHistory(history: SolutionHistory): string[] {
   const notes: string[] = [];
-  for (const b of history.vehicle.filter((x) => x.worked > 0).slice(0, 3)) {
-    notes.push(
-      `On this vehicle, ${b.actionId} worked ${b.worked}/${b.totalWithOutcome} time(s) for ${b.faultClass ?? "this class"} (n=${b.totalWithOutcome}).`,
-    );
+  // X6 — prefer narrative lessons over bare n= rollups when present.
+  for (const n of (history.narratives ?? []).slice(0, 3)) {
+    notes.push(n.lesson);
+  }
+  if (notes.length === 0) {
+    for (const b of history.vehicle.filter((x) => x.worked > 0).slice(0, 3)) {
+      notes.push(
+        `On this vehicle, ${b.actionId} worked ${b.worked}/${b.totalWithOutcome} time(s) for ${b.faultClass ?? "this class"} (n=${b.totalWithOutcome}).`,
+      );
+    }
   }
   if (notes.length === 0) {
     for (const b of history.engineFamilyRollup.filter((x) => x.worked > 0).slice(0, 2)) {

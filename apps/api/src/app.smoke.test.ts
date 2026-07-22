@@ -71,6 +71,7 @@ describe("API HTTP smoke (buildApp + inject)", () => {
       engineFamily: "fca-tigershark-2.4",
       vehicle: [],
       engineFamilyRollup: [],
+      narratives: [],
     });
 
     const timeline = await app.inject({

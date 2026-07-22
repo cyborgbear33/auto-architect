@@ -165,6 +165,7 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
           },
         ],
         engineFamilyRollup: [],
+        narratives: [],
       }),
       getRecommendations: vi.fn().mockResolvedValue([
         {

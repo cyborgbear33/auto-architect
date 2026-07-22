@@ -25,6 +25,7 @@ function history(vehicle: SolutionRollupBucket[]): SolutionHistory {
     faultClassFilter: "MisfireUnderLoad",
     vehicle,
     engineFamilyRollup: vehicle.map((b) => ({ ...b, scope: "engineFamily" as const })),
+    narratives: [],
   };
 }
 

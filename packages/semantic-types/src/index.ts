@@ -729,6 +729,31 @@ export interface SolutionRollupBucket {
   lastDecidedAt: IsoTimestamp | null;
 }
 
+/**
+ * X6 — one apprentice-facing repair story (not an n= rollup).
+ * Compose-only from DecisionRecord + problem class/verify; never invents classes.
+ */
+export type SolutionNarrativeVerify =
+  | "passed"
+  | "failed"
+  | "inconclusive"
+  | "pending"
+  | "none";
+
+export interface SolutionNarrativeCard {
+  decisionId: SemanticId;
+  problemId: SemanticId;
+  actionId: string;
+  faultClass: string | null;
+  outcome: OutcomeStatus;
+  verify: SolutionNarrativeVerify;
+  /** Operator rationale / note — why this action was believed. */
+  whyBelieved: string;
+  decidedAt: IsoTimestamp;
+  /** One fluent teaching sentence: action → class → outcome → verify → why. */
+  lesson: string;
+}
+
 /** Vehicle + engine-family solution history for "what worked before". */
 export interface SolutionHistory {
   vehicleId: SemanticId;
@@ -737,6 +762,8 @@ export interface SolutionHistory {
   faultClassFilter: string | null;
   vehicle: SolutionRollupBucket[];
   engineFamilyRollup: SolutionRollupBucket[];
+  /** Recent vehicle stories for apprentices (X6); family stays rollup-only. */
+  narratives: SolutionNarrativeCard[];
 }
 
 /**

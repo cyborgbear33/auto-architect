@@ -1,12 +1,14 @@
 /**
  * Read-model: aggregate DecisionRecord + ProblemOutcome into "what worked"
- * buckets for a vehicle and its engine family. Does not mutate store state.
+ * buckets and apprentice narrative cards (X6). Does not mutate store state.
  */
 import type {
   DecisionRecord,
   DiagnosticProblem,
   OutcomeStatus,
   SolutionHistory,
+  SolutionNarrativeCard,
+  SolutionNarrativeVerify,
   SolutionRollupBucket,
 } from "@auto/semantic-types";
 import type { Store } from "../store/index.ts";
@@ -55,6 +57,59 @@ function rank(a: SolutionRollupBucket, b: SolutionRollupBucket): number {
   return a.actionId.localeCompare(b.actionId);
 }
 
+export function verifyFromProblem(problem: DiagnosticProblem | undefined): SolutionNarrativeVerify {
+  if (!problem) return "none";
+  if (problem.verification?.result) return problem.verification.result;
+  if (problem.status === "verifying") return "pending";
+  return "none";
+}
+
+/** Fluent apprentice lesson — action → class → outcome → verify → why believed. */
+export function composeSolutionLesson(input: {
+  actionId: string;
+  faultClass: string | null;
+  outcome: OutcomeStatus;
+  verify: SolutionNarrativeVerify;
+  whyBelieved: string;
+}): string {
+  const cls = input.faultClass ?? "unscoped case";
+  const verifyBit =
+    input.verify === "none"
+      ? "verify not recorded"
+      : input.verify === "pending"
+        ? "verify pending"
+        : `verify ${input.verify}`;
+  const why = input.whyBelieved.trim() || "no rationale logged";
+  return `${input.actionId} → ${cls} → ${input.outcome} → ${verifyBit} — why believed: ${why}`;
+}
+
+export function narrativeFromDecision(
+  d: DecisionRecord,
+  faultClass: string | null,
+  problem: DiagnosticProblem | undefined,
+): SolutionNarrativeCard | null {
+  if (!d.outcome) return null;
+  const verify = verifyFromProblem(problem);
+  const whyBelieved = d.outcome.note?.trim() || d.rationale.trim() || "no rationale logged";
+  return {
+    decisionId: d.id,
+    problemId: d.problemId,
+    actionId: d.actionId,
+    faultClass,
+    outcome: d.outcome.status,
+    verify,
+    whyBelieved,
+    decidedAt: d.decidedAt,
+    lesson: composeSolutionLesson({
+      actionId: d.actionId,
+      faultClass,
+      outcome: d.outcome.status,
+      verify,
+      whyBelieved,
+    }),
+  };
+}
+
 export class SolutionHistoryService {
   constructor(
     private store: Store,
@@ -71,24 +126,27 @@ export class SolutionHistoryService {
       .map((v) => v.id);
 
     const problemCache = new Map<string, DiagnosticProblem | undefined>();
-    const resolveClass = async (problemId: string): Promise<string | null> => {
+    const resolveProblem = async (problemId: string): Promise<DiagnosticProblem | undefined> => {
       if (!problemCache.has(problemId)) {
         problemCache.set(problemId, await this.store.problems.get(problemId));
       }
-      return problemCache.get(problemId)?.triggeredByClass ?? null;
+      return problemCache.get(problemId);
     };
 
     const vehicleBuckets = new Map<string, SolutionRollupBucket>();
     const familyBuckets = new Map<string, SolutionRollupBucket>();
+    const narratives: SolutionNarrativeCard[] = [];
 
     const ingest = async (
       decisions: DecisionRecord[],
       into: Map<string, SolutionRollupBucket>,
       scope: "vehicle" | "engineFamily",
+      collectNarratives: boolean,
     ) => {
       for (const d of decisions) {
         if (!d.outcome) continue;
-        const faultClass = await resolveClass(d.problemId);
+        const problem = await resolveProblem(d.problemId);
+        const faultClass = problem?.triggeredByClass ?? null;
         if (filter && faultClass !== filter) continue;
         const k = keyOf({ actionId: d.actionId, faultClass });
         let bucket = into.get(k);
@@ -97,14 +155,20 @@ export class SolutionHistoryService {
           into.set(k, bucket);
         }
         bump(bucket, d.outcome.status, d.decidedAt);
+        if (collectNarratives) {
+          const card = narrativeFromDecision(d, faultClass, problem);
+          if (card) narratives.push(card);
+        }
       }
     };
 
-    await ingest(await this.store.decisions.listByVehicle(vehicleId), vehicleBuckets, "vehicle");
+    await ingest(await this.store.decisions.listByVehicle(vehicleId), vehicleBuckets, "vehicle", true);
 
     for (const id of familyVehicleIds) {
-      await ingest(await this.store.decisions.listByVehicle(id), familyBuckets, "engineFamily");
+      await ingest(await this.store.decisions.listByVehicle(id), familyBuckets, "engineFamily", false);
     }
+
+    narratives.sort((a, b) => (a.decidedAt < b.decidedAt ? 1 : a.decidedAt > b.decidedAt ? -1 : 0));
 
     return {
       vehicleId,
@@ -112,6 +176,7 @@ export class SolutionHistoryService {
       faultClassFilter: filter,
       vehicle: [...vehicleBuckets.values()].sort(rank),
       engineFamilyRollup: [...familyBuckets.values()].sort(rank),
+      narratives: narratives.slice(0, 12),
     };
   }
 }
