@@ -208,6 +208,16 @@ describe("ontology registries", () => {
     expect(tsbs.some((t) => t.id === "05-047-457A")).toBe(true);
   });
 
+  it("exposes OEM steps + relatedClasses for R6 briefs", () => {
+    const campaigns = campaignsForEngineFamily("fca-tigershark-2.4", 2015);
+    const w80 = campaigns.find((c) => c.id === "W80");
+    expect(w80?.relatedClasses).toContain("MultiAirOilStarvation");
+    expect(w80?.steps?.length).toBeGreaterThan(0);
+    const tsb = tsbsForEngineFamily("fca-tigershark-2.4").find((t) => t.id === "05-047-457A");
+    expect(tsb?.relatedClasses).toContain("MultiAirOilStarvation");
+    expect(tsb?.steps?.[0]).toMatch(/oil is not low/i);
+  });
+
   it("lists FCA Proxi alignment for the Tigershark family only", () => {
     const jeep = listSpecialProcedures("fca-tigershark-2.4");
     expect(jeep.map((p) => p.id)).toContain("proc:fca-proxi-alignment");

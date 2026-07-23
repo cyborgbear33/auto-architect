@@ -47,7 +47,7 @@ multi-piece plans live in the next section.
 | **Analysis** — prove fault classes from evidence | **partial** | Recognition + narration + evidence; ~134 P0xxx circuit/emission seed | Full J1979/J2012 catalog + teaching-grade cause briefs | A4/S7; **A6–A7** causal model + apprentice brief |
 | **Diagnosis (probabilistic)** — ranked next steps under uncertainty | **partial** | Outcome shrink-calibration; counterfactuals + disqualified UI | Ranked steps *and* understandable differentials | **A6–A7**, **X6**; D5 LLM only after structured causes |
 | **Informing the user** — clear operator / apprentice surfaces | **partial** | Source badges, narration, AEMF, calibration chips, empty-evidence honesty | Apprentice can explain vehicle + problem + fix from the UI | **A7**, I7, **V1**; I5 package |
-| **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert | Deeper campaign→repair playbooks tied into briefs | R6 → A7; RecommendationService |
+| **Recommendations** — what to do next | **partial** | Class + campaign cards; accept/dismiss/convert; OEM steps in A7 brief | Deeper campaign→repair playbooks | **R6**; RecommendationService |
 | **Problem tracking** — open cases through solve | **shipped** | Caseboard filters; abandon/escalate/reopen; `worked` → verifying → verify check | — | — |
 | **Problem history** — cases over time | **partial** | Case timeline + filters + evidence/session deep-links | Stronger batch-level evidence anchors | Durable observation history |
 | **Solution history** — what fixed what, confirmed over time | **partial** | Rollup + panel + sample-size UX (F10); verify-before-solved | Live multi-vehicle priors polish | Multi-signal trends |
@@ -264,7 +264,7 @@ is opened (`generatedByProblem`).
 | R3 | Status lifecycle in UI (accept / dismiss / convert) | done | Accept/dismiss + convert→ActionService; open-only shortlist |
 | R4 | History-aware priority from solution rollup + calibration | done | One-step bump when worked≥2 clean |
 | R5 | Campaign-backed recommendations (TSB/recall → actionable card) | done | Refresh emits W80/W84/TSB cards; empty classes; Campaigns link |
-| R6 | Campaign/TSB steps linked into A7 causal brief (“OEM also says…”) | planned | Applicability only — never invents a proven fault class |
+| R6 | Campaign/TSB steps linked into A7 causal brief (“OEM also says…”) | done | `oemAlsoSays` on CausalBrief; relatedClasses + steps in known-campaigns |
 
 **Seams:** `RecommendationService`, recognition, campaigns, Dashboard, A7.  
 **Anti-patterns:** Recommendations that invent fault classes; burying cost/risk;
@@ -492,11 +492,11 @@ lessons. Diagnosis UI is still more class-id-forward than Dashboard UX5.
 | Know the vehicle before deep diagnosis | VIN/odo optional; no Diagnosis dossier | **V1** done — dossier + identity ritual | — |
 | Human complaints matter (smell, stall, rough) | Only bus symptoms enter perception | **H6** done — framing-only complaints | — |
 | Plain English on Diagnosis | Fluent primary on Diagnosis proven list + caseboard | **I7** done | — |
-| OEM TSB context in the lesson | Campaigns are parallel cards | **R6** link campaign steps into A7 brief | medium |
+| OEM TSB context in the lesson | Campaigns are parallel cards | **R6** done — OEM also says… in A7 brief | — |
 | Optional LLM gloss | D5 planned without structured fuel | **D5** only after A6/A7 | medium |
 
 **Build order (logical):**
-`A6` → `A7` (+ `I7` polish) → `X6` → `V1` → `H6` (done) → continue `A4` → `R6` → `D5`.
+`A6` → `A7` (+ `I7` polish) → `X6` → `V1` → `H6` → `R6` (done) → continue `A4` → `D5`.
 
 **Integrity:** Causal briefs and LLM advise may *propose* causes and lessons;
 realize still owns class membership; empty DTCs / missing STATUS never mean
@@ -512,7 +512,7 @@ healthy; history never invents a fix that was not logged and verified.
 | Vehicle dossier + VIN/odo ritual on Diagnosis | V1 | done | high | Dossier strip + PATCH identity; discovery/campaigns links; never invents VIN. | VehicleDossierStrip, VehicleService |
 | Diagnosis fluent-first proven classes | I7 | done | medium | Proven list + caseboard lead with fluent; class ids secondary. | `fluentForClass`, Diagnosis |
 | Operator complaint / symptom journal → framing | H6 | done | medium | Draft chips → `operatorComplaints` on create; statement + causal symptoms only. | complaint-framing, Diagnosis, ProblemDetail |
-| Campaign/TSB steps inside causal brief | R6 | planned | medium | OEM context in the lesson, still applicability-only. | known-campaigns, A7 |
+| Campaign/TSB steps inside causal brief | R6 | done | medium | `oemAlsoSays` + steps/relatedClasses; CausalBriefPanel “OEM also says…”. | known-campaigns, CausalBriefService |
 | Propose-only LLM advise (causes/framing gloss) | D5 | planned | medium | After A6/A7 so advise has structured fuel; LOGOS disposes. | logos-bridge / agent-service, A7 |
 | Dashboard next-action console (at-a-glance) | UX1 | done | high | Closes BlueDriver/FIXD “what now” clarity gap. | `NextActionConsole`, Dashboard |
 | DTC-row “what worked” from solution history | UX2 | done | high | `DtcWhatWorkedChips` via classEvidence→solution-history; no invented fixes. | Dashboard DTC list, `solutionHistoryUi` |
@@ -689,6 +689,7 @@ actually maintain.
 | Solution narrative cards (X6) | 2026-07 | `SolutionNarrativeCard` on solution-history; WhatWorked stories; A7 prefers lessons |
 | Vehicle dossier on Diagnosis (V1) | 2026-07 | Identity strip + PATCH VIN/odo; discovery + campaign links; never invents VIN |
 | Operator complaint framing (H6) | 2026-07 | Diagnosis chips → `operatorComplaints`; enrich statement/symptoms only |
+| OEM steps in causal brief (R6) | 2026-07 | `oemAlsoSays` on A7 brief; campaign/TSB steps + relatedClasses; applicability only |
 
 ---
 

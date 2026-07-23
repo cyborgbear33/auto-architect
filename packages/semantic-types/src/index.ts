@@ -488,6 +488,17 @@ export interface CausalModel {
  * A7 — composed apprentice lesson for one fault class / problem.
  * Compose-only from CausalModel + AEMF + narration + history; never invents membership.
  */
+/** R6 — OEM campaign/TSB guidance in the apprentice brief (applicability only). */
+export interface OemGuidanceNote {
+  id: string;
+  title: string;
+  kind: "campaign" | "tsb";
+  steps: string[];
+  reference?: string;
+  /** Short match line — never a realize claim. */
+  applicabilityNote: string;
+}
+
 export interface CausalBrief {
   vehicleId: SemanticId;
   faultClass: string;
@@ -502,6 +513,10 @@ export interface CausalBrief {
   aemfPlaybook?: string;
   /** This vehicle / family outcome notes (sample-size honest). */
   historyNotes: string[];
+  /** H6 — operator complaints when brief is problem-scoped. */
+  operatorComplaints?: string[];
+  /** R6 — matched campaign/TSB steps (“OEM also says…”). */
+  oemAlsoSays?: OemGuidanceNote[];
   causalModel: CausalModel;
   integrityNote: string;
 }
@@ -867,6 +882,10 @@ export interface KnownCampaign {
   yearRange: [number, number];
   summary: string;
   reference?: string; // TSB/NHTSA doc id
+  /** Ordered OEM checks for A7 (R6). */
+  steps?: string[];
+  /** Applicability filter for briefs — never invents realize membership. */
+  relatedClasses?: string[];
 }
 
 // --- Cascade prognosis (F6/F7) ----------------------------------------------

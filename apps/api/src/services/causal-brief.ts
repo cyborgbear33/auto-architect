@@ -1,20 +1,30 @@
 /**
  * A7 — apprentice causal brief read-model.
- * Compose CausalModel + AEMF + recognition narration + solution/learning history.
+ * Compose CausalModel + AEMF + recognition narration + solution/learning history + OEM guidance (R6).
  * Never invents realize membership or confirmed root causes.
  */
 import { composeCausalModel, composeClassEvidence, draftForClass } from "@auto/cartridges";
-import { aemfPlaybookProse } from "@auto/ontology";
-import type { CausalBrief, CausalModel, SolutionHistory } from "@auto/semantic-types";
+import { aemfPlaybookProse, oemGuidanceAppliesToClass, type TsbEntry } from "@auto/ontology";
+import type {
+  CausalBrief,
+  CausalModel,
+  KnownCampaign,
+  OemGuidanceNote,
+  SolutionHistory,
+} from "@auto/semantic-types";
 import { notFound, validationError } from "../lib/errors.ts";
 import type { Store } from "../store/index.ts";
+import type { CampaignService } from "./campaigns.ts";
 import type { LearningCycleService } from "./learning-cycles.ts";
 import type { RecognitionService } from "./recognition.ts";
 import type { SolutionHistoryService } from "./solution-history.ts";
 import type { VehicleService } from "./vehicle.ts";
 
 export const CAUSAL_BRIEF_INTEGRITY =
-  "Teaching brief only — fault-class membership stays LOGOS-proven from OBD evidence; empty DTCs are not healthy.";
+  "Teaching brief only — fault-class membership stays LOGOS-proven from OBD evidence; empty DTCs are not healthy. OEM campaign/TSB notes are applicability only.";
+
+export const OEM_APPLICABILITY =
+  "Applicability only — not a LOGOS-proven fault class.";
 
 export function historyNotesFromSolutionHistory(history: SolutionHistory): string[] {
   const notes: string[] = [];
@@ -51,6 +61,40 @@ export function whatToProveNextFromModel(
   return (model.mostLikelyCauses ?? []).slice(0, 2).map((c) => `Prove or rule out: ${c}`);
 }
 
+/** R6 — filter matched campaigns/TSBs that declare relatedClasses for this fault class. */
+export function oemAlsoSaysForClass(
+  faultClass: string,
+  campaigns: KnownCampaign[],
+  tsbs: TsbEntry[],
+): OemGuidanceNote[] {
+  const notes: OemGuidanceNote[] = [];
+  for (const c of campaigns) {
+    if (!oemGuidanceAppliesToClass(c.relatedClasses, faultClass)) continue;
+    const steps = c.steps?.length ? c.steps : [c.summary];
+    notes.push({
+      id: c.id,
+      title: c.title,
+      kind: "campaign",
+      steps,
+      ...(c.reference ? { reference: c.reference } : {}),
+      applicabilityNote: OEM_APPLICABILITY,
+    });
+  }
+  for (const t of tsbs) {
+    if (!oemGuidanceAppliesToClass(t.relatedClasses, faultClass)) continue;
+    const steps = t.steps?.length ? t.steps : [t.summary];
+    notes.push({
+      id: t.id,
+      title: t.title,
+      kind: "tsb",
+      steps,
+      reference: t.reference,
+      applicabilityNote: OEM_APPLICABILITY,
+    });
+  }
+  return notes;
+}
+
 export function composeCausalBriefSections(input: {
   vehicleId: string;
   faultClass: string;
@@ -61,6 +105,8 @@ export function composeCausalBriefSections(input: {
   historyNotes: string[];
   proveNext: string[];
   gap?: string;
+  operatorComplaints?: string[];
+  oemAlsoSays?: OemGuidanceNote[];
 }): CausalBrief {
   const likely = input.causalModel.mostLikelyCauses?.[0];
   const why = likely
@@ -70,6 +116,7 @@ export function composeCausalBriefSections(input: {
   const howWeKnow = [
     ...(input.fluent ? [input.fluent] : []),
     ...(input.causalModel.symptoms ?? []),
+    ...(input.operatorComplaints ?? []).map((c) => `Operator reports: ${c}`),
   ].filter(Boolean);
 
   return {
@@ -81,6 +128,8 @@ export function composeCausalBriefSections(input: {
     whatToProveNext: input.proveNext,
     ...(input.aemfPlaybook ? { aemfPlaybook: input.aemfPlaybook } : {}),
     historyNotes: input.historyNotes,
+    ...(input.operatorComplaints?.length ? { operatorComplaints: input.operatorComplaints } : {}),
+    ...(input.oemAlsoSays?.length ? { oemAlsoSays: input.oemAlsoSays } : {}),
     causalModel: input.causalModel,
     integrityNote: CAUSAL_BRIEF_INTEGRITY,
   };
@@ -93,6 +142,7 @@ export class CausalBriefService {
     private recognition: RecognitionService,
     private solutionHistory: SolutionHistoryService,
     private learningCycles: LearningCycleService,
+    private campaigns: CampaignService,
   ) {}
 
   async forProblem(problemId: string): Promise<CausalBrief> {
@@ -101,7 +151,13 @@ export class CausalBriefService {
     if (!problem.triggeredByClass) {
       throw validationError("Causal brief requires a problem with triggeredByClass.");
     }
-    return this.forClass(problem.vehicleId, problem.triggeredByClass, problemId, problem.causalModel);
+    return this.forClass(
+      problem.vehicleId,
+      problem.triggeredByClass,
+      problemId,
+      problem.causalModel,
+      problem.operatorComplaints,
+    );
   }
 
   async forClass(
@@ -109,6 +165,7 @@ export class CausalBriefService {
     faultClass: string,
     problemId?: string,
     existingModel?: CausalModel,
+    operatorComplaints?: string[],
   ): Promise<CausalBrief> {
     const vehicle = await this.vehicles.getOrThrow(vehicleId);
     const cartridges = this.vehicles.cartridgesFor(vehicle);
@@ -163,6 +220,9 @@ export class CausalBriefService {
         .filter(Boolean),
     );
 
+    const pack = await this.campaigns.forVehicle(vehicleId);
+    const oemAlsoSays = oemAlsoSaysForClass(faultClass, pack.campaigns, pack.tsbs);
+
     return composeCausalBriefSections({
       vehicleId,
       faultClass,
@@ -173,6 +233,8 @@ export class CausalBriefService {
       historyNotes,
       proveNext,
       gap: draft?.statement.gap,
+      operatorComplaints,
+      oemAlsoSays,
     });
   }
 }

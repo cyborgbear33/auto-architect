@@ -196,6 +196,8 @@ const knownCampaigns: KnownCampaign[] = knownCampaignsFile.campaigns.map((c) => 
   yearRange: c.yearRange,
   summary: c.summary,
   reference: c.reference,
+  ...(c.steps ? { steps: c.steps } : {}),
+  ...(c.relatedClasses ? { relatedClasses: c.relatedClasses } : {}),
 }));
 
 export function campaignsForEngineFamily(
@@ -243,10 +245,30 @@ export interface TsbEntry {
   engineFamily: string;
   summary: string;
   reference: string;
+  steps?: string[];
+  relatedClasses?: string[];
 }
 
 export function tsbsForEngineFamily(engineFamilyId: string): TsbEntry[] {
-  return knownCampaignsFile.tsbs.filter((t) => t.engineFamily === engineFamilyId);
+  return knownCampaignsFile.tsbs
+    .filter((t) => t.engineFamily === engineFamilyId)
+    .map((t) => ({
+      id: t.id,
+      title: t.title,
+      engineFamily: t.engineFamily,
+      summary: t.summary,
+      reference: t.reference,
+      ...(t.steps ? { steps: t.steps } : {}),
+      ...(t.relatedClasses ? { relatedClasses: t.relatedClasses } : {}),
+    }));
+}
+
+/** R6 — campaigns/TSBs whose relatedClasses include the fault class (applicability only). */
+export function oemGuidanceAppliesToClass(
+  relatedClasses: string[] | undefined,
+  faultClass: string,
+): boolean {
+  return Boolean(relatedClasses?.includes(faultClass));
 }
 
 export function listSpecialProcedures(engineFamilyId?: string): SpecialProcedureEntry[] {

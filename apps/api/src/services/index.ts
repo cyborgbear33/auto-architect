@@ -92,6 +92,7 @@ export function createServices(store: Store, bridge: LogosBridge): Services {
     recognition,
     solutionHistory,
     learningCycles,
+    campaigns,
   );
 
   return {

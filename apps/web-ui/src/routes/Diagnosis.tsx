@@ -365,6 +365,18 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                     <span className="font-medium text-slate-800">manual</span>
                   )}
                   <span className="mt-0.5 block text-slate-500">{problem.statement.currentState}</span>
+                  {problem.operatorComplaints && problem.operatorComplaints.length > 0 && (
+                    <span className="mt-1 flex flex-wrap gap-1">
+                      {problem.operatorComplaints.map((c) => (
+                        <span
+                          key={c}
+                          className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] text-amber-900 ring-1 ring-amber-200"
+                        >
+                          {c}
+                        </span>
+                      ))}
+                    </span>
+                  )}
                   {problem.triggeredByClass && (
                     <AemfAspectChips className={problem.triggeredByClass} />
                   )}

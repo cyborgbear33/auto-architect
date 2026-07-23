@@ -6,7 +6,14 @@
       "engineFamily": "fca-tigershark-2.4",
       "yearRange": [2015, 2018],
       "summary": "2015-2018 Jeep Renegade (FWD), 2016-2018 Fiat 500X, and 2015-2018 Ram ProMaster City with the 2.4L engine (sales codes ED6/ED8/EDD/EDE) may exhibit excessive oil consumption from low-tension piston rings, which can eventually cause a stall if unaddressed. The dealer procedure: top off oil, drive a monitored 1500-1700 miles, recheck the level after a 5-minute hot shutdown on level ground. Below the ADD mark = failed test -> long-block engine replacement.",
-      "reference": "NHTSA TSB doc MC-10220586-9999 (Customer Satisfaction Notification W80)"
+      "reference": "NHTSA TSB doc MC-10220586-9999 (Customer Satisfaction Notification W80)",
+      "relatedClasses": ["MultiAirOilStarvation"],
+      "steps": [
+        "Top off oil to the full mark",
+        "Drive a monitored 1500–1700 miles",
+        "Recheck level after a 5-minute hot shutdown on level ground",
+        "Below the ADD mark = failed test → long-block engine replacement"
+      ]
     },
     {
       "id": "W84",
@@ -14,7 +21,12 @@
       "engineFamily": "fca-tigershark-2.4",
       "yearRange": [2015, 2018],
       "summary": "A related Customer Satisfaction Notification issuing a PCM software update aimed at oil-consumption behavior on the same 2.4L engine family.",
-      "reference": "Customer Satisfaction Notification W84 (owner-reported; verify applicability by VIN with a dealer)"
+      "reference": "Customer Satisfaction Notification W84 (owner-reported; verify applicability by VIN with a dealer)",
+      "relatedClasses": ["MultiAirOilStarvation"],
+      "steps": [
+        "Verify VIN applicability with a dealer",
+        "Apply the PCM software update for oil-consumption behavior when applicable"
+      ]
     }
   ],
   "tsbs": [
@@ -23,7 +35,17 @@
       "title": "MultiAir Actuator Assembly Diagnostic Procedure (2.4L Tigershark Only)",
       "engineFamily": "fca-tigershark-2.4",
       "summary": "When diagnosing P-codes related to the MultiAir unit, the required check order is: (1) verify engine oil is not low, (2) verify the oil filter meets OEM spec, (3) verify oil is not dirty/deteriorated, (4) verify correct oil viscosity/weight, (5) verify oil is not contaminated (coolant/fuel), (6) verify the oil galley screen/filter feeding the MultiAir unit is not clogged — BEFORE replacing the MultiAir actuator itself.",
-      "reference": "TSB #05047457A, document MC-10228154-9999"
+      "reference": "TSB #05047457A, document MC-10228154-9999",
+      "relatedClasses": ["MultiAirOilStarvation"],
+      "steps": [
+        "Verify engine oil is not low",
+        "Verify the oil filter meets OEM spec",
+        "Verify oil is not dirty/deteriorated",
+        "Verify correct oil viscosity/weight",
+        "Verify oil is not contaminated (coolant/fuel)",
+        "Verify the oil galley screen/filter feeding the MultiAir unit is not clogged",
+        "Only then consider MultiAir actuator replacement"
+      ]
     }
   ]
 }

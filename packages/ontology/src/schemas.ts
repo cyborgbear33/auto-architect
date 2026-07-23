@@ -97,6 +97,10 @@ export const CampaignEntrySchema = z.object({
   yearRange: z.tuple([z.number().int(), z.number().int()]),
   summary: z.string().min(1),
   reference: z.string().min(1),
+  /** Ordered OEM checks for A7 “OEM also says…” (R6). */
+  steps: z.array(z.string().min(1)).optional(),
+  /** Applicability filter only — never invents realize membership. */
+  relatedClasses: z.array(z.string().min(1)).optional(),
 });
 
 export const TsbEntrySchema = z.object({
@@ -105,6 +109,8 @@ export const TsbEntrySchema = z.object({
   engineFamily: z.string().min(1),
   summary: z.string().min(1),
   reference: z.string().min(1),
+  steps: z.array(z.string().min(1)).optional(),
+  relatedClasses: z.array(z.string().min(1)).optional(),
 });
 
 export const KnownCampaignsFileSchema = z.object({

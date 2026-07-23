@@ -5,7 +5,7 @@ import { CausalModelPanel } from "./CausalModelPanel.tsx";
 
 /**
  * A7 — apprentice causal brief: why / how we know / what to prove next,
- * plus AEMF, history notes, and the underlying CausalModel.
+ * plus AEMF, OEM guidance (R6), history notes, and the underlying CausalModel.
  */
 export function CausalBriefPanel({
   vehicleId,
@@ -59,6 +59,23 @@ export function CausalBriefBody({ brief }: { brief: CausalBrief }) {
             ))}
           </ul>
         </div>
+        {brief.operatorComplaints && brief.operatorComplaints.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+              Operator complaints
+            </h3>
+            <ul className="mt-0.5 flex flex-wrap gap-1.5">
+              {brief.operatorComplaints.map((c) => (
+                <li
+                  key={c}
+                  className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs text-amber-900 ring-1 ring-amber-200"
+                >
+                  {c}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div>
           <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             What to prove next
@@ -69,6 +86,38 @@ export function CausalBriefBody({ brief }: { brief: CausalBrief }) {
             ))}
           </ul>
         </div>
+        {brief.oemAlsoSays && brief.oemAlsoSays.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              OEM also says…
+            </h3>
+            <p className="mt-0.5 text-[11px] text-slate-500">
+              Campaign/TSB applicability for this vehicle — not a proven fault class.
+            </p>
+            <ul className="mt-2 space-y-2">
+              {brief.oemAlsoSays.map((note) => (
+                <li
+                  key={`${note.kind}:${note.id}`}
+                  className="rounded-md bg-white/70 px-3 py-2 ring-1 ring-sky-100"
+                >
+                  <p className="font-medium text-slate-800">
+                    <span className="font-mono text-[11px] text-slate-400">{note.id}</span>{" "}
+                    {note.title}
+                  </p>
+                  <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-slate-700">
+                    {note.steps.map((step) => (
+                      <li key={step.slice(0, 64)}>{step}</li>
+                    ))}
+                  </ol>
+                  {note.reference && (
+                    <p className="mt-1 text-[11px] text-slate-400">{note.reference}</p>
+                  )}
+                  <p className="mt-0.5 text-[11px] text-amber-800">{note.applicabilityNote}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {brief.aemfPlaybook && (
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">

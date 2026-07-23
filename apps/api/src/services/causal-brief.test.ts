@@ -3,6 +3,7 @@ import {
   CAUSAL_BRIEF_INTEGRITY,
   composeCausalBriefSections,
   historyNotesFromSolutionHistory,
+  oemAlsoSaysForClass,
   whatToProveNextFromModel,
 } from "./causal-brief.ts";
 
@@ -20,11 +21,85 @@ describe("composeCausalBriefSections", () => {
       historyNotes: ["No confirmed outcomes yet."],
       proveNext: ["swap coil and plug"],
       gap: "root cause not isolated",
+      operatorComplaints: ["rough idle"],
+      oemAlsoSays: [
+        {
+          id: "W80",
+          title: "Oil Consumption",
+          kind: "campaign",
+          steps: ["Top off oil"],
+          applicabilityNote: "Applicability only — not a LOGOS-proven fault class.",
+        },
+      ],
     });
     expect(brief.why).toMatch(/Most likely: ignition/i);
     expect(brief.howWeKnow[0]).toMatch(/P0300-P0304/);
+    expect(brief.howWeKnow).toContain("Operator reports: rough idle");
+    expect(brief.operatorComplaints).toEqual(["rough idle"]);
+    expect(brief.oemAlsoSays?.[0]?.id).toBe("W80");
     expect(brief.whatToProveNext).toEqual(["swap coil and plug"]);
     expect(brief.integrityNote).toBe(CAUSAL_BRIEF_INTEGRITY);
+  });
+});
+
+describe("oemAlsoSaysForClass", () => {
+  it("includes only campaigns/TSBs related to the fault class", () => {
+    const notes = oemAlsoSaysForClass(
+      "MultiAirOilStarvation",
+      [
+        {
+          id: "W80",
+          title: "Oil Consumption",
+          engineFamily: "fca-tigershark-2.4",
+          yearRange: [2015, 2018],
+          summary: "oil",
+          relatedClasses: ["MultiAirOilStarvation"],
+          steps: ["Top off oil"],
+        },
+        {
+          id: "OTHER",
+          title: "Unrelated",
+          engineFamily: "fca-tigershark-2.4",
+          yearRange: [2015, 2018],
+          summary: "no",
+          relatedClasses: ["MisfireUnderLoad"],
+          steps: ["ignore"],
+        },
+      ],
+      [
+        {
+          id: "05-047-457A",
+          title: "MultiAir procedure",
+          engineFamily: "fca-tigershark-2.4",
+          summary: "oil first",
+          reference: "TSB",
+          relatedClasses: ["MultiAirOilStarvation"],
+          steps: ["Verify oil not low"],
+        },
+      ],
+    );
+    expect(notes.map((n) => n.id).sort()).toEqual(["05-047-457A", "W80"]);
+    expect(notes.every((n) => n.applicabilityNote.includes("Applicability only"))).toBe(true);
+  });
+
+  it("returns empty for unrelated classes (never invents membership)", () => {
+    expect(
+      oemAlsoSaysForClass(
+        "MisfireUnderLoad",
+        [
+          {
+            id: "W80",
+            title: "Oil",
+            engineFamily: "fca-tigershark-2.4",
+            yearRange: [2015, 2018],
+            summary: "oil",
+            relatedClasses: ["MultiAirOilStarvation"],
+            steps: ["Top off"],
+          },
+        ],
+        [],
+      ),
+    ).toEqual([]);
   });
 });
 
