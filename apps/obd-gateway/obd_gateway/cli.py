@@ -20,6 +20,7 @@ import json
 import logging
 import sys
 import time
+from collections.abc import Callable
 from dataclasses import replace
 
 from .api_client import ApiClient, ApiClientError
@@ -30,6 +31,16 @@ from .discovery import build_simulated_capability_report
 from .im_status import simulated_im_status
 
 logger = logging.getLogger("obd_gateway.cli")
+
+# How many consecutive fully-empty poll cycles in `watch` mode before we
+# suspect the link is silently dead and force a reconnect, even though
+# `client.is_connected()` still reports true. Some Bluetooth/rfcomm stacks
+# never surface a disconnect as an exception or a status flip (see
+# client.py's `is_connected()` docstring) — a real, connected ECU almost
+# always answers *something* every cycle (RPM alone is enough), so several
+# fully empty cycles in a row is a strong, low-false-positive signal.
+EMPTY_POLL_RECONNECT_THRESHOLD = 6
+MAX_RECONNECT_BACKOFF_SECONDS = 30.0
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -233,6 +244,98 @@ def run_discover(
     return report
 
 
+def _batch_is_empty(batch: dict) -> bool:
+    """True only when a poll cycle produced no evidence at all. `watch` mode
+    always attempts PID reads (config.pids defaults non-empty, and the
+    --no-* flags only skip dtcs/freeze-frame/mode06/im-status), so a fully
+    empty batch from real hardware is a strong signal the *link*, not the
+    vehicle, has gone quiet — a healthy-but-boring cycle (RPM=0, no DTCs)
+    still populates `pids` and is never mistaken for a dead link."""
+    return not (
+        batch.get("pids")
+        or batch.get("dtcs")
+        or batch.get("freezeFrames")
+        or batch.get("mode06")
+        or batch.get("imStatus")
+    )
+
+
+def _run_watch_loop(
+    config: GatewayConfig,
+    client: ObdGatewayClient | None,
+    api: ApiClient | None,
+    args: argparse.Namespace,
+    *,
+    max_iterations: int | None = None,
+    sleep_fn: Callable[[float], None] = time.sleep,
+) -> None:
+    """Continuous-poll loop for an unattended drive session. Must survive,
+    not just report, three real hardware failure modes:
+
+    1. The link cleanly reports itself down (`client.is_connected()` is
+       False) — attempt a reconnect with capped exponential backoff instead
+       of posting hollow batches while dead.
+    2. The link silently goes quiet without ever reporting itself down (a
+       known python-OBD/pyserial gap on some Bluetooth/rfcomm stacks) —
+       caught via the consecutive-empty-poll heuristic above instead.
+    3. A single cycle raises (e.g. a decoder choking on a malformed frame) —
+       caught per cycle so one bad read doesn't end the whole drive's
+       logging.
+
+    `max_iterations` / `sleep_fn` exist only so tests can drive this
+    deterministically without a real infinite loop or real sleeps; production
+    callers never pass them.
+    """
+    logger.info("watching every %.1fs — Ctrl+C to stop", config.poll_interval_seconds)
+    consecutive_failures = 0
+    consecutive_empty_polls = 0
+    was_link_down = False
+    iterations = 0
+
+    while max_iterations is None or iterations < max_iterations:
+        iterations += 1
+
+        if client is not None:
+            link_down = not client.is_connected()
+            suspected_dead = consecutive_empty_polls >= EMPTY_POLL_RECONNECT_THRESHOLD
+            if link_down or suspected_dead:
+                if not was_link_down:
+                    logger.error(
+                        "OBD adapter link %s — attempting reconnect",
+                        "reports disconnected"
+                        if link_down
+                        else f"produced {consecutive_empty_polls} empty polls in a row (suspected dead)",
+                    )
+                    was_link_down = True
+                if client.reconnect():
+                    logger.info("OBD adapter link restored")
+                    was_link_down = False
+                    consecutive_failures = 0
+                    consecutive_empty_polls = 0
+                else:
+                    consecutive_failures += 1
+                    backoff = min(
+                        config.poll_interval_seconds * (2 ** min(consecutive_failures, 5)),
+                        MAX_RECONNECT_BACKOFF_SECONDS,
+                    )
+                    logger.warning("reconnect failed — retrying in %.1fs", backoff)
+                    sleep_fn(backoff)
+                    continue
+
+        try:
+            batch = run_once(config, client, api, args)
+        except ApiClientError as exc:
+            logger.error("failed to post batch: %s", exc)
+        except Exception:  # noqa: BLE001 — one bad cycle must not end the drive session
+            logger.exception("poll cycle failed unexpectedly — continuing")
+            consecutive_failures += 1
+        else:
+            consecutive_failures = 0
+            consecutive_empty_polls = consecutive_empty_polls + 1 if _batch_is_empty(batch) else 0
+
+        sleep_fn(config.poll_interval_seconds)
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     logging.basicConfig(
@@ -240,8 +343,8 @@ def main(argv: list[str] | None = None) -> int:
         format="%(asctime)s %(levelname)s %(message)s",
     )
 
-    config = _config_from_args(args)
     try:
+        config = _config_from_args(args)
         config.require_vehicle_id()
     except ValueError as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -258,13 +361,7 @@ def main(argv: list[str] | None = None) -> int:
         elif args.mode == "discover":
             run_discover(config, client, api, args)
         elif args.mode == "watch":
-            logger.info("watching every %.1fs — Ctrl+C to stop", config.poll_interval_seconds)
-            while True:
-                try:
-                    run_once(config, client, api, args)
-                except ApiClientError as exc:
-                    logger.error("failed to post batch: %s", exc)
-                time.sleep(config.poll_interval_seconds)
+            _run_watch_loop(config, client, api, args)
     except KeyboardInterrupt:
         logger.info("stopped")
     except ApiClientError as exc:
@@ -272,6 +369,13 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     except ConnectionError as exc:
         print(f"error: {exc}", file=sys.stderr)
+        return 1
+    except Exception as exc:  # noqa: BLE001 — fail cleanly for the operator; full trace still in the log
+        logger.exception("unexpected error")
+        print(
+            f"error: unexpected failure — {exc} (see log for details; rerun with -v for more)",
+            file=sys.stderr,
+        )
         return 1
     finally:
         if client is not None:

@@ -89,7 +89,16 @@ bug: recognition will run the wrong engine-family cartridges.
   It must not clear codes, write to the vehicle, or dump full PID **values**
   (values remain `scan` / `watch`).
 - Timeouts and adapter disconnects should fail visibly (non-zero exit / log),
-  not invent zeroed PIDs that look like real data.
+  not invent zeroed PIDs that look like real data. `scan`/`discover` do this
+  via `ConnectionError` on a failed initial `connect()`. `watch` cannot exit
+  on a mid-drive disconnect (unattended), so it detects link loss two ways —
+  `client.is_connected()` and, for the silent-disconnect case some
+  Bluetooth/rfcomm stacks never surface as a status change, a consecutive-
+  empty-poll heuristic (`EMPTY_POLL_RECONNECT_THRESHOLD` in `cli.py`) — then
+  logs at ERROR, skips posting a hollow batch, and retries `client.reconnect()`
+  with capped backoff rather than silently POSTing empty-looking batches
+  forever. See `client.py`'s `is_connected()`/`reconnect()` and `cli.py`'s
+  `_run_watch_loop()`.
 - `--simulate` exists so CI and UI demos never require hardware.
 
 ---

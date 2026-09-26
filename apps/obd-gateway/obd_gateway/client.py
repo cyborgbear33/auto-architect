@@ -84,27 +84,67 @@ class ObdGatewayClient:
     def connect(self) -> None:
         if self._connection is not None:
             return
-        logger.info(
-            "connecting to OBD adapter port=%s protocol=%s",
-            self.config.obd_port,
-            self.config.obd_protocol,
-        )
-        self._connection = obd.OBD(
-            portstr=self.config.obd_port,
-            baudrate=self.config.obd_baudrate,
-            protocol=self.config.obd_protocol,
-            fast=self.config.obd_fast,
-        )
-        if not self._connection.is_connected():
+        if not self._open_connection():
             raise ConnectionError(
                 "could not connect to an OBD-II adapter — check the OBDLink MX+ is paired/plugged in, "
                 "the ignition is on, and AUTO_OBD_PORT (if set) is correct"
             )
 
+    def reconnect(self) -> bool:
+        """Force-drop and re-establish the connection after a detected link loss
+        (see `is_connected()`). Never raises — the `watch` loop is unattended and
+        must survive a bad reconnect attempt to try again next cycle. Returns
+        whether the new connection is actually live."""
+        self.close()
+        try:
+            return self._open_connection()
+        except Exception:  # noqa: BLE001 — a reconnect attempt must never crash watch
+            logger.exception("reconnect attempt raised unexpectedly")
+            return False
+
+    def _open_connection(self) -> bool:
+        """Builds a fresh `obd.OBD` connection. Returns whether it came up live.
+        python-OBD's own constructor already catches most serial-layer failures
+        internally (see elm327.py), but a malformed port string or an
+        environment-specific pyserial error can still raise past that — caught
+        here so a bad --port value fails as a clean ConnectionError, not a raw
+        traceback."""
+        logger.info(
+            "connecting to OBD adapter port=%s protocol=%s",
+            self.config.obd_port,
+            self.config.obd_protocol,
+        )
+        try:
+            self._connection = obd.OBD(
+                portstr=self.config.obd_port,
+                baudrate=self.config.obd_baudrate,
+                protocol=self.config.obd_protocol,
+                fast=self.config.obd_fast,
+            )
+        except Exception:
+            logger.exception("failed to construct the OBD connection")
+            self._connection = None
+            return False
+        return self._connection.is_connected()
+
     def close(self) -> None:
         if self._connection is not None:
-            self._connection.close()
+            try:
+                self._connection.close()
+            except Exception:  # noqa: BLE001 — closing a half-dead link must not raise
+                logger.warning("error while closing the OBD connection (ignored)", exc_info=True)
             self._connection = None
+
+    def is_connected(self) -> bool:
+        """Best-effort link-health check — never raises. Catches both the
+        'connect() was never called' case and a python-OBD connection whose
+        `is_connected()` itself misbehaves on a half-dead link."""
+        if self._connection is None:
+            return False
+        try:
+            return bool(self._connection.is_connected())
+        except Exception:  # noqa: BLE001 — a broken link must not crash the health check
+            return False
 
     def _require_connection(self) -> obd.OBD:
         if self._connection is None:

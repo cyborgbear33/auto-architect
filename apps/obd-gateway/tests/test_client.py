@@ -242,6 +242,112 @@ def test_discover_capabilities_partitions_mode01_and_mode06():
     assert "OIL_PRESSURE_PSI" in report["manualOnlyPids"]
 
 
+class FakeObdConnection:
+    """Stands in for a real obd.OBD instance returned by obd.OBD(...) — used
+    only to test connect()/reconnect()'s own error handling, never the
+    read_* logic (that's FakeConnection's job)."""
+
+    def __init__(self, *, connected: bool):
+        self._connected = connected
+        self.closed = False
+
+    def is_connected(self):
+        return self._connected
+
+    def close(self):
+        self.closed = True
+
+
+def test_connect_raises_connection_error_when_adapter_unreachable(monkeypatch):
+    monkeypatch.setattr(obd, "OBD", lambda **kwargs: FakeObdConnection(connected=False))
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"))
+    try:
+        client.connect()
+        raise AssertionError("expected ConnectionError")
+    except ConnectionError as exc:
+        assert "OBDLink MX+" in str(exc)
+
+
+def test_connect_raises_connection_error_not_a_raw_traceback_when_construction_blows_up(
+    monkeypatch,
+):
+    def boom(**kwargs):
+        raise ValueError("malformed port string")
+
+    monkeypatch.setattr(obd, "OBD", boom)
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"))
+    try:
+        client.connect()
+        raise AssertionError("expected ConnectionError, not the raw construction error")
+    except ConnectionError:
+        pass
+
+
+def test_is_connected_false_before_connect():
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"))
+    assert client.is_connected() is False
+
+
+def test_is_connected_reflects_the_injected_connection():
+    fake = FakeConnection(supported=set(), responses={})
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=fake)
+    assert client.is_connected() is True
+
+
+def test_is_connected_returns_false_rather_than_raising_when_underlying_check_fails():
+    class BrokenConnection(FakeConnection):
+        def is_connected(self):
+            raise RuntimeError("port gone")
+
+    client = ObdGatewayClient(
+        GatewayConfig(vehicle_id="veh:x"),
+        connection=BrokenConnection(supported=set(), responses={}),
+    )
+    assert client.is_connected() is False
+
+
+def test_reconnect_closes_the_old_connection_and_returns_true_on_success(monkeypatch):
+    old = FakeObdConnection(connected=True)
+    new = FakeObdConnection(connected=True)
+    monkeypatch.setattr(obd, "OBD", lambda **kwargs: new)
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=old)
+    assert client.reconnect() is True
+    assert old.closed is True
+    assert client.is_connected() is True
+
+
+def test_reconnect_returns_false_without_raising_when_the_link_is_still_down(monkeypatch):
+    monkeypatch.setattr(obd, "OBD", lambda **kwargs: FakeObdConnection(connected=False))
+    client = ObdGatewayClient(
+        GatewayConfig(vehicle_id="veh:x"), connection=FakeConnection(supported=set(), responses={})
+    )
+    assert client.reconnect() is False
+
+
+def test_reconnect_returns_false_without_raising_when_construction_blows_up(monkeypatch):
+    def boom(**kwargs):
+        raise OSError("device busy")
+
+    monkeypatch.setattr(obd, "OBD", boom)
+    client = ObdGatewayClient(
+        GatewayConfig(vehicle_id="veh:x"), connection=FakeConnection(supported=set(), responses={})
+    )
+    assert client.reconnect() is False
+
+
+def test_close_does_not_raise_when_the_underlying_close_fails():
+    class BadCloseConnection(FakeConnection):
+        def close(self):
+            raise RuntimeError("already gone")
+
+    client = ObdGatewayClient(
+        GatewayConfig(vehicle_id="veh:x"),
+        connection=BadCloseConnection(supported=set(), responses={}),
+    )
+    client.close()  # must not raise
+    assert client.is_connected() is False
+
+
 def test_read_mode06_maps_mid_tid_and_pass_fail():
     monitor = FakeMonitor(
         [

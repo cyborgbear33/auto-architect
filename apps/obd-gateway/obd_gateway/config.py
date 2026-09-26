@@ -26,7 +26,22 @@ DEFAULT_PIDS = (
 
 def _env_float(name: str, default: float) -> float:
     raw = os.environ.get(name)
-    return float(raw) if raw else default
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError as exc:
+        raise ValueError(f"{name}={raw!r} is not a valid number") from exc
+
+
+def _env_int(name: str, default: int | None) -> int | None:
+    raw = os.environ.get(name)
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError as exc:
+        raise ValueError(f"{name}={raw!r} is not a valid integer") from exc
 
 
 def _env_list(name: str, default: tuple[str, ...]) -> tuple[str, ...]:
@@ -43,11 +58,7 @@ class GatewayConfig:
     )
     vehicle_id: str = field(default_factory=lambda: os.environ.get("AUTO_VEHICLE_ID", ""))
     obd_port: str | None = field(default_factory=lambda: os.environ.get("AUTO_OBD_PORT") or None)
-    obd_baudrate: int | None = field(
-        default_factory=lambda: int(os.environ["AUTO_OBD_BAUDRATE"])
-        if os.environ.get("AUTO_OBD_BAUDRATE")
-        else None
-    )
+    obd_baudrate: int | None = field(default_factory=lambda: _env_int("AUTO_OBD_BAUDRATE", None))
     obd_protocol: str | None = field(
         default_factory=lambda: os.environ.get("AUTO_OBD_PROTOCOL") or None
     )
