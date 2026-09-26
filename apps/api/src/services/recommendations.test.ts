@@ -109,7 +109,9 @@ describe("RecommendationService R2/R3", () => {
   it("refresh emits campaign/TSB cards without inventing fault classes (R5)", async () => {
     const recs = await services.recommendations.refresh(JEEP);
     const campaignIds = recs.flatMap((r) => r.generatedFromCampaignIds ?? []);
-    expect(campaignIds).toEqual(expect.arrayContaining(["W80", "W84", "05-047-457A"]));
+    // W84 excluded: verified against its primary source, it covers only 2017 Renegade AWD (this fixture is a 2015 vehicle).
+    expect(campaignIds).toEqual(expect.arrayContaining(["W80", "05-047-457A"]));
+    expect(campaignIds).not.toContain("W84");
     const w80 = recs.find((r) => r.generatedFromCampaignIds?.includes("W80"));
     expect(w80?.source).toBe("campaign");
     expect(w80?.generatedFromClasses).toEqual([]);
