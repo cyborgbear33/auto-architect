@@ -454,3 +454,13 @@ export function runOntologyLint(
     registeredCartridgeNames: opts.registeredCartridgeNames,
   });
 }
+
+export {
+  listProblemCatalog,
+  type ProblemCatalogCategory,
+  type ProblemCatalogKind,
+  type ProblemCatalogLink,
+  type ProblemCatalogRow,
+  problemCatalogCategories,
+  problemLookupPrefill,
+} from "./problem-catalog.ts";

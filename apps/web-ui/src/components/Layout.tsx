@@ -17,7 +17,13 @@ const NAV_GROUPS: Array<{ label: string; items: Array<{ to: string; label: strin
     ],
   },
   { label: "Procedures", items: [{ to: "/functions", label: "Functions" }] },
-  { label: "Reference", items: [{ to: "/campaigns", label: "Recalls & TSBs" }] },
+  {
+    label: "Reference",
+    items: [
+      { to: "/faults", label: "Problems" },
+      { to: "/campaigns", label: "Recalls & TSBs" },
+    ],
+  },
   { label: "History", items: [{ to: "/journal", label: "Journal" }] },
 ];
 

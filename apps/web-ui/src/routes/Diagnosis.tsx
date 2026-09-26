@@ -284,14 +284,23 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                     <ClassEvidencePanel evidence={evidence} />
                     <CausalBriefPanel vehicleId={vehicleId} faultClass={cls} />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => createProblem.mutate(cls)}
-                    disabled={createProblem.isPending}
-                    className="flex-shrink-0 rounded-md bg-sky-600 px-3 py-1 text-xs font-medium text-white hover:bg-sky-700 disabled:opacity-50"
-                  >
-                    Draft case
-                  </button>
+                  <div className="flex shrink-0 flex-col items-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => createProblem.mutate(cls)}
+                      disabled={createProblem.isPending}
+                      className="rounded-md bg-sky-600 px-3 py-1 text-xs font-medium text-white hover:bg-sky-700 disabled:opacity-50"
+                    >
+                      Draft case
+                    </button>
+                    <Link
+                      to="/faults"
+                      search={{ problem: cls }}
+                      className="text-xs font-medium text-sky-700 hover:underline"
+                    >
+                      Look up
+                    </Link>
+                  </div>
                 </li>
               );
             })}
@@ -375,7 +384,18 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                       </span>
                     )}
                   </Link>
-                  <StatusPill status={problem.status} />
+                  <div className="flex flex-col items-end gap-1">
+                    <StatusPill status={problem.status} />
+                    {problem.triggeredByClass && (
+                      <Link
+                        to="/faults"
+                        search={{ problem: problem.triggeredByClass }}
+                        className="text-xs font-medium text-sky-700 hover:underline"
+                      >
+                        Look up
+                      </Link>
+                    )}
+                  </div>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {(problem.status === "open" || problem.status === "analyzing") && (

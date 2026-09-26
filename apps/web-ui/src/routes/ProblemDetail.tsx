@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { AemfAspectChips } from "../components/AemfAspectChips.tsx";
 import { AemfPlaybookProse } from "../components/AemfPlaybookProse.tsx";
@@ -139,7 +139,20 @@ export function ProblemDetail() {
       <PageHeader
         title={classTitle}
         subtitle={classId ? `${classId} · ${problem.id}` : problem.id}
-        actions={<ReportDownload problemId={problem.id} />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            {problem.triggeredByClass && (
+              <Link
+                to="/faults"
+                search={{ problem: problem.triggeredByClass }}
+                className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Look up
+              </Link>
+            )}
+            <ReportDownload problemId={problem.id} />
+          </div>
+        }
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-2">

@@ -4,8 +4,18 @@ import type React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
-    <a href={to}>{children}</a>
+  Link: ({
+    children,
+    to,
+    search,
+  }: {
+    children: React.ReactNode;
+    to: string;
+    search?: { problem?: string };
+  }) => (
+    <a href={search?.problem ? `${to}?problem=${encodeURIComponent(search.problem)}` : to}>
+      {children}
+    </a>
   ),
 }));
 
@@ -137,9 +147,7 @@ describe("Diagnosis", () => {
     renderDiagnosis();
     expect(await screen.findByText("Vehicle dossier")).toBeInTheDocument();
     expect(screen.getByText(/2015 Jeep Renegade Latitude/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/Not recorded — enter before claiming identity/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Not recorded — enter before claiming identity/)).toBeInTheDocument();
     expect(screen.getByText(/Discovery not run/)).toBeInTheDocument();
   });
 
@@ -152,6 +160,10 @@ describe("Diagnosis", () => {
       section.getByText("Cylinder misfire under high load (plain English)."),
     ).toBeInTheDocument();
     expect(section.getByText("MisfireUnderLoad")).toBeInTheDocument();
+    expect(section.getByRole("link", { name: "Look up" })).toHaveAttribute(
+      "href",
+      "/faults?problem=MisfireUnderLoad",
+    );
     fireEvent.click(button);
     await waitFor(() =>
       expect(api.createDiagnosticProblem).toHaveBeenCalledWith({

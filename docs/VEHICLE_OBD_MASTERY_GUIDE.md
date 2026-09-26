@@ -214,6 +214,16 @@ procedure you repeat; it stays at the top of Functions and on the Dashboard
 for any selected vehicle that has that procedure. A star is a shortcut, not
 proof of a fault.
 
+### Problems
+
+Reference lookup of the fault classes this app can name, plus inspection items a
+scan will not see. Filter by medium (air, electricity, mechanical, fluid — oil
+and coolant are fluid) or by inspection system (brakes, chassis). “Can follow
+from” and “can lead to” are other problems in the same catalog. Search, category
+filter, and sort are on the page. **Look up** on a proved class or an open case
+fills that search and, when the problem has one category, that filter. A row is
+a definition, not a fault proved on the truck outside.
+
 ### Recalls & TSBs
 
 Curated campaigns for the engine family — check before concluding “mystery.”

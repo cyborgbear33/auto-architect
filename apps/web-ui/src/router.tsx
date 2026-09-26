@@ -7,6 +7,7 @@ import { Discovery } from "./routes/Discovery.tsx";
 import { Functions } from "./routes/Functions.tsx";
 import { Guide } from "./routes/Guide.tsx";
 import { Journal } from "./routes/Journal.tsx";
+import { ProblemCatalog } from "./routes/ProblemCatalog.tsx";
 import { ProblemDetail } from "./routes/ProblemDetail.tsx";
 
 const rootRoute = createRootRoute({ component: Layout });
@@ -30,6 +31,14 @@ const routes = [
     }),
   }),
   createRoute({ getParentRoute: () => rootRoute, path: "/campaigns", component: Campaigns }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/faults",
+    component: ProblemCatalog,
+    validateSearch: (search: Record<string, unknown>): { problem?: string } => ({
+      problem: typeof search.problem === "string" ? search.problem : undefined,
+    }),
+  }),
   createRoute({ getParentRoute: () => rootRoute, path: "/journal", component: Journal }),
 ];
 

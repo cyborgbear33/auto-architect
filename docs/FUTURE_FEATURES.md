@@ -695,6 +695,7 @@ actually maintain.
 | Silverado 2500HD field manual | 2026-09 | `docs/silverado-2500hd-field-manual.html` — VIN identity, corrected bank map, the two GM cause chains, cascade watchlist, open unknowns |
 | Console shell usability | 2026-09 | Goal-grouped rail + mobile menu; vehicle identity; at-a-glance hero; Dashboard leads with condition; Diagnosis leads with draft, cases, and the safety hold; recalls say why they matched |
 | Favorite procedures | 2026-09 | Star on Functions; Dashboard shortcut for procedures this vehicle actually has. localStorage only — not a DecisionRecord |
+| Problem catalog | 2026-09 | `/faults` — fault classes plus inspection rows; AEMF and system categories; codes; follow-from / lead-to. A row is a definition, not a proved fault |
 
 ---
 

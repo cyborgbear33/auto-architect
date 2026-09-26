@@ -63,7 +63,7 @@ Operate      — Dashboard (live condition)
 Diagnose     — Diagnosis
 Learn        — Discovery (capability forensics), Guide (mastery curriculum)
 Procedures   — Functions (guided Proxi / special procedures; star a repeat procedure to pin it on Functions and the Dashboard)
-Reference    — Recalls & TSBs
+Reference    — Problems (fault-class and inspection lookup; Diagnosis “Look up” prefills search and category), Recalls & TSBs
 History      — Journal
 ```
 
