@@ -22,8 +22,12 @@ Ontology → Validation → API → Store → UI / OBD edge → Actions → Deci
   `packages/ontology`, it does not exist.
 - **Validation guards the gate.** Untrusted input (UI, obd-gateway) is Zod-
   validated before storage or action.
-- **API exposes semantic contracts.** Reads through resource endpoints; state
-  changes through action endpoints that go through `ActionService`.
+- **API exposes semantic contracts.** Reads through resource endpoints; the
+  `DiagnosticProblem` lifecycle, special-procedure runs, the policy-checked
+  `clear-codes-and-drive` action, and knowledge-gap accept/dismiss go through
+  `ActionService`. Other mutations (vehicles, observations, discovery, drive
+  sessions, recommendation status, garage import) go through their own
+  service's store calls directly — see §6.
 - **Store holds validated facts** keyed by stable semantic IDs (`memory` or
   Postgres via `STORAGE_DRIVER`).
 - **UI / obd-gateway visualize and report.** They never own fault meaning.
@@ -52,7 +56,7 @@ packages/
   validation/     Zod input contracts
   logos-bridge/   Node ↔ LOGOS seam (+ FakeLogosBridge)
   cartridges/     perception + framing (generic + engine-family)
-  game-theory/    pure decision/zero-sum/cooperative math
+  game-theory/    pure decision/zero-sum/cooperative math (ported, currently unused — nothing imports it)
   api-client/     typed UI↔API bridge + TanStack queryKeys
 ```
 
@@ -105,7 +109,10 @@ flowchart TB
 ```
 
 **Never skip a layer:** `obd-gateway` does not call LOGOS. The UI does not write
-the store. Handlers do not mutate state except via `ActionService`.
+the store directly (always through `apps/api`). Recognition/policy/solve never
+write state themselves — `ActionService` owns the `DiagnosticProblem` lifecycle,
+special procedures, `clear-codes-and-drive`, and knowledge-gap status; other
+services own their own domain's writes (§6).
 
 ---
 
@@ -155,7 +162,7 @@ Catalog/cartridge parity is enforced by `pnpm lint:ontology` and
 | `PolicyService` | `reason` | Safety holds (e.g. forbid clear-codes-and-drive) |
 | `SolverService` | `solve` | Rank diagnostic/repair actions |
 | `ForecastService` | `forecast` / trend helpers | Multi-signal trends; optional `sessionId` scope (F4); oil/LTFT/load → recognition |
-| `ActionService` | — | Sole mutation gate + `DecisionRecord` audit (+ knowledge-gap accept/dismiss) |
+| `ActionService` | — | Gates `DiagnosticProblem` lifecycle, special procedures, `clear-codes-and-drive`, knowledge-gap accept/dismiss — each with `DecisionRecord` audit. Not the gate for vehicle/observation/discovery/drive-session/recommendation writes (those services write their own store rows directly). |
 | `ObservationService` | — | Ingest batches; provenance; live gauges; retention prune |
 | `DriveSessionService` | — | Start/end/list sessions; simulate upload path |
 | `ReportService` | — | Markdown + print HTML diagnostic reports; last session + Learning section (F10) |
@@ -216,7 +223,7 @@ Routes (`apps/web-ui/src/router.tsx`):
 | `/diagnosis` | Proven classes, draft/solve problems, safety-hold demo |
 | `/problems/$problemId` | Solution + ranked actions + log repair |
 | `/campaigns` | Recall / TSB matcher |
-| `/journal` | Decision records + JSON/CSV export & import |
+| `/journal` | Decision records + garage JSON export/import; per-vehicle CSV export (observations/DTCs/decisions/problems/timeline — export-only, no CSV import); offline OBD log import (`.obdlog` / ELM327 text / JSON) |
 
 Stack conventions match garden: TanStack Query for server state; Redux for
 durable client UI (`selectedVehicleId`, `debugMode`). There is no shared
@@ -247,7 +254,7 @@ Operator detail: [`apps/obd-gateway/README.md`](../apps/obd-gateway/README.md).
 - Real-LOGOS smoke: `packages/logos-bridge/src/*-integration.test.ts` — self-skip
   without LOGOS; CI runs them for real only in the `ontology-lint` job
   (`verify` deliberately omits the LOGOS install)
-- Bridge-drift (advisory): `pnpm check:bridge-drift` vs garden-architect's `@garden/logos-bridge`
+- Bridge-drift (advisory): `pnpm check:bridge-drift` confirms `packages/logos-bridge` is still a thin shim over `software-architect`'s `@seam/logos-bridge` (no forked transport files)
 - One-shot local gate: `pnpm healthcheck` (sanity: typecheck∥biome∥tests∥ontology) or
   `pnpm healthcheck --full` (+ gateway + UI build); bridge-drift advisory in both
 - CI: `.github/workflows/ci.yml` — `verify` (Fake path) + `ontology-lint` (real LOGOS)

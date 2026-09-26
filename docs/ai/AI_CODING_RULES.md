@@ -55,11 +55,16 @@ Prefer these before inventing new ones:
 
 **Fault classes (DL):** `MisfireUnderLoad`, `CamCrankCorrelationFault`,
 `LeanFuelBank1/2`, `RichFuelBank1/2`, `EvapLeakSmall/Large`,
+`EvapPurgeSystemFault`, `EvapVentSystemFault`,
 `CatalystEfficiencyBank1/2`, `O2CircuitFaultBank1/2`,
 `O2PerformanceFaultBank1/2`, `O2HeaterFaultBank1/2`,
 `O2DownstreamCircuit/Performance/HeaterFaultBank1/2`,
 `EgrFlowFault`, `EgrCircuitFault`, `SecondaryAirSystemFault`,
-`ChronicOilConsumption`, `MultiAirOilStarvation` (FCA view only).
+`CoolantThermostatFault`, `EctSensorCircuitFault`,
+`IgnitionCoilCircuitFault`, `InjectorCircuitFault`, `MapSensorFault`,
+`KnockSensorCircuitFault`, `ThrottlePositionSensorFault`,
+`ChronicOilConsumption`, `MultiAirOilStarvation` (FCA view only). Full list:
+`packages/ontology/dl-ontology.json` `classes` (36 total).
 
 **Symptom / condition / trend subtypes:** see `dl-ontology.json` subtypes —
 notably `EgrFlowCode`, `EgrCircuitCode`, `SecondaryAirCode`,
@@ -78,7 +83,10 @@ notably `EgrFlowCode`, `EgrCircuitCode`, `SecondaryAirCode`,
 1. **Never synthesize a "Healthy" class** when recognition is undecided. Undecided
    means insufficient evidence — not wellness.
 2. **Never classify in `obd-gateway`.** It posts observations only.
-3. **Never mutate store state outside `ActionService`.**
+3. **Never write `DiagnosticProblem`/decision/special-procedure/knowledge-gap
+   state outside `ActionService`.** (Other domains — vehicles, observations,
+   discovery, drive sessions, recommendations — legitimately write through
+   their own service; see [`API_DEV_GUIDE.md`](API_DEV_GUIDE.md) "Mutation gate".)
 4. **Never hardcode Jeep into generic SAE cartridges.** Put OEM-specific logic in
    an engine-family cartridge + ontology view.
 5. **Always set `desiredState.successCriteria`** on framed problems, or LOGOS
@@ -91,16 +99,14 @@ notably `EgrFlowCode`, `EgrCircuitCode`, `SecondaryAirCode`,
 9. **Ground DTC/PID meaning in real standards** (SAE J1979 / J2012, ISO 15031,
    cited TSBs) — never invent descriptions. See
    [`HARDWARE_STANDARDS.md`](HARDWARE_STANDARDS.md).
-10. **Keep `packages/logos-bridge` in sync with garden-architect's copy.**
-    `bridge.ts` / `serve-client.ts` / `errors.ts` are a shared, domain-agnostic
-    seam by design — port real fixes/protocol changes both ways. Run
-    `pnpm check:bridge-drift` (advisory) when you touch these files. See
-    [`TESTING_DEV_GUIDE.md`](TESTING_DEV_GUIDE.md).
-    **Intentional (not drift):** `DiagnosticSolution` vs `GardenSolution` (and
-    their `@auto` / `@garden` semantic-types imports); multi-vehicle vs
-    multi-bed wording in comments; ontology-lint JSDoc (engine-family vs
-    Plant-taxon). Everything else in those three files should stay
-    behaviorally identical after a sync pass.
+10. **Keep `packages/logos-bridge` a thin shim — never re-fork transport
+    here.** It has no `bridge.ts` / `serve-client.ts` / `errors.ts` of its
+    own; those live once, in `software-architect`'s `@seam/logos-bridge`,
+    depended on via `file:` in `packages/logos-bridge/package.json`. This
+    package should only ever contain `src/index.ts` (the re-export) plus
+    domain `*-integration.test.ts` fixtures. Run `pnpm check:bridge-drift`
+    (advisory) if you touch this package — it fails loudly if forked
+    transport files reappear. See [`TESTING_DEV_GUIDE.md`](TESTING_DEV_GUIDE.md).
 
 ---
 

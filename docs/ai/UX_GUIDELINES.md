@@ -39,7 +39,9 @@ Apply the same universal rules garden uses:
 
 - Nielsen heuristics (status visibility, real-world language, error prevention)
 - Norman principles (affordance, feedback, conceptual model)
-- Hick's Law — keep nav small and goal-grouped (auto currently has 4 top-level items; keep it that way)
+- Hick's Law — keep nav small and goal-grouped (auto currently has 7 top-level
+  items: Dashboard, Diagnosis, Discovery, Guide, Functions, Recalls & TSBs,
+  Journal — see §4; prefer deepening an existing page over adding an 8th)
 - Fitts's Law — primary actions obvious; destructive actions separated
 - Jakob's Law — familiar patterns for lists, forms, status, empty/error states
 - Gestalt — group evidence with the claim it supports

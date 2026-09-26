@@ -17,15 +17,27 @@ apps/obd-gateway (Python)  --POST Observations-->  apps/api (Fastify)  <--HTTP--
 ```
 
 - **`apps/obd-gateway`** (Python + python-OBD): talks to an OBDLink MX+ (or any ELM327-compatible adapter) directly over Bluetooth/USB. Reads Mode 01 PIDs, Mode 02 freeze frame, Mode 03/07 DTCs, and SAE-seed Mode 06 monitors; tags them with a vehicle profile id; POSTs `Observation` batches to the API. Never classifies anything itself.
-- **`apps/api`** (Fastify + TypeScript): the deterministic core. `RecognitionService` turns observations into ABox facts and calls LOGOS `realize` to prove fault classes (never synthesizes a fake "Healthy"). `PolicyService` calls `reason` for real safety holds. `SolverService` calls `solve` to rank next actions. `ActionService` is the single mutation gate — every state change goes through it, with an audit trail (`DecisionRecord`).
+- **`apps/api`** (Fastify + TypeScript): the deterministic core. `RecognitionService` turns observations into ABox facts and calls LOGOS `realize` to prove fault classes (never synthesizes a fake "Healthy"). `PolicyService` calls `reason` for real safety holds. `SolverService` calls `solve` to rank next actions. `ActionService` gates the `DiagnosticProblem` lifecycle (create/solve/log-repair/verify/abandon/escalate/reopen), special-procedure runs, the policy-checked `clear-codes-and-drive` action, and knowledge-gap accept/dismiss — each with an audit trail (`DecisionRecord`). Other writes (vehicle profiles, observation ingest, discovery reports, drive sessions, recommendation status, garage import) go through their own service's store calls directly; see `docs/ARCHITECTURE.md` §1.
 - **`apps/web-ui`** (React 19 + Vite + TanStack Router/Query + Redux Toolkit + Tailwind): vehicle picker, live DTC/PID dashboard, a Diagnosis page that drafts/solves `DiagnosticProblem`s and demonstrates the safety-hold policy gate, a recall/TSB matcher, and a decision journal.
 - **`packages/ontology`**: the DL TBox (`dl-ontology.json`) — SAE-generic fault classes (misfire, lean fuel, EVAP leak, cam/crank correlation) in a `generic` view, plus an engine-family-specific view (`fca-tigershark-2.4`) for MultiAir oil-starvation. A vehicle-profile registry (`vehicle-profiles.json`) maps each vehicle to an engine family, which selects both the ontology view and the cartridges to load. Also owns a curated DTC dictionary and known campaigns (TSB 05-047-457A, recalls W80/W84).
 - **`packages/cartridges`**: perception rules (PID/DTC → ABox assertions) and framing rules (proven class → `DiagnosticProblem` draft with a ranked action playbook). Generic cartridges apply to every vehicle; `fca-tigershark-2.4.ts` only loads for that engine family. `gm-vortec-6.0-stub.ts` is a deliberately inert stub for the 2003 Silverado 2500 HD (Vortec 6.0) — second vehicle, zero changes to the base TBox or generic cartridges until curated GM TSBs exist.
-- **`packages/logos-bridge`**: the Node↔Python seam to the LOGOS engine (`@auto/logos-bridge`), ported unchanged from garden-architect's `@garden/logos-bridge`. Ships a `FakeLogosBridge` for Python-free unit tests.
+- **`packages/logos-bridge`**: `@auto/logos-bridge`, a thin re-export shim over `@seam/logos-bridge` (the shared transport now lives in the sibling [`software-architect`](https://github.com/cyborgbear33/software-architect) repo, via a `file:` dependency). This package holds no transport code of its own — just the shim and this repo's vehicle-domain `*-integration.test.ts` fixtures. Re-exports `FakeLogosBridge` for Python-free unit tests.
 - **`packages/semantic-types`** / **`packages/validation`**: the shared camelCase vocabulary and Zod input contracts every app speaks.
-- **`packages/game-theory`**: pure, dependency-free game-theory core (decision/zero-sum/cooperative analysis) used by `solve`'s ranking, ported unchanged from garden-architect.
+- **`packages/game-theory`**: pure, dependency-free game-theory core (decision/zero-sum/cooperative analysis), ported unchanged from garden-architect. Not currently imported anywhere in this repo — `solve`'s ranking goes through LOGOS (`bridge.solve()`), not this package. Kept as a ready-to-wire seam; treat as unused until something imports it.
 
 ## Getting started
+
+**Prerequisite — sibling checkouts.** This repo does not `pnpm install` on its
+own. `packages/logos-bridge` depends on `@seam/logos-bridge` via
+`file:../../../software-architect/packages/logos-bridge`, so
+[`software-architect`](https://github.com/cyborgbear33/software-architect) must
+be cloned as a sibling directory of this repo (`pnpm install` fails with
+`ERR_PNPM_LINKED_PKG_DIR_NOT_FOUND` otherwise). The LOGOS engine itself
+(`python3 -m logos`) comes from
+[`metalanguage`](https://github.com/cyborgbear33/metalanguage), expected at
+`../metalanguage/engine` relative to this repo (or set `LOGOS_ENGINE_PATH` /
+`LOGOS_PIP_SPEC`) — see `scripts/setup-solver.mjs`. CI checks out both
+siblings; see `.github/workflows/ci.yml`.
 
 ```bash
 pnpm install                 # also runs scripts/setup-solver.mjs --check

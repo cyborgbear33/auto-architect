@@ -216,8 +216,12 @@ flowchart LR
   DEC --> UI
 ```
 
-**Never skip a layer:** gateway does not classify; UI does not write the store;
-handlers mutate only through `ActionService`.
+**Never skip a layer:** gateway does not classify; UI does not write the store
+(always through `apps/api`). `ActionService` gates the `DiagnosticProblem`
+lifecycle, special procedures, `clear-codes-and-drive`, and knowledge-gap
+status; other domains (vehicles, observations, discovery, drive sessions,
+recommendations) write through their own service, not `ActionService` — see
+[`ARCHITECTURE.md` §6](ARCHITECTURE.md#6-api-services).
 
 ### 4.3 Stack inventory
 

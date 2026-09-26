@@ -41,7 +41,7 @@ allowed to append evidence; it still does not classify).
 | `PolicyService` | `reason` | Use `folSafeAtom` for individual ids |
 | `SolverService` | `solve` | Requires `desiredState.successCriteria` on problems |
 | `ForecastService` | optional / helpers | Multi-signal trends (`summary`); optional `sessionId` scope; oil + LTFT + load → realize |
-| `ActionService` | via other services | Sole mutation + DecisionRecord |
+| `ActionService` | via other services | DiagnosticProblem lifecycle, special procedures, `clear-codes-and-drive`, knowledge-gap status + DecisionRecord — not a gate for the rows below |
 | `ObservationService` | no | Append / query batches; provenance; live gauges; retention prune |
 | `DriveSessionService` | no | Start/end/list; simulate session with linked batches |
 | `ReportService` | no | Markdown + print HTML reports; attaches `lastSession` summary |
@@ -50,7 +50,17 @@ allowed to append evidence; it still does not classify).
 | `GarageExportService` | no (import mutates store) | JSON garage dump/restore + CSV tables |
 | `CampaignService` | no | Match `known-campaigns.json`; feeds R5 shortlist cards |
 | `RecommendationService` | no (uses recognition + campaigns) | List / refresh (class + campaign cards) / status / convert |
-| `VehicleService` | no | Profiles + engine-family resolution |
+| `VehicleService` | no | Profiles + engine-family resolution; identity patch + manual conditions |
+| `calibration` (pure fns) | no | Bayesian-shrinkage of empirical outcomes toward cartridge priors, feeds draft/solve/refresh |
+| `CascadePrognosisService` | no | Matches proven classes/trends/manual conditions against curated `cascade-edges.json` |
+| `CausalBriefService` | no | Composes apprentice brief (why / how we know / prove next / OEM) from CausalModel + narration + history |
+| `complaint-framing` (pure fns) | no | Normalizes operator-entered complaint text into problem statement/symptoms only |
+| `DiscoveryService` | no | Enriches an `ObdCapabilityReport` into a forensics report + narrative |
+| `KnowledgeGapService` | no | Detects/upserts ontology-gap proposals; exports Markdown/JSON patch-hint bundle |
+| `LearningCycleService` | no | Read-model composing problems + decisions + calibration into cycles |
+| `MasteryGuideService` | no | Template-fills `docs/VEHICLE_OBD_MASTERY_GUIDE.md` per vehicle (reads that file at request time) |
+| `obd-log-import` (pure fns) | no | Parses offline `obdlog-v1` / ELM327 text / JSON logs into observation batches |
+| `SpecialProcedureService` | no | Read-only catalog lookup over `special-procedures.json` by engine family |
 
 Inject `LogosBridge` (or `FakeLogosBridge` in tests) from `services/index.ts`.
 

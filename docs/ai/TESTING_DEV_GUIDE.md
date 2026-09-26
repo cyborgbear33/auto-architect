@@ -129,25 +129,30 @@ fails, so:
 - **In CI**: only the `ontology-lint` job installs LOGOS and runs these for
   real (the `verify` job deliberately omits the install so they self-skip).
 
-When you touch the wire contract (`types.ts`, `bridge.ts`, `serve-client.ts`)
-or bump `LOGOS_MIN_ENGINE_VERSION`, these are the tests that actually prove it
-still works end-to-end — treat a failure here as more serious than a
-FakeLogosBridge unit-test failure.
+When the wire contract changes upstream (in `@seam/logos-bridge` /
+`software-architect`) or `LOGOS_MIN_ENGINE_VERSION` bumps, these are the tests
+that actually prove it still works end-to-end — treat a failure here as more
+serious than a FakeLogosBridge unit-test failure.
 
-## Keeping `@auto/logos-bridge` in sync with `@garden/logos-bridge`
+## Keeping `@auto/logos-bridge` a thin shim over `@seam/logos-bridge`
 
-`packages/logos-bridge`'s transport/salvage logic (`bridge.ts`,
-`serve-client.ts`, `errors.ts`) is a domain-agnostic seam shared in spirit
-with garden-architect's `@garden/logos-bridge`. When you fix a real bug or add
-an engine-protocol feature on one side, port it to the other.
+`packages/logos-bridge` holds no transport code of its own anymore —
+`src/index.ts` is purely a re-export of `@seam/logos-bridge`
+(`file:../../../software-architect/packages/logos-bridge`), plus the
+domain-specific `*-integration.test.ts` fixtures in this repo. There is no
+`bridge.ts` / `serve-client.ts` / `errors.ts` here to keep in sync with a
+garden-architect fork — that transport now lives once, in
+`software-architect`, and both garden-architect and auto-architect depend on
+it the same way.
 
 `pnpm check:bridge-drift` (also run — advisory-only — as the last
-`pnpm healthcheck` step) diffs those seam files against a garden-architect
-checkout next to this repo and reports structural drift. It never fails CI
-(the sibling repo usually isn't checked out there); it exists so a human
-notices divergence instead of discovering it during the next LOGOS upgrade.
-See `scripts/check-bridge-drift.mjs` for exactly what it does and does not
-detect.
+`pnpm healthcheck` step) confirms the `@seam/logos-bridge` dependency is
+present and that no forked transport files (`bridge.ts`, `fake.ts`,
+`types.ts`, `errors.ts`, `serve-client.ts`) have crept back into this
+package. It never fails CI (the `software-architect` sibling checkout may not
+be present); it exists so a human notices a regression instead of
+discovering it later. See `scripts/check-bridge-drift.mjs` for exactly what
+it checks.
 
 ## What "green" means
 

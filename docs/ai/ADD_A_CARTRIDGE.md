@@ -16,19 +16,30 @@ not declare.
 
 ## Cartridges today
 
+17 registered in `packages/cartridges/src/registry.ts`:
+
 | Cartridge | Scope |
 |---|---|
 | `misfire` | SAE-generic P0300–P0304 + load |
 | `lean-fuel` | P0171 / P0174 + fuel trim |
 | `rich-fuel` | P0172 / P0175 + negative fuel trim |
-| `evap` | P0442 / P0455 / P0456 |
+| `evap` | Leak (P0442/P0455/P0456), purge (P0441/P0443/P0496 + Mode 06 $3D), vent (P0446/P0449) |
 | `catalyst` | P0420 / P0430 (DTC-only) |
 | `o2-sensor` | Upstream + downstream circuit/performance/heater + Mode 06 |
-| `egr` | P0400–P0406 + Mode 06 EGR OBDMID $31 |
-| `secondary-air` | P0410–P0412 + Mode 06 AIR OBDMID $71 |
-| `cam-crank-correlation` | P0016–P0018 family |
+| `egr` | P0400–P0402 flow + Mode 06 $31; P0403–P0406 circuit |
+| `secondary-air` | P0410–P0419 + Mode 06 AIR OBDMIDs $71/$72 |
+| `cam-crank-correlation` | Correlation P0016–P0019; CKP/CMP circuit P0335–P0349; Mode 06 $35/$36 |
+| `coolant-thermostat` | Thermostat P0125/P0126/P0128; ECT circuit P0115–P0119 (DTC-only) |
+| `ignition-coil` | P0351–P0358 (DTC-only) |
+| `injector-circuit` | P0201–P0208 (DTC-only) |
+| `map-sensor` | P0105–P0109 (DTC-only) |
+| `knock-sensor` | P0325–P0328 / P0330–P0333 (DTC-only) |
+| `throttle-position` | P0120–P0124 / P0220–P0223 (DTC-only) |
 | `fca-tigershark-2.4` | MultiAir oil starvation (OEM view) |
 | `gm-vortec-6.0-stub` | Inert A5 extension for 2003 Silverado 2500 HD (SAE cartridges load separately) |
+
+Keep this table current when a cartridge is added — cross-check against
+`registry.ts`'s `cartridgeRegistry` before editing this list.
 
 ## The recipe
 
