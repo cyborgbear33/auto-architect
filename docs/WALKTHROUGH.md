@@ -122,8 +122,8 @@ Below is the **operator journey** and the surfaces that support it.
 
 ### 3.1 Operator journey (happy path)
 
-1. **Pick a vehicle** — seeded Jeep Renegade; Silverado profile exists with an
-   inert GM cartridge until curated TSBs land.
+1. **Pick a vehicle** — seeded Jeep Renegade; Silverado profile exists, and its
+   GM cartridge re-frames knock-sensor and lean-fuel classes from corroborated TSBs.
 2. **Ingest evidence** — live OBDLink MX+ via `obd-gateway`, or `--simulate`
    (hardware-free lab path).
 3. **See the state** — Dashboard: DTCs, PIDs / live gauges, freeze frame,

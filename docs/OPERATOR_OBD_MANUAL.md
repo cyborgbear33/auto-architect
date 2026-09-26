@@ -60,7 +60,9 @@ Protocol note: ISO 15765-4 (CAN, 500 kbps).
 Profile id: `veh:silverado-2500hd-2003`  
 Leave protocol **auto-detect** (GMT800 gas is often J1850 VPW — do not hard-force
 CAN). Same MX+ family; no Jeep-specific gray adapter required unless you choose
-one for access.
+one for access. The reasoning map for this truck (entities, the two GM cause
+chains, open unknowns) is
+[`silverado-2500hd-field-manual.html`](silverado-2500hd-field-manual.html).
 
 ---
 

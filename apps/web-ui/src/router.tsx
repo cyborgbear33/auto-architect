@@ -21,7 +21,14 @@ const routes = [
   }),
   createRoute({ getParentRoute: () => rootRoute, path: "/discovery", component: Discovery }),
   createRoute({ getParentRoute: () => rootRoute, path: "/guide", component: Guide }),
-  createRoute({ getParentRoute: () => rootRoute, path: "/functions", component: Functions }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/functions",
+    component: Functions,
+    validateSearch: (search: Record<string, unknown>): { procedure?: string } => ({
+      procedure: typeof search.procedure === "string" ? search.procedure : undefined,
+    }),
+  }),
   createRoute({ getParentRoute: () => rootRoute, path: "/campaigns", component: Campaigns }),
   createRoute({ getParentRoute: () => rootRoute, path: "/journal", component: Journal }),
 ];

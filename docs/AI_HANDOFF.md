@@ -193,7 +193,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | Rich / catalyst / O2 DTC families | shipped | cartridges + ontology; FallingFuelTrim; DTC-only cat/O2 |
 | Mode 06 meaning → recognition (A3) | shipped | SAE/ISO OBDMID seed; failed monitors → realize; labeled UI |
 | O2 performance + A4 SAE seed slice | shipped | P0131–34/P0151–54; Mode 06 $01/$05; O2 voltage PIDs; P0457 |
-| EGR / secondary air / downstream O2 | shipped | cartridges + Mode 06; Vortec 6.0 shares SAE set; OEM stub still inert |
+| EGR / secondary air / downstream O2 | shipped | cartridges + Mode 06; Vortec 6.0 shares SAE set; GM stub re-frames knock and lean only |
 | Freeze-frame + Mode 06 UI | shipped | `EvidencePanels` on Dashboard |
 | Gateway Mode 02 + Mode 06 capture | shipped | `read_freeze_frames` / `read_mode06`; simulate flags for lab |
 | DTC dictionary text on Dashboard rows | shipped | API `enrichDtcDescription` + UI `lookupDtc` fallback |

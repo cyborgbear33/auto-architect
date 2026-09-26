@@ -3,9 +3,14 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import type React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+afterEach(() => {
+  window.localStorage.clear();
+});
+
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
   useNavigate: () => vi.fn(),
+  useSearch: () => ({}),
 }));
 
 const { mockUiState, resetMockUiState } = vi.hoisted(() => {
@@ -92,5 +97,26 @@ describe("Functions", () => {
     expect(await screen.findByText(/Active case:/)).toBeInTheDocument();
     expect(screen.getByText("problem:proxi-1")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Mark completed/i })).toBeInTheDocument();
+  });
+
+  it("pins Proxi alignment as a favorite", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <Functions />
+      </QueryClientProvider>,
+    );
+
+    const star = await screen.findByRole("button", {
+      name: "Favorite Proxi alignment (module configuration sync)",
+    });
+    fireEvent.click(star);
+
+    expect(
+      screen.getByRole("button", {
+        name: "Remove favorite Proxi alignment (module configuration sync)",
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Favorite")).toBeInTheDocument();
   });
 });

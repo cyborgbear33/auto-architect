@@ -95,37 +95,38 @@
     },
     {
       "id": "02-06-04-023A",
-      "title": "Rear Knock Sensor Moisture Intrusion (4.8L/5.3L/6.0L Vortec)",
+      "title": "Rear Knock Sensor P0332 (1999–2002; this profile is 2003)",
       "engineFamily": "gm-vortec-6.0",
-      "summary": "GM TSB 02-06-04-023A (GROUP: 06 - Engine): on 4.8L/5.3L/6.0L Vortec engines (including LQ4, our confirmed engine), the rear-bank knock sensor sits in the lifter valley under the intake manifold, where water intrusion (frequent engine washing, rain through the cowl, condensation) corrodes the sensor and its connector — setting DTC P0332 (or P0327 for the front sensor) even when the engine is not actually knocking. Repair: remove the upper intake manifold, replace the affected knock sensor(s), dam the sensor cavity with RTV to prevent future water intrusion, install upgraded intake manifold gaskets, clear codes.",
-      "reference": "GM Technical Service Bulletin #02-06-04-023 (revision A). NOT confirmed against the actual NHTSA/GM PDF — NHTSA's public TSB archive doesn't surface a document for this bulletin number via search, and the bulk TSB dataset + general search portal needed to look it up directly are unreachable from this environment. Corroborated instead by multiple independent secondary sources that agree on the exact bulletin number, the exact DTCs (P0327/P0332), the affected engines (4.8L/5.3L/6.0L Vortec, 1999-2002-era GM trucks/SUVs), and the repair procedure — including parts retailers selling repair kits explicitly labeled against this bulletin number and DTC.",
+      "summary": "GM TSB 02-06-04-023A lists 1999–2002 Chevrolet Silverado (and other C/K trucks) with 4.8L/5.3L/6.0L engines, VINs V, T, Z, N, U (RPOs LR4, LM7, L59, LQ9, LQ4). It does not list 2003. Condition: spark knock, usually worse on acceleration, and/or an MIL, with DTC P0332. Cause: corrosion of the rear-bank knock sensor from water in the sensor cavity, more apparent if the engine compartment is washed often. The transcribed text does not name P0327, cowl rain, condensation, green/white connector corrosion, or intake gaskets, and it does not say the code rules detonation out. Correction: remove the intake, replace the rear sensor with P/N 10456603, torque 20 N·m (15 lb ft), lay an RTV bead about 9 mm wide and 6 mm high and leave the rear open (do not form a complete circle), remove the rear intake foam seal, reinstall the intake. This 2003 LQ4 shares that engine layout; it is not a listed model year.",
+      "reference": "GM Technical Service Bulletin #02-06-04-023A (Jun 14, 2002 revision). NOT read from the NHTSA/GM PDF — www.nhtsa.gov returns 403 and the bulk TSB host does not resolve from this environment. Corroborated from a Sierra transcription (jimfancher) that matches an independent Corvette Action Center repost and an Underhood Service tech tip on the model years, P0332-only condition, cause, P/N 10456603, torque, and the open RTV bead. An earlier Amazon kit listing was the wrong source: it bundled intake gaskets the bulletin does not list.",
       "sourceType": "corroborated",
-      "source": "https://www.amazon.com/02-06-04-023A-Repair-Intake-Manifold-Gasket/dp/B0084HY7NM",
+      "source": "http://www.jimfancher.com/sierra/p0332.htm",
       "relatedClasses": ["KnockSensorCircuitFault"],
       "steps": [
-        "Inspect the knock sensor connector(s) for green/white corrosion before condemning the PCM or wiring",
-        "Remove the upper intake manifold to access the knock sensor(s) in the lifter valley",
-        "Replace the affected knock sensor(s) (rear bank for P0332, front bank for P0327)",
-        "Dam the sensor cavity with RTV silicone to prevent future water intrusion",
-        "Install upgraded intake manifold gaskets",
-        "Clear codes and verify no return after a drive cycle"
+        "Confirm the truck is being compared to a 1999–2002 list — this profile is a 2003, so the bulletin is the same engine layout, not a listed model year",
+        "Confirm the complaint is spark knock and/or an MIL with DTC P0332 only",
+        "Remove the intake manifold to reach the rear-bank knock sensor",
+        "Replace the rear-bank knock sensor with P/N 10456603 and tighten to 20 N·m (15 lb ft)",
+        "Lay an RTV bead about 9 mm wide and 6 mm high along the valley-cover ridge; do not form a complete circle; leave the rear section open",
+        "From the underside of the intake, remove the rear intake-manifold foam seal completely, then reinstall the intake",
+        "Clear codes and verify P0332 does not return after a drive cycle"
       ]
     },
     {
       "id": "05-06-04-029A",
-      "title": "Intake Manifold Gasket — Lean Codes / Rough Idle / Coolant Leak (4.8L/5.3L/6.0L Vortec)",
+      "title": "Upper Intake Gasket — Rough Idle / Misfire / P0300 (L59 titled; LQ4 may apply)",
       "engineFamily": "gm-vortec-6.0",
-      "summary": "GM TSB 05-06-04-029A (GROUP: 06 - Engine): on 2002-2004 Chevrolet Silverado/Suburban/Tahoe and GMC Sierra/Yukon/Yukon XL with 4.8L/5.3L/6.0L gas engines (RPOs LR4, LM7, LM4, LQ4, LQ9 — VIN codes V/T/P/U/N; our confirmed engine is LQ4, VIN code U) or 5.3L flex-fuel (RPO L59, VIN Z), a degraded intake manifold gasket can cause DTC P0171/P0174 (lean, both banks), rough idle, a possible P0300 misfire, and/or coolant leakage from the gasket area leading to overheating. Repair: replace the intake manifold gasket with the updated design (identifiable by its teal-green material vs. the earlier orange), and inspect the intake plenum for warpage that could cause uneven clamping.",
-      "reference": "GM Technical Service Bulletin #05-06-04-029 (revision A). NOT confirmed against the actual NHTSA/GM PDF — same archive-access limits as 02-06-04-023A. Corroborated by multiple independent secondary sources, most notably a technician transcription that quotes the bulletin's own engine/VIN-code applicability table verbatim (RPOs LR4/LM7/LM4/LQ4/LQ9, VIN codes V/T/P/U/N) — which explicitly includes VIN code U (LQ4, this truck's confirmed engine) — plus consistent corroboration on the DTCs, symptoms, and the orange-to-teal gasket material update across independent parts/repair sources.",
+      "summary": "GM TSB 05-06-04-029A (June 24, 2005). Subject: L59 flex-fuel rough idle, misfire, MIL, DTC P0300; install teal-green upper intake gaskets. Named models are 2002–2004 Chevrolet Silverado/Suburban/Tahoe and GMC Sierra/Yukon/Yukon XL with 5.3L VIN Z, RPO L59. A following sentence says it may apply to regular-fuel 4.8L/5.3L/6.0L VINs V, T, P, U, N (RPOs LR4, LM7, LM4, LQ4, LQ9), which includes this truck’s LQ4 VIN U. Cause stated for the L59: ethanol calibration, higher injector flow, fuel pools on the upper manifold-to-head gasket, and the gasket degrades after about 12 months into an unmetered air leak. Correction: teal-green P/N 89017589; do not install orange P/N 17113557; inspect the intake-to-head deck for warpage. Use it only after the Diagnostic System Check, and only if rough idle, misfire, or P0300 already points at an intake-gasket air leak. The retrieved transcription does not name P0171, P0174, or a coolant leak. Lean classes stay related because an unmetered air leak can present as lean; they are not the bulletin’s named codes.",
+      "reference": "GM Technical Service Bulletin #05-06-04-029A. NOT read from the NHTSA/GM PDF — same archive limits as 02-06-04-023A. Corroborated from two Operation CHARM transcriptions (2003 Silverado SS VIN N and 2004 Express VIN U) that agree on the date, the L59 title, the may-apply VIN list including U, P0300, and the teal vs orange part numbers. A full CHARM page fetch returned 504; these excerpts are search-index text, not a fetched PDF. Do not merge a warpage limit from a separate service-manual page into this row.",
       "sourceType": "corroborated",
-      "source": "https://www.justanswer.com/chevy/0q96j-need-copy-gm-service-bulletin-05-06-04-029.html",
+      "source": "https://charm.li/Chevrolet/2003/Silverado%20SS%20AWD%20V8-6.0L%20VIN%20N/Repair%20and%20Diagnosis/Powertrain%20Management/Technical%20Service%20Bulletins/By%20Symptom/Customer%20Interest/Engine%20-%20Rough%20Idle%2FMisfire%2FMIL%20ON%2FDTC%20P0300/",
       "relatedClasses": ["LeanFuelBank1", "LeanFuelBank2"],
       "steps": [
-        "Verify no external vacuum leak or MAF sensor contamination before condemning the intake gasket",
-        "Inspect for coolant leakage at the intake manifold gasket area",
-        "Replace the intake manifold gasket with the updated (teal-green) material — do not reuse the earlier orange-material gasket",
-        "Inspect the intake plenum for warpage; replace if warped so clamping pressure is even",
-        "Clear codes and verify P0171/P0174 do not return after a drive cycle"
+        "Begin with the Diagnostic System Check. Use this bulletin only if rough idle, misfire, or DTC P0300 already points to an air leak at the intake manifold gasket",
+        "Treat the titled engines as 2002–2004 L59 (VIN Z). This LQ4 (VIN U) is in the may-apply sentence, not in the titled model list",
+        "Replace the upper intake manifold gaskets with teal-green P/N 89017589. Do not install orange P/N 17113557",
+        "Inspect the intake manifold to cylinder-head deck for warpage. The retrieved text does not state a measurement limit",
+        "Do not add a coolant-leak check or a P0171/P0174 verification from this bulletin — those are not in the retrieved text"
       ]
     }
   ]

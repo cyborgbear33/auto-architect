@@ -92,8 +92,17 @@ Ontology here is curated meaning, not “the car told us everything.”
 ### Engine family → cartridges
 
 Recognition loads cartridges for **this vehicle’s** `engineFamily`. SAE-generic
-families (misfire, lean, EVAP, …) may apply broadly; OEM depth (MultiAir oil
-path, GM stub) is family-specific and must stay honest.
+families (misfire, lean, EVAP, …) may apply broadly; OEM depth is
+family-specific and must stay honest. The Jeep's MultiAir oil-starvation path
+has its own dedicated fault class; the Silverado's `gm-vortec-6.0-stub`
+cartridge instead re-frames two existing SAE-generic classes (knock sensor
+circuit, lean fuel trim) from two corroborated bulletins — 023A is 1999–2002
+and P0332 only (this profile is a 2003); 029A names rough idle and P0300, and
+only says it may apply to this LQ4. It does not yet cover every GM-specific
+failure mode on this engine family, only those two.
+The readable map of this truck — identity, the two GM cause chains, and what
+is still unknown — is
+[`silverado-2500hd-field-manual.html`](silverado-2500hd-field-manual.html).
 
 {{ONTOLOGY_BLOCK}}
 
@@ -200,7 +209,10 @@ Capability forensics (this guide’s verification chapter).
 ### Functions
 
 Guided special procedures (Proxi, etc.). Execution is typically an external
-enhanced tool + MX+ — the app tracks the checklist and Journal trail.
+enhanced tool + MX+ — the app tracks the checklist and Journal trail. Star a
+procedure you repeat; it stays at the top of Functions and on the Dashboard
+for any selected vehicle that has that procedure. A star is a shortcut, not
+proof of a fault.
 
 ### Recalls & TSBs
 

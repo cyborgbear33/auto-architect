@@ -28,7 +28,7 @@ not declare.
 | `secondary-air` | P0410–P0412 + Mode 06 AIR OBDMID $71 |
 | `cam-crank-correlation` | P0016–P0018 family |
 | `fca-tigershark-2.4` | MultiAir oil starvation (OEM view) |
-| `gm-vortec-6.0-stub` | Inert A5 extension for 2003 Silverado 2500 HD (SAE cartridges load separately) |
+| `gm-vortec-6.0-stub` | 2003 Silverado 2500 HD framing for knock-sensor and lean-fuel classes (SAE cartridges still load) |
 
 ## The recipe
 

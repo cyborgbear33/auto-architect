@@ -171,7 +171,7 @@ has more lawful fuel. Populate `CausalModel` from cartridge catalogs + current
 | A2 | Wire `verbalize` into Recognition API + Diagnosis UI | done | `Recognition.narration` + ontology-note fallback |
 | A3 | Mode 06 as recognition input where ontology allows | done | Thin SAE/ISO OBDMID seed → perception → realize; unknown MIDs unlabeled |
 | A4 | Broader curated DTC/PID KB + ontology lint parity | partial | + coil/injector/MAP/knock/TPS circuit families; still not full J2012 |
-| A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | SAE set shared; GM stub inert until real truck |
+| A5 | Engine-family cartridge depth (MultiAir real; EcoTec3 when truck exists) | partial | SAE set shared; GM knock/lean framing filled from corroborated TSBs; no GM-only class yet |
 | A6 | Populate `CausalModel` on draft/solve from cartridge cause catalogs + live `classEvidence` | done | `composeCausalModel`; misfire/lean authored; fallback from playbook; ProblemDetail panel |
 | A7 | Apprentice **causal brief** read-model + Diagnosis/ProblemDetail panel | done | `CausalBriefService` + panel: why / how we know / prove next + AEMF + history |
 
@@ -545,7 +545,6 @@ healthy; history never invents a fix that was not logged and verified.
 | Feature | Status | Priority | Why now | Likely reuse seams |
 |---|---|---|---|---|
 | Expand DTC dictionary beyond Tigershark seed set | partial | medium | + coil/injector/MAP/knock/TPS; rarer P0xxx / OEM P1xxx still open. | `dtc-dictionary.json`, ontology lint |
-| Fill GM Vortec 6.0 / Silverado 2500 HD OEM cartridge | planned | high when truck scans available | Profile is 2003 2500 HD gas 6.0L; stub inert until curated GM TSBs. | `gm-vortec-6.0-stub.ts`, vehicle profiles |
 | In-app Proxi / enhanced BCM session over MX+ | planned | low until explicit UDS project | Guided Functions v1 is external AlfaOBD; do not clone AlfaOBD. | future edge path, not Mode 01–07 |
 | Bluetooth auto-discovery / MX+ preferred adapter profile | planned | medium | Less friction for scanning. | `obd_gateway/config.py`, `client.py` |
 | Expand discover beyond seed via raw `0100/0120/…` support-bit decode | planned | low | v1 probes `STANDARD_PID_COMMANDS` only; full bitmask catalog if needed. | `obd_gateway/discovery.py`, pid dictionary |
@@ -690,7 +689,12 @@ actually maintain.
 | Vehicle dossier on Diagnosis (V1) | 2026-07 | Identity strip + PATCH VIN/odo; discovery + campaign links; never invents VIN |
 | Operator complaint framing (H6) | 2026-07 | Diagnosis chips → `operatorComplaints`; enrich statement/symptoms only |
 | OEM steps in causal brief (R6) | 2026-07 | `oemAlsoSays` on A7 brief; campaign/TSB steps + relatedClasses; applicability only |
+| `sourceType`/`source` on campaigns/TSBs (primary vs. corroborated) | 2026-09 | `CampaignEntrySchema`/`TsbEntrySchema`; `CausalBriefPanel` badge; `docs/ai/OEM_RESEARCH_SOURCES.md` |
+| Silverado profile filled from real VIN; 3 verified GM recalls | 2026-09 | `vehicle-profiles.json`, `known-campaigns.json` (04V045000/04V129000/05V161000) |
+| GM Vortec 6.0 knock-sensor + intake-gasket cartridge fill | 2026-09 | `gm-vortec-6.0-stub.ts` re-frames `KnockSensorCircuitFault`/`LeanFuelBank1`/`LeanFuelBank2` (priority 90). 023A is 1999–2002 and P0332 only (this profile is 2003). 029A names P0300 on L59 and may apply to LQ4. Both stay `corroborated`. No new OEM class |
+| Silverado 2500HD field manual | 2026-09 | `docs/silverado-2500hd-field-manual.html` — VIN identity, corrected bank map, the two GM cause chains, cascade watchlist, open unknowns |
 | Console shell usability | 2026-09 | Goal-grouped rail + mobile menu; vehicle identity; at-a-glance hero; Dashboard leads with condition; Diagnosis leads with draft, cases, and the safety hold; recalls say why they matched |
+| Favorite procedures | 2026-09 | Star on Functions; Dashboard shortcut for procedures this vehicle actually has. localStorage only — not a DecisionRecord |
 
 ---
 

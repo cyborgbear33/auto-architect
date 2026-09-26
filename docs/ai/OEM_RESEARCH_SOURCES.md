@@ -60,6 +60,24 @@ If either blocked host ever becomes reachable, re-verify the two
 (`02-06-04-023A`, `05-06-04-029A`) against the real bulk dataset or document
 viewer and upgrade them to `"primary"`.
 
+A 2026-09-26 pass found transcriptions and used them to correct the rows.
+They are still not primary. `02-06-04-023A` now cites
+[jimfancher’s Sierra page](http://www.jimfancher.com/sierra/p0332.htm),
+which matches a Corvette Action Center repost and an Underhood Service tech
+tip: 1999–2002 trucks, P0332 only, rear sensor P/N 10456603, RTV bead left
+open at the rear. This profile is a 2003. An Amazon kit listing had been
+the source and had bundled intake gaskets the bulletin does not list.
+`05-06-04-029A` now cites an [Operation CHARM transcription](https://charm.li/Chevrolet/2003/Silverado%20SS%20AWD%20V8-6.0L%20VIN%20N/Repair%20and%20Diagnosis/Powertrain%20Management/Technical%20Service%20Bulletins/By%20Symptom/Customer%20Interest/Engine%20-%20Rough%20Idle%2FMisfire%2FMIL%20ON%2FDTC%20P0300/)
+(a second CHARM page, 2004 Express VIN U, agreed). Full-page fetch returned
+504; the row is from search-index excerpts. Named complaint is rough idle,
+misfire, and P0300 on L59, with LQ4 VIN U in a may-apply sentence. The
+excerpt does not name P0171, P0174, or a coolant leak. Do not copy a warpage
+limit in from a separate service-manual page.
+
+## A research draft that does not close specs
+
+A 2026-09-26 whole-truck draft (the file the operator saved as a deep-research report) has a section “Missing Numerical Parameters & Provenance.” It lists engine torques, oil-filter torque, coolant-cap pressure, fan-clutch temperature, starter draw, fuse amperages, transmission capacity, oil pressure, and cam offset, and it marks every one **unspecified**. It also writes the truck as an 8.1L L18. This profile is the VIN-confirmed LQ4 6.0. Do not treat that draft as a `source` for a campaign, a torque, or a capacity. The open list is recorded in the field manual (Part 10) and in the pretty-print ontology (section 6.1). Close a row only after the LQ4 / this-VIN page of a service manual or schematic is actually read, and tag it `primary` only then.
+
 ## Secondary / corroborating sources
 
 Use these only after a genuine attempt at the primary sources above comes up

@@ -33,7 +33,7 @@ describe("ontology registries", () => {
     expect(getEngineFamilyCartridges("fca-tigershark-2.4")).toContain("fca-tigershark-2.4");
   });
 
-  it("resolves the 2003 Silverado 2500 HD to Vortec 6.0 with SAE cartridges + inert stub", () => {
+  it("resolves the 2003 Silverado 2500 HD to Vortec 6.0 with SAE cartridges plus the GM stub", () => {
     const truck = getVehicleProfile("veh:silverado-2500hd-2003");
     expect(truck).toMatchObject({
       make: "Chevrolet",

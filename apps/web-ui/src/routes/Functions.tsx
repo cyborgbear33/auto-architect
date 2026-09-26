@@ -1,8 +1,10 @@
 import type { SpecialProcedureDto } from "@auto/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { api, queryKeys } from "../lib/api.ts";
+import { loadFavoriteProcedureIds, setFavoriteProcedure } from "../lib/favoriteProcedures.ts";
 
 export function Functions() {
   const vehicleId = useSelectedVehicleId();
@@ -12,19 +14,34 @@ export function Functions() {
 
 function VehicleFunctions({ vehicleId }: { vehicleId: string }) {
   const qc = useQueryClient();
+  const { procedure: procedureFromSearch } = useSearch({ strict: false });
   const proceduresQ = useQuery({
     queryKey: queryKeys.specialProcedures(vehicleId),
     queryFn: () => api.getSpecialProcedures(vehicleId),
   });
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    typeof procedureFromSearch === "string" ? procedureFromSearch : null,
+  );
+  const [favoriteIds, setFavoriteIds] = useState(() => loadFavoriteProcedureIds());
   const [activeProblemId, setActiveProblemId] = useState<string | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [note, setNote] = useState("");
 
-  const selected = useMemo(
-    () => proceduresQ.data?.find((p) => p.id === (selectedId ?? proceduresQ.data?.[0]?.id)),
-    [proceduresQ.data, selectedId],
-  );
+  const selected = useMemo(() => {
+    const list = proceduresQ.data ?? [];
+    return list.find((proc) => proc.id === selectedId) ?? list[0];
+  }, [proceduresQ.data, selectedId]);
+  const ordered = useMemo(() => {
+    const list = proceduresQ.data ?? [];
+    return [...list].sort(
+      (a, b) => Number(favoriteIds.includes(b.id)) - Number(favoriteIds.includes(a.id)),
+    );
+  }, [proceduresQ.data, favoriteIds]);
+
+  function toggleFavorite(id: string) {
+    const nextFavorite = !favoriteIds.includes(id);
+    setFavoriteIds(setFavoriteProcedure(id, nextFavorite));
+  }
 
   const startMut = useMutation({
     mutationFn: (procedureId: string) =>
@@ -60,7 +77,7 @@ function VehicleFunctions({ vehicleId }: { vehicleId: string }) {
     <div>
       <PageHeader
         title="Functions"
-        subtitle="Checklists for special procedures. The module tool stays outside this app; the checklist stays here."
+        subtitle="Checklists for special procedures. Star one you repeat — it stays at the top and on the Dashboard. The module tool stays outside this app."
       />
 
       {proceduresQ.isLoading && <p className="text-sm text-slate-400">Loading procedures…</p>}
@@ -73,25 +90,46 @@ function VehicleFunctions({ vehicleId }: { vehicleId: string }) {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <section className="space-y-2 lg:col-span-1">
-          {proceduresQ.data?.map((proc) => (
-            <button
-              key={proc.id}
-              type="button"
-              onClick={() => {
-                setSelectedId(proc.id);
-                setActiveProblemId(null);
-                setChecked({});
-              }}
-              className={`w-full rounded-lg border px-3 py-3 text-left text-sm transition ${
-                selected?.id === proc.id
-                  ? "border-sky-300 bg-sky-50"
-                  : "border-slate-200 bg-white hover:bg-slate-50"
-              }`}
-            >
-              <div className="font-semibold text-slate-800">{proc.title}</div>
-              <div className="mt-1 font-mono text-[11px] text-slate-400">{proc.id}</div>
-            </button>
-          ))}
+          {ordered.map((proc) => {
+            const favorited = favoriteIds.includes(proc.id);
+            return (
+              <div
+                key={proc.id}
+                className={`flex items-stretch rounded-lg border text-sm transition ${
+                  selected?.id === proc.id
+                    ? "border-sky-300 bg-sky-50"
+                    : "border-slate-200 bg-white"
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(proc.id);
+                    setActiveProblemId(null);
+                    setChecked({});
+                  }}
+                  className="min-w-0 flex-1 px-3 py-3 text-left hover:bg-slate-50"
+                >
+                  <div className="font-semibold text-slate-800">{proc.title}</div>
+                  {favorited && (
+                    <div className="mt-1 text-[11px] font-medium text-sky-800">Favorite</div>
+                  )}
+                  <div className="mt-1 font-mono text-[11px] text-slate-400">{proc.id}</div>
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={favorited}
+                  aria-label={
+                    favorited ? `Remove favorite ${proc.title}` : `Favorite ${proc.title}`
+                  }
+                  onClick={() => toggleFavorite(proc.id)}
+                  className="shrink-0 border-l border-slate-200 px-3 text-xs font-medium text-sky-800 hover:bg-sky-50"
+                >
+                  {favorited ? "Starred" : "Star"}
+                </button>
+              </div>
+            );
+          })}
         </section>
 
         {selected && (

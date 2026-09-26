@@ -11,6 +11,7 @@ import { EmptyEvidenceState } from "../components/EmptyEvidenceState.tsx";
 import { EvidenceIngestPanel } from "../components/EvidenceIngestPanel.tsx";
 import { EvidencePanels } from "../components/EvidencePanels.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
+import { FavoriteProceduresStrip } from "../components/FavoriteProceduresStrip.tsx";
 import {
   EmptyVehicleState,
   PageHeader,
@@ -127,6 +128,8 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
       </div>
 
       <NextActionConsole vehicleId={vehicleId} />
+
+      <FavoriteProceduresStrip vehicleId={vehicleId} />
 
       <ReadinessPanel vehicleId={vehicleId} />
 

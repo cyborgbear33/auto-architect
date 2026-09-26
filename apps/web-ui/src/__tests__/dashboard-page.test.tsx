@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, within } from "@testing-library/react";
 import type React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { api } from "../lib/api.ts";
+import { setFavoriteProcedure } from "../lib/favoriteProcedures.ts";
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
@@ -20,7 +22,10 @@ vi.mock("../store/index.ts", () => ({
     selector({ ui: mockUiState }),
 }));
 
-afterEach(() => resetMockUiState());
+afterEach(() => {
+  resetMockUiState();
+  window.localStorage.clear();
+});
 
 vi.mock("../lib/api.ts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../lib/api.ts")>();
@@ -167,6 +172,7 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
         engineFamilyRollup: [],
         narratives: [],
       }),
+      getSpecialProcedures: vi.fn().mockResolvedValue([]),
       getRecommendations: vi.fn().mockResolvedValue([
         {
           id: "rec:1",
@@ -319,6 +325,36 @@ describe("Dashboard", () => {
     expect(section.getByRole("button", { name: "Accept" })).toBeInTheDocument();
     expect(section.getByRole("button", { name: "Dismiss" })).toBeInTheDocument();
     expect(section.getByRole("button", { name: "Convert to case" })).toBeInTheDocument();
+  });
+
+  it("shows a pinned procedure without treating it as a proven fault", async () => {
+    setFavoriteProcedure("proc:fca-proxi-alignment", true);
+    vi.mocked(api.getSpecialProcedures).mockResolvedValueOnce([
+      {
+        id: "proc:fca-proxi-alignment",
+        title: "Proxi alignment (module configuration sync)",
+        engineFamily: "fca-tigershark-2.4",
+        executionMode: "external_enhanced_tool",
+        summary: "BCM Proxi master sync after battery events.",
+        triggers: ["Stuck in Park"],
+        modulesInvolved: [{ id: "BCM", role: "Proxi master" }],
+        detectSteps: ["Scan all modules with AlfaOBD"],
+        alignSteps: ["Body computer → PROXI alignment"],
+        verifySteps: ["Shift out of Park"],
+        hardware: ["OBDLink MX+"],
+        risks: ["Gateway cannot send Proxi"],
+        references: ["Public Renegade Proxi reports"],
+      },
+    ]);
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <Dashboard />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByRole("heading", { name: "Favorites" })).toBeInTheDocument();
+    expect(screen.getByText("Proxi alignment (module configuration sync)")).toBeInTheDocument();
+    expect(screen.getByText(/Procedures you pinned for quick access/)).toBeInTheDocument();
   });
 
   it("shows an empty-vehicle state when nothing is selected", async () => {

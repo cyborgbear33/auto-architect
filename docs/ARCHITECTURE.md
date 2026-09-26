@@ -126,9 +126,10 @@ the store. Handlers do not mutate state except via `ActionService`.
 
 `VehicleService` resolves a vehicle's engine family, which selects the TBox view
 slice and the cartridge list. The 2003 Silverado 2500 HD uses
-`veh:silverado-2500hd-2003` / `gm-vortec-6.0` with an inert
-`gm-vortec-6.0-stub.ts` until curated GM TSBs exist — not forking the generic
-TBox.
+`veh:silverado-2500hd-2003` / `gm-vortec-6.0`. `gm-vortec-6.0-stub.ts`
+re-frames knock-sensor and lean-fuel classes from corroborated GM TSBs and
+does not fork the generic TBox. The operator map is
+`docs/silverado-2500hd-field-manual.html`.
 
 ---
 
@@ -141,7 +142,8 @@ Each cartridge in `packages/cartridges` packages:
    and a ranked candidate-action playbook
 
 Registered today: SAE generics (misfire, lean/rich, EVAP, catalyst, O2, EGR,
-secondary air, cam/crank), `fca-tigershark-2.4`, plus inert `gm-vortec-6.0-stub`.
+secondary air, cam/crank), `fca-tigershark-2.4`, plus `gm-vortec-6.0-stub`
+(GM framing on two existing classes).
 Catalog/cartridge parity is enforced by `pnpm lint:ontology` and
 `packages/cartridges/src/ontology-lint.test.ts`.
 

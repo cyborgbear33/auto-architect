@@ -15,16 +15,21 @@ when the fault is not SAE-portable (MultiAir is the canonical example).
 
 ## Recipe (Silverado path)
 
-Profile already filled for the gas 2500 HD:
+Profile filled and VIN-confirmed for the gas 2500 HD:
 
-- Vehicle: `veh:silverado-2500hd-2003` — 2003 Chevrolet Silverado 2500 HD, unleaded 6.0L V8
+- Vehicle: `veh:silverado-2500hd-2003` — 2003 Chevrolet Silverado 2500 HD, LQ4
+  Iron 6.0L V8 (Vortec 6000), 4WD, GVWR Class 2H — confirmed via NHTSA vPIC
+  VIN decode, see `OEM_RESEARCH_SOURCES.md`
 - Family: `gm-vortec-6.0` (view `generic`, full SAE cartridge set)
-- Cartridge: `packages/cartridges/src/gm-vortec-6.0-stub.ts` (inert OEM extension)
+- Cartridge: `packages/cartridges/src/gm-vortec-6.0-stub.ts` — partially filled:
+  re-frames `KnockSensorCircuitFault` and `LeanFuelBank1`/`LeanFuelBank2` with
+  GM-specific TSB guidance; everything else on this engine family still runs
+  the plain SAE-generic framing
 
-### 1. Confirm the real engine (optional polish)
+### 1. Confirm the real engine (done)
 
-Confirm RPO / VIN sticker (LQ4-class Vortec 6000 vs other 6.0 variants) when
-convenient. Do not invent EcoTec3 or Duramax for this gas truck.
+Confirmed via VIN decode (not just RPO sticker guess): LQ4 Iron 6.0L V8. Not
+LQ9/L18/other 6.0 variant. Do not invent EcoTec3 or Duramax for this gas truck.
 
 ### 2. Fill the vehicle profile
 
@@ -41,12 +46,20 @@ If GM-specific fault classes are required:
 3. Point the engine family at that view
 4. Prove with a realize fixture
 
-If SAE-generic classes suffice, keep view `generic` (current state).
+If SAE-generic classes suffice, keep view `generic` (current state — the knock
+sensor and lean-fuel fill below needed no new class, just a higher-priority
+framing rule on the classes that already existed).
 
 ### 4. Fill the cartridge
 
 Replace the stub's no-op perception/framing with curated GM rules only when
-TSBs / service-manual summaries exist. Mirror `fca-tigershark-2.4.ts`.
+TSBs / service-manual summaries exist. Mirror `fca-tigershark-2.4.ts` if a new
+dedicated class is warranted; if the DTCs already have a generic class (as
+with knock sensor / lean fuel), it's simpler to just add a higher-priority
+`framing` rule for that same `whenClass` — `draftForClass` in `registry.ts` is
+winner-take-all by priority, so the OEM-specific `build` fully replaces the
+generic one rather than merging with it. See `gm-vortec-6.0-stub.ts` for the
+worked example.
 
 ### 5. Campaigns / DTC dictionary
 
@@ -101,12 +114,25 @@ Wrong vehicle id = evidence lands on the wrong profile. Empty honest scan ≠
 
 ## Checklist
 
-- [x] Profile has real year/trim/engine family (2003 2500 HD / Vortec 6.0)
-- [x] View membership correct (`generic` until OEM classes exist)
-- [x] Cartridge registered on that family (inert stub)
-- [ ] Ontology lint green after any OEM fill
-- [ ] At least one realize fixture for a truck-specific headline fault (when OEM cartridge filled)
-- [ ] `FUTURE_FEATURES.md` updated (OEM cartridge row → Implemented when done)
-- [ ] Mastery Guide refined if this vehicle adds new hardware, protocol, or
-      troubleshoot steps operators must know (`VEHICLE_OBD_MASTERY_GUIDE.md` /
-      `MasteryGuideService`; see `UX_GUIDELINES.md` §4)
+- [x] Profile has real year/trim/engine family (2003 2500 HD, VIN-confirmed LQ4)
+- [x] View membership correct (`generic` — knock sensor / lean fuel are already
+      SAE-generic classes; no new GM-specific class or view was needed)
+- [x] Cartridge filled — `gm-vortec-6.0-stub.ts` re-frames `KnockSensorCircuitFault`
+      and `LeanFuelBank1`/`LeanFuelBank2` (priority 90, above the generic
+      cartridges' 52/80) citing TSBs 02-06-04-023A and 05-06-04-029A
+      (`sourceType: "corroborated"` — see `OEM_RESEARCH_SOURCES.md`)
+- [x] Ontology lint green after the OEM fill (`pnpm lint:ontology`)
+- [x] Proof the fill actually takes effect: no new DL realize fixture was
+      needed (no new class), so proof lives at the cartridge layer instead —
+      `gm-vortec-6.0-stub.test.ts` asserts `draftForClass` picks the GM-specific
+      build over the generic one for a Silverado, and not for a Jeep
+- [x] `FUTURE_FEATURES.md` updated (moved to Implemented History, 2026-09)
+- [x] Mastery Guide refined — `VEHICLE_OBD_MASTERY_GUIDE.md`'s ontology-slice
+      section no longer calls this cartridge an inert "GM stub"
+
+Still open for a future pass: no GM-specific DL class exists yet (only two
+generic classes got OEM-specific framing), and the two TSBs above are
+`"corroborated"` not `"primary"` — see `OEM_RESEARCH_SOURCES.md`'s known
+blockers if you want to try upgrading them. Do not restore the earlier
+overclaims: 023A does not list 2003 or P0327, and 029A does not name
+P0171/P0174 or a coolant leak.

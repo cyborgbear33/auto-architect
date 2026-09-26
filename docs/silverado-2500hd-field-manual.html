@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2003 Silverado 2500HD — field manual</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+:root{
+  --bg:#eef1f1; --surface:#ffffff; --surface-2:#e3e8e9;
+  --ink:#1a1d1f; --ink-soft:#545a5d; --ink-faint:#7c8285;
+  --line:#ccd3d5; --line-strong:#aab3b6;
+  --accent:#1f5c73; --accent-strong:#164457; --accent-soft:#e2eef1;
+  --amber:#a6690d; --amber-soft:#fbeed9;
+  --rust:#a3391f; --rust-soft:#f9e3dd;
+  --verified:#2c6e42; --verified-soft:#e1efe4;
+  --corrob:#83671c; --corrob-soft:#f3ecd6;
+  --shadow:0 1px 2px rgba(20,30,35,.07), 0 6px 22px rgba(20,30,35,.06);
+  --font-display:"Big Shoulders Display", system-ui, sans-serif;
+  --font-body:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14181a; --surface:#1b2225; --surface-2:#222a2d;
+    --ink:#e8ecec; --ink-soft:#adb6b8; --ink-faint:#7f8a8d;
+    --line:#2c3639; --line-strong:#3b464a;
+    --accent:#7cc3da; --accent-strong:#a6dbec; --accent-soft:#1c333c;
+    --amber:#e2ab4c; --amber-soft:#362a12;
+    --rust:#e2745a; --rust-soft:#38211a;
+    --verified:#6fcb8c; --verified-soft:#17301f;
+    --corrob:#d3b862; --corrob-soft:#332b13;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 26px rgba(0,0,0,.4);
+  }
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--font-body); font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--accent-soft); color:var(--accent-strong);}
+a{color:var(--accent); text-decoration-thickness:1.5px; text-underline-offset:2px;}
+a:focus-visible, button:focus-visible, summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:800; text-wrap:balance; line-height:1.05; letter-spacing:.2px; color:var(--ink);}
+code, .mono{font-family:var(--font-mono);}
+.layout{display:grid; grid-template-columns:248px minmax(0,1fr); max-width:1180px; margin:0 auto;}
+.rail{position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; padding:28px 14px 28px 20px; border-right:1px solid var(--line); scrollbar-width:thin;}
+.rail-brand{font-family:var(--font-display); font-weight:900; font-size:1.05rem; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-faint); margin:0 0 18px 0;}
+.rail nav{display:flex; flex-direction:column; gap:1px;}
+.rail a{
+  display:flex; gap:9px; align-items:baseline; color:var(--ink-soft); text-decoration:none;
+  font-size:.83rem; padding:6px 8px; border-radius:5px; border-left:2px solid transparent;
+}
+.rail a .num{font-family:var(--font-mono); color:var(--ink-faint); font-size:.72rem; min-width:1.4em;}
+.rail a:hover{background:var(--surface-2); color:var(--ink);}
+.rail a.active{color:var(--accent); border-left-color:var(--accent); background:var(--accent-soft);}
+main{min-width:0; padding:28px 40px 90px;}
+.prose{max-width:66ch;}
+.prose p{margin:0 0 1.05em 0;}
+.cover{padding-bottom:8px; margin-bottom:6px;}
+.cover .kicker{font-family:var(--font-mono); font-size:.78rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); margin:0 0 10px;}
+.cover h1{font-size:clamp(2.1rem, 4.5vw, 3.2rem); margin:0 0 8px;}
+.cover .sub{color:var(--ink-soft); font-size:1.05rem; max-width:62ch; margin:0 0 26px;}
+.plate{
+  background:var(--surface); border:1px solid var(--line); border-radius:10px;
+  box-shadow:var(--shadow); padding:22px 24px; margin-bottom:10px;
+}
+.plate-head{display:flex; justify-content:space-between; align-items:baseline; gap:12px; border-bottom:1px dashed var(--line-strong); padding-bottom:10px; margin-bottom:14px; flex-wrap:wrap;}
+.plate-head .id{font-family:var(--font-mono); font-size:.78rem; color:var(--ink-faint);}
+.plate-head .label{font-family:var(--font-display); font-weight:800; font-size:1.1rem; letter-spacing:.5px; text-transform:uppercase;}
+.fields{display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:14px 20px;}
+.field dt{font-size:.72rem; text-transform:uppercase; letter-spacing:.6px; color:var(--ink-faint); margin-bottom:3px;}
+.field dd{margin:0; font-family:var(--font-mono); font-size:.92rem; font-variant-numeric:tabular-nums;}
+.badge{
+  display:inline-flex; align-items:center; gap:5px; font-family:var(--font-mono); font-size:.68rem;
+  font-weight:600; letter-spacing:.3px; text-transform:uppercase; padding:2px 8px; border-radius:99px; white-space:nowrap;
+}
+.b-vin{background:var(--accent-soft); color:var(--accent-strong);}
+.b-primary{background:var(--verified-soft); color:var(--verified);}
+.b-corrob{background:var(--corrob-soft); color:var(--corrob);}
+.b-platform{background:var(--surface-2); color:var(--ink-soft);}
+.b-open{background:var(--rust-soft); color:var(--rust);}
+.legend{display:flex; flex-wrap:wrap; gap:8px 14px; margin:16px 0 30px; padding:14px 16px; background:var(--surface); border:1px solid var(--line); border-radius:10px;}
+.legend div{display:flex; align-items:center; gap:7px; font-size:.82rem; color:var(--ink-soft);}
+section{padding-top:52px; scroll-margin-top:18px;}
+section:first-of-type{padding-top:8px;}
+.groupline{display:flex; align-items:baseline; gap:12px; margin-bottom:4px;}
+.groupline .g{font-family:var(--font-mono); font-size:.78rem; color:var(--accent); letter-spacing:1px;}
+.groupline .rule{flex:1; height:1px; background:var(--line-strong);}
+h2{font-size:clamp(1.5rem,3vw,2rem); margin:2px 0 6px;}
+.deck{color:var(--ink-soft); font-size:1rem; max-width:66ch; margin:0 0 22px;}
+h3{font-size:1.15rem; margin:28px 0 10px;}
+h4{font-size:.98rem; margin:20px 0 8px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.4px; font-weight:700;}
+.callout{border:1px solid var(--line); border-left:3px solid var(--accent); background:var(--surface); border-radius:0 8px 8px 0; padding:14px 18px; margin:18px 0; font-size:.94rem;}
+.callout.warn{border-left-color:var(--rust);}
+.callout.note{border-left-color:var(--corrob);}
+.callout strong{font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:5px; color:var(--ink-faint);}
+.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:10px; margin:16px 0 28px; background:var(--surface);}
+table{border-collapse:collapse; width:100%; font-size:.87rem;}
+th,td{text-align:left; padding:9px 13px; border-bottom:1px solid var(--line); vertical-align:top;}
+thead th{font-family:var(--font-mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-faint); background:var(--surface-2); position:sticky; top:0;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--accent-soft);}
+td.mono, th.mono{font-family:var(--font-mono);}
+.dtc{font-family:var(--font-mono); font-size:.82rem; color:var(--accent-strong); background:var(--accent-soft); padding:1px 5px; border-radius:4px;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media (max-width:760px){.grid2{grid-template-columns:1fr;}}
+.sysgrid{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:14px; margin:18px 0 8px;}
+.syscard{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px 18px;}
+.syscard h4{margin:0 0 8px; text-transform:none; letter-spacing:0; font-size:1rem; color:var(--ink); font-family:var(--font-display); font-weight:800;}
+.syscard p, .syscard li{font-size:.87rem; color:var(--ink-soft);}
+.syscard ul{margin:0; padding-left:18px;}
+.syscard ul li{margin-bottom:3px;}
+.rank{display:flex; flex-direction:column; gap:8px; margin:12px 0 20px;}
+.rank .row{display:grid; grid-template-columns:92px 1fr; gap:12px; align-items:start; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:12px 14px;}
+.rank .tag{font-family:var(--font-mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.4px; padding:3px 7px; border-radius:99px; align-self:start; justify-self:start;}
+.tag-first{background:var(--rust-soft); color:var(--rust);}
+.tag-next{background:var(--amber-soft); color:var(--amber);}
+.tag-later{background:var(--surface-2); color:var(--ink-soft);}
+.rank .row p{margin:0; font-size:.9rem;}
+.rank .row strong{display:block; margin-bottom:2px;}
+.rulecard{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; border-top:3px solid var(--ink-faint);}
+.rulecard.band-watch{border-top-color:var(--ink-faint);}
+.rulecard.band-elevated{border-top-color:var(--amber);}
+.rulecard.band-high{border-top-color:var(--rust);}
+.rulecard .flow{display:flex; align-items:center; gap:8px; font-weight:600; font-size:.92rem; flex-wrap:wrap;}
+.rulecard .flow .arrow{color:var(--ink-faint);}
+.rulecard .band{align-self:flex-start; font-family:var(--font-mono); font-size:.66rem; text-transform:uppercase; letter-spacing:.5px; padding:1px 7px; border-radius:99px;}
+.band-watch .band{background:var(--surface-2); color:var(--ink-soft);}
+.band-elevated .band{background:var(--amber-soft); color:var(--amber);}
+.band-high .band{background:var(--rust-soft); color:var(--rust);}
+.rulecard p{margin:0; font-size:.85rem; color:var(--ink-soft);}
+.rulecard .horizon{font-size:.76rem; color:var(--ink-faint); font-family:var(--font-mono);}
+.quickgrid{display:grid; gap:10px;}
+figure{margin:20px 0 8px;}
+figure svg{max-width:100%; height:auto; display:block; background:var(--surface); border:1px solid var(--line); border-radius:10px;}
+figcaption{font-size:.83rem; color:var(--ink-faint); margin-top:8px; max-width:72ch;}
+svg text{font-family:var(--font-mono); fill:currentColor;}
+svg .lbl{font-family:var(--font-body); font-weight:600;}
+details{border:1px solid var(--line); border-radius:10px; background:var(--surface); margin:16px 0;}
+details summary{cursor:pointer; padding:13px 18px; font-weight:600; font-size:.92rem; list-style:none; display:flex; align-items:center; gap:8px;}
+details summary::-webkit-details-marker{display:none;}
+details summary::before{content:"▸"; color:var(--accent); transition:transform .15s;}
+details[open] summary::before{transform:rotate(90deg);}
+details > .tablewrap{margin:0; border:none; border-top:1px solid var(--line); border-radius:0 0 10px 10px;}
+.qcard{display:grid; grid-template-columns:1.3fr 1fr 1.6fr; gap:14px; padding:13px 16px; background:var(--surface); border:1px solid var(--line); border-radius:8px; align-items:start; font-size:.87rem;}
+.qcard .sym{font-weight:700;}
+.qcard .sys{font-family:var(--font-mono); font-size:.76rem; color:var(--accent-strong); background:var(--accent-soft); padding:2px 7px; border-radius:5px; align-self:start;}
+.qcard .why{color:var(--ink-soft);}
+@media (max-width:700px){.qcard{grid-template-columns:1fr;}}
+dl.gloss{display:grid; grid-template-columns:max-content 1fr; gap:6px 18px; font-size:.9rem;}
+dl.gloss dt{font-family:var(--font-mono); font-weight:600; color:var(--accent-strong);}
+dl.gloss dd{margin:0 0 8px 0; color:var(--ink-soft);}
+footer{border-top:1px solid var(--line); margin-top:60px; padding:26px 40px 50px; color:var(--ink-faint); font-size:.82rem;}
+@media (max-width:880px){
+  .layout{grid-template-columns:1fr;}
+  .rail{position:static; height:auto; border-right:none; border-bottom:1px solid var(--line); padding:16px 20px;}
+  .rail nav{flex-direction:row; overflow-x:auto; gap:4px; padding-bottom:4px;}
+  .rail a{white-space:nowrap; border-left:none; border-bottom:2px solid transparent;}
+  .rail a.active{border-left:none; border-bottom-color:var(--accent);}
+  main{padding:24px 18px 60px;}
+  footer{padding:20px 18px 40px;}
+}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+@media print{
+  .rail{display:none;}
+  .layout{display:block; max-width:none;}
+  main, footer{padding:0;}
+  body{background:#fff; color:#111;}
+  .plate, .syscard, .rulecard, .qcard, .rank .row, .tablewrap, .callout{box-shadow:none;}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside class="rail">
+  <p class="rail-brand">Field Manual</p>
+  <nav id="toc">
+    <a href="#identity"><span class="num">01</span>This truck</a>
+    <a href="#method"><span class="num">02</span>How to trace</a>
+    <a href="#gm-chains"><span class="num">03</span>Two GM chains</a>
+    <a href="#engine"><span class="num">04</span>Engine map</a>
+    <a href="#ontology"><span class="num">05</span>What software can name</a>
+    <a href="#cascade"><span class="num">06</span>Forward watchlist</a>
+    <a href="#rest"><span class="num">07</span>Rest of the truck</a>
+    <a href="#recalls"><span class="num">08</span>Recalls &amp; TSBs</a>
+    <a href="#quick-trace"><span class="num">09</span>Quick-trace</a>
+    <a href="#unknowns"><span class="num">10</span>Open unknowns</a>
+    <a href="#glossary"><span class="num">11</span>Glossary</a>
+    <a href="#sources"><span class="num">12</span>Sources</a>
+  </nav>
+</aside>
+
+<main>
+
+<div class="cover">
+  <p class="kicker">Ontology &amp; technical reference · veh:silverado-2500hd-2003</p>
+  <h1>The 2003 Silverado 2500HD, as entities, relationships, and rules.</h1>
+  <p class="sub">A reasoning map for this gas LQ4 truck. When something breaks, start from the complaint, name the entity that is actually speaking, and walk the rules backward to a cause. It is not a service manual: torque specs, fluid capacities, and safety-critical procedures still belong to a factory manual.</p>
+</div>
+
+<section id="identity">
+  <div class="groupline"><span class="g">PART 01</span><div class="rule"></div></div>
+  <h2>This truck — verified identity</h2>
+  <p class="deck">Facts under the dashed line come from decoding this VIN. Everything else in the manual is marked so a model-line habit never gets mistaken for this build sheet.</p>
+
+  <div class="plate">
+    <div class="plate-head">
+      <span class="label">Vehicle identity plate</span>
+      <span class="id">NHTSA vPIC · 2026-09-26</span>
+    </div>
+    <dl class="fields">
+      <div class="field"><dt>Make / model</dt><dd>Chevrolet Silverado 2500 HD</dd></div>
+      <div class="field"><dt>Model year</dt><dd>2003</dd></div>
+      <div class="field"><dt>Body</dt><dd>Extended-cab pickup</dd></div>
+      <div class="field"><dt>Engine</dt><dd>LQ4 · Vortec 6000 · iron 6.0L V8</dd></div>
+      <div class="field"><dt>Fuel</dt><dd>Gasoline</dd></div>
+      <div class="field"><dt>Drive</dt><dd>4WD / 4x4</dd></div>
+      <div class="field"><dt>GVWR class</dt><dd>2H · 9,001–10,000 lb</dd></div>
+      <div class="field"><dt>Plant</dt><dd>Pontiac, MI</dd></div>
+      <div class="field"><dt>Trim</dt><dd>Not decodable</dd></div>
+      <div class="field"><dt>Transmission</dt><dd>Not decodable</dd></div>
+      <div class="field"><dt>OBD protocol</dt><dd>Not confirmed live</dd></div>
+      <div class="field"><dt>Profile</dt><dd>veh:silverado-2500hd-2003</dd></div>
+    </dl>
+  </div>
+
+  <div class="legend">
+    <div><span class="badge b-vin">VIN-verified</span> decoded for this VIN</div>
+    <div><span class="badge b-primary">NHTSA-primary</span> read from the government record for this make, model, and year</div>
+    <div><span class="badge b-corrob">Corroborated</span> independent sources agree; the original GM document was not fetched</div>
+    <div><span class="badge b-platform">Platform-typical</span> published for the 2003 HD / Gen III family — confirm on the RPO label</div>
+    <div><span class="badge b-open">Open</span> unknown for this VIN</div>
+  </div>
+
+  <div class="prose">
+    <p>LQ4 is the iron-block 6.0 in GM’s Gen III truck small-block family (LR4 4.8, LM7 5.3, LQ4/LQ9 6.0). The decode rules out the other displacements and rules out LQ9. Two facts stay open on purpose: marketing trim, and transmission type. Transmission type decides whether recall 05V161000 can apply at all.</p>
+    <p>A make/model/year recall match is not a VIN-list hit. Campaigns below were confirmed against NHTSA for 2003 Chevrolet Silverado. Whether this unit is inside a campaign’s population is a dealer VIN check.</p>
+  </div>
+</section>
+
+<section id="method">
+  <div class="groupline"><span class="g">PART 02</span><div class="rule"></div></div>
+  <h2>How to trace a cause</h2>
+  <p class="deck">Four questions, asked in the same order every time. The rest of this manual is those four questions applied to this truck.</p>
+
+  <div class="sysgrid">
+    <div class="syscard"><h4>Entity</h4><p>What kind of thing is speaking? A part (knock sensor), a symptom (a DTC), a condition (positive fuel trim right now), or a trend (trim rising over weeks).</p></div>
+    <div class="syscard"><h4>Property</h4><p>Which side, which cylinder, which circuit, which fluid. “Bank 1” and “front knock sensor” are different properties. Mixing them sends you to the wrong part.</p></div>
+    <div class="syscard"><h4>Relationship</h4><p>How the engine holds evidence: <code>hasDtc</code> (a code), <code>hasCondition</code> (true now), <code>hasTrend</code> (true across samples). A named fault class is a rule over those three.</p></div>
+    <div class="syscard"><h4>Rule</h4><p>What may follow, and in which order to check. Forward rules say “if A is confirmed, watch for B.” Backward rules say “given this complaint, rank the causes.”</p></div>
+  </div>
+
+  <h3>Reading a fault-class rule</h3>
+  <p class="prose">The project’s ontology states misfire like this:</p>
+  <div class="tablewrap"><table><tbody><tr><td class="mono">MisfireUnderLoad ≡ Engine ⊓ (∃hasDtc.CylinderMisfire ⊔ ∃hasCondition.FailedMisfireMonitor) ⊓ (∃hasCondition.HighLoad ⊔ ∃hasTrend.RecurringHighLoad)</td></tr></tbody></table></div>
+  <p class="prose">⊓ means and. ⊔ means or. ∃ means “has at least one.” In words: this counts as misfire under load only when there is a misfire code or a failed misfire monitor, and the engine is under high load now or has a recurring high-load trend. A lone code is not yet the class. That extra bar is the point of the ontology.</p>
+
+  <div class="grid2">
+    <div class="syscard"><h4>Aspect order</h4><p>Air faults get the gas path measured first. Electricity faults get the circuit proven before the part is condemned. Mechanical faults get isolated (swap, compression, correlation) before a reporting sensor is replaced. Fluid faults get level, quality, and viscosity checked before an actuator is blamed for what a starved fluid can fake.</p></div>
+    <div class="syscard"><h4>Cheap and reversible first</h4><p>Impact, confidence, information gained, cost, risk, and reversibility are the six scores the software uses to rank the next action. That ranking is not the same thing as a bulletin’s own step 1. TSB 02-06-04-023A’s transcribed procedure starts by removing the intake.</p></div>
+  </div>
+
+  <div class="callout">
+    <strong>Worked trace — P0332</strong>
+    The entity is the rear knock sensor (P0332), which is not cylinder bank 2. The corroborated bulletin’s condition is spark knock and/or an MIL with that one code, on 1999–2002 trucks. This profile is a 2003. The transcribed repair replaces the rear sensor and leaves the RTV dam open at the rear. It does not start at the connector, and it does not say the code rules detonation out.
+  </div>
+</section>
+
+<section id="gm-chains">
+  <div class="groupline"><span class="g">PART 03</span><div class="rule"></div></div>
+  <h2>The two cause chains that belong to this engine</h2>
+  <p class="deck">These are the GM-specific priors the Silverado cartridge actually uses. They re-rank two SAE classes that already exist. They do not add a new fault class. Both bulletins are corroborated, not read from GM’s original PDF.</p>
+
+  <h3>Chain A — rear knock sensor, P0332, 1999–2002</h3>
+  <p class="prose"><span class="badge b-corrob">corroborated</span> TSB 02-06-04-023A. Listed trucks are 1999–2002 Silverados with 4.8 / 5.3 / 6.0 engines, including LQ4 VIN U. This profile is a 2003. The named code is P0332 only. The stated cause is corrosion of the rear knock sensor from water in the cavity, more apparent if the engine compartment is washed often. The customer comment in the bulletin is spark knock and/or an MIL. P0327 is not in that text.</p>
+
+  <div class="sysgrid">
+    <div class="syscard"><h4>Entities</h4><ul><li>Rear knock sensor — the bulletin’s part, P/N 10456603</li><li>P0332 — the only DTC the bulletin names</li><li>Front knock sensor — P0327 is a different circuit, not this bulletin</li><li>Intake that has to come off to reach the rear sensor</li></ul></div>
+    <div class="syscard"><h4>Properties</h4><ul><li>Front / rear, not left / right</li><li>“Rear bank” in the bulletin means the rear sensor</li><li>Cylinder bank 1 is still the driver’s side — a different axis</li></ul></div>
+    <div class="syscard"><h4>Relationship</h4><ul><li>Water in the rear sensor cavity → corrosion → P0332</li><li>The bulletin also lists audible spark knock as a customer comment</li><li>The RTV bead is not a closed circle; the rear stays open</li></ul></div>
+  </div>
+
+  <div class="rank">
+    <div class="row"><span class="tag tag-first">First</span><div><strong>Year and code</strong><p>1999–2002 and P0332. This truck is one model year later. Do not apply the repair to a front-bank P0327.</p></div></div>
+    <div class="row"><span class="tag tag-next">Next</span><div><strong>Rear sensor and open RTV dam</strong><p>Remove the intake. Replace the rear sensor and tighten to 20 N·m (15 lb ft). Bead about 9 mm wide and 6 mm high. Leave the rear open. Remove the rear intake foam seal. The parts list is that one sensor, not intake gaskets.</p></div></div>
+    <div class="row"><span class="tag tag-later">Later</span><div><strong>The ping the customer reported</strong><p>The bulletin does not say the code means the engine is not knocking. Spark knock is the condition it opens with.</p></div></div>
+  </div>
+  <p class="prose">Clear the code and drive the same kind of trip that set it. A parts-kit listing that bundles intake gaskets with this bulletin number is not the transcribed procedure.</p>
+
+  <h3>Chain B — upper intake gasket, rough idle, P0300</h3>
+  <p class="prose"><span class="badge b-corrob">corroborated</span> TSB 05-06-04-029A (June 24, 2005). The titled engines are 2002–2004 L59 flex-fuel (VIN Z). A following sentence says it may apply to regular-fuel engines including this LQ4 (VIN U). The named complaint is rough idle, misfire, and/or an MIL with P0300. The stated L59 cause is fuel pooling on the upper manifold-to-head gasket until it degrades into an unmetered air leak. The retrieved text does not name P0171, P0174, or a coolant leak.</p>
+
+  <div class="sysgrid">
+    <div class="syscard"><h4>Entities</h4><ul><li>Upper intake gasket</li><li>Teal-green P/N 89017589</li><li>Orange P/N 17113557 — do not install</li><li>Intake-to-head deck, which the bulletin says to inspect for warpage</li></ul></div>
+    <div class="syscard"><h4>Properties</h4><ul><li>Titled on L59; LQ4 is “may apply”</li><li>Named code is P0300, not a lean code</li><li>Use it only after the diagnostic check already points at a gasket air leak</li></ul></div>
+    <div class="syscard"><h4>Relationship</h4><ul><li>Degraded gasket → unmetered air → rough idle / misfire / P0300</li><li>An unmetered air leak can also lean the engine out; that is not a code the bulletin names</li><li>A one-bank lean code is not this bulletin by itself</li></ul></div>
+  </div>
+
+  <div class="rank">
+    <div class="row"><span class="tag tag-first">First</span><div><strong>The diagnostic check, not the gasket</strong><p>The bulletin says to start with the Diagnostic System Check and to follow these steps only if rough idle, misfire, or P0300 already points at an intake-gasket air leak.</p></div></div>
+    <div class="row"><span class="tag tag-next">Next</span><div><strong>Teal gasket, then the deck</strong><p>Install teal-green P/N 89017589. Do not install orange P/N 17113557. Inspect the intake-to-head deck for warpage. The retrieved text does not give a measurement limit.</p></div></div>
+    <div class="row"><span class="tag tag-later">Later</span><div><strong>Lean codes are a different claim</strong><p>Both banks lean can be one shared air leak, and that is worth proving. It is not what this bulletin titles. Do not add a coolant-loss finding from this row.</p></div></div>
+  </div>
+
+  <div class="callout note">
+    <strong>What this is not</strong>
+    The Jeep’s MultiAir oil-starvation story does not apply. Chronic oil use can still be recognized on this truck as a trend, but the high-band cascade from oil loss into a MultiAir actuator is gated to the Tigershark family and will not fire here.
+  </div>
+</section>
+
+<section id="engine">
+  <div class="groupline"><span class="g">PART 04</span><div class="rule"></div></div>
+  <h2>Engine map</h2>
+  <p class="deck">LQ4 is a cast-iron block, aluminum-head, pushrod V8. The numbers below are the 2003 Vortec 6000 brochure figures, not a measurement of this VIN.</p>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>Property</th><th>Value</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>Displacement</td><td class="mono">6.0 L · 364 cu in · 5,967 cc</td><td><span class="badge b-platform">platform</span></td></tr>
+      <tr><td>Bore × stroke</td><td class="mono">4.00 in × 3.62 in</td><td><span class="badge b-platform">platform</span></td></tr>
+      <tr><td>Block / heads</td><td>Cast-iron block, aluminum heads, OHV, 2 valves per cylinder</td><td><span class="badge b-platform">platform</span></td></tr>
+      <tr><td>Compression</td><td class="mono">9.4:1 · regular fuel</td><td><span class="badge b-platform">platform</span></td></tr>
+      <tr><td>Output (brochure)</td><td class="mono">300 hp @ 4,400 rpm · 360 lb-ft @ 4,000 rpm</td><td><span class="badge b-platform">platform</span></td></tr>
+      <tr><td>Firing order</td><td class="mono">1–8–7–2–6–5–4–3</td><td><span class="badge b-platform">platform</span></td></tr>
+      <tr><td>Bank 1</td><td>Driver’s side · cylinders 1, 3, 5, 7 front to rear · P0171, upstream O2 on this side</td><td><span class="badge b-platform">platform</span></td></tr>
+      <tr><td>Bank 2</td><td>Passenger side · cylinders 2, 4, 6, 8 front to rear · P0174</td><td><span class="badge b-platform">platform</span></td></tr>
+      <tr><td>Ignition / fuel</td><td>Coil-near-plug, eight coils (P0351–P0358). Sequential port injection, eight injectors (P0201–P0208).</td><td><span class="badge b-platform">platform</span></td></tr>
+      <tr><td>Knock sensors</td><td>Two, in the valley, front and rear — see Chain A</td><td><span class="badge b-corrob">corroborated</span></td></tr>
+      <tr><td>EGR</td><td>Reported deleted on 2003 gas applications. Confirm by looking: an EGR valve on a stock LQ4 is unexpected. The 8.1 and the Duramax of this year do have EGR, and this truck is neither.</td><td><span class="badge b-corrob">corroborated</span></td></tr>
+      <tr><td>Secondary air</td><td>No air pump is part of the published Vortec 6000 description. If a secondary-air code appears, find the hardware before diagnosing a pump.</td><td><span class="badge b-platform">platform</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <figure>
+    <svg viewBox="0 0 640 420" role="img" aria-label="Top view of the LQ4. Bank 1 is the driver side with cylinders 1, 3, 5, 7 from front to rear. Bank 2 is the passenger side with cylinders 2, 4, 6, 8.">
+      <text x="320" y="22" text-anchor="middle" font-size="11" fill="var(--ink-faint)">FRONT OF THE TRUCK</text>
+      <text x="180" y="52" text-anchor="middle" class="lbl" font-size="14" fill="var(--accent)">Bank 1 · driver</text>
+      <text x="460" y="52" text-anchor="middle" class="lbl" font-size="14" fill="var(--corrob)">Bank 2 · passenger</text>
+      <g stroke="currentColor" stroke-width="1.4" fill="none">
+        <circle cx="180" cy="90" r="26"/><text x="180" y="96" text-anchor="middle" font-size="16" stroke="none" fill="currentColor">1</text>
+        <circle cx="180" cy="156" r="26"/><text x="180" y="162" text-anchor="middle" font-size="16" stroke="none" fill="currentColor">3</text>
+        <circle cx="180" cy="222" r="26"/><text x="180" y="228" text-anchor="middle" font-size="16" stroke="none" fill="currentColor">5</text>
+        <circle cx="180" cy="288" r="26"/><text x="180" y="294" text-anchor="middle" font-size="16" stroke="none" fill="currentColor">7</text>
+        <circle cx="460" cy="90" r="26"/><text x="460" y="96" text-anchor="middle" font-size="16" stroke="none" fill="currentColor">2</text>
+        <circle cx="460" cy="156" r="26"/><text x="460" y="162" text-anchor="middle" font-size="16" stroke="none" fill="currentColor">4</text>
+        <circle cx="460" cy="222" r="26"/><text x="460" y="228" text-anchor="middle" font-size="16" stroke="none" fill="currentColor">6</text>
+        <circle cx="460" cy="288" r="26"/><text x="460" y="294" text-anchor="middle" font-size="16" stroke="none" fill="currentColor">8</text>
+      </g>
+      <text x="320" y="200" text-anchor="middle" font-size="11" fill="var(--ink-faint)">valley</text>
+      <text x="320" y="216" text-anchor="middle" font-size="11" fill="var(--ink-faint)">knock sensors</text>
+      <text x="320" y="348" text-anchor="middle" font-size="11" fill="var(--ink-faint)">REAR · firewall</text>
+      <text x="320" y="390" text-anchor="middle" class="lbl" font-size="14">Firing order 1 – 8 – 7 – 2 – 6 – 5 – 4 – 3</text>
+    </svg>
+    <figcaption>Fig. 1 — Driver’s side means the left side as you sit in the seat. Cylinder 1 is the front cylinder on that side. P0171 is bank 1. P0174 is bank 2. The two knock sensors sit in the valley between the banks, one toward the front and one toward the rear — that axis is not bank 1 versus bank 2.</figcaption>
+  </figure>
+
+  <div class="callout warn">
+    <strong>Confirm cylinder 1 before a repair</strong>
+    This layout is the Gen III truck convention, repeated across independent references. It is not stamped by this VIN decode. Before you pull a coil or an injector, match the number to the plug you are holding.
+  </div>
+
+  <div class="sysgrid">
+    <div class="syscard"><h4>PCM</h4><ul><li>Owns sensor inputs and actuator outputs</li><li>Sets every code in Part 05</li><li>Learns fuel trim per bank</li></ul></div>
+    <div class="syscard"><h4>Sensors the codes name</h4><ul><li>MAF and MAP</li><li>Coolant temperature, intake air temperature</li><li>Crankshaft and camshaft position</li><li>Throttle position</li><li>Knock, front and rear</li><li>Oxygen, upstream and downstream, each bank</li></ul></div>
+    <div class="syscard"><h4>Actuators</h4><ul><li>Eight injectors, eight coils</li><li>Throttle body</li><li>EVAP purge and vent solenoids</li></ul></div>
+  </div>
+</section>
+
+<section id="ontology">
+  <div class="groupline"><span class="g">PART 05</span><div class="rule"></div></div>
+  <h2>What the software can honestly name</h2>
+  <p class="deck">The running app only proves classes in the <code>generic</code> view. That view is SAE-portable. GM depth, today, is a higher-priority framing of knock-sensor and lean-fuel classes — the check order in Part 03 — not a separate ontology.</p>
+
+  <div class="grid2">
+    <div class="syscard"><h4>Air</h4><p>Intake, EVAP, catalyst, oxygen. Prove the gas path with trims and a leak check before condemning electronics.</p></div>
+    <div class="syscard"><h4>Electricity</h4><p>Coils, injectors, heaters, sensor circuits. A circuit code names a path, not yet a dead part.</p></div>
+    <div class="syscard"><h4>Mechanical</h4><p>Misfire and cam/crank correlation. Isolate the cylinder before replacing the sensor that reported it.</p></div>
+    <div class="syscard"><h4>Fluid</h4><p>Oil and coolant. Level, quality, and temperature come before blaming an actuator. The intake-gasket bulletin does not add a coolant-seal failure.</p></div>
+  </div>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>Fault class</th><th>Evidence that proves it</th><th>Plain rule</th></tr></thead>
+    <tbody>
+      <tr><td><strong>MisfireUnderLoad</strong></td><td class="mono">P0300–P0308 or P0316, plus high load now or a recurring high-load trend</td><td>Mechanical then air. Unburned fuel cooks the catalyst if you keep towing on it.</td></tr>
+      <tr><td><strong>CamCrankCorrelationFault</strong></td><td class="mono">P0016–P0019 or P0335–P0349</td><td>Timing or the crank/cam circuit. Do not clear and hope.</td></tr>
+      <tr><td><strong>IgnitionCoilCircuitFault</strong></td><td class="mono">P0351–P0358</td><td>One coil circuit. Often the cause that shows up next as misfire.</td></tr>
+      <tr><td><strong>InjectorCircuitFault</strong></td><td class="mono">P0201–P0208</td><td>One injector circuit. Prove the wire before opening the rail.</td></tr>
+      <tr><td><strong>KnockSensorCircuitFault</strong></td><td class="mono">P0325–P0328 or P0330–P0333</td><td>Circuit only. On this engine use Chain A before calling it detonation.</td></tr>
+      <tr><td><strong>LeanFuelBank1 / Bank2</strong></td><td class="mono">P0171 / P0174, plus positive long-term trim or a rising-trim trend</td><td>Both codes together: Chain B. One code: that bank’s leak, metering, or fuel, and do not assume the shared gasket.</td></tr>
+      <tr><td><strong>RichFuelBank1 / Bank2</strong></td><td class="mono">P0172 / P0175, plus negative trim or a falling trend</td><td>Extra fuel or a metering error. A stuck purge valve can add vapor and drive a rich idle; prove it before a sensor swap.</td></tr>
+      <tr><td><strong>CatalystEfficiencyBank1 / Bank2</strong></td><td class="mono">P0420 / P0430</td><td>An outcome. Walk backward through misfire, lean, rich, and oxygen-sensor faults before replacing the converter.</td></tr>
+      <tr><td><strong>O2 circuit / performance / heater</strong></td><td class="mono">P0130–P0161, by bank and upstream vs downstream</td><td>Upstream sensors steer fuel. Downstream sensors judge the catalyst. Heater and circuit first, then the reading.</td></tr>
+      <tr><td><strong>EVAP leak / purge / vent</strong></td><td class="mono">P0440–P0457, P0441, P0443, P0496, P0446, P0449</td><td>Find the leak with smoke before replacing solenoids. Incorrect purge flow is a metering disturbance — see the watchlist.</td></tr>
+      <tr><td><strong>CoolantThermostatFault</strong></td><td class="mono">P0125, P0126, P0128</td><td>Insufficient coolant temperature for closed loop. Thermal and fluid first.</td></tr>
+      <tr><td><strong>EctSensorCircuitFault</strong></td><td class="mono">P0115–P0119</td><td>Do not trust the temperature number until the circuit is sound.</td></tr>
+      <tr><td><strong>MapSensorFault / ThrottlePositionSensorFault</strong></td><td class="mono">P0105–P0109 / P0120–P0124, P0220–P0223</td><td>Circuit reporting load or throttle. Verify it before chasing an unrelated vacuum leak.</td></tr>
+      <tr><td><strong>Egr* / SecondaryAir*</strong></td><td class="mono">P0400–P0406 / P0410–P0419</td><td>The generic view can name these. On a stock 2003 LQ4, look for the part before you chase the class. See Part 04.</td></tr>
+      <tr><td><strong>ChronicOilConsumption</strong></td><td class="mono">Oil-level trend over logged samples, never one scan</td><td>Real on this truck. It does not cascade into the Jeep MultiAir class.</td></tr>
+    </tbody>
+  </table></div>
+
+  <details>
+    <summary>Seeded DTC → concept lookup</summary>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Code</th><th>SAE description</th><th>Concept</th></tr></thead>
+        <tbody>
+          <tr><td class="dtc">P0300–P0308, P0316</td><td>Misfire, random or cylinder 1–8, including startup</td><td class="mono">CylinderMisfire</td></tr>
+          <tr><td class="dtc">P0016–P0019</td><td>Crank–cam correlation</td><td class="mono">CamCrankCorrelation</td></tr>
+          <tr><td class="dtc">P0335–P0349</td><td>Crankshaft or camshaft position circuit</td><td class="mono">CamCrankSensorCircuit</td></tr>
+          <tr><td class="dtc">P0171 / P0174</td><td>System too lean, bank 1 / bank 2</td><td class="mono">LeanCodeBank1 / 2</td></tr>
+          <tr><td class="dtc">P0172 / P0175</td><td>System too rich, bank 1 / bank 2</td><td class="mono">RichCodeBank1 / 2</td></tr>
+          <tr><td class="dtc">P0420 / P0430</td><td>Catalyst efficiency, bank 1 / bank 2</td><td class="mono">CatalystCodeBank1 / 2</td></tr>
+          <tr><td class="dtc">P0130–P0141</td><td>Bank 1 oxygen sensors, upstream then downstream</td><td class="mono">O2*Bank1</td></tr>
+          <tr><td class="dtc">P0150–P0161</td><td>Bank 2 oxygen sensors, upstream then downstream</td><td class="mono">O2*Bank2</td></tr>
+          <tr><td class="dtc">P0442, P0456</td><td>EVAP small / very small leak</td><td class="mono">EvapCodeSmall</td></tr>
+          <tr><td class="dtc">P0440, P0455, P0457</td><td>EVAP system, large leak, or loose cap</td><td class="mono">EvapCodeLarge</td></tr>
+          <tr><td class="dtc">P0441, P0443, P0496</td><td>Purge flow or purge valve circuit</td><td class="mono">EvapPurgeCode</td></tr>
+          <tr><td class="dtc">P0446, P0449</td><td>EVAP vent</td><td class="mono">EvapVentCode</td></tr>
+          <tr><td class="dtc">P0400–P0406</td><td>EGR flow or EGR circuit</td><td class="mono">EgrFlowCode / EgrCircuitCode</td></tr>
+          <tr><td class="dtc">P0410–P0419</td><td>Secondary air</td><td class="mono">SecondaryAirCode</td></tr>
+          <tr><td class="dtc">P0115–P0119</td><td>Coolant-temperature sensor circuit</td><td class="mono">EctCircuitCode</td></tr>
+          <tr><td class="dtc">P0125, P0126, P0128</td><td>Insufficient coolant temperature</td><td class="mono">ThermostatCode</td></tr>
+          <tr><td class="dtc">P0351–P0358</td><td>Ignition coil 1–8 circuit</td><td class="mono">IgnitionCoilCircuit</td></tr>
+          <tr><td class="dtc">P0201–P0208</td><td>Injector circuit, cylinder 1–8</td><td class="mono">InjectorCircuitCode</td></tr>
+          <tr><td class="dtc">P0105–P0109</td><td>MAP / baro circuit</td><td class="mono">MapSensorCode</td></tr>
+          <tr><td class="dtc">P0325–P0328</td><td>Knock sensor 1 circuit (front, on this engine)</td><td class="mono">KnockSensorCode</td></tr>
+          <tr><td class="dtc">P0330–P0333</td><td>Knock sensor 2 circuit (rear, on this engine)</td><td class="mono">KnockSensorCode</td></tr>
+          <tr><td class="dtc">P0120–P0124, P0220–P0223</td><td>Throttle / pedal position circuit</td><td class="mono">ThrottlePositionCode</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<section id="cascade">
+  <div class="groupline"><span class="g">PART 06</span><div class="rule"></div></div>
+  <h2>Forward watchlist</h2>
+  <p class="deck">These edges run only after something is already confirmed. They are shop priors — Watch, Elevated, High — not probabilities, and they never declare the next failure proven. Bands and wording are copied from <code>cascade-edges.json</code>.</p>
+
+  <h3>Powertrain</h3>
+  <div class="quickgrid">
+    <div class="rulecard band-elevated"><div class="flow">CamCrankCorrelationFault <span class="arrow">→</span> MisfireUnderLoad</div><span class="band">Elevated</span><p>Timing or crank/cam circuit faults commonly show up next as misfire under load if the engine keeps running.</p><span class="horizon">Immediate to short-term if driven</span></div>
+    <div class="rulecard band-elevated"><div class="flow">IgnitionCoilCircuitFault <span class="arrow">→</span> MisfireUnderLoad</div><span class="band">Elevated</span><p>A coil circuit fault commonly becomes a cylinder misfire under load.</p><span class="horizon">Immediate to short-term if driven</span></div>
+    <div class="rulecard band-elevated"><div class="flow">InjectorCircuitFault <span class="arrow">→</span> MisfireUnderLoad</div><span class="band">Elevated</span><p>An open or shorted injector circuit commonly becomes a hard misfire on that cylinder.</p><span class="horizon">Immediate if the circuit stays open</span></div>
+    <div class="rulecard band-elevated"><div class="flow">MisfireUnderLoad <span class="arrow">→</span> CatalystEfficiencyBank1</div><span class="band">Elevated</span><p>Chronic misfire dumps raw fuel into the catalyst and commonly cooks the brick before P0420 appears. An unresolved open misfire case carries the same watch for as long as the truck is driven.</p><span class="horizon">Often within a few hundred miles of continued misfire under load</span></div>
+    <div class="rulecard band-watch"><div class="flow">RisingFuelTrim <span class="arrow">→</span> LeanFuelBank1</div><span class="band">Watch</span><p>A rising long-term trim is early lean evidence. On this engine, remember Chain B if bank 2 is rising too.</p><span class="horizon">Next several drive cycles if the trend continues</span></div>
+    <div class="rulecard band-watch"><div class="flow">EvapPurgeSystemFault <span class="arrow">→</span> LeanFuelBank1</div><span class="band">Watch</span><p>The curated edge treats incorrect purge flow as a metering disturbance that can drive positive trim. The lean-fuel playbook separately says a stuck-open purge often shows up rich at idle when the canister is saturated. Prove which failure you have. The edge is a watch, not a direction proof.</p><span class="horizon">Next several drive cycles if purge stays stuck open</span></div>
+    <div class="rulecard band-watch"><div class="flow">LeanFuelBank1 <span class="arrow">→</span> CatalystEfficiencyBank1</div><span class="band">Watch</span><p>Sustained lean and high positive trim stress catalyst light-off and oxygen storage.</p><span class="horizon">Miles to short seasons depending on severity</span></div>
+    <div class="rulecard band-watch"><div class="flow">O2PerformanceFaultBank1 <span class="arrow">→</span> CatalystEfficiencyBank1</div><span class="band">Watch</span><p>An upstream oxygen-sensor performance fault corrupts fuel control. Fix the sensor path before chasing the converter.</p><span class="horizon">Variable</span></div>
+  </div>
+
+  <h3>One-bank misfire, outside the ontology file</h3>
+  <div class="callout note">
+    <strong>Corroborated shop prior, not a fetched bulletin</strong>
+    A GM Preliminary Information numbered PIP3056 (dated 2004 in reposts) is widely quoted for 1997–2005 Gen III V8s: a P0300 from two to four cylinders on the same bank, sometimes with a fuel-trim code on that bank. The quoted checks are an injector balance test (one bad injector can misfuel a whole bank), inspection of that bank’s upstream oxygen-sensor connector for water — passenger-side harnesses can get dripped on by A/C evaporator condensate — an exhaust-backpressure check, and swapping the upstream oxygen sensors side to side to see if the misfire moves. The original PI was not fetched. Use it as a ranked guess, behind the coil and injector circuit codes if those are already set.
+  </div>
+
+  <h3>Chassis — only from what you observe</h3>
+  <p class="prose">These antecedents are operator-entered conditions. A scan tool does not prove them.</p>
+  <div class="quickgrid">
+    <div class="rulecard band-elevated"><div class="flow">Brake pads thin <span class="arrow">→</span> rotor scoring</div><span class="band">Elevated</span><p>Thin pads leave less margin. Continued driving commonly scores the rotor before the next pad change.</p><span class="horizon">Soon if driven hard or pads are near minimum</span></div>
+    <div class="rulecard band-high"><div class="flow">Pads metal-on-metal <span class="arrow">→</span> rotor damage</div><span class="band">High</span><p>Backing-plate contact machines the rotor face. Expect rotor replacement with the pads.</p><span class="horizon">Immediate — do not keep driving on grinding brakes</span></div>
+    <div class="rulecard band-elevated"><div class="flow">Caliper seized <span class="arrow">→</span> tapered pad wear</div><span class="band">Elevated</span><p>A sticking caliper forces tapered wear on that corner.</p><span class="horizon">Immediate to short-term while driven</span></div>
+    <div class="rulecard band-high"><div class="flow">Caliper seized <span class="arrow">→</span> rotor heat spot</div><span class="band">High</span><p>A dragging caliper heat-spots the rotor. Repair or machine it with the caliper.</p><span class="horizon">Immediate if the wheel is running hot</span></div>
+    <div class="rulecard band-elevated"><div class="flow">Brake fluid dark <span class="arrow">→</span> hydraulic corrosion</div><span class="band">Elevated</span><p>Dark or overdue fluid usually means moisture. Seals and ABS hardware corrode next.</p><span class="horizon">Seasons if the fluid stays neglected</span></div>
+    <div class="rulecard band-watch"><div class="flow">Rotor scored <span class="arrow">→</span> hub-bearing noise</div><span class="band">Watch</span><p>Once scoring is confirmed by inspection, heat and vibration become a reason to watch the hub.</p><span class="horizon">Next seasons if vibration and heat keep cycling the hub</span></div>
+    <div class="rulecard band-high"><div class="flow">Hub growl <span class="arrow">→</span> wheel-hub failure</div><span class="band">High</span><p>Load-sensitive growl commonly progresses to play, ABS tone-ring damage, or seizure.</p><span class="horizon">Soon — do not ignore a growing growl</span></div>
+    <div class="rulecard band-elevated"><div class="flow">CV click on a turn <span class="arrow">→</span> joint failure</div><span class="band">Elevated</span><p>Outer-joint click on lock-steer usually means a torn boot heading for axle replacement. This generation’s 2500HD 4×4 is an independent front, so the joint is expected — still confirm under the truck.</p><span class="horizon">Miles to short seasons depending on severity</span></div>
+    <div class="rulecard band-elevated"><div class="flow">Serpentine belt cracked <span class="arrow">→</span> accessory-drive loss</div><span class="band">Elevated</span><p>A cracked belt can shed ribs and strand the alternator, water pump, and power steering. On an HD hydro-boost truck, power-steering loss is also brake-assist loss.</p><span class="horizon">Soon if cracks are deep or chunks are missing</span></div>
+    <div class="rulecard band-watch"><div class="flow">Coolant hose soft or swollen <span class="arrow">→</span> coolant leak</div><span class="band">Watch</span><p>Soft or swollen hoses commonly split at the end of a heat cycle.</p><span class="horizon">Next seasons or the next hard heat soak</span></div>
+  </div>
+</section>
+
+<section id="rest">
+  <div class="groupline"><span class="g">PART 07</span><div class="rule"></div></div>
+  <h2>The rest of the truck</h2>
+  <p class="deck">A scan tool does not see these. They are here so a noise or a pedal change has an entity to attach to. Where the VIN is silent, the row says so.</p>
+
+  <h3>Drivetrain</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Entity</th><th>What is actually known</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>Transmission</td><td>Not decoded. The 2003 HD published list is Hydra-Matic 4L80-E (RPO MT1), a 5-speed manual (RPO MW3), ZF S6-650 (RPO ML6), and Allison 1000 (RPO M74). Period tables disagree on whether MW3 is printed as NVG 3500 or NVG 4500; the 5.61:1 first gear in those tables is the heavy 5-speed ratio. Those tables do not, by themselves, assign one gearbox to the LQ4. Read the M-code on the glovebox RPO label. A clutch pedal only splits manual from automatic; it does not name which manual.</td><td><span class="badge b-open">open</span></td></tr>
+      <tr><td>Transfer case</td><td>4WD is VIN-verified. The 2500HD/3500 line uses one of two heavy-duty, chain-driven, part-time New Venture cases, both 32-spline in and out, both 2HI/4HI/N/4LO only — this HD line has no Auto-4WD mode (that AutoTrac/NV246 feature belongs to the 1500/1500HD): NV261HD (floor lever, RPO NP2) or NV263HD (push-button, RPO NP1). The tag on the case or the RPO label decides which.</td><td><span class="badge b-corrob">corroborated</span></td></tr>
+      <tr><td>Front axle</td><td>2001–2007 2500HD 4×4 uses an independent torsion-bar front and an AAM 9.25 in IFS differential. That is not the pre-2001 solid axle, and it is not the 1500’s 8.6 in axle. A straight axle tube under the bumper would mean this truck is not the expected layout — look.</td><td><span class="badge b-platform">platform</span></td></tr>
+      <tr><td>Rear axle</td><td>Commonly the AAM 11.5 in full-floating unit on this HD line (hub-flange bolts visible at each rear wheel) — not the older corporate “14-bolt” semi-float some GM-truck habits assume. Ratio and locker are RPO facts, not VIN facts: GT4 is 3.73, GT5 is 4.10 (standard on the Vortec 6000). G80 on the label means an Eaton locking differential; GQ1 means open.</td><td><span class="badge b-corrob">corroborated</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Brakes</h3>
+  <div class="callout">
+    <strong>Hydro-boost is the HD design, not a VIN-list fact</strong>
+    Trucks in this GVWR class assist the brake pedal with a hydraulic booster fed by the power-steering pump, not a vacuum can. NHTSA campaign 04V045000 describes an out-of-spec relief-valve bore on some 2003 Silverados: the O-ring can fracture and pedal or steering effort rises slightly while braking. The campaign matches this make, model, and year. It does not by itself prove this VIN is one of the roughly 68,875 units. A harder pedal still points first at the belt, fluid, and pump that feed the booster, and then at whether the recall repair was done.
+  </div>
+  <div class="sysgrid">
+    <div class="syscard"><h4>Brakes</h4><ul><li>Pads and rotors, each corner</li><li>Calipers</li><li>Hydro-boost unit</li><li>Power-steering pump, belt, and fluid — they are part of the brake system</li></ul></div>
+    <div class="syscard"><h4>Front suspension</h4><ul><li>Torsion bars, expected</li><li>Upper and lower ball joints</li><li>CV halfshafts, expected because the front is independent</li><li>Hubs and wheel bearings</li></ul></div>
+    <div class="syscard"><h4>Rear</h4><ul><li>Leaf springs</li><li>Shocks</li><li>Driveshaft and U-joints</li></ul></div>
+  </div>
+
+  <h3>Cooling and charging</h3>
+  <div class="grid2">
+    <div class="syscard"><h4>Cooling</h4><ul>
+      <li>Radiator, water pump, engine-driven fan</li>
+      <li>Thermostat and coolant-temperature sensor — Part 05</li>
+      <li>Heater hoses and the radiator cap — a loss with no puddle is still a cooling-system check, not Chain B</li>
+    </ul></div>
+    <div class="syscard"><h4>Electrical</h4><ul>
+      <li>One alternator and one battery is the usual gas-HD layout</li>
+      <li>Starter</li>
+      <li>The PCM and the harness are where every “electricity” class in Part 05 physically lives</li>
+    </ul></div>
+  </div>
+
+  <h3>Body</h3>
+  <div class="callout">
+    <strong>Tailgate cables — campaign match, not a VIN-list hit</strong>
+    NHTSA 04V129000 names the galvanized cables that hold the tailgate open on certain 2003 Silverados. They corrode, weaken, and can fracture. If both fail, the tailgate drops onto the bumper. Inspect both cables. Whether this VIN was in the population, or already repaired, is a dealer question.
+  </div>
+  <p class="prose">Ladder frame, cab, and bed are otherwise undescribed for this VIN. Nothing else about the body is documented here.</p>
+</section>
+
+<section id="recalls">
+  <div class="groupline"><span class="g">PART 08</span><div class="rule"></div></div>
+  <h2>Recalls and bulletins on file</h2>
+  <p class="deck">Copied from <code>known-campaigns.json</code>. Primary means the NHTSA campaign record was read. Corroborated means the GM PDF was not reached.</p>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>Id</th><th>What it says</th><th>What you do</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="mono">04V045000<br><span class="badge b-primary">primary</span></td>
+        <td>Brake hydro-boost relief valve (GM 04004). Out-of-spec bore; O-ring may fracture; slightly higher brake or steering effort while braking.</td>
+        <td>Dealer replaces the valve, if this VIN is in the population.</td>
+      </tr>
+      <tr>
+        <td class="mono">04V129000<br><span class="badge b-primary">primary</span></td>
+        <td>Tailgate support cables (GM 04007). Corrosion can fracture the cables; both failing drops the tailgate.</td>
+        <td>Dealer replaces the cables, if this VIN is in the population. Inspect them regardless.</td>
+      </tr>
+      <tr>
+        <td class="mono">05V161000<br><span class="badge b-primary">primary</span> <span class="badge b-open">conditional</span></td>
+        <td>Parking-brake lining wear (GM 05042). Only if this truck has a manual transmission with a PBR or TRW parking brake.</td>
+        <td>Confirm manual transmission first. PBR: a low-force spring-clip retainer. TRW: a redesigned cable assembly.</td>
+      </tr>
+      <tr>
+        <td class="mono">02-06-04-023A<br><span class="badge b-corrob">corroborated</span></td>
+        <td>1999–2002, P0332 only, rear knock sensor. This profile is 2003. Chain A.</td>
+        <td>Rear sensor P/N 10456603, open RTV dam, remove the rear foam seal. Not P0327. Not intake gaskets.</td>
+      </tr>
+      <tr>
+        <td class="mono">05-06-04-029A<br><span class="badge b-corrob">corroborated</span></td>
+        <td>Rough idle, misfire, P0300. Titled on L59. LQ4 VIN U is in the may-apply sentence. Retrieved text does not name lean codes or a coolant leak. Chain B.</td>
+        <td>Only after the diagnostic check points at a gasket air leak. Teal P/N 89017589, not orange 17113557. Inspect the deck. No measurement limit in the retrieved text.</td>
+      </tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="quick-trace">
+  <div class="groupline"><span class="g">PART 09</span><div class="rule"></div></div>
+  <h2>Quick-trace</h2>
+  <p class="deck">Complaint, then the first entity to suspect, then why. Open the part when you need the full ranking.</p>
+  <div class="quickgrid">
+    <div class="qcard"><div class="sym">P0171 and P0174 together</div><div class="sys">Part 03 · Chain B</div><div class="why">Both banks lean can be one shared air leak. Bulletin 05-06-04-029A still names P0300, not these lean codes. Do not add a coolant-loss finding from that row.</div></div>
+    <div class="qcard"><div class="sym">Only P0171, or only P0174</div><div class="sys">Part 04 · Part 05</div><div class="why">That bank. Driver’s side is bank 1. Do not promote the shared gasket to first place until the other bank is lean too.</div></div>
+    <div class="qcard"><div class="sym">P0332, spark knock or an MIL</div><div class="sys">Part 03 · Chain A</div><div class="why">Rear sensor only, and the bulletin lists 1999–2002. This truck is a 2003. P0327 is not that bulletin. Front/rear is not driver/passenger.</div></div>
+    <div class="qcard"><div class="sym">Misfire that worsens while towing</div><div class="sys">Part 05 · Part 06</div><div class="why">If a coil or injector code for one cylinder is set, that circuit is the cause and the catalyst is the risk. If several cylinders on one bank misfire, the quoted PIP3056 checks (injector balance, that bank’s upstream oxygen-sensor connector) outrank a random parts swap.</div></div>
+    <div class="qcard"><div class="sym">P0420 or P0430 after a lean code or a misfire</div><div class="sys">Part 06</div><div class="why">The converter is the victim. Walk backward. Bank 1 is the driver’s side.</div></div>
+    <div class="qcard"><div class="sym">Overheating, no puddle</div><div class="sys">Part 07</div><div class="why">Check level, thermostat behavior, fan, and hoses. Bulletin 05-06-04-029A’s retrieved text does not add an inward coolant leak at the intake gasket.</div></div>
+    <div class="qcard"><div class="sym">Higher brake-pedal effort</div><div class="sys">Part 07 · Part 08</div><div class="why">Hydro-boost shares the power-steering pump. Belt, fluid, and pump first; then whether 04V045000 was performed on this VIN.</div></div>
+    <div class="qcard"><div class="sym">Tailgate sags or has dropped</div><div class="sys">Part 07 · Part 08</div><div class="why">Support cables. Inspect both before the second one lets go.</div></div>
+    <div class="qcard"><div class="sym">Parking brake will not hold</div><div class="sys">Part 08</div><div class="why">Only the manual-transmission path has recall 05V161000. An automatic truck is ordinary wear or adjustment until the transmission type is known.</div></div>
+    <div class="qcard"><div class="sym">Growl that changes in a corner</div><div class="sys">Part 06</div><div class="why">Wheel hub. The forward rule is High: play, tone-ring damage, or seizure come next.</div></div>
+    <div class="qcard"><div class="sym">Click on a tight turn</div><div class="sys">Part 06 · Part 07</div><div class="why">Outer CV joint, which this IFS front is expected to have. Confirm the boot before assuming a solid-axle U-joint that this generation did not use.</div></div>
+    <div class="qcard"><div class="sym">Oil level falling on the stick</div><div class="sys">Part 05</div><div class="why">Log it over miles. The software can name chronic oil use. It will not call this a MultiAir failure. Coolant loss is a separate complaint.</div></div>
+  </div>
+</section>
+
+<section id="unknowns">
+  <div class="groupline"><span class="g">PART 10</span><div class="rule"></div></div>
+  <h2>Open unknowns</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Unknown</th><th>Why it changes the map</th><th>How to close it</th></tr></thead>
+    <tbody>
+      <tr><td>Trim (LS / LT / WT)</td><td>Badges and options. It does not change the engine chains.</td><td>Door badge, or the RPO label.</td></tr>
+      <tr><td>Transmission RPO</td><td>Gates 05V161000. Changes fluid and failure model.</td><td>Glovebox RPO label: MT1, MW3, ML6, or M74. A clutch pedal is the fast manual-versus-automatic check; it does not name which manual.</td></tr>
+      <tr><td>Transfer case (NV261HD vs NV263HD)</td><td>Shift procedure and fluid; the RPO (NP2 vs NP1) also confirms it is one of these two HD cases, not a 1500-line AutoTrac unit.</td><td>Tag on the case, or the RPO label. Manual shift lever means NV261HD; push-button means NV263HD.</td></tr>
+      <tr><td>Rear axle ratio and locker</td><td>Gear ratio and whether the rear differential locks.</td><td>GT4 (3.73) or GT5 (4.10), and G80 (locking) vs GQ1 (open), all on the RPO label.</td></tr>
+      <tr><td>Whether each recall was done</td><td>A campaign match is not a completed repair.</td><td>Dealer VIN inquiry for 04V045000, 04V129000, and 05V161000.</td></tr>
+      <tr><td>OBD protocol</td><td>Forcing CAN on a J1850 VPW truck wastes the afternoon.</td><td>Leave the adapter on auto-detect. GMT800 gas trucks are often SAE J1850 VPW. Write down whatever the first live session reports, and only then set <code>obdProtocol</code> on the profile.</td></tr>
+      <tr><td>EGR hardware present</td><td>Decides whether an EGR code has a part behind it.</td><td>Look on the intake. A valve on a stock 2003 LQ4 is unexpected.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Numerical specs still unspecified</h3>
+  <p class="prose">A whole-truck research draft listed these parameters and then left every value unspecified. That draft also describes an 8.1L Vortec (RPO L18). This VIN is an LQ4 6.0. The draft does not supply the numbers, so they stay blank here. When a manual is opened, read the LQ4 / this-VIN row, not the 8.1L row. Transmission fluid capacity stays blocked until the RPO is known (MT1, MW3, ML6, or M74).</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Parameter</th><th>Subsystem</th><th>Value on this truck</th><th>Where to read it</th></tr></thead>
+    <tbody>
+      <tr><td>Main bearing cap bolt torque</td><td>Engine</td><td>Unspecified</td><td>GM service manual, engine section, LQ4</td></tr>
+      <tr><td>Rod bolt torque</td><td>Engine</td><td>Unspecified</td><td>GM service manual, engine section, LQ4</td></tr>
+      <tr><td>Cylinder head bolt torque</td><td>Engine</td><td>Unspecified</td><td>GM service manual, engine section, LQ4</td></tr>
+      <tr><td>Oil-filter tighten torque</td><td>Lubrication</td><td>Unspecified</td><td>GM service information for this filter. A “common value” is not a spec.</td></tr>
+      <tr><td>Coolant pressure-cap rating</td><td>Cooling</td><td>Unspecified</td><td>GM service manual, cooling section, or the cap itself</td></tr>
+      <tr><td>Fan-clutch engagement temperature</td><td>Cooling</td><td>Unspecified</td><td>GM service information for the clutch on this truck</td></tr>
+      <tr><td>Starter current draw</td><td>Electrical</td><td>Unspecified</td><td>Starter specification for the unit on this truck</td></tr>
+      <tr><td>Fuse amperages</td><td>Electrical</td><td>Unspecified</td><td>GM electrical schematics for this body. The draft names fuse 16, fuse 29, and a 60A EBCM fuse without a citation in the file; do not adopt those amperages from the draft.</td></tr>
+      <tr><td>Transmission fluid capacity</td><td>Transmission</td><td>Unspecified</td><td>GM service information for the transmission the RPO label names. One capacity does not cover all four gearboxes.</td></tr>
+      <tr><td>Oil pressure, idle and running</td><td>Lubrication</td><td>Unspecified</td><td>GM engine specifications for the LQ4</td></tr>
+      <tr><td>Camshaft calibration offset</td><td>Engine control</td><td>Unspecified</td><td>A GM bulletin or service procedure that actually states the offset for this calibration</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="glossary">
+  <div class="groupline"><span class="g">PART 11</span><div class="rule"></div></div>
+  <h2>Glossary</h2>
+  <dl class="gloss">
+    <dt>DTC</dt><dd>Diagnostic trouble code. A standardized identifier, such as P0332, stored by the PCM.</dd>
+    <dt>PID</dt><dd>Parameter ID. A live value a scan tool can request, such as coolant temperature or long-term fuel trim.</dd>
+    <dt>LTFT</dt><dd>Long-term fuel trim. The PCM’s learned fuel correction per bank. Positive means it is adding fuel (a lean condition). Negative means it is removing fuel (a rich condition).</dd>
+    <dt>Bank 1</dt><dd>Driver’s side of this engine. Cylinders 1, 3, 5, 7. P0171. Not the front knock sensor.</dd>
+    <dt>Bank 2</dt><dd>Passenger side. Cylinders 2, 4, 6, 8. P0174. Not the rear knock sensor.</dd>
+    <dt>RPO</dt><dd>Regular Production Option. The three-character build codes on the glovebox label. They name the transmission, axle, and options this VIN left with.</dd>
+    <dt>Aspect</dt><dd>Air, electricity, mechanical, or fluid. It chooses the first kind of check, not the verdict.</dd>
+    <dt>Cascade edge</dt><dd>A curated “if A is confirmed, watch for B.” Never a certainty, and never proof that B has already happened.</dd>
+    <dt>Primary</dt><dd>Read from the NHTSA record or the OEM document.</dd>
+    <dt>Corroborated</dt><dd>The original document was not reached. Independent secondary sources agree on the number, the codes, and the repair order.</dd>
+  </dl>
+</section>
+
+<section id="sources">
+  <div class="groupline"><span class="g">PART 12</span><div class="rule"></div></div>
+  <h2>Sources</h2>
+  <div class="prose">
+    <p><span class="badge b-vin">VIN-verified</span> identity is the NHTSA vPIC decode stored on <code>veh:silverado-2500hd-2003</code> in <code>packages/ontology/vehicle-profiles.json</code>.</p>
+    <p><span class="badge b-primary">NHTSA-primary</span> recalls are the three GM campaigns in <code>known-campaigns.json</code>, each checked against <code>api.nhtsa.gov</code> for Chevrolet Silverado 2003. See <code>docs/ai/OEM_RESEARCH_SOURCES.md</code> for the lookup recipe and for why older GM bulletin PDFs were unreachable.</p>
+    <p><span class="badge b-corrob">Corroborated</span> TSBs 02-06-04-023A and 05-06-04-029A are the same file’s TSB rows. The cartridge <code>gm-vortec-6.0-stub.ts</code> is the check order those rows became. PIP3056 is cited only as a repeatedly reposted Preliminary Information; it is not a row in <code>known-campaigns.json</code> because the original was not fetched. The 2003 EGR deletion is the same kind of claim: independent accounts, including a quoted GM year-to-year service comparison and parts listings that fit an EGR valve to the 8.1 and the 6.6 rather than the 6.0, with no GM PDF in hand.</p>
+    <p>For the whole truck beyond the OBD-provable slice — drivetrain, chassis, electrical, comfort/safety, and the full provenance-tagged component ontology — see <code>docs/Ontology_of_2003_Chevrolet_Silverado_2500HD_Truck_Pretty_Print.md</code>.</p>
+    <p><span class="badge b-platform">Platform-typical</span> engine figures (displacement, 9.4:1, aluminum heads, 300 hp and 360 lb-ft, coil-near-plug, the transmission-option list, 4.10 as the Vortec 6000 standard ratio) follow reprinted 2003 Silverado HD specification tables. Bank 1 = driver’s side is the Gen III truck convention across those tables’ cylinder layout and independent diagnostic writeups. The AAM 9.25 in IFS front is the 2001–2007 2500HD 4×4 pattern in axle references, not a measurement of this truck. Confirm anything in this badge against the RPO label before you order a part.</p>
+    <p>Fault classes, aspects, and cascade edges are transcribed from <code>dl-ontology.json</code>, <code>vehicle-system-aspects.json</code>, and <code>cascade-edges.json</code> so this manual stays aligned with what the software will actually prove.</p>
+  </div>
+</section>
+
+</main>
+</div>
+
+<footer>
+  Compiled for veh:silverado-2500hd-2003 · auto-architect ontology as of 2026-09-26 · A reasoning aid, not a factory service manual. Confirm torque, fluids, and safety-critical procedures against GM service information before wrenching.
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var sections = links.map(function(a){ return document.getElementById(a.getAttribute('href').slice(1)); });
+  function onScroll(){
+    var pos = window.scrollY + 120;
+    var current = 0;
+    for (var i = 0; i < sections.length; i++){
+      if (sections[i] && sections[i].offsetTop <= pos) current = i;
+    }
+    links.forEach(function(a, i){ a.classList.toggle('active', i === current); });
+  }
+  document.addEventListener('scroll', onScroll, {passive: true});
+  onScroll();
+})();
+</script>
+</body>
+</html>
