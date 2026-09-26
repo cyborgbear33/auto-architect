@@ -62,6 +62,19 @@ Leave protocol **auto-detect** (GMT800 gas is often J1850 VPW — do not hard-fo
 CAN). Same MX+ family; no Jeep-specific gray adapter required unless you choose
 one for access.
 
+**Expect zero Mode 06 rows on this truck, always.** `python-OBD`'s own
+`test_cmd()` gates every Mode 06 command — including the `$0600` "which MIDs
+are supported" probe itself — behind `protocol_id() in ("6","7","8","9")`,
+i.e. CAN only. J1850 VPW isn't one of those, so on a non-CAN protocol no MID
+is ever added to the adapter's supported-command set: not "no data this
+cycle," but structurally impossible for this truck's protocol, before and
+regardless of drive cycles or Mode 06 dictionary coverage. This is a real
+protocol/library limitation, not a wiring problem, a stub gap, or a bug in
+this app — Mode 03/07 DTCs, Mode 01 PIDs, freeze frame, and STATUS/I-M
+readiness are all unaffected and work normally on J1850 VPW. If the truck
+ever runs CAN instead (confirm via `discover`'s reported `protocolId`), this
+limitation goes away on its own — nothing to change here.
+
 ---
 
 ## 3. What a “full picture” means here
@@ -249,7 +262,8 @@ When you want the best picture before trusting recognition:
 | `rfcomm bind` fails / `/dev/rfcommN` won't open (`Device or resource busy`, or the file exists but every read hangs or errors) | A previous session (or a crash) left a stale binding — this is a Linux Bluetooth-SPP quirk, not a `python-OBD` or MX+ problem, and no amount of retrying the gateway itself fixes it. Release the stale channel first: `sudo rfcomm release 0` (or `sudo rfcomm release /dev/rfcomm0`), confirm nothing is bound with `rfcomm -a` (should print nothing for channel 0), then re-bind per the gateway README: `sudo rfcomm bind 0 AA:BB:CC:DD:EE:FF 1`. If `release` itself hangs, `sudo systemctl restart bluetooth` (drops all BT connections) is the next step before touching the adapter again. |
 | Empty PIDs | Engine running; widen `--pids` only after a support check |
 | Wrong conclusions | Wrong `--vehicle-id`; simulated batch mistaken for live |
-| No Mode 06 / FF | ECU may not have data this cycle — not a gateway “healthy” claim |
+| No Mode 06 / FF this cycle | ECU may not have data yet — not a gateway “healthy” claim; retry after a drive cycle |
+| No Mode 06 rows *ever* (Silverado / any non-CAN vehicle) | Expected, not a fault — Mode 06 is CAN-only in `python-OBD` (see §2); confirm the vehicle's protocol via `discover` before assuming a gateway/adapter problem |
 | Protocol errors (truck) | Clear forced protocol; allow auto-detect |
 | Stuck in Park / flashing odo after battery | Functions → Proxi; AlfaOBD + gray adapter — not gateway `scan` alone |
 
