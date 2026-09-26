@@ -204,7 +204,7 @@ export class CausalBriefService {
         : { symptoms: evidence.dtcs.map((d) => d.code), possibleCauses: [], mostLikelyCauses: [] });
 
     const recognition = await this.recognition.recognize(vehicleId);
-    const fluent = recognition.narration.find((n) => n.className === faultClass)?.fluent;
+    const fluent = recognition.narration?.find((n) => n.className === faultClass)?.fluent;
     const history = await this.solutionHistory.forVehicle(vehicleId, faultClass);
     const cycles = await this.learningCycles.forVehicle(vehicleId, problemId);
     const historyNotes = historyNotesFromSolutionHistory(history);
