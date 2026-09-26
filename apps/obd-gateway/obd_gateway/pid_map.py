@@ -55,6 +55,23 @@ STANDARD_PID_COMMANDS: dict[str, obd.OBDCommand] = {
     "COMMANDED_EVAPORATIVE_PURGE": obd.commands.EVAPORATIVE_PURGE,
     "RUN_TIME": obd.commands.RUN_TIME,
     "DISTANCE_W_MIL": obd.commands.DISTANCE_W_MIL,
+    "CATALYST_TEMP_B1S2": obd.commands.CATALYST_TEMP_B1S2,
+    "CATALYST_TEMP_B2S2": obd.commands.CATALYST_TEMP_B2S2,
+    "OIL_TEMP": obd.commands.OIL_TEMP,
+    "THROTTLE_POS_B": obd.commands.THROTTLE_POS_B,
+    "THROTTLE_ACTUATOR": obd.commands.THROTTLE_ACTUATOR,
+    "SHORT_O2_TRIM_B1": obd.commands.SHORT_O2_TRIM_B1,
+    "LONG_O2_TRIM_B1": obd.commands.LONG_O2_TRIM_B1,
+    "SHORT_O2_TRIM_B2": obd.commands.SHORT_O2_TRIM_B2,
+    "LONG_O2_TRIM_B2": obd.commands.LONG_O2_TRIM_B2,
+    "FUEL_RAIL_PRESSURE_VAC": obd.commands.FUEL_RAIL_PRESSURE_VAC,
+    "FUEL_RAIL_PRESSURE_ABS": obd.commands.FUEL_RAIL_PRESSURE_ABS,
+    "COMMANDED_EQUIV_RATIO": obd.commands.COMMANDED_EQUIV_RATIO,
+    "FUEL_RATE": obd.commands.FUEL_RATE,
+    "WARMUPS_SINCE_DTC_CLEAR": obd.commands.WARMUPS_SINCE_DTC_CLEAR,
+    "DISTANCE_SINCE_DTC_CLEAR": obd.commands.DISTANCE_SINCE_DTC_CLEAR,
+    "RUN_TIME_MIL": obd.commands.RUN_TIME_MIL,
+    "TIME_SINCE_DTC_CLEARED": obd.commands.TIME_SINCE_DTC_CLEARED,
 }
 
 # PID keys real cartridges reference (packages/cartridges/src/*.ts) that are

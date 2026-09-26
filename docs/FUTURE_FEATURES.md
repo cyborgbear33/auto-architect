@@ -142,7 +142,7 @@ into the Journal forever.
 | S4 | DriveSession object (start/stop; batches linked by `sessionId`) | done | `DriveSessionService`; simulate path; Dashboard panel |
 | S5 | Retention policy (keep FF/Mode06 forever; downsample high-rate PIDs) | done | `applyRetention` / prune; keep evidence; hourly PID downsample |
 | S6 | Bluetooth / preferred-adapter discovery | todo | Friction reduction after S1 works manually |
-| S7 | SAE PID/DTC dictionary depth for scan interpretation | partial | ~134 P0xxx + coil/MAP/knock/injector/TPS; still not full J1979 |
+| S7 | SAE PID/DTC dictionary depth for scan interpretation | partial | ~134 P0xxx + coil/MAP/knock/injector/TPS; Mode 01 PID seed now 52 of the 96 standard python-OBD commands (was 35) — still not full J1979 |
 
 **Seams:** `apps/obd-gateway`, `ObservationsService`, store batches, Dashboard.  
 **Anti-patterns:** Classifying faults in the gateway; silent simulate-vs-live;
@@ -690,6 +690,7 @@ actually maintain.
 | Vehicle dossier on Diagnosis (V1) | 2026-07 | Identity strip + PATCH VIN/odo; discovery + campaign links; never invents VIN |
 | Operator complaint framing (H6) | 2026-07 | Diagnosis chips → `operatorComplaints`; enrich statement/symptoms only |
 | OEM steps in causal brief (R6) | 2026-07 | `oemAlsoSays` on A7 brief; campaign/TSB steps + relatedClasses; applicability only |
+| Mode 01 PID seed widened to 52 rows (S7 slice) | 2026-09 | 17 new standard PIDs (catalyst B1S2/B2S2, oil temp, throttle B/actuator, secondary O2 trims, fuel rail abs/vac, commanded equiv ratio, fuel rate, DTC-clear counters) hand-verified against installed `python-OBD` source (hex + unit), not memory; `pid-dictionary.json`, `obd_gateway/pid_map.py`, `OIL_TEMP` added to `LIVE_GAUGE_PID_CHOICES` |
 
 ---
 

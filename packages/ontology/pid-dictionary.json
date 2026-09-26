@@ -253,6 +253,133 @@
       "mode": "01",
       "pidHex": "0x2D",
       "note": "J1979 centered percent; evidence adjacency only."
+    },
+    "CATALYST_TEMP_B1S2": {
+      "description": "Catalyst temperature — Bank 1 Sensor 2",
+      "unit": "celsius",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x3E"
+    },
+    "CATALYST_TEMP_B2S2": {
+      "description": "Catalyst temperature — Bank 2 Sensor 2",
+      "unit": "celsius",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x3F"
+    },
+    "OIL_TEMP": {
+      "description": "Engine oil temperature",
+      "unit": "celsius",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x5C",
+      "note": "Unlike OIL_PRESSURE_PSI/OIL_LEVEL_PCT, this is a real Mode 01 PID — auto-queryable, no --manual-pid needed when the ECU supports it. Evidence adjacency for MultiAir oil-starvation cases; no cartridge threshold yet."
+    },
+    "THROTTLE_POS_B": {
+      "description": "Absolute throttle position B",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x47",
+      "note": "Second TPS signal for correlation checks; evidence adjacency for ThrottlePositionSensorFault, no cartridge threshold yet."
+    },
+    "THROTTLE_ACTUATOR": {
+      "description": "Commanded throttle actuator",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x4C",
+      "note": "Commanded vs. THROTTLE_POS/_B correlation; evidence adjacency for ThrottlePositionSensorFault."
+    },
+    "SHORT_O2_TRIM_B1": {
+      "description": "Short term secondary O2 trim — Bank 1",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x55",
+      "note": "J1979 centered percent; evidence adjacency only."
+    },
+    "LONG_O2_TRIM_B1": {
+      "description": "Long term secondary O2 trim — Bank 1",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x56",
+      "note": "J1979 centered percent; evidence adjacency only."
+    },
+    "SHORT_O2_TRIM_B2": {
+      "description": "Short term secondary O2 trim — Bank 2",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x57",
+      "note": "J1979 centered percent; evidence adjacency only."
+    },
+    "LONG_O2_TRIM_B2": {
+      "description": "Long term secondary O2 trim — Bank 2",
+      "unit": "percent",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x58",
+      "note": "J1979 centered percent; evidence adjacency only."
+    },
+    "FUEL_RAIL_PRESSURE_VAC": {
+      "description": "Fuel rail pressure (relative to vacuum)",
+      "unit": "kPa",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x22"
+    },
+    "FUEL_RAIL_PRESSURE_ABS": {
+      "description": "Fuel rail pressure (absolute)",
+      "unit": "kPa",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x59"
+    },
+    "COMMANDED_EQUIV_RATIO": {
+      "description": "Commanded equivalence ratio",
+      "unit": "ratio",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x44",
+      "note": "Target air-fuel equivalence ratio (~1.0 = stoichiometric); evidence adjacency for lean/rich cases."
+    },
+    "FUEL_RATE": {
+      "description": "Engine fuel rate",
+      "unit": "liters/hour",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x5E"
+    },
+    "WARMUPS_SINCE_DTC_CLEAR": {
+      "description": "Number of warm-ups since codes cleared",
+      "unit": "count",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x30"
+    },
+    "DISTANCE_SINCE_DTC_CLEAR": {
+      "description": "Distance traveled since codes cleared",
+      "unit": "km",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x31"
+    },
+    "RUN_TIME_MIL": {
+      "description": "Time run with MIL on",
+      "unit": "minutes",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x4D"
+    },
+    "TIME_SINCE_DTC_CLEARED": {
+      "description": "Time since trouble codes cleared",
+      "unit": "minutes",
+      "sae": true,
+      "mode": "01",
+      "pidHex": "0x4E"
     }
   }
 }

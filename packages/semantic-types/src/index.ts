@@ -351,6 +351,7 @@ export const LIVE_GAUGE_PID_CHOICES = [
   "TIMING_ADVANCE",
   "O2_B1S1",
   "RUN_TIME",
+  "OIL_TEMP",
 ] as const;
 
 export const MAX_LIVE_GAUGE_PIDS = 6;
