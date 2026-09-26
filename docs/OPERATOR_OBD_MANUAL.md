@@ -246,6 +246,7 @@ When you want the best picture before trusting recognition:
 | Symptom | Try |
 |---|---|
 | Cannot connect | Ignition on; reseat gray adapter + MX+; re-bind rfcomm; `--verbose` |
+| `rfcomm bind` fails / `/dev/rfcommN` won't open (`Device or resource busy`, or the file exists but every read hangs or errors) | A previous session (or a crash) left a stale binding — this is a Linux Bluetooth-SPP quirk, not a `python-OBD` or MX+ problem, and no amount of retrying the gateway itself fixes it. Release the stale channel first: `sudo rfcomm release 0` (or `sudo rfcomm release /dev/rfcomm0`), confirm nothing is bound with `rfcomm -a` (should print nothing for channel 0), then re-bind per the gateway README: `sudo rfcomm bind 0 AA:BB:CC:DD:EE:FF 1`. If `release` itself hangs, `sudo systemctl restart bluetooth` (drops all BT connections) is the next step before touching the adapter again. |
 | Empty PIDs | Engine running; widen `--pids` only after a support check |
 | Wrong conclusions | Wrong `--vehicle-id`; simulated batch mistaken for live |
 | No Mode 06 / FF | ECU may not have data this cycle — not a gateway “healthy” claim |
