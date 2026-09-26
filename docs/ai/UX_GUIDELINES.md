@@ -39,14 +39,15 @@ Apply the same universal rules garden uses:
 
 - Nielsen heuristics (status visibility, real-world language, error prevention)
 - Norman principles (affordance, feedback, conceptual model)
-- Hick's Law — keep nav small and goal-grouped (auto currently has 4 top-level items; keep it that way)
+- Hick's Law — keep nav small and goal-grouped (six short groups in the rail; do not add a seventh destination without a new job)
 - Fitts's Law — primary actions obvious; destructive actions separated
 - Jakob's Law — familiar patterns for lists, forms, status, empty/error states
 - Gestalt — group evidence with the claim it supports
 - **Doherty Threshold** — keep live telemetry feeling responsive (perceived
   latency under ~400ms where practical; avoid full-panel loading flashes on poll)
-- **Progressive disclosure** — operator-readable defaults; raw Mode 06 / DL ids /
-  proof internals behind Debug mode (already practiced — name it when extending)
+- **Progressive disclosure** — operator-readable defaults; raw Mode 06 ids,
+  ranking scores, and undecided classes behind the **Technical detail** toggle
+  (debug mode)
 
 Organize around: What codes are active? What fault class is proven? What should
 I do next? Why? What is forbidden? What did I already try?
@@ -55,24 +56,24 @@ I do next? Why? What is forbidden? What did I already try?
 
 ## 4. Information architecture (current)
 
-Real nav (`apps/web-ui/src/components/Layout.tsx`):
+Rail groups in `apps/web-ui/src/components/Layout.tsx` (labels stay short):
 
 ```text
-Dashboard · Diagnosis · Discovery · Guide · Functions · Recalls & TSBs · Journal
+Operate      — Dashboard (live condition)
+Diagnose     — Diagnosis
+Learn        — Discovery (capability forensics), Guide (mastery curriculum)
+Procedures   — Functions (guided Proxi / special procedures)
+Reference    — Recalls & TSBs
+History      — Journal
 ```
 
-Plus detail route: `/problems/$problemId`.
+Plus detail route: `/problems/$problemId` (opened from Diagnosis, not a rail item).
 
-**Do not grow a flat 17-item nav.** Goal grouping (keep labels short in the rail):
+On narrow screens the rail is a menu; the selected vehicle name stays in the top bar.
+Desktop keeps the labeled Vehicle control in the rail.
 
-```text
-Operate     — Dashboard (live condition)
-Diagnose    — Diagnosis, Problem detail
-Verify/Learn — Discovery (capability forensics), Guide (mastery curriculum)
-OEM ops     — Functions (guided Proxi / special procedures)
-Reference   — Recalls & TSBs
-History     — Journal
-```
+**Do not grow a flat destination list.** A new page belongs in an existing group, or it
+is linked from Dashboard / Diagnosis instead of a new rail item.
 
 **Guide** is the peace-of-mind manual: vehicle → ontology → discovery → scan →
 troubleshoot, personalized per selected vehicle, with Markdown + Print/PDF

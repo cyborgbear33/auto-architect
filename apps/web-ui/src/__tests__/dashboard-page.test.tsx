@@ -296,7 +296,7 @@ describe("Dashboard", () => {
         <Dashboard />
       </QueryClientProvider>,
     );
-    const heading = await screen.findByText("Proven fault classes (LOGOS realize)");
+    const heading = await screen.findByText("Proven conditions");
     const section = within(heading.closest("section")!);
     expect(await section.findByText("MisfireUnderLoad")).toBeInTheDocument();
     expect(section.queryByText("Healthy")).not.toBeInTheDocument();

@@ -690,6 +690,7 @@ actually maintain.
 | Vehicle dossier on Diagnosis (V1) | 2026-07 | Identity strip + PATCH VIN/odo; discovery + campaign links; never invents VIN |
 | Operator complaint framing (H6) | 2026-07 | Diagnosis chips → `operatorComplaints`; enrich statement/symptoms only |
 | OEM steps in causal brief (R6) | 2026-07 | `oemAlsoSays` on A7 brief; campaign/TSB steps + relatedClasses; applicability only |
+| Console shell usability | 2026-09 | Goal-grouped rail + mobile menu; vehicle identity; at-a-glance hero; Dashboard leads with condition, Evidence tools below; operator language on Diagnosis / problem detail |
 
 ---
 

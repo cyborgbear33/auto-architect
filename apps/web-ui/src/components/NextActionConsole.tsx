@@ -79,7 +79,7 @@ export function NextActionConsole({ vehicleId }: { vehicleId: string }) {
   } else if (!hasEvidence && proven.length === 0) {
     headline = "No OBD evidence on file yet";
     detail =
-      "Import an OBD log or simulate a drive below — or follow the Guide for live MX+. Empty is not a clean bill of health.";
+      "Import an OBD log or simulate a drive under Evidence tools — or follow the Guide for a live MX+ scan. Empty is not a clean bill of health.";
     ctaLabel = "How to scan (Guide)";
     ctaTo = "/guide";
   } else if (proven.length === 0) {
@@ -112,25 +112,25 @@ export function NextActionConsole({ vehicleId }: { vehicleId: string }) {
 
   return (
     <section
-      className="mb-4 rounded-lg border border-sky-200 bg-gradient-to-br from-sky-50 to-white px-4 py-3"
+      className="mb-4 rounded-lg border border-slate-800 bg-slate-900 px-4 py-4 shadow-sm"
       aria-labelledby="next-action-heading"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-sky-800">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-sky-300">
             At a glance
           </p>
-          <h2 id="next-action-heading" className="mt-0.5 text-base font-semibold text-slate-900">
+          <h2 id="next-action-heading" className="mt-1 text-lg font-semibold text-white">
             {headline}
           </h2>
-          <p className="mt-1 text-sm text-slate-600">{detail}</p>
+          <p className="mt-1 text-sm leading-relaxed text-slate-300">{detail}</p>
           {proven.length > 0 && (
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {proven.slice(0, 3).map((cls) => {
                 const fluent = fluentForClass(cls, narration);
                 return (
                   <span key={cls} className="inline-flex max-w-xs flex-col gap-0.5">
-                    <span className="text-xs font-medium leading-snug text-slate-800">
+                    <span className="text-xs font-medium leading-snug text-slate-100">
                       {fluent}
                     </span>
                     {fluent !== cls && (
@@ -147,24 +147,24 @@ export function NextActionConsole({ vehicleId }: { vehicleId: string }) {
               )}
             </div>
           )}
-          <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+          <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
             <div>
-              <dt className="inline font-medium text-slate-600">Proven </dt>
+              <dt className="inline font-medium text-slate-300">Proven </dt>
               <dd className="inline">{proven.length}</dd>
             </div>
             <div>
-              <dt className="inline font-medium text-slate-600">Open recs </dt>
+              <dt className="inline font-medium text-slate-300">Open recs </dt>
               <dd className="inline">{recsQ.data?.length ?? 0}</dd>
             </div>
             <div>
-              <dt className="inline font-medium text-slate-600">Active cases </dt>
+              <dt className="inline font-medium text-slate-300">Active cases </dt>
               <dd className="inline">{activeCases.length}</dd>
             </div>
           </dl>
         </div>
         <Link
           to={ctaTo}
-          className="flex-shrink-0 rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white hover:bg-sky-700"
+          className="flex-shrink-0 rounded-md bg-sky-400 px-3.5 py-2 text-sm font-semibold text-slate-950 hover:bg-sky-300"
         >
           {ctaLabel}
         </Link>

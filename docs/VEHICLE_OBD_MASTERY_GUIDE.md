@@ -176,10 +176,16 @@ Gateway posts `Observation` batches. It never classifies faults itself.
 
 ## 5. Operate the console
 
+The sidebar groups pages by job: **Operate**, **Diagnose**, **Learn**, **Procedures**,
+**Reference**, **History**. On a phone or tablet, open **Menu** — the vehicle name
+stays visible in the top bar. Open **Menu** to switch vehicles. **Technical detail**
+(bottom of the menu) shows monitor ids, ranking scores, and undecided classes.
+
 ### Dashboard (Operate)
 
-Live condition: DTCs, gauges, freeze frame, Mode 06, recognition narration,
-recommendations, drive sessions.
+Live condition first: the at-a-glance next step, gauges, DTCs, proven conditions,
+and recommendations. Evidence tools (import, simulate, sessions, freeze frame,
+Mode 06) sit below that.
 
 ### Diagnosis
 

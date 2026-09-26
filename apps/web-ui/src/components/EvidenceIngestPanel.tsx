@@ -62,12 +62,12 @@ export function EvidenceIngestPanel({ vehicleId }: { vehicleId: string }) {
   return (
     <section
       id="evidence-ingest"
-      className="mb-4 scroll-mt-4 rounded-lg border border-slate-200 bg-white p-4"
+      className="mb-4 scroll-mt-20 rounded-lg border border-slate-200 bg-white p-4"
     >
       <h2 className="text-sm font-semibold text-slate-700">Get evidence on file</h2>
       <p className="mt-0.5 text-xs text-slate-400">
-        Without hardware: import an OBD log or simulate a short drive. Live MX+ commands are
-        below — never mistaken for a clean bill of health.
+        Without hardware: import an OBD log or simulate a short drive. Live MX+ commands are below —
+        never mistaken for a clean bill of health.
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button

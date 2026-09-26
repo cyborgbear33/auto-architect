@@ -9,7 +9,6 @@ import { DriveSessionsPanel } from "../components/DriveSessionsPanel.tsx";
 import { DtcWhatWorkedChips } from "../components/DtcWhatWorkedChips.tsx";
 import { EmptyEvidenceState } from "../components/EmptyEvidenceState.tsx";
 import { EvidenceIngestPanel } from "../components/EvidenceIngestPanel.tsx";
-import { ReadinessPanel } from "../components/ReadinessPanel.tsx";
 import { EvidencePanels } from "../components/EvidencePanels.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import {
@@ -20,6 +19,7 @@ import {
 } from "../components/Layout.tsx";
 import { LiveGaugeStrip } from "../components/LiveGaugeStrip.tsx";
 import { NextActionConsole } from "../components/NextActionConsole.tsx";
+import { ReadinessPanel } from "../components/ReadinessPanel.tsx";
 import { RecommendationPanel } from "../components/RecommendationPanel.tsx";
 import { ReportDownload } from "../components/ReportDownload.tsx";
 import { api, queryKeys } from "../lib/api.ts";
@@ -117,14 +117,8 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
 
       <ReadinessPanel vehicleId={vehicleId} />
 
-      <EvidenceIngestPanel vehicleId={vehicleId} />
-
       <div className="mb-4">
         <LiveGaugeStrip vehicleId={vehicleId} />
-      </div>
-
-      <div className="mb-4">
-        <DriveSessionsPanel vehicleId={vehicleId} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -182,8 +176,8 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
             <div>
               <h2 className="text-sm font-semibold text-slate-700">Signal trends</h2>
               <p className="mt-0.5 text-xs text-slate-400">
-                Ontology-backed flags feed recognition (always vehicle-global). Scope below is
-                UI-only; coolant climb is informing-only.
+                Recorded-signal flags. This drive scope is for the view only — recognition always
+                uses the whole vehicle. A coolant climb is informational.
               </p>
             </div>
             <label className="flex flex-col gap-0.5 text-xs text-slate-500">
@@ -236,9 +230,10 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
       </div>
 
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">
-          Proven fault classes (LOGOS realize)
-        </h2>
+        <h2 className="text-sm font-semibold text-slate-700">Proven conditions</h2>
+        <p className="mb-3 mt-0.5 text-xs text-slate-500">
+          Confirmed from current evidence. Nothing proven is not a clean bill of health.
+        </p>
         {recognitionQ.data?.mostSpecific.length === 0 ? (
           <p className="text-sm text-slate-400">
             Nothing proven from current evidence. That is an honest "not yet classified" — never a
@@ -281,11 +276,21 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
       </section>
 
       <div className="mt-4">
-        <EvidencePanels vehicleId={vehicleId} />
+        <RecommendationPanel vehicleId={vehicleId} />
       </div>
 
-      <div className="mt-4">
-        <RecommendationPanel vehicleId={vehicleId} />
+      <div className="mt-8 border-t border-slate-200 pt-6">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Evidence tools
+        </h2>
+        <p className="mb-3 mt-1 text-xs text-slate-500">
+          Import, simulate, or review raw snapshots. A live adapter scan is in the Guide.
+        </p>
+        <EvidenceIngestPanel vehicleId={vehicleId} />
+        <div className="mb-4">
+          <DriveSessionsPanel vehicleId={vehicleId} />
+        </div>
+        <EvidencePanels vehicleId={vehicleId} />
       </div>
     </div>
   );

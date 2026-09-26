@@ -8,6 +8,7 @@ import { CausalBriefPanel } from "../components/CausalBriefPanel.tsx";
 import { CounterfactualsPanel, DisqualifiedActionsPanel } from "../components/Explainability.tsx";
 import { PageHeader } from "../components/Layout.tsx";
 import { LearningCyclePanel } from "../components/LearningCyclePanel.tsx";
+import { fluentForClass } from "../components/NextActionConsole.tsx";
 import { ReportDownload } from "../components/ReportDownload.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
 import { api, queryKeys } from "../lib/api.ts";
@@ -19,8 +20,8 @@ const KIND_EXPLANATIONS: Record<string, string> = {
     "the system is poorly understood — run the cheapest informative test before committing to a repair.",
   "stabilize-first": "something is actively getting worse — stabilize before diagnosing further.",
   "clarify-values":
-    "success criteria are unclear — LOGOS refuses to rank actions against an undefined goal.",
-  escalate: "this needs a human decision LOGOS can't make safely on its own.",
+    "success criteria are unclear — actions are not ranked against an undefined goal.",
+  escalate: "this needs a human decision the policy will not make on its own.",
   none: "no viable action was found.",
 };
 
@@ -46,6 +47,12 @@ export function ProblemDetail() {
   const problemQ = useQuery({
     queryKey: queryKeys.problem(problemId),
     queryFn: () => api.getProblem(problemId),
+  });
+  const vehicleId = problemQ.data?.vehicleId;
+  const recognitionQ = useQuery({
+    queryKey: queryKeys.recognition(vehicleId ?? ""),
+    queryFn: () => api.getRecognition(vehicleId ?? ""),
+    enabled: Boolean(vehicleId),
   });
 
   const invalidate = () => {
@@ -110,12 +117,19 @@ export function ProblemDetail() {
   if (!problem) return <p className="text-sm text-red-600">Problem not found.</p>;
 
   const solution = problem.solution;
+  const classTitle = problem.triggeredByClass
+    ? fluentForClass(problem.triggeredByClass, recognitionQ.data?.narration)
+    : "Diagnostic problem";
+  const classId =
+    problem.triggeredByClass && classTitle !== problem.triggeredByClass
+      ? problem.triggeredByClass
+      : null;
 
   return (
     <div>
       <PageHeader
-        title={problem.triggeredByClass ?? "Diagnostic problem"}
-        subtitle={problem.id}
+        title={classTitle}
+        subtitle={classId ? `${classId} · ${problem.id}` : problem.id}
         actions={<ReportDownload problemId={problem.id} />}
       />
 
@@ -228,9 +242,7 @@ export function ProblemDetail() {
         </dl>
         {problem.operatorComplaints && problem.operatorComplaints.length > 0 && (
           <div className="mt-3 rounded-md border border-amber-100 bg-amber-50/40 px-3 py-2">
-            <p className="text-xs font-semibold uppercase text-slate-400">
-              Operator complaints
-            </p>
+            <p className="text-xs font-semibold uppercase text-slate-400">Operator complaints</p>
             <ul className="mt-1 flex flex-wrap gap-1.5">
               {problem.operatorComplaints.map((c) => (
                 <li
@@ -242,7 +254,7 @@ export function ProblemDetail() {
               ))}
             </ul>
             <p className="mt-1 text-[11px] text-slate-500">
-              Framing only — not a LOGOS-proven fault class.
+              Symptoms you reported. They frame the case; they do not prove a fault by themselves.
             </p>
           </div>
         )}
@@ -270,7 +282,7 @@ export function ProblemDetail() {
 
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700">Solution (LOGOS solve)</h2>
+          <h2 className="text-sm font-semibold text-slate-700">Ranked actions</h2>
           {!solution && problem.status !== "abandoned" && (
             <button
               type="button"

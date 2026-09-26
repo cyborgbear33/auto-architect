@@ -4,9 +4,9 @@ import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AemfAspectChips } from "../components/AemfAspectChips.tsx";
 import { AemfPlaybookProse } from "../components/AemfPlaybookProse.tsx";
-import { CausalBriefPanel } from "../components/CausalBriefPanel.tsx";
 import { CascadePrognosisPanel } from "../components/CascadePrognosisPanel.tsx";
 import { CaseTimelinePanel } from "../components/CaseTimelinePanel.tsx";
+import { CausalBriefPanel } from "../components/CausalBriefPanel.tsx";
 import { ClassEvidencePanel } from "../components/ClassEvidencePanel.tsx";
 import { EvidenceSourceBadge } from "../components/EvidenceSourceBadge.tsx";
 import { KnowledgeGapPanel } from "../components/KnowledgeGapPanel.tsx";
@@ -166,7 +166,7 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
     <div>
       <PageHeader
         title="Diagnosis"
-        subtitle="Caseboard: draft → solve → repair → verify → close (or abandon / escalate / reopen)"
+        subtitle="Draft a case from what is proven, rank the next repair, then verify it held."
       />
 
       <VehicleDossierStrip vehicleId={vehicleId} />
@@ -196,11 +196,9 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
       </div>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="mb-2 text-sm font-semibold text-slate-700">
-          Proven, not-yet-drafted
-        </h2>
+        <h2 className="mb-2 text-sm font-semibold text-slate-700">Proven, not-yet-drafted</h2>
         <p className="mb-2 text-xs text-slate-400">
-          Plain-English first (I7) — LOGOS class ids stay secondary for apprentices.
+          Plain English leads. Technical class names stay underneath for reference.
         </p>
 
         <div className="mb-3 rounded-md border border-amber-100 bg-amber-50/50 px-3 py-2">
@@ -345,93 +343,95 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
               ? fluentForClass(problem.triggeredByClass, recognitionQ.data?.narration)
               : null;
             return (
-            <li key={problem.id} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <Link
-                  to="/problems/$problemId"
-                  params={{ problemId: problem.id }}
-                  className="min-w-0 flex-1 hover:underline"
-                >
-                  {problem.triggeredByClass && classFluent ? (
+              <li key={problem.id} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <Link
+                    to="/problems/$problemId"
+                    params={{ problemId: problem.id }}
+                    className="min-w-0 flex-1 hover:underline"
+                  >
+                    {problem.triggeredByClass && classFluent ? (
+                      <>
+                        <span className="font-medium text-slate-800">{classFluent}</span>
+                        {classFluent !== problem.triggeredByClass && (
+                          <span className="ml-2 font-mono text-[11px] text-slate-400">
+                            {problem.triggeredByClass}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="font-medium text-slate-800">manual</span>
+                    )}
+                    <span className="mt-0.5 block text-slate-500">
+                      {problem.statement.currentState}
+                    </span>
+                    {problem.operatorComplaints && problem.operatorComplaints.length > 0 && (
+                      <span className="mt-1 flex flex-wrap gap-1">
+                        {problem.operatorComplaints.map((c) => (
+                          <span
+                            key={c}
+                            className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] text-amber-900 ring-1 ring-amber-200"
+                          >
+                            {c}
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                    {problem.triggeredByClass && (
+                      <AemfAspectChips className={problem.triggeredByClass} />
+                    )}
+                    {problem.verification?.result && (
+                      <span className="mt-0.5 block text-xs text-slate-500">
+                        verify: {problem.verification.result}
+                        {problem.verification.note ? ` — ${problem.verification.note}` : ""}
+                      </span>
+                    )}
+                  </Link>
+                  <StatusPill status={problem.status} />
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(problem.status === "open" || problem.status === "analyzing") && (
                     <>
-                      <span className="font-medium text-slate-800">{classFluent}</span>
-                      {classFluent !== problem.triggeredByClass && (
-                        <span className="ml-2 font-mono text-[11px] text-slate-400">
-                          {problem.triggeredByClass}
-                        </span>
-                      )}
+                      <CaseAction
+                        label="Escalate"
+                        onClick={() => escalate.mutate(problem.id)}
+                        disabled={escalate.isPending}
+                      />
+                      <CaseAction
+                        label="Abandon"
+                        onClick={() => abandon.mutate(problem.id)}
+                        disabled={abandon.isPending}
+                        tone="muted"
+                      />
                     </>
-                  ) : (
-                    <span className="font-medium text-slate-800">manual</span>
                   )}
-                  <span className="mt-0.5 block text-slate-500">{problem.statement.currentState}</span>
-                  {problem.operatorComplaints && problem.operatorComplaints.length > 0 && (
-                    <span className="mt-1 flex flex-wrap gap-1">
-                      {problem.operatorComplaints.map((c) => (
-                        <span
-                          key={c}
-                          className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] text-amber-900 ring-1 ring-amber-200"
-                        >
-                          {c}
-                        </span>
-                      ))}
-                    </span>
+                  {problem.status === "verifying" && (
+                    <>
+                      <CaseAction
+                        label="Run verify"
+                        onClick={() => verify.mutate(problem.id)}
+                        disabled={verify.isPending}
+                        tone="primary"
+                      />
+                      <CaseAction
+                        label="Abandon"
+                        onClick={() => abandon.mutate(problem.id)}
+                        disabled={abandon.isPending}
+                        tone="muted"
+                      />
+                    </>
                   )}
-                  {problem.triggeredByClass && (
-                    <AemfAspectChips className={problem.triggeredByClass} />
+                  {(problem.status === "solved" ||
+                    problem.status === "abandoned" ||
+                    problem.status === "escalated") && (
+                    <CaseAction
+                      label="Reopen"
+                      onClick={() => reopen.mutate(problem.id)}
+                      disabled={reopen.isPending}
+                    />
                   )}
-                  {problem.verification?.result && (
-                    <span className="mt-0.5 block text-xs text-slate-500">
-                      verify: {problem.verification.result}
-                      {problem.verification.note ? ` — ${problem.verification.note}` : ""}
-                    </span>
-                  )}
-                </Link>
-                <StatusPill status={problem.status} />
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {(problem.status === "open" || problem.status === "analyzing") && (
-                  <>
-                    <CaseAction
-                      label="Escalate"
-                      onClick={() => escalate.mutate(problem.id)}
-                      disabled={escalate.isPending}
-                    />
-                    <CaseAction
-                      label="Abandon"
-                      onClick={() => abandon.mutate(problem.id)}
-                      disabled={abandon.isPending}
-                      tone="muted"
-                    />
-                  </>
-                )}
-                {problem.status === "verifying" && (
-                  <>
-                    <CaseAction
-                      label="Run verify"
-                      onClick={() => verify.mutate(problem.id)}
-                      disabled={verify.isPending}
-                      tone="primary"
-                    />
-                    <CaseAction
-                      label="Abandon"
-                      onClick={() => abandon.mutate(problem.id)}
-                      disabled={abandon.isPending}
-                      tone="muted"
-                    />
-                  </>
-                )}
-                {(problem.status === "solved" ||
-                  problem.status === "abandoned" ||
-                  problem.status === "escalated") && (
-                  <CaseAction
-                    label="Reopen"
-                    onClick={() => reopen.mutate(problem.id)}
-                    disabled={reopen.isPending}
-                  />
-                )}
-              </div>
-            </li>
+                </div>
+              </li>
             );
           })}
         </ul>
@@ -439,11 +439,11 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
 
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="mb-2 text-sm font-semibold text-slate-700">
-          Safety hold demo: clear codes &amp; drive
+          Safety hold: clear codes and drive
         </h2>
         <p className="mb-3 text-xs text-slate-500">
-          A real policy gate (LOGOS <code>reason</code>), not a UI suggestion — this <em>blocks</em>{" "}
-          when a dangerous fault class is currently proven, e.g. <code>MisfireUnderLoad</code>.
+          A hard stop, not a suggestion. Clearing codes stays blocked while a dangerous fault is
+          proven — for example a misfire under load.
         </p>
         <button
           type="button"

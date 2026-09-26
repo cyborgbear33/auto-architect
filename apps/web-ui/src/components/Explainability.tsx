@@ -87,8 +87,7 @@ export function CounterfactualsPanel({ items }: { items: Counterfactual[] }) {
         Why this ranking
       </h3>
       <p className="mt-0.5 text-[11px] text-slate-500">
-        Sensitivity to score factors — illustrative under FakeLogosBridge; full flips come from
-        LOGOS solve when available.
+        What would have to change for a different action to rank first.
       </p>
       <ul className="mt-2 space-y-2">
         {sorted.map((cf) => {
