@@ -691,6 +691,7 @@ actually maintain.
 | Operator complaint framing (H6) | 2026-07 | Diagnosis chips → `operatorComplaints`; enrich statement/symptoms only |
 | OEM steps in causal brief (R6) | 2026-07 | `oemAlsoSays` on A7 brief; campaign/TSB steps + relatedClasses; applicability only |
 | Mode 01 PID seed widened to 52 rows (S7 slice) | 2026-09 | 17 new standard PIDs (catalyst B1S2/B2S2, oil temp, throttle B/actuator, secondary O2 trims, fuel rail abs/vac, commanded equiv ratio, fuel rate, DTC-clear counters) hand-verified against installed `python-OBD` source (hex + unit), not memory; `pid-dictionary.json`, `obd_gateway/pid_map.py`, `OIL_TEMP` added to `LIVE_GAUGE_PID_CHOICES` |
+| Third Jeep/Tigershark campaign: U90 catalyst-efficiency emissions recall (A4/R5 slice) | 2026-09 | Added via web search against NHTSA-sourced references (nhtsa.gov itself was network-blocked in this session — corroborated via CarComplaints.com TSB archive + FCA doc numbers MC-10229778-9999/MC-10226018-9999/MC-10236888-9999 instead; reference field says so plainly — verify by VIN before treating as authoritative). `known-campaigns.json`; `relatedClasses: CatalystEfficiencyBank1/2`; `packages/ontology/src/index.test.ts` updated for the new campaign count |
 
 ---
 

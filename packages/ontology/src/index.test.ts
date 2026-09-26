@@ -197,9 +197,9 @@ describe("ontology registries", () => {
     expect(lookupPid("NOT_A_REAL_PID")).toBeUndefined();
   });
 
-  it("matches W80/W84 campaigns to the Tigershark engine family within the year range", () => {
+  it("matches W80/W84/U90 campaigns to the Tigershark engine family within the year range", () => {
     const campaigns = campaignsForEngineFamily("fca-tigershark-2.4", 2015);
-    expect(campaigns.map((c) => c.id).sort()).toEqual(["W80", "W84"]);
+    expect(campaigns.map((c) => c.id).sort()).toEqual(["U90", "W80", "W84"]);
     expect(campaignsForEngineFamily("fca-tigershark-2.4", 2025)).toEqual([]);
   });
 

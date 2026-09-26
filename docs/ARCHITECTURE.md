@@ -124,7 +124,7 @@ services own their own domain's writes (§6).
 | `packages/ontology/vehicle-profiles.json` | Vehicle → engine family → view + cartridges |
 | `packages/ontology/dtc-dictionary.json` | Curated DTC → description / concept |
 | `packages/ontology/pid-dictionary.json` | Thin SAE J1979 seed: units + Mode 01 hex |
-| `packages/ontology/known-campaigns.json` | W80 / W84 / TSB 05047457A matcher inputs |
+| `packages/ontology/known-campaigns.json` | W80 / W84 / U90 / TSB 05047457A matcher inputs |
 
 **Views:**
 

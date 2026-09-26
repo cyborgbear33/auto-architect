@@ -16,6 +16,22 @@
       ]
     },
     {
+      "id": "U90",
+      "title": "Emissions Recall — Catalyst Efficiency",
+      "engineFamily": "fca-tigershark-2.4",
+      "yearRange": [2015, 2016],
+      "summary": "Reported to affect 2015-2016 Jeep Renegade (and other FCA 2.4L Tigershark platform vehicles) with the 2.4L engine: the catalytic converter can lose CO/NOx conversion efficiency after operating at sustained high temperature, causing the vehicle to exceed tailpipe emission standards. FCA's remedy replaces the catalytic converter and reprograms the PCM and TCM with updated software.",
+      "reference": "FCA Emissions Recall U90 — corroborated across multiple independent secondary sources (CarComplaints.com TSB archive, owner/dealer forum postings referencing FCA document numbers MC-10229778-9999 / MC-10226018-9999 / MC-10236888-9999) during a 2026-09 web search; the primary NHTSA/FCA PDF could not be fetched directly in this environment (nhtsa.gov is network-egress-blocked here). Verify exact wording and VIN applicability at nhtsa.gov/recalls or with a dealer before treating this as authoritative.",
+      "relatedClasses": ["CatalystEfficiencyBank1", "CatalystEfficiencyBank2"],
+      "steps": [
+        "Confirm a catalyst-efficiency DTC (e.g. P0420/P0430) and/or a failed Mode 06 catalyst monitor",
+        "Check FCA campaign U90 applicability by VIN (dealer or nhtsa.gov/recalls)",
+        "Dealer remedy: replace the catalytic converter",
+        "Dealer remedy: reprogram the PCM and TCM with the latest software",
+        "Verify the catalyst monitor passes after a completed drive cycle"
+      ]
+    },
+    {
       "id": "W84",
       "title": "PCM Reprogramming for Oil Consumption",
       "engineFamily": "fca-tigershark-2.4",
