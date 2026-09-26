@@ -16,7 +16,7 @@ async function main(): Promise<void> {
 
   const bridge = createLogosBridge();
   const services = createServices(store, bridge);
-  const app = await buildApp(services);
+  const app = await buildApp(services, { corsOrigins: config.corsOrigins });
 
   await app.listen({ port: config.port, host: config.host });
   console.log(

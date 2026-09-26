@@ -103,5 +103,9 @@ set `DATABASE_URL` to also run the Postgres suite.
 
 ## Ports & CORS
 
-Default listen: `4100`. web-ui Vite proxies `/api` and `/health`. Keep CORS
-permissive for local MVP; tighten when auth lands.
+Default listen: `127.0.0.1:4100`. Set `HOST=0.0.0.0` only when another machine
+on the LAN must reach the API. web-ui Vite proxies `/api` and `/health`, so the
+console does not need a wide-open browser policy. CORS allows
+`http://localhost:5173` and `http://127.0.0.1:5173` unless `CORS_ORIGINS` is set
+(comma-separated). There is still no login: anyone who can open the port can
+call it.

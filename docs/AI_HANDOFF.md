@@ -110,6 +110,8 @@ pnpm install                       # also runs scripts/setup-solver.mjs --check
 | `LOGOS_PYTHON_BIN` | Python used by the bridge (default `python3`) |
 | `LOGOS_TRANSPORT` | `serve` (warm daemon) or `subprocess` (one-shot) |
 | `PORT` | API port (default `4100`) |
+| `HOST` | API bind address (default `127.0.0.1`; set `0.0.0.0` to listen on the LAN) |
+| `CORS_ORIGINS` | Comma-separated browser origins allowed to call the API (default the local Vite console) |
 | `STORAGE_DRIVER` | `memory` (default) \| `postgres` \| `auto` (postgres if `DATABASE_URL` set) |
 | `DATABASE_URL` | Postgres URL when using the Drizzle adapter (e.g. `postgres://auto:auto@localhost:5433/auto`) |
 

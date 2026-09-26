@@ -132,4 +132,34 @@ describe("API HTTP smoke (buildApp + inject)", () => {
     expect(completed.statusCode).toBe(200);
     expect((completed.json() as { problem: { status: string } }).problem.status).toBe("solved");
   });
+
+  it("does not reflect an unknown browser origin", async () => {
+    const res = await app.inject({
+      method: "GET",
+      url: "/health",
+      headers: { origin: "https://evil.example" },
+    });
+    expect(res.headers["access-control-allow-origin"]).not.toBe("https://evil.example");
+  });
+
+  it("allows the local console origin", async () => {
+    const res = await app.inject({
+      method: "GET",
+      url: "/health",
+      headers: { origin: "http://localhost:5173" },
+    });
+    expect(res.headers["access-control-allow-origin"]).toBe("http://localhost:5173");
+  });
+
+  it("hides unexpected error text from the client", async () => {
+    const local = await buildApp(services);
+    local.get("/__boom", async () => {
+      throw new Error("disk /var/secret");
+    });
+    const res = await local.inject({ method: "GET", url: "/__boom" });
+    expect(res.statusCode).toBe(500);
+    expect(res.json()).toMatchObject({ error: { message: "Unexpected error." } });
+    expect(res.body).not.toContain("/var/secret");
+    await local.close();
+  });
 });
