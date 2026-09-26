@@ -62,8 +62,8 @@ export function KnowledgeGapPanel({
         <div>
           <h2 className="text-sm font-semibold text-slate-700">Knowledge gaps</h2>
           <p className="mt-0.5 text-xs text-slate-400">
-            Propose ontology/dictionary improvements — accept exports a patch hint; never
-            auto-writes the TBox.
+            Gaps in what this app can name. Accepting one copies a note you can apply later — it
+            does not change the vehicle record by itself.
           </p>
         </div>
         <div className="flex flex-wrap gap-1.5">

@@ -89,6 +89,8 @@ export interface TsbEntry {
   engineFamily: string;
   summary: string;
   reference?: string;
+  sourceType?: "primary" | "corroborated";
+  source?: string;
 }
 
 export interface EngineFamilySummary {
@@ -238,8 +240,7 @@ export class AutoApiClient {
   getEvidenceProvenance = (vehicleId: string) =>
     this.request<EvidenceProvenance>(`/api/vehicles/${enc(vehicleId)}/evidence-provenance`);
   getLiveGauges = (vehicleId: string, pids?: readonly string[]) => {
-    const q =
-      pids && pids.length > 0 ? `?pids=${encodeURIComponent(pids.join(","))}` : "";
+    const q = pids && pids.length > 0 ? `?pids=${encodeURIComponent(pids.join(","))}` : "";
     return this.request<LiveGaugeStrip>(`/api/vehicles/${enc(vehicleId)}/live-gauges${q}`);
   };
   getReadiness = (vehicleId: string) =>

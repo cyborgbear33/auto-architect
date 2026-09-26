@@ -14,6 +14,15 @@ import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
 import { api, queryKeys } from "../lib/api.ts";
 import { useAppSelector } from "../store/index.ts";
 
+const KIND_LABELS: Record<string, string> = {
+  act: "Act",
+  "measure-first": "Measure first",
+  "stabilize-first": "Stabilize first",
+  "clarify-values": "Clarify the goal",
+  escalate: "Escalate",
+  none: "No action",
+};
+
 const KIND_EXPLANATIONS: Record<string, string> = {
   act: "the top-ranked action is clearly best — go ahead.",
   "measure-first":
@@ -290,17 +299,21 @@ export function ProblemDetail() {
               disabled={solve.isPending}
               className="rounded-md bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-50"
             >
-              Solve
+              {solve.isPending ? "Ranking…" : "Rank actions"}
             </button>
           )}
         </div>
 
-        {!solution && <p className="text-sm text-slate-400">Not solved yet.</p>}
+        {!solution && (
+          <p className="text-sm text-slate-500">
+            No ranking yet. Rank actions when you are ready to choose a repair.
+          </p>
+        )}
 
         {solution && (
           <div>
             <div className="mb-3 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">
-              <span className="font-semibold">{solution.kind}</span> —{" "}
+              <span className="font-semibold">{KIND_LABELS[solution.kind] ?? solution.kind}</span> —{" "}
               {KIND_EXPLANATIONS[solution.kind] ?? solution.rationale}
               <p className="mt-1 text-xs text-sky-700">{solution.rationale}</p>
               {solution.certainty && (
@@ -313,7 +326,7 @@ export function ProblemDetail() {
                 <li key={r.action.id} className="rounded-md border border-slate-200 p-3 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-slate-800">
-                      {i + 1}. {r.action.id}
+                      {i + 1}. {r.action.description?.trim() || r.action.id}
                       {solution.recommended === r.action.id && (
                         <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">
                           recommended
@@ -324,7 +337,9 @@ export function ProblemDetail() {
                       <span className="text-xs text-slate-400">score: {r.score.toFixed(1)}</span>
                     )}
                   </div>
-                  <p className="mt-1 text-slate-600">{r.action.description}</p>
+                  {r.action.description?.trim() && (
+                    <p className="mt-0.5 font-mono text-[11px] text-slate-400">{r.action.id}</p>
+                  )}
                   {problem.status !== "verifying" &&
                     problem.status !== "solved" &&
                     problem.status !== "abandoned" && (

@@ -73,7 +73,7 @@ function VehicleGuide({ vehicleId }: { vehicleId: string }) {
     <div>
       <PageHeader
         title="Guide"
-        subtitle="Peace-of-mind mastery: vehicle → ontology → discovery → scan → diagnose → troubleshoot"
+        subtitle="Know this vehicle, see what it exposes, scan, then diagnose."
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-sky-100 bg-sky-50/80 px-3 py-2 text-sm text-sky-950">

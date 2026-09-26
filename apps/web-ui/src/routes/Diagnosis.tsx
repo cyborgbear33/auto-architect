@@ -175,25 +175,11 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         <EvidenceSourceBadge provenance={provenanceQ.data} />
       </div>
 
-      <div className="mb-4">
-        <WhatWorkedPanel vehicleId={vehicleId} />
-      </div>
-
-      <div className="mb-4">
-        <LearningCyclePanel vehicleId={vehicleId} limit={6} />
-      </div>
-
-      <div className="mb-4">
-        <KnowledgeGapPanel vehicleId={vehicleId} />
-      </div>
-
-      <div className="mb-4">
-        <CaseTimelinePanel vehicleId={vehicleId} limit={8} title="Recent case activity" />
-      </div>
-
-      <div className="mb-4">
-        <CascadePrognosisPanel vehicleId={vehicleId} />
-      </div>
+      {(recognitionQ.isError || problemsQ.isError) && (
+        <p role="alert" className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
+          Diagnosis could not be loaded. Check that the API is running, then refresh this page.
+        </p>
+      )}
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="mb-2 text-sm font-semibold text-slate-700">Proven, not-yet-drafted</h2>
@@ -204,7 +190,7 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         <div className="mb-3 rounded-md border border-amber-100 bg-amber-50/50 px-3 py-2">
           <p className="text-xs font-semibold text-slate-700">Operator complaints (framing only)</p>
           <p className="mt-0.5 text-[11px] text-slate-500">
-            Human symptoms enrich the case statement — they never invent a proven fault class.
+            Symptoms you notice. They frame the case; they do not prove a fault by themselves.
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {COMPLAINT_CHIPS.map((chip) => {
@@ -304,7 +290,7 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                     disabled={createProblem.isPending}
                     className="flex-shrink-0 rounded-md bg-sky-600 px-3 py-1 text-xs font-medium text-white hover:bg-sky-700 disabled:opacity-50"
                   >
-                    Draft diagnostic problem
+                    Draft case
                   </button>
                 </li>
               );
@@ -316,11 +302,13 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-slate-700">Problem caseboard</h2>
-          <div className="flex flex-wrap gap-1">
+          <fieldset className="m-0 flex min-w-0 flex-wrap gap-1 border-0 p-0">
+            <legend className="sr-only">Filter cases</legend>
             {filters.map((f) => (
               <button
                 key={f.id}
                 type="button"
+                aria-pressed={filter === f.id}
                 onClick={() => setFilter(f.id)}
                 className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${
                   filter === f.id
@@ -331,11 +319,11 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
                 {f.label}
               </button>
             ))}
-          </div>
+          </fieldset>
         </div>
 
         {filteredProblems.length === 0 && (
-          <p className="text-sm text-slate-400">No problems in this filter.</p>
+          <p className="text-sm text-slate-500">No cases in this view.</p>
         )}
         <ul className="space-y-2">
           {filteredProblems.map((problem) => {
@@ -437,11 +425,11 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         </ul>
       </section>
 
-      <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="mb-2 text-sm font-semibold text-slate-700">
+      <section className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
+        <h2 className="mb-2 text-sm font-semibold text-amber-950">
           Safety hold: clear codes and drive
         </h2>
-        <p className="mb-3 text-xs text-slate-500">
+        <p className="mb-3 text-xs text-amber-950/80">
           A hard stop, not a suggestion. Clearing codes stays blocked while a dangerous fault is
           proven — for example a misfire under load.
         </p>
@@ -466,6 +454,29 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
           </p>
         )}
       </section>
+
+      <div className="mt-8 border-t border-slate-200 pt-6">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Garage memory
+        </h2>
+        <p className="mb-3 mt-1 text-xs text-slate-500">
+          What worked before, recent case activity, and what may go next. None of this proves a new
+          fault.
+        </p>
+        <div className="mb-4">
+          <WhatWorkedPanel vehicleId={vehicleId} />
+        </div>
+        <div className="mb-4">
+          <LearningCyclePanel vehicleId={vehicleId} limit={6} />
+        </div>
+        <div className="mb-4">
+          <KnowledgeGapPanel vehicleId={vehicleId} />
+        </div>
+        <div className="mb-4">
+          <CaseTimelinePanel vehicleId={vehicleId} limit={8} title="Recent case activity" />
+        </div>
+        <CascadePrognosisPanel vehicleId={vehicleId} />
+      </div>
     </div>
   );
 }

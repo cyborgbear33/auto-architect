@@ -25,6 +25,19 @@ import { ReportDownload } from "../components/ReportDownload.tsx";
 import { api, queryKeys } from "../lib/api.ts";
 import { useAppSelector } from "../store/index.ts";
 
+const FAMILY_LABELS: Record<string, string> = {
+  "fca-tigershark-2.4": "FCA Tigershark 2.4",
+  "gm-vortec-6.0": "GM Vortec 6.0",
+};
+
+function vehicleSubtitle(
+  vehicle: { engineFamily: string; id: string },
+  debugMode: boolean,
+): string {
+  const family = FAMILY_LABELS[vehicle.engineFamily] ?? vehicle.engineFamily;
+  return debugMode ? `${family} · ${vehicle.id}` : family;
+}
+
 const URGENCY_STYLES: Record<string, string> = {
   critical: "bg-red-100 text-red-800 border-red-200",
   high: "bg-orange-100 text-orange-800 border-orange-200",
@@ -85,7 +98,7 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
     <div>
       <PageHeader
         title={vehicle ? vehicleLabel(vehicle) : "Vehicle"}
-        subtitle={vehicle ? `${vehicle.engineFamily} · ${vehicle.id}` : undefined}
+        subtitle={vehicle ? vehicleSubtitle(vehicle, debugMode) : undefined}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Link
@@ -124,7 +137,12 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <section className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">
           <h2 className="mb-3 text-sm font-semibold text-slate-700">Active DTCs</h2>
-          {dtcsQ.isLoading && <p className="text-sm text-slate-400">Loading…</p>}
+          {dtcsQ.isLoading && <p className="text-sm text-slate-400">Loading trouble codes…</p>}
+          {dtcsQ.isError && (
+            <p role="alert" className="text-sm text-red-700">
+              Could not load trouble codes. Check that the API is running, then refresh.
+            </p>
+          )}
           {dtcsQ.data?.length === 0 && <EmptyEvidenceState kind="dtcs" ingestLink />}
           <ul className="space-y-1.5">
             {dtcsQ.data?.map((dtc) => {

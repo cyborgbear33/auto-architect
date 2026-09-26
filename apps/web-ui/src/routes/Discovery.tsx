@@ -76,15 +76,14 @@ function VehicleDiscovery({ vehicleId }: { vehicleId: string }) {
     <div>
       <PageHeader
         title="Discovery"
-        subtitle="Vehicle intelligence — what this ECU + OBDLink MX+ can expose, mapped to ontology"
+        subtitle="What this adapter can read on this vehicle, and what the app can interpret."
       />
 
       <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-        <p className="font-medium text-slate-800">Lawful observe boundary</p>
+        <p className="font-medium text-slate-800">What this page covers</p>
         <p className="mt-1 text-slate-600">
-          Discovery maps Mode 01–07 support bits and ontology links from what the adapter can
-          report. It is not a full OEM CAN/UDS module tree (FORScan-style maps stay out of
-          scope) — grow depth from evidence, not invented bus matrices.
+          Standard OBD modes the adapter reported (Mode 01–07), and whether this app has a meaning
+          for each item. It is not a full dealer module map. Unsupported items stay unsupported.
         </p>
       </div>
 
@@ -104,7 +103,7 @@ function VehicleDiscovery({ vehicleId }: { vehicleId: string }) {
             <Link to="/guide" className="font-medium text-amber-950 underline underline-offset-2">
               Guide
             </Link>{" "}
-            for the full vehicle → ontology → discovery path (print / Markdown export included).
+            for the path from this vehicle, through discovery, to a scan.
           </p>
         </div>
       )}
@@ -156,7 +155,7 @@ function VehicleDiscovery({ vehicleId }: { vehicleId: string }) {
                   <option value="supported">Available</option>
                   <option value="unsupported">Unsupported</option>
                   <option value="unknown">Unknown / manual</option>
-                  <option value="unmapped">Unmapped (ECU yes, ontology no)</option>
+                  <option value="unmapped">Unmapped (read, but no meaning here)</option>
                   <option value="cartridge">Cartridge-relevant</option>
                 </select>
               </label>
@@ -269,7 +268,7 @@ function Mode01Table({ rows }: { rows: DiscoveryPidRow[] }) {
               <td className="px-3 py-2 text-slate-600">{row.description ?? "—"}</td>
               <td className="px-3 py-2">
                 <div className="flex flex-wrap gap-1">
-                  {row.inOntology ? <Tag>ontology</Tag> : <Tag tone="warn">unmapped</Tag>}
+                  {row.inOntology ? <Tag>in app</Tag> : <Tag tone="warn">unmapped</Tag>}
                   {row.inDefaultPoll && <Tag>default poll</Tag>}
                   {row.cartridgeRelevant && <Tag>cartridge</Tag>}
                 </div>

@@ -189,7 +189,9 @@ Mode 06) sit below that.
 
 ### Diagnosis
 
-Cases, policy safety holds, solve/draft, verify-after-repair, case timeline.
+Draft and the case list come first, then the safety hold for clearing codes. What
+worked, recent activity, and what may go next follow under garage memory. None of
+that memory proves a new fault.
 
 ### Discovery
 

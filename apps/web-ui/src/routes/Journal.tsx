@@ -12,6 +12,12 @@ const OUTCOME_STYLES: Record<string, string> = {
   inconclusive: "bg-slate-100 text-slate-600 border-slate-200",
 };
 
+function formatWhen(iso: string): string {
+  const parsed = new Date(iso);
+  if (Number.isNaN(parsed.getTime())) return iso;
+  return parsed.toLocaleString();
+}
+
 export function Journal() {
   const vehicleId = useSelectedVehicleId();
   if (!vehicleId) return <EmptyVehicleState />;
@@ -27,8 +33,8 @@ function VehicleJournal({ vehicleId }: { vehicleId: string }) {
   return (
     <div>
       <PageHeader
-        title="Decision journal"
-        subtitle="Every enacted diagnostic/repair action, with why it was chosen and whether it worked"
+        title="Journal"
+        subtitle="Repairs you logged: what you did, why, and whether it worked."
       />
 
       <div className="mb-4">
@@ -40,8 +46,17 @@ function VehicleJournal({ vehicleId }: { vehicleId: string }) {
       </div>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700">Logged repairs</h2>
+        {decisionsQ.isLoading && <p className="text-sm text-slate-400">Loading journal…</p>}
+        {decisionsQ.isError && (
+          <p role="alert" className="text-sm text-red-700">
+            Could not load the journal. Check that the API is running, then refresh.
+          </p>
+        )}
         {decisionsQ.data?.length === 0 && (
-          <p className="text-sm text-slate-400">No repairs logged yet.</p>
+          <p className="text-sm text-slate-500">
+            No repairs logged yet. Record an outcome from a case when you finish a repair.
+          </p>
         )}
         <ul className="space-y-3">
           {decisionsQ.data?.map((d) => (
@@ -64,8 +79,8 @@ function VehicleJournal({ vehicleId }: { vehicleId: string }) {
               </div>
               <p className="mt-1 text-slate-600">{d.rationale}</p>
               <p className="mt-1 text-xs text-slate-400">
-                decided by {d.decidedBy} at {d.decidedAt} · policy{" "}
-                {d.policyAllowed ? "allowed" : "blocked"}
+                {d.decidedBy} · {formatWhen(d.decidedAt)} ·{" "}
+                {d.policyAllowed ? "policy allowed this action" : "policy blocked this action"}
               </p>
             </li>
           ))}

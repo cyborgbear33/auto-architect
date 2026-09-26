@@ -60,7 +60,7 @@ function VehicleFunctions({ vehicleId }: { vehicleId: string }) {
     <div>
       <PageHeader
         title="Functions"
-        subtitle="Guided OEM special procedures — Proxi and related ops for this vehicle"
+        subtitle="Checklists for special procedures. The module tool stays outside this app; the checklist stays here."
       />
 
       {proceduresQ.isLoading && <p className="text-sm text-slate-400">Loading procedures…</p>}

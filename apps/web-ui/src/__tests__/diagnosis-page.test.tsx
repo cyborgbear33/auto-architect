@@ -147,7 +147,7 @@ describe("Diagnosis", () => {
     renderDiagnosis();
     const heading = await screen.findByText("Proven, not-yet-drafted");
     const section = within(heading.closest("section")!);
-    const button = await section.findByRole("button", { name: "Draft diagnostic problem" });
+    const button = await section.findByRole("button", { name: "Draft case" });
     expect(
       section.getByText("Cylinder misfire under high load (plain English)."),
     ).toBeInTheDocument();
@@ -167,7 +167,7 @@ describe("Diagnosis", () => {
     const section = within(heading.closest("section")!);
     expect(section.getByText(/Operator complaints/)).toBeInTheDocument();
     fireEvent.click(section.getByRole("button", { name: "rough idle" }));
-    fireEvent.click(await section.findByRole("button", { name: "Draft diagnostic problem" }));
+    fireEvent.click(await section.findByRole("button", { name: "Draft case" }));
     await waitFor(() =>
       expect(api.createDiagnosticProblem).toHaveBeenCalledWith({
         vehicleId: "veh:jeep-renegade-2015-latitude",
@@ -215,7 +215,7 @@ describe("Diagnosis", () => {
     renderDiagnosis();
     await waitFor(() => expect(api.listProblems).toHaveBeenCalled());
     expect(await screen.findByRole("button", { name: "Run verify" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Draft diagnostic problem" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Draft case" })).toBeNull();
   });
 
   it("filters the caseboard and exposes lifecycle actions", async () => {
