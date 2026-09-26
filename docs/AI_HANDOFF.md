@@ -255,6 +255,7 @@ Deep dive: [`ARCHITECTURE.md`](ARCHITECTURE.md). OBD contract:
 | [`ai/ONTOLOGY_DEV_GUIDE.md`](ai/ONTOLOGY_DEV_GUIDE.md) | DL TBox, views, DTC dictionary |
 | [`ai/ADD_A_CARTRIDGE.md`](ai/ADD_A_CARTRIDGE.md) | Extend a diagnostic domain |
 | [`ai/ADD_A_VEHICLE.md`](ai/ADD_A_VEHICLE.md) | Add Silverado (or any next car) |
+| [`ai/OEM_RESEARCH_SOURCES.md`](ai/OEM_RESEARCH_SOURCES.md) | Where to find real VIN/recall/TSB data, and how to cite it (`sourceType` primary vs. corroborated) |
 | [`OPERATOR_OBD_MANUAL.md`](OPERATOR_OBD_MANUAL.md) | Human OBDLink MX+ setup + thorough-scan integration plan |
 | [`VEHICLE_OBD_MASTERY_GUIDE.md`](VEHICLE_OBD_MASTERY_GUIDE.md) | In-app Guide curriculum (vehicle → ontology → discovery → troubleshoot) |
 | [`ai/OBD_EDGE_CONTRACT.md`](ai/OBD_EDGE_CONTRACT.md) | OBD-II / CANBUS edge rules |

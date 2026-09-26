@@ -34,6 +34,7 @@ Before making changes, read files in this order:
    - `HARDWARE_STANDARDS.md` — SAE/ISO/CAN grounding (J1979, J2012, UDS, J1939)
    - `ADD_A_CARTRIDGE.md` — recipe for a new diagnostic domain
    - `ADD_A_VEHICLE.md` — recipe for a new vehicle / engine family
+   - `OEM_RESEARCH_SOURCES.md` — read before researching a real VIN, recall, or TSB; where to look, what's blocked, how to cite `sourceType`
    - `TESTING_DEV_GUIDE.md` — FakeLogosBridge, vitest, pytest
    - `DOCUMENTATION_DEV_GUIDE.md` — when creating or reformatting any doc
 

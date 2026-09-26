@@ -48,6 +48,23 @@ truly SAE-portable.
   `pid-dictionary.json` row with a canonical `unit`.
 - `pnpm lint:ontology` / cartridge parity tests fail on catalog ↔ DL ↔ cartridge drift.
 - Prefer real TSB/recall grounding over inventing descriptions.
+
+## `known-campaigns.json` sourcing discipline
+
+Every `campaigns[]` / `tsbs[]` entry requires `sourceType` and `source`
+(`CampaignEntrySchema` / `TsbEntrySchema` in `src/schemas.ts`):
+
+- `sourceType: "primary"` — you fetched the actual OEM/NHTSA document text,
+  or the claim comes straight from a live official government API/database
+  record (the API response *is* the primary source).
+- `sourceType: "corroborated"` — the primary document wasn't reachable;
+  multiple independent secondary sources agree on the specifics instead.
+  Say so in `reference`. Surfaces to the operator as a "corroborated, not
+  primary-verified" badge in `CausalBriefPanel.tsx`.
+- `source` is the canonical URL backing `reference`.
+
+See [`OEM_RESEARCH_SOURCES.md`](OEM_RESEARCH_SOURCES.md) for where to look,
+what's known-blocked, and a step-by-step verification recipe.
 - Ground SAE-generic codes in SAE J2012 / ISO 15031-6 wording; never guess
   manufacturer-enhanced meanings. See [`HARDWARE_STANDARDS.md`](HARDWARE_STANDARDS.md).
 - **Knowledge-gap export (F11):** accepted proposals export Markdown/JSON *hints*
