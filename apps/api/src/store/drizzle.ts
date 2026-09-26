@@ -19,7 +19,7 @@ import type {
 } from "@auto/semantic-types";
 import { and, asc, desc, eq, notInArray } from "drizzle-orm";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { createDb, type DbHandle } from "../db/client.ts";
+import { createDb, type Db, type DbHandle } from "../db/client.ts";
 import * as t from "../db/schema.ts";
 import { notFound } from "../lib/errors.ts";
 import type {
@@ -81,14 +81,7 @@ export function createDrizzleStore(databaseUrl: string): Store {
 
   const observations: ObservationRepository = {
     async record(batch) {
-      const id = `obs:${batch.vehicleId}:${batch.capturedAt}:${randomUUID()}`;
-      await db.insert(t.observationBatches).values({
-        id,
-        vehicleId: batch.vehicleId,
-        capturedAt: batch.capturedAt,
-        source: batch.source,
-        payload: batch,
-      });
+      await insertObservationBatch(db, batch);
     },
 
     async listBatches(vehicleId) {
@@ -192,11 +185,15 @@ export function createDrizzleStore(databaseUrl: string): Store {
     },
 
     async replaceAll(vehicleId, next) {
-      await db.delete(t.observationBatches).where(eq(t.observationBatches.vehicleId, vehicleId));
-      const sorted = [...next].sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
-      for (const batch of sorted) {
-        await observations.record(batch);
-      }
+      await replaceVehicleBatches<ObservationWriter>(
+        (work) => db.transaction((tx) => work(tx)),
+        async (tx: ObservationWriter, id) => {
+          await tx.delete(t.observationBatches).where(eq(t.observationBatches.vehicleId, id));
+        },
+        (tx, batch) => insertObservationBatch(tx, batch),
+        vehicleId,
+        next,
+      );
     },
   };
 
@@ -488,4 +485,41 @@ export function createDrizzleStore(databaseUrl: string): Store {
       await sql.end({ timeout: 5 });
     },
   };
+}
+
+type ObservationWriter = {
+  insert: Db["insert"];
+  delete: Db["delete"];
+};
+
+async function insertObservationBatch(
+  executor: Pick<ObservationWriter, "insert">,
+  batch: ObservationBatch,
+) {
+  const id = `obs:${batch.vehicleId}:${batch.capturedAt}:${randomUUID()}`;
+  await executor.insert(t.observationBatches).values({
+    id,
+    vehicleId: batch.vehicleId,
+    capturedAt: batch.capturedAt,
+    source: batch.source,
+    payload: batch,
+  });
+}
+
+/**
+ * Retention rewrites the log inside one transaction. The delete and the inserts
+ * commit together, so a failure leaves the previous batches in place.
+ */
+export async function replaceVehicleBatches<Tx>(
+  transaction: (work: (tx: Tx) => Promise<void>) => Promise<unknown>,
+  clear: (tx: Tx, vehicleId: string) => Promise<void>,
+  insert: (tx: Tx, batch: ObservationBatch) => Promise<void>,
+  vehicleId: string,
+  next: readonly ObservationBatch[],
+): Promise<void> {
+  const sorted = [...next].sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
+  await transaction(async (tx) => {
+    await clear(tx, vehicleId);
+    for (const batch of sorted) await insert(tx, batch);
+  });
 }

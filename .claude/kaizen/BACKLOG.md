@@ -6,6 +6,8 @@ The 2026-09-26 correctness pass shipped its one accepted item: [dossier lookup e
 
 The 2026-09-26 security item shipped: [API listens on localhost](evidence/api-localhost-cors-evidence.md).
 
+The 2026-09-26 reliability item shipped: [retention rewrite](evidence/retention-transaction-evidence.md).
+
 ## Performance
 
 ### Memory observation log re-sorts the whole history on every sample [apps/api]
@@ -17,15 +19,3 @@ Effort: low
 Risk: low
 Dependencies: none
 Added: 2026-09-26 (kaizen-audit: Performance)
-
-## Reliability / Stability
-
-### Retention rewrite deletes the observation log before the kept rows are back [apps/api]
-Status: proposed
-Problem: On Postgres, pruning old samples deletes every observation batch for the vehicle, then inserts the kept ones one by one. If the process stops in that gap, the log is gone or only partly restored.
-Evidence: `apps/api/src/store/drizzle.ts` `replaceAll` runs `db.delete` on `observationBatches` for the vehicle, then `observations.record` in a loop. There is no transaction around the two steps. `apps/api/src/services/observations.ts` `applyRetention` is the caller. The in-memory store replaces the list in one `Map.set`, so this window is the Postgres path only. Discovery history inserts the new report before it deletes older ones, so that path does not have the same hole.
-Expected value: A prune either finishes or leaves the previous log intact.
-Effort: low
-Risk: low
-Dependencies: none
-Added: 2026-09-26 (kaizen-audit: Reliability / Stability)
