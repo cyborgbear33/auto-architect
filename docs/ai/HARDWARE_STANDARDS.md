@@ -18,7 +18,7 @@ Companion docs:
 |---|---|
 | Preferred adapter | **OBDLink MX+** (Bluetooth ELM327-compatible) |
 | 2015 Jeep Renegade Latitude 2.4L | MX+ used with a **gray-type OBD-II adapter/extension** for better DLC access. Operator-confirmed; mechanical only — not a protocol or OEM-session unlock. Profile: `veh:jeep-renegade-2015-latitude`. |
-| 2003 Silverado 2500 HD (gas) | Same MX+ family; leave protocol auto-detect. Profile: `veh:silverado-2500hd-2003`. |
+| 2003 Silverado 2500 HD (gas) | Same MX+ family; leave protocol auto-detect (likely J1850 VPW, non-CAN). Profile: `veh:silverado-2500hd-2003`. Mode 06 is CAN-only (§5) — expect none on this truck. |
 
 Operator workflow and phased “thorough OBD map” plan:
 [`OPERATOR_OBD_MANUAL.md`](../OPERATOR_OBD_MANUAL.md).
@@ -128,6 +128,15 @@ repo (`Mode06Result`):
   EGR `$31` → `FailedEgrMonitor`; secondary air `$71` → `FailedSecondaryAirMonitor`.
 - Legacy TID+CID (pre-CAN) vehicles are out of this thin seed; do not invent
   manufacturer TID charts.
+- **Mode 06 is CAN-only, structurally, in `python-OBD` itself** — its
+  `test_cmd()` gates every Mode 06 command, including the `$0600`
+  supported-MIDs probe, behind `protocol_id() in ("6","7","8","9")`. On a
+  non-CAN protocol (e.g. J1850 VPW — the likely case for `veh:silverado-2500hd-2003`),
+  no MID is ever added to the supported-command set: not "no data this
+  cycle," but permanently unavailable for that vehicle's protocol. This is a
+  real SAE/ISO-era gap (Mode 06 was never well-standardized pre-CAN) reflected
+  faithfully by the library, not a bug to work around — do not add a non-CAN
+  Mode 06 fallback path or invent monitor results for legacy protocols.
 
 Failed monitors with a dictionary `concept` assert a **Condition** via
 cartridge perception and may OR into existing fault classes (A3).

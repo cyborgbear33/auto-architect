@@ -40,7 +40,7 @@ Classification, policy, and ranking live exclusively in `apps/api`.
 | 01 | Live PIDs + STATUS ($01) I/M bitfield | primary; STATUS → structured `imStatus` (not a float PID) |
 | 02 | Freeze frame | gateway populates when ECU exposes a freeze DTC + Mode 02 PIDs |
 | 03 / 07 / 0A | Stored / pending / permanent DTCs | 03/07 via python-OBD; 0A via thin `GET_PERMANENT_DTC` (`force=True`) |
-| 06 | On-board monitor results | gateway populates SAE-seed OBDMIDs when ECU supports them |
+| 06 | On-board monitor results | gateway populates SAE-seed OBDMIDs when ECU supports them — CAN protocols only, see §6 |
 
 Manual / simulated PIDs are allowed for tests (`--manual-pid`, `--simulate`).
 
@@ -100,6 +100,16 @@ bug: recognition will run the wrong engine-family cartridges.
   forever. See `client.py`'s `is_connected()`/`reconnect()` and `cli.py`'s
   `_run_watch_loop()`.
 - `--simulate` exists so CI and UI demos never require hardware.
+- **Mode 06 is CAN-only — do not add a non-CAN fallback.** `python-OBD`'s
+  `test_cmd()` gates every Mode 06 command (including the `$0600`
+  supported-MIDs probe) behind `protocol_id() in ("6","7","8","9")`. On a
+  non-CAN vehicle (e.g. the Silverado's likely J1850 VPW), no Mode 06 MID is
+  ever added to the supported-command set — `read_mode06()` will correctly,
+  permanently return `[]`. That is the library reflecting a real pre-CAN
+  standardization gap, not a `client.py` bug or a gateway limitation to
+  route around; never invent a legacy-protocol Mode 06 substitute or
+  synthesize monitor pass/fail from Mode 01/03 evidence to compensate.
+  Grounding: [`HARDWARE_STANDARDS.md`](HARDWARE_STANDARDS.md) §5.
 
 ---
 
