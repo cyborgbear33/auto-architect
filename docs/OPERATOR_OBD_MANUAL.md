@@ -55,6 +55,20 @@ access** to the port (reach / clearance), not a protocol change.
 Profile id: `veh:jeep-renegade-2015-latitude`  
 Protocol note: ISO 15765-4 (CAN, 500 kbps).
 
+**If this Jeep has auto stop-start, watch the reconnect logs the first few
+drives.** Confirm whether this specific Latitude actually has it (trim/market
+dependent — do not assume) — if so, each engine-off-at-a-stop event is a real,
+brief bus-quiet period. `watch`'s reconnect logic (`cli.py`'s
+`EMPTY_POLL_RECONNECT_THRESHOLD`) treats 6 consecutive empty polls — ~30s at
+the default 5s interval — as a suspected dead link and forces a reconnect.
+That should comfortably outlast a normal stop-start cycle, but it was sized by
+reasoning about the interval, not measured against a real stop-start event on
+this vehicle. Check the gateway log (`-v`) after a few stop-start cycles: it
+should show normal polling resume on its own, not an "OBD adapter link ...
+suspected dead" reconnect firing every time the engine auto-stops. If it does
+fire spuriously, raise the threshold (or poll faster) rather than disabling
+the reconnect logic.
+
 ### 2003 Chevrolet Silverado 2500 HD (gas 6.0L)
 
 Profile id: `veh:silverado-2500hd-2003`  
