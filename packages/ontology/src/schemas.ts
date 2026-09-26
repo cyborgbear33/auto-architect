@@ -90,6 +90,16 @@ export const VehicleProfilesFileSchema = z.object({
   engineFamilies: z.record(EngineFamilyEntrySchema),
 });
 
+/**
+ * "primary": confirmed directly against the actual OEM/NHTSA document text, or a
+ * live official government API/database record (that record IS the primary source).
+ * "corroborated": not confirmed against the primary document itself — supported
+ * instead by multiple independent secondary sources that agree on specifics
+ * (bulletin number, DTCs, affected engine/VIN codes), e.g. parts retailers or
+ * technicians citing/transcribing the same bulletin. Never invent either tier.
+ */
+export const SourceTypeSchema = z.enum(["primary", "corroborated"]);
+
 export const CampaignEntrySchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -97,6 +107,10 @@ export const CampaignEntrySchema = z.object({
   yearRange: z.tuple([z.number().int(), z.number().int()]),
   summary: z.string().min(1),
   reference: z.string().min(1),
+  /** Confidence tier of `source` — see SourceTypeSchema. */
+  sourceType: SourceTypeSchema,
+  /** Canonical URL backing `reference` — the actual document/API endpoint checked. */
+  source: z.string().min(1),
   /** Ordered OEM checks for A7 “OEM also says…” (R6). */
   steps: z.array(z.string().min(1)).optional(),
   /** Applicability filter only — never invents realize membership. */
@@ -109,6 +123,10 @@ export const TsbEntrySchema = z.object({
   engineFamily: z.string().min(1),
   summary: z.string().min(1),
   reference: z.string().min(1),
+  /** Confidence tier of `source` — see SourceTypeSchema. */
+  sourceType: SourceTypeSchema,
+  /** Canonical URL backing `reference` — the actual document/API endpoint checked. */
+  source: z.string().min(1),
   steps: z.array(z.string().min(1)).optional(),
   relatedClasses: z.array(z.string().min(1)).optional(),
 });
@@ -219,5 +237,6 @@ export type Mode06DictionaryFile = z.infer<typeof Mode06DictionaryFileSchema>;
 export type Mode06DictionaryEntry = z.infer<typeof Mode06DictionaryEntrySchema>;
 export type VehicleProfilesFile = z.infer<typeof VehicleProfilesFileSchema>;
 export type KnownCampaignsFile = z.infer<typeof KnownCampaignsFileSchema>;
+export type SourceType = z.infer<typeof SourceTypeSchema>;
 export type SpecialProcedureEntry = z.infer<typeof SpecialProcedureEntrySchema>;
 export type SpecialProceduresFile = z.infer<typeof SpecialProceduresFileSchema>;

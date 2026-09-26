@@ -39,6 +39,7 @@ import {
   Mode06DictionaryFileSchema,
   type PidDictionaryEntry,
   PidDictionaryFileSchema,
+  type SourceType,
   type SpecialProcedureEntry,
   SpecialProceduresFileSchema,
   type VehicleProfilesFile,
@@ -67,6 +68,8 @@ export {
   type PidDictionaryEntry,
   PidDictionaryEntrySchema,
   PidDictionaryFileSchema,
+  type SourceType,
+  SourceTypeSchema,
   type SpecialProcedureEntry,
   SpecialProcedureEntrySchema,
   SpecialProceduresFileSchema,
@@ -196,6 +199,8 @@ const knownCampaigns: KnownCampaign[] = knownCampaignsFile.campaigns.map((c) => 
   yearRange: c.yearRange,
   summary: c.summary,
   reference: c.reference,
+  sourceType: c.sourceType,
+  source: c.source,
   ...(c.steps ? { steps: c.steps } : {}),
   ...(c.relatedClasses ? { relatedClasses: c.relatedClasses } : {}),
 }));
@@ -245,6 +250,9 @@ export interface TsbEntry {
   engineFamily: string;
   summary: string;
   reference: string;
+  /** Confidence tier backing `reference` — see SourceTypeSchema. Optional to keep older/test fixtures compiling. */
+  sourceType?: SourceType;
+  source?: string;
   steps?: string[];
   relatedClasses?: string[];
 }
@@ -258,6 +266,8 @@ export function tsbsForEngineFamily(engineFamilyId: string): TsbEntry[] {
       engineFamily: t.engineFamily,
       summary: t.summary,
       reference: t.reference,
+      sourceType: t.sourceType,
+      source: t.source,
       ...(t.steps ? { steps: t.steps } : {}),
       ...(t.relatedClasses ? { relatedClasses: t.relatedClasses } : {}),
     }));

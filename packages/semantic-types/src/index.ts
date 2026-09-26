@@ -495,6 +495,8 @@ export interface OemGuidanceNote {
   kind: "campaign" | "tsb";
   steps: string[];
   reference?: string;
+  /** "primary" (confirmed against the actual document/API) vs "corroborated" (secondary sources only). */
+  sourceType?: "primary" | "corroborated";
   /** Short match line — never a realize claim. */
   applicabilityNote: string;
 }
@@ -882,6 +884,14 @@ export interface KnownCampaign {
   yearRange: [number, number];
   summary: string;
   reference?: string; // TSB/NHTSA doc id
+  /**
+   * "primary": confirmed directly against the actual document text or a live
+   * official API/database record. "corroborated": not confirmed against the
+   * primary document — supported by multiple agreeing secondary sources instead.
+   */
+  sourceType?: "primary" | "corroborated";
+  /** Canonical URL backing `reference` — the actual document/API endpoint checked. */
+  source?: string;
   /** Ordered OEM checks for A7 (R6). */
   steps?: string[];
   /** Applicability filter for briefs — never invents realize membership. */

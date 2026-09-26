@@ -77,6 +77,7 @@ export function oemAlsoSaysForClass(
       kind: "campaign",
       steps,
       ...(c.reference ? { reference: c.reference } : {}),
+      ...(c.sourceType ? { sourceType: c.sourceType } : {}),
       applicabilityNote: OEM_APPLICABILITY,
     });
   }
@@ -89,6 +90,7 @@ export function oemAlsoSaysForClass(
       kind: "tsb",
       steps,
       reference: t.reference,
+      ...(t.sourceType ? { sourceType: t.sourceType } : {}),
       applicabilityNote: OEM_APPLICABILITY,
     });
   }

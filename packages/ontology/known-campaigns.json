@@ -6,7 +6,9 @@
       "engineFamily": "fca-tigershark-2.4",
       "yearRange": [2015, 2018],
       "summary": "2015-2018 Jeep Renegade (FWD only — AWD Renegades are NOT covered by this notification), 2016-2018 Fiat 500X (FWD/AWD), and 2015-2018 Ram ProMaster City with the 2.4L engine (sales codes ED6/ED8/EDD/EDE) may exhibit excessive oil consumption from a combination of manufacturing variances and the engine calibration strategy, affecting ~241,000 vehicles; unaddressed, a low oil condition can eventually cause a stall. The dealer procedure: top off oil, drive a monitored 1500-1700 miles, recheck the level after a 5-minute hot shutdown on level ground. Below the ADD mark = failed test -> long-block engine replacement.",
-      "reference": "NHTSA TSB doc MC-10220586-9999 (FCA Dealer Service Instructions, Customer Satisfaction Notification W80 — Oil Consumption Inspection, Rev. 2 Feb 2021). Verified 2026-09-26 against the primary-source PDF at static.nhtsa.gov/odi/tsbs/2021/MC-10220586-9999.pdf.",
+      "reference": "NHTSA TSB doc MC-10220586-9999 (FCA Dealer Service Instructions, Customer Satisfaction Notification W80 — Oil Consumption Inspection, Rev. 2 Feb 2021). Verified 2026-09-26 against the primary-source PDF.",
+      "sourceType": "primary",
+      "source": "https://static.nhtsa.gov/odi/tsbs/2021/MC-10220586-9999.pdf",
       "relatedClasses": ["MultiAirOilStarvation"],
       "steps": [
         "Top off oil to the full mark",
@@ -21,7 +23,9 @@
       "engineFamily": "fca-tigershark-2.4",
       "yearRange": [2017, 2017],
       "summary": "Customer Satisfaction Notification W84 (Powertrain Software Update) is narrower than W80: verified against the primary source, it covers only 2014 (KL) Jeep Cherokee, 2017 (UF) Chrysler 200, 2017 (MP) Jeep Compass, 2017 (KL) Jeep Cherokee, and 2017 (BU) Jeep Renegade AWD — all with the 2.4L engine (ED6/ED8/EDD/EDE). It does NOT cover Fiat 500X, Ram ProMaster City, or Renegade FWD/any model year outside 2014 or 2017. Reprograms the PCM and TCM and clears DTCs; does not itself require the oil consumption test in W80.",
-      "reference": "NHTSA TSB doc MC-10215923-9999 (FCA Dealer Service Instructions, Customer Satisfaction Notification W84 — Powertrain Software Update, Jan 2021). Verified 2026-09-26 against the primary-source PDF at static.nhtsa.gov/odi/tsbs/2021/MC-10215923-9999.pdf. NOTE: this corrects an earlier unverified entry that assumed W84 shared W80's 2015-2018/FWD Renegade/500X/ProMaster City scope — it does not.",
+      "reference": "NHTSA TSB doc MC-10215923-9999 (FCA Dealer Service Instructions, Customer Satisfaction Notification W84 — Powertrain Software Update, Jan 2021). Verified 2026-09-26 against the primary-source PDF. NOTE: this corrects an earlier unverified entry that assumed W84 shared W80's 2015-2018/FWD Renegade/500X/ProMaster City scope — it does not.",
+      "sourceType": "primary",
+      "source": "https://static.nhtsa.gov/odi/tsbs/2021/MC-10215923-9999.pdf",
       "relatedClasses": ["MultiAirOilStarvation"],
       "steps": [
         "Verify VIN applicability with a dealer",
@@ -34,7 +38,9 @@
       "engineFamily": "gm-vortec-6.0",
       "yearRange": [2003, 2003],
       "summary": "Certain SUVs, pickup trucks, and passenger vans — including the 2003 Chevrolet Silverado — were produced with an out-of-specification brake hydro-boost housing relief valve bore. The valve O-ring seal may fracture, requiring a slight increase in brake pedal effort or steering effort while braking. ~68,875 units affected across covered models/years.",
-      "reference": "NHTSA recall campaign 04V045000, GM Recall No. 04004, reported 2004-04-02. Verified 2026-09-26 directly against NHTSA's recall database (api.nhtsa.gov/recalls/campaignNumber?campaignNumber=04V045000), filtered to Make=CHEVROLET, Model=SILVERADO, ModelYear=2003 — a confirmed match. Manufacturer of record: General Motors Corp.",
+      "reference": "NHTSA recall campaign 04V045000, GM Recall No. 04004, reported 2004-04-02. Verified 2026-09-26 directly against NHTSA's recall database, filtered to Make=CHEVROLET, Model=SILVERADO, ModelYear=2003 — a confirmed match. Manufacturer of record: General Motors Corp.",
+      "sourceType": "primary",
+      "source": "https://api.nhtsa.gov/recalls/campaignNumber?campaignNumber=04V045000",
       "steps": [
         "Dealer replaces the hydro-boost relief valve",
         "No owner action beyond scheduling the recall repair"
@@ -46,7 +52,9 @@
       "engineFamily": "gm-vortec-6.0",
       "yearRange": [2003, 2003],
       "summary": "On certain pickup trucks and SUVs — including the 2003 Chevrolet Silverado — the galvanized steel tailgate support cables that hold the tailgate open may corrode, weaken, and fracture; if both cables fail the tailgate can drop suddenly onto the rear bumper. A very large recall (~3.66 million units across covered models/years).",
-      "reference": "NHTSA recall campaign 04V129000, GM Recall No. 04007, reported 2004 (interim notice 2004-04-07; recall began 2004-09-24). Verified 2026-09-26 directly against NHTSA's recall database (api.nhtsa.gov/recalls/campaignNumber?campaignNumber=04V129000), filtered to Make=CHEVROLET, Model=SILVERADO, ModelYear=2003 — a confirmed match. Manufacturer of record: General Motors Corp.",
+      "reference": "NHTSA recall campaign 04V129000, GM Recall No. 04007, reported 2004 (interim notice 2004-04-07; recall began 2004-09-24). Verified 2026-09-26 directly against NHTSA's recall database, filtered to Make=CHEVROLET, Model=SILVERADO, ModelYear=2003 — a confirmed match. Manufacturer of record: General Motors Corp.",
+      "sourceType": "primary",
+      "source": "https://api.nhtsa.gov/recalls/campaignNumber?campaignNumber=04V129000",
       "steps": ["Dealer replaces the tailgate support cables"]
     },
     {
@@ -55,7 +63,9 @@
       "engineFamily": "gm-vortec-6.0",
       "yearRange": [2003, 2003],
       "summary": "CONDITIONAL — applies only if this specific truck has a manual transmission with a PBR or TRW parking brake system (transmission type is not decodable from the VIN; this profile does not record it). On qualifying trucks, parking brake friction linings may wear enough for the parking brake to become ineffective at holding the vehicle. ~90,242 units affected across covered models/years.",
-      "reference": "NHTSA recall campaign 05V161000, GM Recall No. 05042, recall began 2005-07-29. Verified 2026-09-26 directly against NHTSA's recall database (api.nhtsa.gov/recalls/campaignNumber?campaignNumber=05V161000), filtered to Make=CHEVROLET, Model=SILVERADO, ModelYear=2003 — a confirmed match, but the manual-transmission condition itself is unverified against this specific vehicle. Manufacturer of record: General Motors Corp.",
+      "reference": "NHTSA recall campaign 05V161000, GM Recall No. 05042, recall began 2005-07-29. Verified 2026-09-26 directly against NHTSA's recall database, filtered to Make=CHEVROLET, Model=SILVERADO, ModelYear=2003 — a confirmed match, but the manual-transmission condition itself is unverified against this specific vehicle. Manufacturer of record: General Motors Corp.",
+      "sourceType": "primary",
+      "source": "https://api.nhtsa.gov/recalls/campaignNumber?campaignNumber=05V161000",
       "steps": [
         "Confirm the truck has a manual transmission before assuming this applies",
         "PBR system: dealer installs a low-force spring clip retainer",
@@ -69,7 +79,9 @@
       "title": "MultiAir Actuator Assembly Diagnostic Procedure (2.4L Tigershark Only)",
       "engineFamily": "fca-tigershark-2.4",
       "summary": "When diagnosing P-codes related to the MultiAir unit, the required check order is: (1) verify engine oil is not low, (2) verify the oil filter meets OEM spec, (3) verify oil is not dirty/deteriorated, (4) verify correct oil viscosity/weight, (5) verify oil is not contaminated (coolant/fuel), (6) verify the oil galley screen/filter feeding the MultiAir unit is not clogged — BEFORE replacing the MultiAir actuator itself.",
-      "reference": "FCA GPOP Issue Review System tech tip, document MC-10228154-9999, dated 8/10/2016, for MY14-16 PF/KL/BU/UF platforms. Note: \"05047457A\" is the MultiAir actuator assembly PART NUMBER this tip is filed under, not a separate TSB bulletin number. Verified 2026-09-26 against the primary-source PDF at static.nhtsa.gov/odi/tsbs/2016/MC-10228154-9999.pdf — the six-item pre-check order matches this ontology's steps verbatim.",
+      "reference": "FCA GPOP Issue Review System tech tip, document MC-10228154-9999, dated 8/10/2016, for MY14-16 PF/KL/BU/UF platforms. Note: \"05047457A\" is the MultiAir actuator assembly PART NUMBER this tip is filed under, not a separate TSB bulletin number. Verified 2026-09-26 against the primary-source PDF — the six-item pre-check order matches this ontology's steps verbatim.",
+      "sourceType": "primary",
+      "source": "https://static.nhtsa.gov/odi/tsbs/2016/MC-10228154-9999.pdf",
       "relatedClasses": ["MultiAirOilStarvation"],
       "steps": [
         "Verify engine oil is not low",
@@ -79,6 +91,41 @@
         "Verify oil is not contaminated (coolant/fuel)",
         "Verify the oil galley screen/filter feeding the MultiAir unit is not clogged",
         "Only then consider MultiAir actuator replacement"
+      ]
+    },
+    {
+      "id": "02-06-04-023A",
+      "title": "Rear Knock Sensor Moisture Intrusion (4.8L/5.3L/6.0L Vortec)",
+      "engineFamily": "gm-vortec-6.0",
+      "summary": "GM TSB 02-06-04-023A (GROUP: 06 - Engine): on 4.8L/5.3L/6.0L Vortec engines (including LQ4, our confirmed engine), the rear-bank knock sensor sits in the lifter valley under the intake manifold, where water intrusion (frequent engine washing, rain through the cowl, condensation) corrodes the sensor and its connector — setting DTC P0332 (or P0327 for the front sensor) even when the engine is not actually knocking. Repair: remove the upper intake manifold, replace the affected knock sensor(s), dam the sensor cavity with RTV to prevent future water intrusion, install upgraded intake manifold gaskets, clear codes.",
+      "reference": "GM Technical Service Bulletin #02-06-04-023 (revision A). NOT confirmed against the actual NHTSA/GM PDF — NHTSA's public TSB archive doesn't surface a document for this bulletin number via search, and the bulk TSB dataset + general search portal needed to look it up directly are unreachable from this environment. Corroborated instead by multiple independent secondary sources that agree on the exact bulletin number, the exact DTCs (P0327/P0332), the affected engines (4.8L/5.3L/6.0L Vortec, 1999-2002-era GM trucks/SUVs), and the repair procedure — including parts retailers selling repair kits explicitly labeled against this bulletin number and DTC.",
+      "sourceType": "corroborated",
+      "source": "https://www.amazon.com/02-06-04-023A-Repair-Intake-Manifold-Gasket/dp/B0084HY7NM",
+      "relatedClasses": ["KnockSensorCircuitFault"],
+      "steps": [
+        "Inspect the knock sensor connector(s) for green/white corrosion before condemning the PCM or wiring",
+        "Remove the upper intake manifold to access the knock sensor(s) in the lifter valley",
+        "Replace the affected knock sensor(s) (rear bank for P0332, front bank for P0327)",
+        "Dam the sensor cavity with RTV silicone to prevent future water intrusion",
+        "Install upgraded intake manifold gaskets",
+        "Clear codes and verify no return after a drive cycle"
+      ]
+    },
+    {
+      "id": "05-06-04-029A",
+      "title": "Intake Manifold Gasket — Lean Codes / Rough Idle / Coolant Leak (4.8L/5.3L/6.0L Vortec)",
+      "engineFamily": "gm-vortec-6.0",
+      "summary": "GM TSB 05-06-04-029A (GROUP: 06 - Engine): on 2002-2004 Chevrolet Silverado/Suburban/Tahoe and GMC Sierra/Yukon/Yukon XL with 4.8L/5.3L/6.0L gas engines (RPOs LR4, LM7, LM4, LQ4, LQ9 — VIN codes V/T/P/U/N; our confirmed engine is LQ4, VIN code U) or 5.3L flex-fuel (RPO L59, VIN Z), a degraded intake manifold gasket can cause DTC P0171/P0174 (lean, both banks), rough idle, a possible P0300 misfire, and/or coolant leakage from the gasket area leading to overheating. Repair: replace the intake manifold gasket with the updated design (identifiable by its teal-green material vs. the earlier orange), and inspect the intake plenum for warpage that could cause uneven clamping.",
+      "reference": "GM Technical Service Bulletin #05-06-04-029 (revision A). NOT confirmed against the actual NHTSA/GM PDF — same archive-access limits as 02-06-04-023A. Corroborated by multiple independent secondary sources, most notably a technician transcription that quotes the bulletin's own engine/VIN-code applicability table verbatim (RPOs LR4/LM7/LM4/LQ4/LQ9, VIN codes V/T/P/U/N) — which explicitly includes VIN code U (LQ4, this truck's confirmed engine) — plus consistent corroboration on the DTCs, symptoms, and the orange-to-teal gasket material update across independent parts/repair sources.",
+      "sourceType": "corroborated",
+      "source": "https://www.justanswer.com/chevy/0q96j-need-copy-gm-service-bulletin-05-06-04-029.html",
+      "relatedClasses": ["LeanFuelBank1", "LeanFuelBank2"],
+      "steps": [
+        "Verify no external vacuum leak or MAF sensor contamination before condemning the intake gasket",
+        "Inspect for coolant leakage at the intake manifold gasket area",
+        "Replace the intake manifold gasket with the updated (teal-green) material — do not reuse the earlier orange-material gasket",
+        "Inspect the intake plenum for warpage; replace if warped so clamping pressure is even",
+        "Clear codes and verify P0171/P0174 do not return after a drive cycle"
       ]
     }
   ]

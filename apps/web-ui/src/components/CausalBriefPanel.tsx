@@ -110,7 +110,17 @@ export function CausalBriefBody({ brief }: { brief: CausalBrief }) {
                     ))}
                   </ol>
                   {note.reference && (
-                    <p className="mt-1 text-[11px] text-slate-400">{note.reference}</p>
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      {note.sourceType === "corroborated" && (
+                        <span
+                          className="mr-1 rounded bg-amber-100 px-1 py-0.5 font-semibold uppercase tracking-wide text-amber-700"
+                          title="Not confirmed against the primary document — supported by agreeing secondary sources only."
+                        >
+                          Corroborated, not primary-verified
+                        </span>
+                      )}
+                      {note.reference}
+                    </p>
                   )}
                   <p className="mt-0.5 text-[11px] text-amber-800">{note.applicabilityNote}</p>
                 </li>
