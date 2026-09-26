@@ -27,6 +27,40 @@
         "Verify VIN applicability with a dealer",
         "Apply the PCM software update for oil-consumption behavior when applicable"
       ]
+    },
+    {
+      "id": "04V045000",
+      "title": "Brake Hydro-Boost Relief Valve (GM Recall No. 04004)",
+      "engineFamily": "gm-vortec-6.0",
+      "yearRange": [2003, 2003],
+      "summary": "Certain SUVs, pickup trucks, and passenger vans — including the 2003 Chevrolet Silverado — were produced with an out-of-specification brake hydro-boost housing relief valve bore. The valve O-ring seal may fracture, requiring a slight increase in brake pedal effort or steering effort while braking. ~68,875 units affected across covered models/years.",
+      "reference": "NHTSA recall campaign 04V045000, GM Recall No. 04004, reported 2004-04-02. Verified 2026-09-26 directly against NHTSA's recall database (api.nhtsa.gov/recalls/campaignNumber?campaignNumber=04V045000), filtered to Make=CHEVROLET, Model=SILVERADO, ModelYear=2003 — a confirmed match. Manufacturer of record: General Motors Corp.",
+      "steps": [
+        "Dealer replaces the hydro-boost relief valve",
+        "No owner action beyond scheduling the recall repair"
+      ]
+    },
+    {
+      "id": "04V129000",
+      "title": "Tailgate Support Cable Corrosion (GM Recall No. 04007)",
+      "engineFamily": "gm-vortec-6.0",
+      "yearRange": [2003, 2003],
+      "summary": "On certain pickup trucks and SUVs — including the 2003 Chevrolet Silverado — the galvanized steel tailgate support cables that hold the tailgate open may corrode, weaken, and fracture; if both cables fail the tailgate can drop suddenly onto the rear bumper. A very large recall (~3.66 million units across covered models/years).",
+      "reference": "NHTSA recall campaign 04V129000, GM Recall No. 04007, reported 2004 (interim notice 2004-04-07; recall began 2004-09-24). Verified 2026-09-26 directly against NHTSA's recall database (api.nhtsa.gov/recalls/campaignNumber?campaignNumber=04V129000), filtered to Make=CHEVROLET, Model=SILVERADO, ModelYear=2003 — a confirmed match. Manufacturer of record: General Motors Corp.",
+      "steps": ["Dealer replaces the tailgate support cables"]
+    },
+    {
+      "id": "05V161000",
+      "title": "Parking Brake Friction Lining Wear — Manual Transmission Only (GM Recall No. 05042)",
+      "engineFamily": "gm-vortec-6.0",
+      "yearRange": [2003, 2003],
+      "summary": "CONDITIONAL — applies only if this specific truck has a manual transmission with a PBR or TRW parking brake system (transmission type is not decodable from the VIN; this profile does not record it). On qualifying trucks, parking brake friction linings may wear enough for the parking brake to become ineffective at holding the vehicle. ~90,242 units affected across covered models/years.",
+      "reference": "NHTSA recall campaign 05V161000, GM Recall No. 05042, recall began 2005-07-29. Verified 2026-09-26 directly against NHTSA's recall database (api.nhtsa.gov/recalls/campaignNumber?campaignNumber=05V161000), filtered to Make=CHEVROLET, Model=SILVERADO, ModelYear=2003 — a confirmed match, but the manual-transmission condition itself is unverified against this specific vehicle. Manufacturer of record: General Motors Corp.",
+      "steps": [
+        "Confirm the truck has a manual transmission before assuming this applies",
+        "PBR system: dealer installs a low-force spring clip retainer",
+        "TRW system: dealer installs a redesigned parking brake cable assembly"
+      ]
     }
   ],
   "tsbs": [

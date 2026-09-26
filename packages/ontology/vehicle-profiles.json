@@ -16,7 +16,7 @@
       "trim": "2500 HD",
       "engineFamily": "gm-vortec-6.0",
       "obdProtocol": null,
-      "notes": "Unleaded gasoline 6.0L V8 (Vortec 6000 / LQ4-class on GMT800). Confirm exact RPO from VIN/glovebox sticker when convenient. OBD protocol is typically ELM327 auto-detect on this era (often SAE J1850 VPW on GMT800 \u2014 do not hard-force CAN). Shares SAE-generic cartridges; OEM-specific depth lives in gm-vortec-6.0-stub once curated TSBs exist. Do not invent GM-enhanced fault classes."
+      "notes": "VIN-confirmed via NHTSA vPIC decode (2026-09-26): LQ4 Iron 6.0L V8 (Vortec 6000, not LQ9/L18/other 6.0 variant), 4WD/4x4, GVWR Class 2H (9,001-10,000 lb), extended-cab pickup body, assembled at GM's Pontiac, MI truck plant. Marketing trim (LS/LT/Work Truck) is not decodable from this VIN \u2014 leave unknown rather than guessing. Transmission type (automatic vs. manual) is also not decodable from the VIN and matters for at least one open recall \u2014 see known-campaigns.json (05V161000). OBD protocol is typically ELM327 auto-detect on this era (often SAE J1850 VPW on GMT800 \u2014 do not hard-force CAN; confirm from a live session). Shares SAE-generic cartridges; OEM-specific depth lives in gm-vortec-6.0-stub once curated TSBs exist. Do not invent GM-enhanced fault classes."
     }
   },
   "engineFamilies": {
