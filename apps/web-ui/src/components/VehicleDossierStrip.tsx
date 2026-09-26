@@ -33,6 +33,7 @@ export function VehicleDossierStrip({ vehicleId }: { vehicleId: string }) {
   const vehicle = vehicleQ.data;
   const discoveryMissing =
     discoveryQ.error instanceof ApiError && discoveryQ.error.statusCode === 404;
+  const discoveryFailed = discoveryQ.isError && !discoveryMissing;
   const campaignCount =
     (campaignsQ.data?.campaigns.length ?? 0) + (campaignsQ.data?.tsbs.length ?? 0);
 
@@ -89,12 +90,16 @@ export function VehicleDossierStrip({ vehicleId }: { vehicleId: string }) {
             <Link to="/discovery" className="font-medium text-sky-700 hover:underline">
               Discovery not run — capability is unknown
             </Link>
+          ) : discoveryFailed ? (
+            <p className="text-red-700">Discovery could not be loaded.</p>
           ) : (
             <p className="text-slate-500">
               {discoveryQ.data ? "Discovery is on file." : "Discovery…"}
             </p>
           )}
-          {campaignCount > 0 ? (
+          {campaignsQ.isError ? (
+            <p className="text-red-700">Campaigns could not be loaded.</p>
+          ) : campaignCount > 0 ? (
             <Link to="/campaigns" className="font-medium text-sky-700 hover:underline">
               {campaignCount} campaign/TSB match{campaignCount === 1 ? "" : "es"} for this family
             </Link>

@@ -151,6 +151,15 @@ describe("Diagnosis", () => {
     expect(screen.getByText(/Discovery not run/)).toBeInTheDocument();
   });
 
+  it("does not describe a failed lookup as still loading or as no match", async () => {
+    vi.mocked(api.getDiscovery).mockRejectedValueOnce(new FakeApiError("discovery down", 500));
+    vi.mocked(api.getCampaigns).mockRejectedValueOnce(new FakeApiError("campaigns down", 500));
+    renderDiagnosis();
+    expect(await screen.findByText("Discovery could not be loaded.")).toBeInTheDocument();
+    expect(screen.getByText("Campaigns could not be loaded.")).toBeInTheDocument();
+    expect(screen.queryByText(/No campaigns matched/)).not.toBeInTheDocument();
+  });
+
   it("offers to draft a diagnostic problem for a proven, not-yet-drafted class", async () => {
     renderDiagnosis();
     const heading = await screen.findByText("Proven, not-yet-drafted");
