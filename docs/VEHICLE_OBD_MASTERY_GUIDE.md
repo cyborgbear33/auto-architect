@@ -192,15 +192,20 @@ stays visible in the top bar. Open **Menu** to switch vehicles. **Technical deta
 
 ### Dashboard (Operate)
 
-Live condition first: the at-a-glance next step, gauges, DTCs, proven conditions,
-and recommendations. Evidence tools (import, simulate, sessions, freeze frame,
-Mode 06) sit below that.
+Live condition first. The header has one primary action — the next step, the open
+case, or how to scan when nothing is classified yet. The dark card under it says
+why, including the codes that name that step. Guide, report, and refresh stay
+secondary. A pinned procedure stays visible. Live gauges stay up, with units and
+how old the reading is. The full code list, trends, recommendations, and import
+sit behind **Show the evidence**.
 
 ### Diagnosis
 
-Draft and the case list come first, then the safety hold for clearing codes. What
-worked, recent activity, and what may go next follow under garage memory. None of
-that memory proves a new fault.
+Draft and the case list come first. Complaint chips appear only while a case can
+be drafted. Case filters appear only when more than one case exists. Clearing
+codes stays behind “Consider clearing codes,” and the hold text says why a clear
+is not the next step. What worked, recent activity, and what may go next follow
+under garage memory. None of that memory proves a new fault.
 
 ### Discovery
 
@@ -209,7 +214,10 @@ Capability forensics (this guide’s verification chapter).
 ### Functions
 
 Guided special procedures (Proxi, etc.). Execution is typically an external
-enhanced tool + MX+ — the app tracks the checklist and Journal trail. Star a
+enhanced tool + MX+ — the app tracks the checklist and Journal trail. The open
+procedure shows the current step, what finishing it tells you, and what not to
+skip. Finished and later steps stay collapsed. Procedure ids stay behind
+Technical detail. Star a
 procedure you repeat; it stays at the top of Functions and on the Dashboard
 for any selected vehicle that has that procedure. A star is a shortcut, not
 proof of a fault.
@@ -221,7 +229,9 @@ scan will not see. Filter by medium (air, electricity, mechanical, fluid — oil
 and coolant are fluid) or by inspection system (brakes, chassis). “Can follow
 from” and “can lead to” are other problems in the same catalog. Search, category
 filter, and sort are on the page. **Look up** on a proved class or an open case
-fills that search and, when the problem has one category, that filter. A row is
+fills that search and, when the problem has one category, that filter. Recalls open
+from a match on the dossier. Discovery opens from Diagnosis when capability has
+not been recorded. A row is
 a definition, not a fault proved on the truck outside.
 
 ### Recalls & TSBs

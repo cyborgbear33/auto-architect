@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { api, queryKeys } from "../lib/api.ts";
 import { loadFavoriteProcedureIds, setFavoriteProcedure } from "../lib/favoriteProcedures.ts";
+import { useAppSelector } from "../store/index.ts";
 
 export function Functions() {
   const vehicleId = useSelectedVehicleId();
@@ -13,6 +14,7 @@ export function Functions() {
 }
 
 function VehicleFunctions({ vehicleId }: { vehicleId: string }) {
+  const debugMode = useAppSelector((s) => s.ui.debugMode);
   const qc = useQueryClient();
   const { procedure: procedureFromSearch } = useSearch({ strict: false });
   const proceduresQ = useQuery({
@@ -114,7 +116,9 @@ function VehicleFunctions({ vehicleId }: { vehicleId: string }) {
                   {favorited && (
                     <div className="mt-1 text-[11px] font-medium text-sky-800">Favorite</div>
                   )}
-                  <div className="mt-1 font-mono text-[11px] text-slate-400">{proc.id}</div>
+                  {debugMode && (
+                    <div className="mt-1 font-mono text-[11px] text-slate-400">{proc.id}</div>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -145,6 +149,7 @@ function VehicleFunctions({ vehicleId }: { vehicleId: string }) {
             busy={startMut.isPending || completeMut.isPending}
             startError={startMut.error?.message}
             completeError={completeMut.error?.message}
+            debugMode={debugMode}
           />
         )}
       </div>
@@ -164,6 +169,7 @@ function ProcedureDetail({
   busy,
   startError,
   completeError,
+  debugMode,
 }: {
   procedure: SpecialProcedureDto;
   activeProblemId: string | null;
@@ -176,8 +182,12 @@ function ProcedureDetail({
   busy: boolean;
   startError?: string;
   completeError?: string;
+  debugMode: boolean;
 }) {
   const guiding = Boolean(activeProblemId);
+  const [showContext, setShowContext] = useState(false);
+  const [showLater, setShowLater] = useState(false);
+  const [showDone, setShowDone] = useState(false);
 
   function toggle(key: string) {
     setChecked((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -195,70 +205,64 @@ function ProcedureDetail({
       <div className="rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="text-base font-semibold text-slate-800">{procedure.title}</h2>
         <p className="mt-2 text-sm text-slate-600">{procedure.summary}</p>
-
-        <h3 className="mt-4 text-sm font-semibold text-slate-700">When to use</h3>
-        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-600">
-          {procedure.triggers.map((t) => (
-            <li key={t}>{t}</li>
-          ))}
-        </ul>
-
-        <h3 className="mt-4 text-sm font-semibold text-slate-700">Modules involved</h3>
-        <ul className="mt-1 space-y-1.5 text-sm text-slate-600">
-          {procedure.modulesInvolved.map((m) => (
-            <li key={m.id}>
-              <span className="font-mono font-medium text-slate-800">{m.id}</span> — {m.role}
-            </li>
-          ))}
-        </ul>
-
-        <h3 className="mt-4 text-sm font-semibold text-slate-700">Hardware</h3>
-        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-600">
-          {procedure.hardware.map((h) => (
-            <li key={h}>{h}</li>
-          ))}
-        </ul>
+        <button
+          type="button"
+          aria-expanded={showContext}
+          onClick={() => setShowContext((open) => !open)}
+          className="mt-3 text-sm font-medium text-sky-800 hover:underline"
+        >
+          {showContext ? "Hide why this procedure" : "Why this procedure"}
+        </button>
+        {showContext && (
+          <div className="mt-3 space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700">When to use</h3>
+              <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-600">
+                {procedure.triggers.map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700">Modules involved</h3>
+              <ul className="mt-1 space-y-1.5 text-sm text-slate-600">
+                {procedure.modulesInvolved.map((m) => (
+                  <li key={m.id}>
+                    <span className="font-medium text-slate-800">{m.id}</span> — {m.role}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700">Hardware</h3>
+              <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-600">
+                {procedure.hardware.map((h) => (
+                  <li key={h}>{h}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700">References</h3>
+              <ul className="mt-1 list-disc space-y-1 pl-5 text-xs text-slate-500">
+                {procedure.references.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
 
-      <StepSection
-        title="1. Detect — are modules out of sync?"
-        prefix="detect"
-        steps={procedure.detectSteps}
+      <ProcedureSteps
+        procedure={procedure}
         guiding={guiding}
         checked={checked}
         onToggle={toggle}
+        showLater={showLater}
+        showDone={showDone}
+        onShowLater={() => setShowLater(true)}
+        onShowDone={() => setShowDone(true)}
       />
-      <StepSection
-        title="2. Align — Proxi realignment procedure"
-        prefix="align"
-        steps={procedure.alignSteps}
-        guiding={guiding}
-        checked={checked}
-        onToggle={toggle}
-      />
-      <StepSection
-        title="3. Verify"
-        prefix="verify"
-        steps={procedure.verifySteps}
-        guiding={guiding}
-        checked={checked}
-        onToggle={toggle}
-      />
-
-      <div className="rounded-lg border border-slate-200 bg-white p-4">
-        <h3 className="text-sm font-semibold text-slate-700">Risks</h3>
-        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-600">
-          {procedure.risks.map((r) => (
-            <li key={r}>{r}</li>
-          ))}
-        </ul>
-        <h3 className="mt-3 text-sm font-semibold text-slate-700">References</h3>
-        <ul className="mt-1 list-disc space-y-1 pl-5 text-xs text-slate-500">
-          {procedure.references.map((r) => (
-            <li key={r}>{r}</li>
-          ))}
-        </ul>
-      </div>
 
       <div className="rounded-lg border border-slate-200 bg-white p-4">
         <label className="block text-sm font-semibold text-slate-700" htmlFor="proc-note">
@@ -285,7 +289,10 @@ function ProcedureDetail({
           ) : (
             <>
               <span className="self-center text-xs text-slate-500">
-                Active case: <span className="font-mono">{activeProblemId}</span>
+                Guided run is open
+                {debugMode && activeProblemId ? (
+                  <span className="ml-1 font-mono">{activeProblemId}</span>
+                ) : null}
               </span>
               <button
                 type="button"
@@ -314,6 +321,118 @@ function ProcedureDetail({
   );
 }
 
+function procedurePhases(procedure: SpecialProcedureDto) {
+  return [
+    { key: "detect", title: "1. Detect — are modules out of sync?", steps: procedure.detectSteps },
+    { key: "align", title: "2. Align — Proxi realignment procedure", steps: procedure.alignSteps },
+    { key: "verify", title: "3. Verify", steps: procedure.verifySteps },
+  ];
+}
+
+function phaseComplete(key: string, steps: string[], checked: Record<string, boolean>): boolean {
+  return steps.every((_, index) => checked[`${key}-${index}`]);
+}
+
+function finishLine(title: string): string {
+  const aside = title.split("—")[1]?.trim();
+  return aside || title;
+}
+
+function ProcedureSteps({
+  procedure,
+  guiding,
+  checked,
+  onToggle,
+  showLater,
+  showDone,
+  onShowLater,
+  onShowDone,
+}: {
+  procedure: SpecialProcedureDto;
+  guiding: boolean;
+  checked: Record<string, boolean>;
+  onToggle: (key: string) => void;
+  showLater: boolean;
+  showDone: boolean;
+  onShowLater: () => void;
+  onShowDone: () => void;
+}) {
+  const phases = procedurePhases(procedure);
+  const openIndex = phases.findIndex((phase) => !phaseComplete(phase.key, phase.steps, checked));
+  const current = openIndex === -1 ? phases.length - 1 : openIndex;
+  const currentPhase = phases[current];
+  if (!currentPhase) return null;
+
+  return (
+    <div className="space-y-3">
+      {showDone &&
+        phases
+          .slice(0, current)
+          .map((phase) => (
+            <StepSection
+              key={phase.key}
+              title={phase.title}
+              prefix={phase.key}
+              steps={phase.steps}
+              guiding={guiding}
+              checked={checked}
+              onToggle={onToggle}
+            />
+          ))}
+      {current > 0 && !showDone && (
+        <button
+          type="button"
+          onClick={onShowDone}
+          className="text-sm font-medium text-slate-600 hover:text-slate-900"
+        >
+          Show finished steps
+        </button>
+      )}
+      <div className="rounded-lg border border-slate-800 bg-white p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-sky-800">This step</p>
+        <StepSection
+          title={currentPhase.title}
+          prefix={currentPhase.key}
+          steps={currentPhase.steps}
+          guiding={guiding}
+          checked={checked}
+          onToggle={onToggle}
+          bare
+        />
+        <p className="mt-3 text-sm text-slate-700">
+          Finishing this tells you: {finishLine(currentPhase.title)}
+        </p>
+        {procedure.risks.length > 0 && (
+          <p className="mt-2 text-sm text-amber-950">Do not skip: {procedure.risks.join("; ")}</p>
+        )}
+      </div>
+      {current < phases.length - 1 && !showLater && (
+        <button
+          type="button"
+          onClick={onShowLater}
+          className="text-sm font-medium text-slate-600 hover:text-slate-900"
+        >
+          Later steps
+        </button>
+      )}
+      {showLater &&
+        phases
+          .slice(current + 1)
+          .map((phase) => (
+            <StepSection
+              key={phase.key}
+              title={phase.title}
+              prefix={phase.key}
+              steps={phase.steps}
+              guiding={guiding}
+              checked={checked}
+              onToggle={onToggle}
+            />
+          ))}
+    </div>
+  );
+}
+
 function StepSection({
   title,
   prefix,
@@ -321,6 +440,7 @@ function StepSection({
   guiding,
   checked,
   onToggle,
+  bare = false,
 }: {
   title: string;
   prefix: string;
@@ -328,9 +448,10 @@ function StepSection({
   guiding: boolean;
   checked: Record<string, boolean>;
   onToggle: (key: string) => void;
+  bare?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
+    <div className={bare ? "" : "rounded-lg border border-slate-200 bg-white p-4"}>
       <h3 className="text-sm font-semibold text-slate-700">{title}</h3>
       <ol className="mt-2 space-y-2">
         {steps.map((step, i) => {

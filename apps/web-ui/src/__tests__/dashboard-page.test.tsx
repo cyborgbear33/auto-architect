@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import type React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { api } from "../lib/api.ts";
@@ -199,6 +199,10 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
 
 import { Dashboard } from "../routes/Dashboard.tsx";
 
+async function revealEvidence() {
+  fireEvent.click(await screen.findByRole("button", { name: "Show the evidence" }));
+}
+
 describe("Dashboard", () => {
   it("shows the vehicle's DTCs with their status", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -207,6 +211,7 @@ describe("Dashboard", () => {
         <Dashboard />
       </QueryClientProvider>,
     );
+    await revealEvidence();
     const heading = await screen.findByText("Active DTCs");
     const section = within(heading.closest("section")!);
     expect(await section.findByText("P0304")).toBeInTheDocument();
@@ -223,6 +228,7 @@ describe("Dashboard", () => {
         <Dashboard />
       </QueryClientProvider>,
     );
+    await revealEvidence();
     const heading = await screen.findByText("Active DTCs");
     const section = within(heading.closest("section")!);
     expect(await section.findByText("Cylinder 4 Misfire Detected")).toBeInTheDocument();
@@ -245,12 +251,18 @@ describe("Dashboard", () => {
         <Dashboard />
       </QueryClientProvider>,
     );
-    expect(await screen.findByText("At a glance")).toBeInTheDocument();
+    expect(await screen.findByText("Why this step")).toBeInTheDocument();
     expect(
       await screen.findByText(/Next: Jeep Renegade: cylinder misfire under load/),
     ).toBeInTheDocument();
+    expect(screen.getAllByText("Take this next")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Refresh recommendations" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Report" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Download report" })).not.toBeInTheDocument();
     // Plain-English narration appears in the at-a-glance strip (not only class ids).
     expect(screen.getAllByText(/P0300-P0304 \+ high load evidence/).length).toBeGreaterThan(0);
+    expect(await screen.findByText(/Named by P0304/)).toBeInTheDocument();
+    expect(screen.queryByText("Active DTCs")).not.toBeInTheDocument();
   });
 
   it("shows verified-fix chips on DTC rows joined via classEvidence", async () => {
@@ -260,6 +272,7 @@ describe("Dashboard", () => {
         <Dashboard />
       </QueryClientProvider>,
     );
+    await revealEvidence();
     const heading = await screen.findByText("Active DTCs");
     const section = within(heading.closest("section")!);
     expect(await section.findByText("swap-coil-plug")).toBeInTheDocument();
@@ -274,7 +287,8 @@ describe("Dashboard", () => {
         <Dashboard />
       </QueryClientProvider>,
     );
-    expect(await screen.findByText("Get evidence on file")).toBeInTheDocument();
+    await revealEvidence();
+    expect(await screen.findByRole("heading", { name: "Get evidence on file" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Simulate drive session/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Import OBD log/i })).toBeInTheDocument();
     expect(screen.getByText(/Live MX\+ \/ gateway/)).toBeInTheDocument();
@@ -302,6 +316,7 @@ describe("Dashboard", () => {
         <Dashboard />
       </QueryClientProvider>,
     );
+    await revealEvidence();
     const heading = await screen.findByText("Proven conditions");
     const section = within(heading.closest("section")!);
     expect(await section.findByText("MisfireUnderLoad")).toBeInTheDocument();
@@ -315,6 +330,7 @@ describe("Dashboard", () => {
         <Dashboard />
       </QueryClientProvider>,
     );
+    await revealEvidence();
     const heading = await screen.findByText("Recommendations");
     const section = within(heading.closest("section")!);
     expect(await section.findByText(/cylinder misfire under load/)).toBeInTheDocument();

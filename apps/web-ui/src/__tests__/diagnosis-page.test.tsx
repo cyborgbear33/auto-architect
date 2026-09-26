@@ -177,7 +177,7 @@ describe("Diagnosis", () => {
     renderDiagnosis();
     const heading = await screen.findByText("Proven, not-yet-drafted");
     const section = within(heading.closest("section")!);
-    expect(section.getByText(/Operator complaints/)).toBeInTheDocument();
+    expect(await section.findByText(/Operator complaints/)).toBeInTheDocument();
     fireEvent.click(section.getByRole("button", { name: "rough idle" }));
     fireEvent.click(await section.findByRole("button", { name: "Draft case" }));
     await waitFor(() =>
@@ -195,7 +195,8 @@ describe("Diagnosis", () => {
       obligations: [],
     });
     renderDiagnosis();
-    fireEvent.click(await screen.findByRole("button", { name: "Request: clear codes and drive" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Consider clearing codes" }));
+    fireEvent.click(screen.getByRole("button", { name: "Request: clear codes and drive" }));
     expect(await screen.findByText(/Allowed\./)).toBeInTheDocument();
   });
 
@@ -204,7 +205,10 @@ describe("Diagnosis", () => {
       new FakeApiError("blocked by R_forbid_clear_misfire", 403, "POLICY_BLOCKED"),
     );
     renderDiagnosis();
-    fireEvent.click(await screen.findByRole("button", { name: "Request: clear codes and drive" }));
+    const consider = await screen.findByRole("button", { name: "Consider clearing codes" });
+    expect(screen.queryByRole("button", { name: "Request: clear codes and drive" })).toBeNull();
+    fireEvent.click(consider);
+    fireEvent.click(screen.getByRole("button", { name: "Request: clear codes and drive" }));
     expect(
       await screen.findByText(/Blocked: blocked by R_forbid_clear_misfire/),
     ).toBeInTheDocument();
@@ -228,6 +232,8 @@ describe("Diagnosis", () => {
     await waitFor(() => expect(api.listProblems).toHaveBeenCalled());
     expect(await screen.findByRole("button", { name: "Run verify" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Draft case" })).toBeNull();
+    expect(screen.queryByText(/Operator complaints/)).toBeNull();
+    expect(screen.queryByRole("button", { name: "Active" })).toBeNull();
   });
 
   it("filters the caseboard and exposes lifecycle actions", async () => {

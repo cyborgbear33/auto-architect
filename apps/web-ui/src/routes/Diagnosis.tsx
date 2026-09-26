@@ -66,6 +66,7 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
   const [filter, setFilter] = useState<CaseboardFilter>("active");
   const [complaints, setComplaints] = useState<string[]>([]);
   const [complaintDraft, setComplaintDraft] = useState("");
+  const [considerClear, setConsiderClear] = useState(false);
   const [clearCodesResult, setClearCodesResult] = useState<
     | { kind: "allowed"; obligations: string[] }
     | { kind: "blocked"; message: string; details: unknown }
@@ -95,10 +96,17 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
     (c) => !activeClasses.has(c),
   );
 
+  const allProblems = problemsQ.data ?? [];
+  const showCaseFilters = allProblems.length > 1;
   const filteredProblems = useMemo(() => {
-    const list = (problemsQ.data ?? []).filter((p) => matchesFilter(p, filter));
+    const list = showCaseFilters
+      ? allProblems.filter((p) => matchesFilter(p, filter))
+      : allProblems;
     return [...list].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  }, [problemsQ.data, filter]);
+  }, [allProblems, filter, showCaseFilters]);
+  const provenCount = recognitionQ.data?.mostSpecific.length ?? 0;
+  const showClear =
+    provenCount > 0 || (provenanceQ.data?.batchCount ?? 0) > 0 || allProblems.length > 0;
 
   const invalidateProblems = () => {
     void qc.invalidateQueries({ queryKey: queryKeys.problems(vehicleId) });
@@ -187,148 +195,161 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
           Plain English leads. Technical class names stay underneath for reference.
         </p>
 
-        <div className="mb-3 rounded-md border border-amber-100 bg-amber-50/50 px-3 py-2">
-          <p className="text-xs font-semibold text-slate-700">Operator complaints (framing only)</p>
-          <p className="mt-0.5 text-[11px] text-slate-500">
-            Symptoms you notice. They frame the case; they do not prove a fault by themselves.
-          </p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {COMPLAINT_CHIPS.map((chip) => {
-              const on = complaints.some((c) => c.toLowerCase() === chip);
-              return (
-                <button
-                  key={chip}
-                  type="button"
-                  onClick={() =>
-                    on
-                      ? setComplaints((prev) => prev.filter((c) => c.toLowerCase() !== chip))
-                      : addComplaint(chip)
-                  }
-                  className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${
-                    on
-                      ? "border-amber-300 bg-amber-100 text-amber-900"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-                  }`}
-                >
-                  {chip}
-                </button>
-              );
-            })}
-          </div>
-          <form
-            className="mt-2 flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              addComplaint(complaintDraft);
-              setComplaintDraft("");
-            }}
-          >
-            <input
-              className="min-w-0 flex-1 rounded border border-slate-200 px-2 py-1 text-xs"
-              value={complaintDraft}
-              onChange={(e) => setComplaintDraft(e.target.value)}
-              placeholder="Other symptom (optional)"
-              maxLength={200}
-            />
-            <button
-              type="submit"
-              className="shrink-0 text-xs font-medium text-sky-700 hover:underline"
-            >
-              Add
-            </button>
-          </form>
-          {complaints.length > 0 && (
-            <ul className="mt-2 flex flex-wrap gap-1.5">
-              {complaints.map((c) => (
-                <li
-                  key={c}
-                  className="inline-flex items-center gap-1 rounded bg-white px-2 py-0.5 text-[11px] text-slate-700 ring-1 ring-slate-200"
-                >
-                  {c}
-                  <button
-                    type="button"
-                    aria-label={`Remove ${c}`}
-                    className="text-slate-400 hover:text-slate-700"
-                    onClick={() => setComplaints((prev) => prev.filter((x) => x !== c))}
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
         {undraftedClasses.length === 0 ? (
           <p className="text-sm text-slate-400">
             Nothing new to draft — every proven class already has an active case below (or nothing
             is proven).
           </p>
         ) : (
-          <ul className="space-y-2">
-            {undraftedClasses.map((cls) => {
-              const fluent = fluentForClass(cls, recognitionQ.data?.narration);
-              const evidence = recognitionQ.data?.classEvidence?.find((e) => e.className === cls);
-              return (
-                <li
-                  key={cls}
-                  className="flex items-center justify-between gap-3 rounded-md bg-slate-50 px-3 py-2 text-sm"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-slate-800">{fluent}</p>
-                    {fluent !== cls && (
-                      <p className="mt-0.5 font-mono text-[11px] text-slate-400">{cls}</p>
-                    )}
-                    <AemfAspectChips className={cls} />
-                    <AemfPlaybookProse className={cls} />
-                    <ClassEvidencePanel evidence={evidence} />
-                    <CausalBriefPanel vehicleId={vehicleId} faultClass={cls} />
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-2">
+          <>
+            <div className="mb-3 rounded-md border border-amber-100 bg-amber-50/50 px-3 py-2">
+              <p className="text-xs font-semibold text-slate-700">
+                Operator complaints (framing only)
+              </p>
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                Shown because a case can be drafted. Symptoms frame that draft; they do not prove a
+                fault by themselves.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {COMPLAINT_CHIPS.map((chip) => {
+                  const on = complaints.some((c) => c.toLowerCase() === chip);
+                  return (
                     <button
+                      key={chip}
                       type="button"
-                      onClick={() => createProblem.mutate(cls)}
-                      disabled={createProblem.isPending}
-                      className="rounded-md bg-sky-600 px-3 py-1 text-xs font-medium text-white hover:bg-sky-700 disabled:opacity-50"
+                      onClick={() =>
+                        on
+                          ? setComplaints((prev) => prev.filter((c) => c.toLowerCase() !== chip))
+                          : addComplaint(chip)
+                      }
+                      className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${
+                        on
+                          ? "border-amber-300 bg-amber-100 text-amber-900"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                      }`}
                     >
-                      Draft case
+                      {chip}
                     </button>
-                    <Link
-                      to="/faults"
-                      search={{ problem: cls }}
-                      className="text-xs font-medium text-sky-700 hover:underline"
+                  );
+                })}
+              </div>
+              <form
+                className="mt-2 flex gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  addComplaint(complaintDraft);
+                  setComplaintDraft("");
+                }}
+              >
+                <input
+                  className="min-w-0 flex-1 rounded border border-slate-200 px-2 py-1 text-xs"
+                  value={complaintDraft}
+                  onChange={(e) => setComplaintDraft(e.target.value)}
+                  placeholder="Other symptom (optional)"
+                  maxLength={200}
+                />
+                <button
+                  type="submit"
+                  className="shrink-0 text-xs font-medium text-sky-700 hover:underline"
+                >
+                  Add
+                </button>
+              </form>
+              {complaints.length > 0 && (
+                <ul className="mt-2 flex flex-wrap gap-1.5">
+                  {complaints.map((c) => (
+                    <li
+                      key={c}
+                      className="inline-flex items-center gap-1 rounded bg-white px-2 py-0.5 text-[11px] text-slate-700 ring-1 ring-slate-200"
                     >
-                      Look up
-                    </Link>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                      {c}
+                      <button
+                        type="button"
+                        aria-label={`Remove ${c}`}
+                        className="text-slate-400 hover:text-slate-700"
+                        onClick={() => setComplaints((prev) => prev.filter((x) => x !== c))}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <ul className="space-y-2">
+              {undraftedClasses.map((cls) => {
+                const fluent = fluentForClass(cls, recognitionQ.data?.narration);
+                const evidence = recognitionQ.data?.classEvidence?.find((e) => e.className === cls);
+                return (
+                  <li
+                    key={cls}
+                    className="flex items-center justify-between gap-3 rounded-md bg-slate-50 px-3 py-2 text-sm"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-slate-800">{fluent}</p>
+                      {fluent !== cls && (
+                        <p className="mt-0.5 font-mono text-[11px] text-slate-400">{cls}</p>
+                      )}
+                      <AemfAspectChips className={cls} />
+                      <AemfPlaybookProse className={cls} />
+                      <ClassEvidencePanel evidence={evidence} />
+                      <CausalBriefPanel vehicleId={vehicleId} faultClass={cls} />
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => createProblem.mutate(cls)}
+                        disabled={createProblem.isPending}
+                        className="rounded-md bg-sky-600 px-3 py-1 text-xs font-medium text-white hover:bg-sky-700 disabled:opacity-50"
+                      >
+                        Draft case
+                      </button>
+                      <Link
+                        to="/faults"
+                        search={{ problem: cls }}
+                        className="text-xs font-medium text-sky-700 hover:underline"
+                      >
+                        Look up
+                      </Link>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
         )}
       </section>
 
       <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-slate-700">Problem caseboard</h2>
-          <fieldset className="m-0 flex min-w-0 flex-wrap gap-1 border-0 p-0">
-            <legend className="sr-only">Filter cases</legend>
-            {filters.map((f) => (
-              <button
-                key={f.id}
-                type="button"
-                aria-pressed={filter === f.id}
-                onClick={() => setFilter(f.id)}
-                className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${
-                  filter === f.id
-                    ? "border-sky-300 bg-sky-50 text-sky-800"
-                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </fieldset>
+          <div>
+            <h2 className="text-sm font-semibold text-slate-700">Problem caseboard</h2>
+            {showCaseFilters && (
+              <p className="mt-0.5 text-xs text-slate-500">
+                More than one case — filter by where each one stands.
+              </p>
+            )}
+          </div>
+          {showCaseFilters && (
+            <fieldset className="m-0 flex min-w-0 flex-wrap gap-1 border-0 p-0">
+              <legend className="sr-only">Filter cases</legend>
+              {filters.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  aria-pressed={filter === f.id}
+                  onClick={() => setFilter(f.id)}
+                  className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                    filter === f.id
+                      ? "border-sky-300 bg-sky-50 text-sky-800"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </fieldset>
+          )}
         </div>
 
         {filteredProblems.length === 0 && (
@@ -445,35 +466,48 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         </ul>
       </section>
 
-      <section className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
-        <h2 className="mb-2 text-sm font-semibold text-amber-950">
-          Safety hold: clear codes and drive
-        </h2>
-        <p className="mb-3 text-xs text-amber-950/80">
-          A hard stop, not a suggestion. Clearing codes stays blocked while a dangerous fault is
-          proven — for example a misfire under load.
-        </p>
-        <button
-          type="button"
-          onClick={() => clearCodes.mutate()}
-          disabled={clearCodes.isPending}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-        >
-          Request: clear codes and drive
-        </button>
-        {clearCodesResult?.kind === "allowed" && (
-          <p className="mt-2 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">
-            Allowed.{" "}
-            {clearCodesResult.obligations.length > 0 &&
-              `Obligations: ${clearCodesResult.obligations.join(", ")}`}
+      {showClear && (
+        <section className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
+          <h2 className="mb-2 text-sm font-semibold text-amber-950">
+            Safety hold: clear codes and drive
+          </h2>
+          <p className="mb-3 text-xs text-amber-950/80">
+            {provenCount > 0
+              ? "A fault is proven, so a clear stays on hold until that fault is gone. Asking checks the hold. It does not bypass it."
+              : "A clear removes stored codes. It does not show that a repair worked."}
           </p>
-        )}
-        {clearCodesResult?.kind === "blocked" && (
-          <p className="mt-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
-            Blocked: {clearCodesResult.message}
-          </p>
-        )}
-      </section>
+          {considerClear ? (
+            <button
+              type="button"
+              onClick={() => clearCodes.mutate()}
+              disabled={clearCodes.isPending}
+              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              Request: clear codes and drive
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConsiderClear(true)}
+              className="text-sm font-medium text-amber-950 underline"
+            >
+              Consider clearing codes
+            </button>
+          )}
+          {clearCodesResult?.kind === "allowed" && (
+            <p className="mt-2 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">
+              Allowed.{" "}
+              {clearCodesResult.obligations.length > 0 &&
+                `Obligations: ${clearCodesResult.obligations.join(", ")}`}
+            </p>
+          )}
+          {clearCodesResult?.kind === "blocked" && (
+            <p className="mt-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
+              Blocked: {clearCodesResult.message}
+            </p>
+          )}
+        </section>
+      )}
 
       <div className="mt-8 border-t border-slate-200 pt-6">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">

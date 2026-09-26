@@ -78,6 +78,16 @@ describe("Functions", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/External tool required/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Start guided run/i })).toBeInTheDocument();
+    expect(screen.getByText(/Scan all modules with AlfaOBD/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Finishing this tells you: are modules out of sync\?/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Do not skip: Gateway cannot send Proxi/)).toBeInTheDocument();
+    expect(screen.queryByText("proc:fca-proxi-alignment")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Body computer → PROXI alignment; gray adapter when prompted/i),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Later steps" }));
     expect(
       screen.getByText(/Body computer → PROXI alignment; gray adapter when prompted/i),
     ).toBeInTheDocument();
@@ -94,8 +104,8 @@ describe("Functions", () => {
     const start = await screen.findByRole("button", { name: /Start guided run/i });
     fireEvent.click(start);
 
-    expect(await screen.findByText(/Active case:/)).toBeInTheDocument();
-    expect(screen.getByText("problem:proxi-1")).toBeInTheDocument();
+    expect(await screen.findByText(/Guided run is open/)).toBeInTheDocument();
+    expect(screen.queryByText("problem:proxi-1")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Mark completed/i })).toBeInTheDocument();
   });
 

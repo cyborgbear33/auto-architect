@@ -5,12 +5,16 @@ import { api } from "../lib/api.ts";
 export function ReportDownload({
   vehicleId,
   problemId,
+  compact = false,
 }: {
   vehicleId?: string;
   problemId?: string;
+  /** One Report control until the operator asks for download, print, or copy. */
+  compact?: boolean;
 }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [open, setOpen] = useState(!compact);
 
   async function loadReport() {
     if (!vehicleId && !problemId) throw new Error("No vehicle or problem selected.");
@@ -61,6 +65,18 @@ export function ReportDownload({
     } finally {
       setBusy(false);
     }
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="text-sm font-medium text-slate-600 hover:text-slate-900"
+      >
+        Report
+      </button>
+    );
   }
 
   return (

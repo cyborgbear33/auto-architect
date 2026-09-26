@@ -63,7 +63,7 @@ Operate      — Dashboard (live condition)
 Diagnose     — Diagnosis
 Learn        — Discovery (capability forensics), Guide (mastery curriculum)
 Procedures   — Functions (guided Proxi / special procedures; star a repeat procedure to pin it on Functions and the Dashboard)
-Reference    — Problems (fault-class and inspection lookup; Diagnosis “Look up” prefills search and category), Recalls & TSBs
+Reference    — Problems (lookup; Diagnosis “Look up” prefills it), Recalls & TSBs (open from a dossier match, not an empty shortcut)
 History      — Journal
 ```
 
@@ -165,7 +165,7 @@ streaming or polled OBD evidence:
 
 | Page | One job |
 |---|---|
-| Dashboard | Present condition + **at-a-glance next action**; DTCs, proven classes, trends, recommendations |
+| Dashboard | One primary action (next step, open case, or how to scan) with the reason beside it. Guide, report, and refresh stay secondary. DTCs, proven classes, trends, and recommendations follow |
 | Diagnosis | Draft/solve problems from proven classes; demonstrate safety holds |
 | Problem detail | Show solution + ranked actions; log repair outcome |
 | Campaigns | Match recalls/TSBs for the selected vehicle |

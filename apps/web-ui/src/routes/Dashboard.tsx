@@ -19,7 +19,7 @@ import {
   vehicleLabel,
 } from "../components/Layout.tsx";
 import { LiveGaugeStrip } from "../components/LiveGaugeStrip.tsx";
-import { NextActionConsole } from "../components/NextActionConsole.tsx";
+import { NextActionConsole, useDashboardDecision } from "../components/NextActionConsole.tsx";
 import { ReadinessPanel } from "../components/ReadinessPanel.tsx";
 import { RecommendationPanel } from "../components/RecommendationPanel.tsx";
 import { ReportDownload } from "../components/ReportDownload.tsx";
@@ -67,6 +67,7 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
   const qc = useQueryClient();
   /** Empty string = all drives (vehicle-global). */
   const [trendSessionId, setTrendSessionId] = useState("");
+  const [showEvidence, setShowEvidence] = useState(false);
 
   const vehicleQ = useQuery({
     queryKey: queryKeys.vehicle(vehicleId),
@@ -94,6 +95,8 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
   });
 
   const vehicle = vehicleQ.data;
+  const { decision } = useDashboardDecision(vehicleId);
+  const primary = decision.primary;
 
   return (
     <div>
@@ -101,24 +104,37 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
         title={vehicle ? vehicleLabel(vehicle) : "Vehicle"}
         subtitle={vehicle ? vehicleSubtitle(vehicle, debugMode) : undefined}
         actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to="/guide"
-              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              OBD Guide
-            </Link>
-            <ReportDownload vehicleId={vehicleId} />
-            <button
-              type="button"
-              onClick={async () => {
-                await api.refreshRecommendations(vehicleId);
-                qc.invalidateQueries({ queryKey: queryKeys.recommendations(vehicleId) });
-              }}
-              className="rounded-md bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700"
-            >
-              Refresh recommendations
-            </button>
+          <div className="flex flex-col items-stretch gap-2 sm:items-end">
+            {primary && (
+              <Link
+                to={primary.to}
+                className="rounded-md bg-sky-600 px-3.5 py-2 text-center text-sm font-semibold text-white hover:bg-sky-700"
+              >
+                {primary.label}
+              </Link>
+            )}
+            <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+              {primary?.to !== "/guide" && (
+                <Link
+                  to="/guide"
+                  className="text-sm font-medium text-slate-600 hover:text-slate-900"
+                >
+                  OBD Guide
+                </Link>
+              )}
+              <ReportDownload vehicleId={vehicleId} compact />
+              <button
+                type="button"
+                onClick={async () => {
+                  await api.refreshRecommendations(vehicleId);
+                  qc.invalidateQueries({ queryKey: queryKeys.recommendations(vehicleId) });
+                }}
+                className="text-sm font-medium text-slate-600 hover:text-slate-900"
+                title="Recompute the ranked next step from the evidence already on file"
+              >
+                Refresh recommendations
+              </button>
+            </div>
           </div>
         }
       />
@@ -131,188 +147,212 @@ function VehicleDashboard({ vehicleId }: { vehicleId: string }) {
 
       <FavoriteProceduresStrip vehicleId={vehicleId} />
 
-      <ReadinessPanel vehicleId={vehicleId} />
-
       <div className="mb-4">
         <LiveGaugeStrip vehicleId={vehicleId} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <section className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">
-          <h2 className="mb-3 text-sm font-semibold text-slate-700">Active DTCs</h2>
-          {dtcsQ.isLoading && <p className="text-sm text-slate-400">Loading trouble codes…</p>}
-          {dtcsQ.isError && (
-            <p role="alert" className="text-sm text-red-700">
-              Could not load trouble codes. Check that the API is running, then refresh.
-            </p>
-          )}
-          {dtcsQ.data?.length === 0 && <EmptyEvidenceState kind="dtcs" ingestLink />}
-          <ul className="space-y-1.5">
-            {dtcsQ.data?.map((dtc) => {
-              const desc =
-                dtc.description?.trim() || lookupDtc(dtc.code)?.description || "No description";
-              const linkedClass = recognitionQ.data?.classEvidence?.find((e) =>
-                e.dtcs.some((d) => d.code.toUpperCase() === dtc.code.toUpperCase()),
-              )?.className;
-              const fluent = linkedClass
-                ? recognitionQ.data?.narration?.find((n) => n.className === linkedClass)?.fluent
-                : undefined;
-              const tip = [desc, fluent && fluent !== linkedClass ? fluent : null, linkedClass]
-                .filter(Boolean)
-                .join(" · ");
-              return (
-                <li
-                  key={`${dtc.code}-${dtc.status}`}
-                  className="rounded-md bg-slate-50 px-3 py-2 text-sm"
-                  title={tip}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono font-semibold text-slate-800">{dtc.code}</span>
-                    <span className="min-w-0 flex-1 text-slate-500">{desc}</span>
-                    <Pill
-                      tone={
-                        dtc.status === "permanent"
-                          ? "critical"
-                          : dtc.status === "pending"
-                            ? "low"
-                            : "high"
-                      }
-                    >
-                      {dtc.status}
-                    </Pill>
-                  </div>
-                  <DtcWhatWorkedChips
-                    vehicleId={vehicleId}
-                    dtcCode={dtc.code}
-                    classEvidence={recognitionQ.data?.classEvidence}
-                  />
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-
-        <section className="rounded-lg border border-slate-200 bg-white p-4">
-          <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-700">Signal trends</h2>
-              <p className="mt-0.5 text-xs text-slate-400">
-                Recorded-signal flags. This drive scope is for the view only — recognition always
-                uses the whole vehicle. A coolant climb is informational.
-              </p>
-            </div>
-            <label className="flex flex-col gap-0.5 text-xs text-slate-500">
-              Drive scope
-              <select
-                value={trendSessionId}
-                onChange={(e) => setTrendSessionId(e.target.value)}
-                className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700"
-              >
-                <option value="">All drives</option>
-                {(sessionsQ.data ?? []).map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.label ?? s.id.replace(/^session:/, "").slice(0, 12)}
-                    {s.endedAt ? "" : " (open)"}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {!forecastQ.data && <p className="text-sm text-slate-400">Loading…</p>}
-          {forecastQ.data && (
-            <ul className="space-y-2">
-              {forecastQ.data.signals.map((signal) => (
-                <li
-                  key={signal.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm"
-                >
-                  <div>
-                    <span className="font-medium text-slate-800">{signal.label}</span>
-                    <span className="ml-2 text-xs text-slate-400">
-                      {signal.series.length} sample(s)
-                      {signal.direction !== "unknown" ? ` · ${signal.direction}` : ""}
-                    </span>
-                    {signal.flagReason && (
-                      <p className="mt-0.5 text-xs text-slate-500">{signal.flagReason}</p>
-                    )}
-                  </div>
-                  <Pill tone={signal.flagged ? "high" : signal.flagReason ? "normal" : "low"}>
-                    {signal.flagged
-                      ? (signal.ontologyTrend ?? "flagged")
-                      : signal.series.length < 2
-                        ? "need ≥2"
-                        : "ok"}
-                  </Pill>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
-
-      <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="text-sm font-semibold text-slate-700">Proven conditions</h2>
-        <p className="mb-3 mt-0.5 text-xs text-slate-500">
-          Confirmed from current evidence. Nothing proven is not a clean bill of health.
-        </p>
-        {recognitionQ.data?.mostSpecific.length === 0 ? (
-          <p className="text-sm text-slate-400">
-            Nothing proven from current evidence. That is an honest "not yet classified" — never a
-            synthesized "Healthy".
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {recognitionQ.data?.mostSpecific.map((cls) => {
-              const narr = recognitionQ.data?.narration?.find((n) => n.className === cls);
-              const evidence = recognitionQ.data?.classEvidence?.find((e) => e.className === cls);
-              return (
-                <li key={cls} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
-                  {narr?.fluent && narr.fluent !== cls ? (
-                    <>
-                      <p className="text-sm font-medium text-slate-800">{narr.fluent}</p>
-                      <Pill tone="high">{cls}</Pill>
-                    </>
-                  ) : (
-                    <Pill tone="high">{cls}</Pill>
-                  )}
-                  <AemfAspectChips className={cls} />
-                  <AemfPlaybookProse className={cls} />
-                  <ClassEvidencePanel evidence={evidence} />
-                </li>
-              );
-            })}
-          </ul>
-        )}
-        {debugMode && recognitionQ.data?.undecided && recognitionQ.data.undecided.length > 0 && (
-          <p className="mt-2 text-xs text-slate-400">
-            Undecided (insufficient evidence either way): {recognitionQ.data.undecided.join(", ")}
-          </p>
-        )}
-        <Link
-          to="/diagnosis"
-          className="mt-3 inline-block text-sm font-medium text-sky-700 hover:underline"
+      <div className="mb-4">
+        <button
+          type="button"
+          aria-expanded={showEvidence}
+          onClick={() => setShowEvidence((open) => !open)}
+          className="text-sm font-semibold text-sky-800 hover:underline"
         >
-          Go to full diagnosis →
-        </Link>
-      </section>
-
-      <div className="mt-4">
-        <RecommendationPanel vehicleId={vehicleId} />
-      </div>
-
-      <div className="mt-8 border-t border-slate-200 pt-6">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Evidence tools
-        </h2>
-        <p className="mb-3 mt-1 text-xs text-slate-500">
-          Import, simulate, or review raw snapshots. A live adapter scan is in the Guide.
+          {showEvidence ? "Hide the evidence" : "Show the evidence"}
+        </button>
+        <p className="mt-1 text-xs text-slate-500">
+          The full code list, trends, recommendations, and import. The gauges above are this
+          vehicle's live readings, with units and age.
         </p>
-        <EvidenceIngestPanel vehicleId={vehicleId} />
-        <div className="mb-4">
-          <DriveSessionsPanel vehicleId={vehicleId} />
-        </div>
-        <EvidencePanels vehicleId={vehicleId} />
       </div>
+
+      {showEvidence && (
+        <>
+          <ReadinessPanel vehicleId={vehicleId} />
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <section className="rounded-lg border border-slate-200 bg-white p-4 lg:col-span-2">
+              <h2 className="mb-3 text-sm font-semibold text-slate-700">Active DTCs</h2>
+              {dtcsQ.isLoading && <p className="text-sm text-slate-400">Loading trouble codes…</p>}
+              {dtcsQ.isError && (
+                <p role="alert" className="text-sm text-red-700">
+                  Could not load trouble codes. Check that the API is running, then refresh.
+                </p>
+              )}
+              {dtcsQ.data?.length === 0 && <EmptyEvidenceState kind="dtcs" ingestLink />}
+              <ul className="space-y-1.5">
+                {dtcsQ.data?.map((dtc) => {
+                  const desc =
+                    dtc.description?.trim() || lookupDtc(dtc.code)?.description || "No description";
+                  const linkedClass = recognitionQ.data?.classEvidence?.find((e) =>
+                    e.dtcs.some((d) => d.code.toUpperCase() === dtc.code.toUpperCase()),
+                  )?.className;
+                  const fluent = linkedClass
+                    ? recognitionQ.data?.narration?.find((n) => n.className === linkedClass)?.fluent
+                    : undefined;
+                  const tip = [desc, fluent && fluent !== linkedClass ? fluent : null, linkedClass]
+                    .filter(Boolean)
+                    .join(" · ");
+                  return (
+                    <li
+                      key={`${dtc.code}-${dtc.status}`}
+                      className="rounded-md bg-slate-50 px-3 py-2 text-sm"
+                      title={tip}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono font-semibold text-slate-800">{dtc.code}</span>
+                        <span className="min-w-0 flex-1 text-slate-500">{desc}</span>
+                        <Pill
+                          tone={
+                            dtc.status === "permanent"
+                              ? "critical"
+                              : dtc.status === "pending"
+                                ? "low"
+                                : "high"
+                          }
+                        >
+                          {dtc.status}
+                        </Pill>
+                      </div>
+                      <DtcWhatWorkedChips
+                        vehicleId={vehicleId}
+                        dtcCode={dtc.code}
+                        classEvidence={recognitionQ.data?.classEvidence}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+
+            <section className="rounded-lg border border-slate-200 bg-white p-4">
+              <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-700">Signal trends</h2>
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    Recorded-signal flags. This drive scope is for the view only — recognition
+                    always uses the whole vehicle. A coolant climb is informational.
+                  </p>
+                </div>
+                <label className="flex flex-col gap-0.5 text-xs text-slate-500">
+                  Drive scope
+                  <select
+                    value={trendSessionId}
+                    onChange={(e) => setTrendSessionId(e.target.value)}
+                    className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700"
+                  >
+                    <option value="">All drives</option>
+                    {(sessionsQ.data ?? []).map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.label ?? s.id.replace(/^session:/, "").slice(0, 12)}
+                        {s.endedAt ? "" : " (open)"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              {!forecastQ.data && <p className="text-sm text-slate-400">Loading…</p>}
+              {forecastQ.data && (
+                <ul className="space-y-2">
+                  {forecastQ.data.signals.map((signal) => (
+                    <li
+                      key={signal.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm"
+                    >
+                      <div>
+                        <span className="font-medium text-slate-800">{signal.label}</span>
+                        <span className="ml-2 text-xs text-slate-400">
+                          {signal.series.length} sample(s)
+                          {signal.direction !== "unknown" ? ` · ${signal.direction}` : ""}
+                        </span>
+                        {signal.flagReason && (
+                          <p className="mt-0.5 text-xs text-slate-500">{signal.flagReason}</p>
+                        )}
+                      </div>
+                      <Pill tone={signal.flagged ? "high" : signal.flagReason ? "normal" : "low"}>
+                        {signal.flagged
+                          ? (signal.ontologyTrend ?? "flagged")
+                          : signal.series.length < 2
+                            ? "need ≥2"
+                            : "ok"}
+                      </Pill>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+
+          <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+            <h2 className="text-sm font-semibold text-slate-700">Proven conditions</h2>
+            <p className="mb-3 mt-0.5 text-xs text-slate-500">
+              Confirmed from current evidence. Nothing proven is not a clean bill of health.
+            </p>
+            {recognitionQ.data?.mostSpecific.length === 0 ? (
+              <p className="text-sm text-slate-400">
+                Nothing proven from current evidence. That is an honest "not yet classified" — never
+                a synthesized "Healthy".
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {recognitionQ.data?.mostSpecific.map((cls) => {
+                  const narr = recognitionQ.data?.narration?.find((n) => n.className === cls);
+                  const evidence = recognitionQ.data?.classEvidence?.find(
+                    (e) => e.className === cls,
+                  );
+                  return (
+                    <li key={cls} className="rounded-md bg-slate-50 px-3 py-2 text-sm">
+                      {narr?.fluent && narr.fluent !== cls ? (
+                        <>
+                          <p className="text-sm font-medium text-slate-800">{narr.fluent}</p>
+                          <Pill tone="high">{cls}</Pill>
+                        </>
+                      ) : (
+                        <Pill tone="high">{cls}</Pill>
+                      )}
+                      <AemfAspectChips className={cls} />
+                      <AemfPlaybookProse className={cls} />
+                      <ClassEvidencePanel evidence={evidence} />
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            {debugMode &&
+              recognitionQ.data?.undecided &&
+              recognitionQ.data.undecided.length > 0 && (
+                <p className="mt-2 text-xs text-slate-400">
+                  Undecided (insufficient evidence either way):{" "}
+                  {recognitionQ.data.undecided.join(", ")}
+                </p>
+              )}
+            <Link
+              to="/diagnosis"
+              className="mt-3 inline-block text-sm font-medium text-sky-700 hover:underline"
+            >
+              Go to full diagnosis →
+            </Link>
+          </section>
+
+          <div className="mt-4">
+            <RecommendationPanel vehicleId={vehicleId} />
+          </div>
+
+          <div className="mt-8 border-t border-slate-200 pt-6">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Evidence tools
+            </h2>
+            <p className="mb-3 mt-1 text-xs text-slate-500">
+              Import, simulate, or review raw snapshots. A live adapter scan is in the Guide.
+            </p>
+            <EvidenceIngestPanel vehicleId={vehicleId} />
+            <div className="mb-4">
+              <DriveSessionsPanel vehicleId={vehicleId} />
+            </div>
+            <EvidencePanels vehicleId={vehicleId} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

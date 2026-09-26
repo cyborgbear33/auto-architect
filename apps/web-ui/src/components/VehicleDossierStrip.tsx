@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ApiError, api, queryKeys } from "../lib/api.ts";
+import { useAppSelector } from "../store/index.ts";
 import { vehicleLabel } from "./Layout.tsx";
 
 /**
@@ -9,6 +10,7 @@ import { vehicleLabel } from "./Layout.tsx";
  * VIN/odo are operator-entered only — never invented from empty evidence.
  */
 export function VehicleDossierStrip({ vehicleId }: { vehicleId: string }) {
+  const debugMode = useAppSelector((s) => s.ui.debugMode);
   const qc = useQueryClient();
   const [vinDraft, setVinDraft] = useState("");
   const [odoDraft, setOdoDraft] = useState("");
@@ -44,8 +46,7 @@ export function VehicleDossierStrip({ vehicleId }: { vehicleId: string }) {
     mutationFn: () => {
       const vinTrim = vinDraft.trim();
       const odoRaw = odoDraft.trim();
-      const odometerMiles =
-        odoRaw === "" ? null : Number.parseInt(odoRaw.replace(/,/g, ""), 10);
+      const odometerMiles = odoRaw === "" ? null : Number.parseInt(odoRaw.replace(/,/g, ""), 10);
       if (odoRaw !== "" && !Number.isFinite(odometerMiles)) {
         throw new Error("Odometer must be a non-negative whole number.");
       }
@@ -79,23 +80,29 @@ export function VehicleDossierStrip({ vehicleId }: { vehicleId: string }) {
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-slate-800">Vehicle dossier</h2>
           <p className="mt-0.5 text-sm text-slate-700">{vehicleLabel(vehicle)}</p>
-          <p className="mt-0.5 font-mono text-xs text-slate-500">{vehicle.engineFamily}</p>
+          {debugMode && (
+            <p className="mt-0.5 font-mono text-xs text-slate-500">{vehicle.engineFamily}</p>
+          )}
         </div>
-        <div className="flex flex-wrap gap-3 text-xs">
-          <Link to="/discovery" className="font-medium text-sky-700 hover:underline">
-            {discoveryMissing
-              ? "Discovery not run"
-              : discoveryQ.data
-                ? "Discovery on file"
-                : "Discovery…"}
-          </Link>
-          <Link to="/campaigns" className="font-medium text-sky-700 hover:underline">
-            {campaignsQ.isLoading
-              ? "Campaigns…"
-              : campaignCount === 0
-                ? "No matched campaigns"
-                : `${campaignCount} campaign/TSB match${campaignCount === 1 ? "" : "es"}`}
-          </Link>
+        <div className="flex flex-col items-end gap-1 text-xs">
+          {discoveryMissing ? (
+            <Link to="/discovery" className="font-medium text-sky-700 hover:underline">
+              Discovery not run — capability is unknown
+            </Link>
+          ) : (
+            <p className="text-slate-500">
+              {discoveryQ.data ? "Discovery is on file." : "Discovery…"}
+            </p>
+          )}
+          {campaignCount > 0 ? (
+            <Link to="/campaigns" className="font-medium text-sky-700 hover:underline">
+              {campaignCount} campaign/TSB match{campaignCount === 1 ? "" : "es"} for this family
+            </Link>
+          ) : (
+            <p className="text-slate-500">
+              {campaignsQ.isLoading ? "Campaigns…" : "No campaigns matched this engine family."}
+            </p>
+          )}
         </div>
       </div>
 
