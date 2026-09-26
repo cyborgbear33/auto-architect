@@ -8,14 +8,6 @@ The 2026-09-26 security item shipped: [API listens on localhost](evidence/api-lo
 
 The 2026-09-26 reliability item shipped: [retention rewrite](evidence/retention-transaction-evidence.md).
 
-## Performance
+The 2026-09-26 performance item shipped: [memory log insert](evidence/memory-log-insert-evidence.md).
 
-### Memory observation log re-sorts the whole history on every sample [apps/api]
-Status: proposed
-Problem: The default in-memory store sorts every stored batch each time a new observation is recorded. A long watch gets slower as the log grows.
-Evidence: `apps/api/src/store/memory.ts` `record` pushes the batch and then `list.sort` on the full vehicle list. Timed with `tsx` against `createMemoryStore`: 500 inserts 21.8 ms, 2,000 inserts 153.2 ms, 8,000 inserts 2,159.6 ms. Seven forecast `series` walks of those 8,000 batches were 3.1 ms, so the repeated scan is not the cost. Postgres inserts one row and does not do this sort.
-Expected value: Recording a long drive stays cheap instead of re-sorting thousands of samples on each new one.
-Effort: low
-Risk: low
-Dependencies: none
-Added: 2026-09-26 (kaizen-audit: Performance)
+No open entries.

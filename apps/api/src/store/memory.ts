@@ -62,10 +62,24 @@ function createObservationRepository(): ObservationRepository {
   }
 
   return {
+    // Live samples arrive in time order and append. An older import is inserted
+    // at its timestamp so the log stays sorted without re-sorting every batch.
     async record(batch) {
       const list = batches.get(batch.vehicleId) ?? [];
-      list.push(batch);
-      list.sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
+      const last = list.at(-1);
+      if (!last || last.capturedAt.localeCompare(batch.capturedAt) <= 0) {
+        list.push(batch);
+      } else {
+        let lo = 0;
+        let hi = list.length;
+        while (lo < hi) {
+          const mid = (lo + hi) >> 1;
+          const row = list[mid];
+          if (row && row.capturedAt.localeCompare(batch.capturedAt) <= 0) lo = mid + 1;
+          else hi = mid;
+        }
+        list.splice(lo, 0, batch);
+      }
       batches.set(batch.vehicleId, list);
     },
 

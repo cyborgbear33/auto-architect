@@ -125,6 +125,21 @@ export function runStoreConformance(label: string, makeStore: () => Store): void
       expect(pidReadings.find((p) => p.pid === "ENGINE_LOAD")?.value).toBe(85);
     });
 
+    it("keeps observation batches in time order when an older sample arrives later", async () => {
+      await store.vehicles.create(vehicle);
+      await store.observations.record(
+        batch({ capturedAt: "2026-07-19T10:00:00.000Z", sessionId: "early" }),
+      );
+      await store.observations.record(
+        batch({ capturedAt: "2026-07-19T12:00:00.000Z", sessionId: "late" }),
+      );
+      await store.observations.record(
+        batch({ capturedAt: "2026-07-19T11:00:00.000Z", sessionId: "middle" }),
+      );
+      const batches = await store.observations.listBatches(vehicle.id);
+      expect(batches.map((row) => row.sessionId)).toEqual(["early", "middle", "late"]);
+    });
+
     it("replaceAll rewrites observation batches for a vehicle", async () => {
       await store.vehicles.create(vehicle);
       await store.observations.record(batch({ capturedAt: "2026-07-19T10:00:00.000Z" }));
