@@ -5,6 +5,7 @@
  */
 import { lookupDtc, lookupMode06, lookupPid } from "@auto/ontology";
 import type { DtcObservation, FreezeFrame, Mode06Result } from "@auto/semantic-types";
+import { pidMeetsThreshold } from "./perception.ts";
 import type { Cartridge } from "./types.ts";
 
 export interface ClassEvidencePid {
@@ -21,18 +22,6 @@ export interface ClassEvidenceBundle {
   pids: ClassEvidencePid[];
   freezeFrames: FreezeFrame[];
   mode06: Mode06Result[];
-}
-
-function pidMeetsWhen(
-  value: number,
-  when?: { gt?: number; gte?: number; lt?: number; lte?: number },
-): boolean {
-  if (!when) return true;
-  if (when.gt !== undefined && !(value > when.gt)) return false;
-  if (when.gte !== undefined && !(value >= when.gte)) return false;
-  if (when.lt !== undefined && !(value < when.lt)) return false;
-  if (when.lte !== undefined && !(value <= when.lte)) return false;
-  return true;
 }
 
 /** Cartridges that frame or require this proven class. */
@@ -90,7 +79,7 @@ export function composeClassEvidence(
       pid,
       value,
       ...(entry?.unit ? { unit: entry.unit } : {}),
-      ...(when ? { thresholdMet: pidMeetsWhen(value, when) } : {}),
+      ...(when ? { thresholdMet: pidMeetsThreshold(value, when) } : {}),
     });
   }
 

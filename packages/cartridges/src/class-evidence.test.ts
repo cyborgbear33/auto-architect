@@ -40,6 +40,21 @@ describe("composeClassEvidence", () => {
     expect(bundle.mode06).toEqual([]);
   });
 
+  it("does not mark the fuel-trim threshold met when the reading only equals the bound", () => {
+    const bundle = composeClassEvidence(
+      "LeanFuelBank1",
+      [leanFuelCartridge],
+      [{ code: "P0171", status: "stored" }],
+      { LONG_FUEL_TRIM_1: 10 },
+      [],
+    );
+    expect(bundle.pids).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ pid: "LONG_FUEL_TRIM_1", value: 10, thresholdMet: false }),
+      ]),
+    );
+  });
+
   it("returns empty evidence when no cartridge frames the class", () => {
     const bundle = composeClassEvidence("UnknownClass", [leanFuelCartridge], [], {}, []);
     expect(bundle.dtcs).toEqual([]);

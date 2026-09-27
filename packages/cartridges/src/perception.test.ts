@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runPerception } from "./perception.ts";
+import { pidMeetsThreshold, runPerception } from "./perception.ts";
 import { resolveCartridgesForEngineFamily } from "./registry.ts";
 
 describe("runPerception", () => {
@@ -141,6 +141,13 @@ describe("runPerception", () => {
     ]);
     expect(abox.concepts["veh:x:mode06-cat-b1"]).toEqual(["FailedCatalystMonitorBank1"]);
     expect(abox.roles).toContainEqual(["hasCondition", "veh:x", "veh:x:mode06-cat-b1"]);
+  });
+
+  it("treats an exact bound as inside only for gte and lte", () => {
+    expect(pidMeetsThreshold(10, { gt: 10 })).toBe(false);
+    expect(pidMeetsThreshold(10, { gte: 10 })).toBe(true);
+    expect(pidMeetsThreshold(10, { lt: 10 })).toBe(false);
+    expect(pidMeetsThreshold(10, { lte: 10 })).toBe(true);
   });
 
   it("does not invent meaning for unknown Mode 06 OBDMIDs", () => {

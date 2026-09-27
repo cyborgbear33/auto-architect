@@ -8,7 +8,11 @@ const ROLE_FOR: Record<PerceptionRule["as"], "hasDtc" | "hasCondition" | "hasTre
   trend: "hasTrend",
 };
 
-function evaluate(when: PerceptionRule["when"], value: number): boolean {
+/** True when a live PID meets a perception rule's bounds. Shared with class evidence. */
+export function pidMeetsThreshold(
+  value: number,
+  when?: { gt?: number; gte?: number; lt?: number; lte?: number },
+): boolean {
   if (!when) return true;
   if (when.gt !== undefined && !(value > when.gt)) return false;
   if (when.gte !== undefined && !(value >= when.gte)) return false;
@@ -65,7 +69,7 @@ export function runPerception(
         satisfied = active.has(rule.dtcConcept);
       } else if (rule.pid !== undefined) {
         const value = pids[rule.pid];
-        satisfied = value !== undefined && evaluate(rule.when, value);
+        satisfied = value !== undefined && pidMeetsThreshold(value, rule.when);
       } else if (rule.mode06Concept !== undefined) {
         satisfied = failedMonitors.has(rule.mode06Concept);
       }
