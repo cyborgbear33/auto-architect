@@ -107,6 +107,12 @@ function buildNarrative(
     );
   }
 
+  if (summary.vinRead) {
+    lines.push(
+      `The bus returned VIN ${summary.vinRead}. It is not the dossier VIN until the operator records it.`,
+    );
+  }
+
   lines.push(
     "Standard discovery does not enumerate OEM modules or run Proxi/Functions — use Functions + AlfaOBD for those. Values still come from `scan` / `watch`.",
   );
@@ -137,6 +143,11 @@ function composeMarkdown(report: DiscoveryForensicsReport): string {
     `- Mode 03 DTCs: ${flagLabel(report.summary.mode03Dtcs)}`,
     `- Mode 07 pending: ${flagLabel(report.summary.mode07Pending)}`,
     `- VIN: ${flagLabel(report.summary.vin)}`,
+    ...(report.summary.vinRead
+      ? [
+          `- VIN read from the bus: ${report.summary.vinRead} (not saved until the operator records it)`,
+        ]
+      : []),
     `- Unmapped supported PIDs: ${report.summary.unmappedSupportedPids}`,
     `- Cartridge-relevant available: ${report.summary.cartridgeRelevantAvailable}`,
     "",
@@ -279,6 +290,7 @@ export class DiscoveryService {
       mode03Dtcs: raw.modes.mode03Dtcs.supported,
       mode07Pending: raw.modes.mode07Pending.supported,
       vin: raw.modes.vin.supported,
+      ...(raw.modes.vin.value ? { vinRead: raw.modes.vin.value } : {}),
       unmappedSupportedPids: unmappedSupportedPids.length,
       cartridgeRelevantAvailable,
     };

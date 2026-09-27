@@ -122,7 +122,7 @@ export interface ObdCapabilityReport {
     mode03Dtcs: { supported: SupportFlag };
     mode07Pending: { supported: SupportFlag };
     mode06: { supportedMids: string[]; unsupportedMids: string[]; unknownMids: string[] };
-    vin: { supported: SupportFlag };
+    vin: { supported: SupportFlag; value?: string | null };
   };
   manualOnlyPids: string[];
 }
@@ -195,6 +195,8 @@ export interface DiscoveryForensicsReport {
     mode03Dtcs: SupportFlag;
     mode07Pending: SupportFlag;
     vin: SupportFlag;
+    /** Mode 09 string when the adapter returned a 17-character VIN. Absent means none was read. */
+    vinRead?: string | null;
     unmappedSupportedPids: number;
     cartridgeRelevantAvailable: number;
   };

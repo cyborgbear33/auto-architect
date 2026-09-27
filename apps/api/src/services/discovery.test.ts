@@ -103,6 +103,22 @@ describe("DiscoveryService", () => {
     expect(list).toHaveLength(2);
   });
 
+  it("passes a bus VIN through without saving it as the vehicle identity", async () => {
+    await discovery.record(
+      sampleReport(JEEP, {
+        modes: {
+          ...sampleReport(JEEP).modes,
+          vin: { supported: true, value: "1GCHK23U03F123456" },
+        },
+      }),
+    );
+    const forensics = await discovery.getForensics(JEEP);
+    expect(forensics?.summary.vinRead).toBe("1GCHK23U03F123456");
+    expect(forensics?.markdown).toContain("not saved until the operator records it");
+    const vehicle = await vehicles.getOrThrow(JEEP);
+    expect(vehicle.vin).toBeUndefined();
+  });
+
   it("returns null forensics when nothing recorded", async () => {
     expect(await discovery.getForensics(JEEP)).toBeNull();
   });

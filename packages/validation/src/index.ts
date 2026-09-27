@@ -269,7 +269,14 @@ export const ObdCapabilityReportSchema = z.object({
       unsupportedMids: z.array(z.string()),
       unknownMids: z.array(z.string()),
     }),
-    vin: z.object({ supported: SupportFlagSchema }),
+    vin: z.object({
+      supported: SupportFlagSchema,
+      value: z
+        .string()
+        .regex(/^[A-HJ-NPR-Z0-9]{17}$/)
+        .nullable()
+        .optional(),
+    }),
   }),
   manualOnlyPids: z.array(z.string()),
 });

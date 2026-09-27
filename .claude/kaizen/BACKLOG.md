@@ -14,4 +14,6 @@ The 2026-09-27 maintainability item shipped: [PID threshold](evidence/pid-thresh
 
 The 2026-09-27 research item shipped: [scan comparison](evidence/scan-compare-evidence.md).
 
+The 2026-09-27 research item shipped: [bus-reported VIN](evidence/bus-vin-evidence.md).
+
 No open entries.

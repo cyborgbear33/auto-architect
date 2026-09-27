@@ -13,6 +13,8 @@ Last refreshed: 2026-09-27, derived from: `docs/AI_HANDOFF.md`, `docs/ARCHITECTU
 | Product | Category | Last scanned | Takeaway |
 | --- | --- | --- | --- |
 | Innova RepairSolutions 2 | Consumer OBD app plus a repair-information service | 2026-09-27 | It saves scans and shows the one from before a repair next to the one after. Most of its other headlines (national fix odds, parts store, warranty) do not fit this console. |
+| TopDon TopScan | Pocket scan tool and phone app | 2026-09-27 | AutoVIN and a before/after diagnostic report are the pieces that fit. Full-system bidirectional service functions do not. |
+| OBD Fusion | Phone OBD app for ELM-class adapters | 2026-09-27 | Mode 09 vehicle info (VIN and calibration IDs) and shared diagnostic reports fit the evidence rule. Calculated fuel economy and GPS trip maps need a separate decision. |
 
 ## Tier 1 — strong fit
 
@@ -23,8 +25,24 @@ Evidence: Innova’s app page says “Easily view scans pre & post repair” (ht
 Fit note: The comparison is stored evidence, not a new fault class. It matches the rule that a claim shows why.
 Added: 2026-09-27 (kaizen-research: scanning Innova RepairSolutions 2)
 Shipped: 2026-09-27 on Diagnosis. See `.claude/kaizen/evidence/scan-compare-evidence.md`.
+Corroborated: 2026-09-27 by TopDon TopScan, which “creates before-and-after comparisons” of fault codes and live data (https://www.topdon.us/products/topscan).
+
+### Record the VIN the adapter read [apps/web-ui]
+Seen in: TopDon TopScan AutoVIN (https://www.topdon.us/products/topscan); OBD Fusion Mode 09 vehicle information, including the VIN (https://apps.apple.com/us/app/obd-fusion/id650684932); OBDLink’s Vehicle Info tab, which lists Mode $09 (https://support.obdlink.com/support/solutions/articles/43000712521-get-started-with-monitors).
+Opportunity: Discovery records whether VIN mode is supported. The gateway can read the VIN. The dossier still asks the operator to type it, and a blank field stays blank.
+Evidence: `read_vin` in `apps/obd-gateway/obd_gateway/client.py` queries the VIN command. `discover_capabilities` stores `supported` only. The dossier copy says empty OBD evidence never invents a VIN.
+Fit note: Showing the string the bus returned is evidence. The operator records it. A short or illegal string is dropped, not stored as identity.
+Added: 2026-09-27 (kaizen-research: scanning TopDon TopScan and OBD Fusion)
+Shipped: 2026-09-27. See `.claude/kaizen/evidence/bus-vin-evidence.md`.
 
 ## Tier 2 — plausible, needs scoping
+
+### Calculated fuel economy when speed and airflow are both present [apps/web-ui]
+Seen in: OBD Fusion and the OBDLink app, which estimate MPG, L/100 km, or km/L from live data (https://www.obdsoftware.net/software/obdfusion and https://play.google.com/store/apps/details?id=OCTech.Mobile.Applications.OBDLink).
+Opportunity: This console shows the PIDs and does not show a fuel-economy figure.
+Evidence: No fuel-economy calculation in the web UI or gateway. A figure that assumes a stoichiometric ratio would be a guessed number.
+Fit note: Worth a later look only if both speed and mass-airflow are on the scan and the formula is labeled as calculated.
+Added: 2026-09-27 (kaizen-research: scanning OBD Fusion)
 
 ### Manufacturer maintenance intervals by mileage [packages/ontology]
 Seen in: Innova RepairSolutions 2, “Upcoming Maintenance” — the maker’s recommended intervals, from the help article https://help.repairsolutions.com/article/2295-about-repairsolutions2.
@@ -34,6 +52,20 @@ Fit note: Useful next to the dossier, but only with a sourced interval table. Gu
 Added: 2026-09-27 (kaizen-research: scanning Innova RepairSolutions 2)
 
 ## Tier 3 — speculative, noted only
+
+### Bidirectional service functions and one-tap code clear [apps/obd-gateway]
+Seen in: TopDon TopScan — oil reset, throttle adaptation, EPB, bidirectional control, and one-click code clearing (https://www.topdon.us/products/topscan).
+Opportunity: Actuators and maintenance resets from the phone.
+Evidence: `docs/FUTURE_FEATURES.md` keeps bidirectional UDS and flashing out of scope until an explicit project. Diagnosis already hides clear-codes behind a hold.
+Fit note: Conflicts with both boundaries.
+Added: 2026-09-27 (kaizen-research: scanning TopDon TopScan)
+
+### GPS trip maps and 0–60 timing [apps/web-ui]
+Seen in: OBD Fusion — map a route, trip meters, and 0–60 / quarter-mile timing (https://apps.apple.com/us/app/obd-fusion/id650684932).
+Opportunity: A driving log with location and acceleration times.
+Evidence: This console’s drive sessions store OBD batches, not GPS. Acceleration timing is not a fault claim.
+Fit note: Outside the diagnostic job. Not recommended.
+Added: 2026-09-27 (kaizen-research: scanning OBD Fusion)
 
 ### Twelve-month repair probability [apps/web-ui]
 Seen in: Innova RepairSolutions 2, “Predicted Repairs” — a statistical probability of repairs in the next 12 months, from the same help article.
@@ -54,3 +86,4 @@ Added: 2026-09-27 (kaizen-research: scanning Innova RepairSolutions 2)
 | Date | Product scanned | Method | Found | Tiered | Promoted to backlog | Rejected (reasons) |
 | --- | --- | --- | --- | --- | --- | --- |
 | 2026-09-27 | Innova RepairSolutions 2 | Web search and the Innova app page plus the RepairSolutions help article, cross-checked against `docs/FUTURE_FEATURES.md` and the code | 8 | 4 (1 / 1 / 2) | 1 (pre/post scan comparison) | 4 (TSBs and recalls already have a campaigns page; live recordings are drive sessions; DTC wording is the dictionary and narration; an oil/battery/brake/TPMS “health” tile would treat missing enhanced data as a status) |
+| 2026-09-27 | TopDon TopScan and OBD Fusion | Web search of the TopDon product page, the OBD Fusion site and App Store listing, and the OBDLink monitors article as corroboration | 7 | 4 (1 / 1 / 2) | 1 (bus-reported VIN) | 4 (before/after reports already shipped; state readiness is already not a legal smog cert; one-tap clear conflicts with the hold; GPS maps and 0–60 times are not diagnosis) |

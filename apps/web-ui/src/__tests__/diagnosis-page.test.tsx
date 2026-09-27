@@ -133,6 +133,7 @@ afterEach(() => {
   vi.clearAllMocks();
   vi.mocked(api.listProblems).mockResolvedValue([]);
   vi.mocked(api.listObservationBatches).mockResolvedValue([]);
+  vi.mocked(api.getDiscovery).mockRejectedValue(new FakeApiError("No discovery", 404));
 });
 
 function renderDiagnosis() {
@@ -329,5 +330,20 @@ describe("Diagnosis", () => {
     renderDiagnosis();
     expect(await screen.findByText("Scans could not be loaded.")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "What changed between scans" })).toBeNull();
+  });
+
+  it("offers to record a VIN the bus returned and does not save it until asked", async () => {
+    vi.mocked(api.getDiscovery).mockResolvedValue({
+      summary: { vinRead: "1GCHK23U03F123456" },
+    } as Awaited<ReturnType<typeof api.getDiscovery>>);
+    renderDiagnosis();
+    expect(await screen.findByText(/The adapter read this VIN from the bus/)).toBeInTheDocument();
+    expect(api.patchVehicleIdentity).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Record this VIN" }));
+    await waitFor(() =>
+      expect(api.patchVehicleIdentity).toHaveBeenCalledWith("veh:jeep-renegade-2015-latitude", {
+        vin: "1GCHK23U03F123456",
+      }),
+    );
   });
 });

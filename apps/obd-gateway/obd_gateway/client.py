@@ -8,6 +8,7 @@ OBDLink MX+ plugged in.
 from __future__ import annotations
 
 import logging
+import re
 from datetime import UTC, datetime
 from typing import Any
 
@@ -56,6 +57,17 @@ def _call_or_attr(obj: Any, name: str) -> str | None:
     except Exception:  # noqa: BLE001 — adapter quirks must not abort discovery
         return None
     return str(value) if value is not None else None
+
+
+_VIN_RE = re.compile(r"^[A-HJ-NPR-Z0-9]{17}$")
+
+
+def normalize_reported_vin(raw: object) -> str | None:
+    """Keep a Mode 09 VIN only when it is 17 characters and uses the ISO alphabet."""
+    text = str(raw).strip().upper().replace(" ", "")
+    if not _VIN_RE.fullmatch(text):
+        return None
+    return text
 
 
 def _freeze_dtc_code(value: Any) -> str | None:
@@ -285,7 +297,9 @@ class ObdGatewayClient:
         if not conn.supports(obd.commands.VIN):
             return None
         response = conn.query(obd.commands.VIN)
-        return None if response.is_null() else str(response.value)
+        if response.is_null():
+            return None
+        return normalize_reported_vin(response.value)
 
     def discover_capabilities(self, *, vehicle_id: str) -> dict[str, Any]:
         """Probe ECU/adapter support for gateway-seeded OBD modes — no value dump."""
@@ -311,6 +325,7 @@ class ObdGatewayClient:
         )
         mode07 = conn.supports(obd.commands.GET_CURRENT_DTC)
         vin_supported = conn.supports(obd.commands.VIN)
+        vin_value = self.read_vin() if vin_supported else None
 
         port = getattr(conn, "port_name", None) or self.config.obd_port
         protocol_id = _call_or_attr(conn, "protocol_id")
@@ -340,7 +355,7 @@ class ObdGatewayClient:
                     "unsupportedMids": mode06_unsupported,
                     "unknownMids": [],
                 },
-                "vin": {"supported": vin_supported},
+                "vin": {"supported": vin_supported, "value": vin_value},
             },
             "manualOnlyPids": sorted(MANUAL_ONLY_PIDS.keys()),
         }

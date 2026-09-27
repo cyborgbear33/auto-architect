@@ -63,6 +63,18 @@ export function VehicleDossierStrip({ vehicleId }: { vehicleId: string }) {
     },
   });
 
+  const busVin = discoveryQ.data?.summary.vinRead?.trim() || null;
+  const recordBusVin = useMutation({
+    mutationFn: () => {
+      if (!busVin) throw new Error("No VIN was read from the bus.");
+      return api.patchVehicleIdentity(vehicleId, { vin: busVin });
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.vehicle(vehicleId) });
+      void qc.invalidateQueries({ queryKey: queryKeys.vehicles() });
+    },
+  });
+
   if (vehicleQ.isLoading) {
     return (
       <section className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
@@ -74,6 +86,7 @@ export function VehicleDossierStrip({ vehicleId }: { vehicleId: string }) {
 
   const vinMissing = !vehicle.vin?.trim();
   const odoMissing = vehicle.odometerMiles === undefined;
+  const busVinDiffers = Boolean(busVin && vehicle.vin && vehicle.vin !== busVin);
 
   return (
     <section className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
@@ -119,6 +132,27 @@ export function VehicleDossierStrip({ vehicleId }: { vehicleId: string }) {
               <span className="text-amber-800">Not recorded — enter before claiming identity</span>
             ) : (
               <span className="font-mono tracking-wide">{vehicle.vin}</span>
+            )}
+            {vinMissing && busVin && (
+              <div className="mt-2">
+                <p>
+                  The adapter read this VIN from the bus:{" "}
+                  <span className="font-mono tracking-wide">{busVin}</span>
+                </p>
+                <button
+                  type="button"
+                  className="mt-1 font-medium text-sky-700 hover:underline disabled:opacity-50"
+                  disabled={recordBusVin.isPending}
+                  onClick={() => recordBusVin.mutate()}
+                >
+                  {recordBusVin.isPending ? "Recording…" : "Record this VIN"}
+                </button>
+              </div>
+            )}
+            {busVinDiffers && (
+              <p className="mt-2 text-amber-800">
+                The bus reported {busVin}. The dossier has {vehicle.vin}. Neither was changed.
+              </p>
             )}
           </dd>
         </div>

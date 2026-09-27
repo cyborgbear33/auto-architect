@@ -239,7 +239,26 @@ def test_discover_capabilities_partitions_mode01_and_mode06():
     assert report["modes"]["mode02FreezeFrame"]["supported"] is True
     assert report["modes"]["mode07Pending"]["supported"] is True
     assert report["modes"]["vin"]["supported"] is True
+    assert report["modes"]["vin"]["value"] is None
     assert "OIL_PRESSURE_PSI" in report["manualOnlyPids"]
+
+
+def test_discover_keeps_a_mode09_vin_and_drops_a_malformed_one():
+    good = FakeConnection(
+        supported={obd.commands.VIN},
+        responses={obd.commands.VIN: "1gchk23u03f123456"},
+    )
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=good)
+    report = client.discover_capabilities(vehicle_id="veh:x")
+    assert report["modes"]["vin"] == {"supported": True, "value": "1GCHK23U03F123456"}
+
+    bad = FakeConnection(
+        supported={obd.commands.VIN},
+        responses={obd.commands.VIN: "NOT-A-VIN"},
+    )
+    client = ObdGatewayClient(GatewayConfig(vehicle_id="veh:x"), connection=bad)
+    report = client.discover_capabilities(vehicle_id="veh:x")
+    assert report["modes"]["vin"] == {"supported": True, "value": None}
 
 
 def test_read_mode06_maps_mid_tid_and_pass_fail():
