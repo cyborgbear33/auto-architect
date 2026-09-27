@@ -16,4 +16,6 @@ The 2026-09-27 research item shipped: [scan comparison](evidence/scan-compare-ev
 
 The 2026-09-27 research item shipped: [bus-reported VIN](evidence/bus-vin-evidence.md).
 
+The 2026-09-27 documentation item shipped: [discover VIN wording](evidence/discover-vin-docs-evidence.md).
+
 No open entries.

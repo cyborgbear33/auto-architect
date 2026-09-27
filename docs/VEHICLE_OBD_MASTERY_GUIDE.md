@@ -22,7 +22,7 @@ Work the chapters in order the first time. After that, jump by need:
 
 1. **Know your vehicle** — correct profile, hardware, protocol expectations
 2. **Ontology** — what meaning the app can honestly attach to bus data
-3. **Discovery** — verify what this ECU + MX+ can expose (support, not values)
+3. **Discovery** — verify what this ECU + MX+ can expose (support flags, not PID values). A valid 17-character VIN may come back with the probe.
 4. **Scan & watch** — gather evidence into Dashboard / Diagnosis
 5. **Operate the console** — read badges, gauges, recommendations, Journal
 6. **Special procedures** — Proxi / Functions when standard OBD is not enough
@@ -151,7 +151,7 @@ Then open **Discovery** in the UI.
 ### After Discovery
 
 1. Note Mode 01 supported vs unsupported vs unknown
-2. Check Mode 06 MID coverage and freeze-frame / VIN flags
+2. Check Mode 06 MID coverage, freeze-frame support, and any VIN the probe read. That VIN is not on the dossier until you record it.
 3. Read hardware notes (gray adapter is context, not a protocol unlock)
 4. Only then run `scan` / `watch` for values
 
@@ -204,6 +204,8 @@ sit behind **Show the evidence**.
 Draft and the case list come first. When two saved scans exist, Diagnosis sets the oldest
 snapshot beside the newest and lists codes and readings that differ. A drive session
 counts as one snapshot. A code missing from the later scan is not proof it is gone.
+When discovery read a 17-character VIN and the dossier is blank, Diagnosis offers
+to record that VIN. It does not save it until you do.
 Complaint chips appear only while a case can
 be drafted. Case filters appear only when more than one case exists. Clearing
 codes stays behind “Consider clearing codes,” and the hold text says why a clear
