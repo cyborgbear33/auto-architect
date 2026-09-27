@@ -1,6 +1,6 @@
 import type { ObservationBatch } from "@auto/semantic-types";
 import { describe, expect, it } from "vitest";
-import { compareScans } from "./scan-compare.ts";
+import { clampScanPair, compareScans } from "./scan-compare.ts";
 
 function batch(overrides: Partial<ObservationBatch> = {}): ObservationBatch {
   return {
@@ -82,5 +82,14 @@ describe("compareScans", () => {
       { code: "P0304", kind: "status", earlierStatus: "pending", laterStatus: "stored" },
       { code: "P0420", kind: "still", earlierStatus: "stored", laterStatus: "stored" },
     ]);
+  });
+});
+
+describe("clampScanPair", () => {
+  it("defaults to the first and last snapshot and refuses a reversed pair", () => {
+    expect(clampScanPair(1, 0, 0)).toBeNull();
+    expect(clampScanPair(3, 0, 2)).toEqual({ earlier: 0, later: 2 });
+    expect(clampScanPair(3, 2, 0)).toEqual({ earlier: 1, later: 2 });
+    expect(clampScanPair(4, 2, 2)).toEqual({ earlier: 2, later: 3 });
   });
 });

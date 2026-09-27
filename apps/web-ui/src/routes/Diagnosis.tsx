@@ -184,7 +184,7 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
         <EvidenceSourceBadge provenance={provenanceQ.data} />
       </div>
 
-      <ScanComparePanel vehicleId={vehicleId} />
+      <ScanComparePanel key={vehicleId} vehicleId={vehicleId} />
 
       {(recognitionQ.isError || problemsQ.isError) && (
         <p role="alert" className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">

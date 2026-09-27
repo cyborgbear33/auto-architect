@@ -59,12 +59,28 @@ function pidMap(batch: ObservationBatch): Map<string, { value: number; unit?: st
   return out;
 }
 
-/** Earliest snapshot against the latest. Null until two snapshots exist. */
-export function compareScans(batches: readonly ObservationBatch[]): ScanComparison | null {
-  const points = scanSnapshots(batches);
-  const earlier = points[0];
-  const later = points[points.length - 1];
-  if (!earlier || !later || earlier === later) return null;
+/**
+ * Keep the earlier index strictly before the later one. Defaults are the
+ * first and last snapshots. Null until two snapshots exist.
+ */
+export function clampScanPair(
+  count: number,
+  earlier: number,
+  later: number,
+): { earlier: number; later: number } | null {
+  if (count < 2) return null;
+  const e = Math.max(0, Math.min(Math.trunc(earlier), count - 2));
+  let l = Math.max(0, Math.min(Math.trunc(later), count - 1));
+  if (l <= e) l = e + 1;
+  return { earlier: e, later: l };
+}
+
+/** One stored snapshot against another. Same snapshot is not a comparison. */
+export function compareSnapshotPair(
+  earlier: ObservationBatch,
+  later: ObservationBatch,
+): ScanComparison | null {
+  if (earlier === later) return null;
 
   const before = dtcMap(earlier);
   const after = dtcMap(later);
@@ -106,4 +122,15 @@ export function compareScans(batches: readonly ObservationBatch[]): ScanComparis
   }
 
   return { earlier, later, codes, readings };
+}
+
+/** Earliest snapshot against the latest. Null until two snapshots exist. */
+export function compareScans(batches: readonly ObservationBatch[]): ScanComparison | null {
+  const points = scanSnapshots(batches);
+  const pair = clampScanPair(points.length, 0, points.length - 1);
+  if (!pair) return null;
+  const earlier = points[pair.earlier];
+  const later = points[pair.later];
+  if (!earlier || !later) return null;
+  return compareSnapshotPair(earlier, later);
 }

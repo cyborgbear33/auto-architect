@@ -323,6 +323,38 @@ describe("Diagnosis", () => {
     expect(screen.getByText(/ENGINE_LOAD: 40 % → 20 %/)).toBeInTheDocument();
     expect(screen.getByText(/not proof it is gone/)).toBeInTheDocument();
     expect(screen.queryByText(/vehicle is healthy/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "Earlier scan" })).toBeNull();
+  });
+
+  it("lets the operator compare a middle scan with the newest instead of the oldest", async () => {
+    vi.mocked(api.listObservationBatches).mockResolvedValue([
+      {
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        capturedAt: "2026-07-19T08:00:00.000Z",
+        source: "simulated",
+        dtcs: [{ code: "P0300", status: "stored" }],
+      },
+      {
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        capturedAt: "2026-07-19T10:00:00.000Z",
+        source: "obd_gateway",
+        dtcs: [{ code: "P0171", status: "stored" }],
+      },
+      {
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        capturedAt: "2026-07-19T12:00:00.000Z",
+        source: "obd_gateway",
+        dtcs: [],
+      },
+    ]);
+    renderDiagnosis();
+    const earlier = await screen.findByRole("combobox", { name: "Earlier scan" });
+    expect(screen.getByText("P0300")).toBeInTheDocument();
+    expect(screen.queryByText("P0171")).toBeNull();
+    fireEvent.change(earlier, { target: { value: "1" } });
+    expect(await screen.findByText("P0171")).toBeInTheDocument();
+    expect(screen.queryByText("P0300")).toBeNull();
+    expect(screen.getByText(/not proof it is gone/)).toBeInTheDocument();
   });
 
   it("says when the scan list fails instead of showing an empty comparison", async () => {

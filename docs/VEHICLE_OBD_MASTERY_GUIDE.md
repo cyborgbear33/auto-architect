@@ -190,7 +190,7 @@ recommendations, drive sessions.
 
 ### Diagnosis
 
-Cases, policy safety holds, solve/draft, verify-after-repair, case timeline.
+Cases, policy safety holds, solve/draft, verify-after-repair, case timeline. When more than two scans are saved, pick the earlier and later snapshot. A code missing from the later scan is not proof it is gone.
 
 ### Discovery
 
