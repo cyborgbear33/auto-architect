@@ -120,6 +120,7 @@ vi.mock("../lib/api.ts", async (importOriginal) => {
       verifyDiagnosticProblem: vi.fn(),
       reopenDiagnosticProblem: vi.fn(),
       requestClearCodesAndDrive: vi.fn(),
+      listObservationBatches: vi.fn().mockResolvedValue([]),
     },
   };
 });
@@ -131,6 +132,7 @@ afterEach(() => {
   resetMockUiState();
   vi.clearAllMocks();
   vi.mocked(api.listProblems).mockResolvedValue([]);
+  vi.mocked(api.listObservationBatches).mockResolvedValue([]);
 });
 
 function renderDiagnosis() {
@@ -293,5 +295,39 @@ describe("Diagnosis", () => {
     fireEvent.click(board().getByRole("button", { name: "Active" }));
     fireEvent.click(await board().findByRole("button", { name: "Abandon" }));
     await waitFor(() => expect(api.abandonDiagnosticProblem).toHaveBeenCalledWith("problem:open"));
+  });
+
+  it("shows what changed between two scans and does not treat a missing code as gone", async () => {
+    vi.mocked(api.listObservationBatches).mockResolvedValue([
+      {
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        capturedAt: "2026-07-19T10:00:00.000Z",
+        source: "simulated",
+        dtcs: [{ code: "P0304", status: "stored" }],
+        pids: [{ pid: "ENGINE_LOAD", value: 40, unit: "%", timestamp: "2026-07-19T10:00:00.000Z" }],
+      },
+      {
+        vehicleId: "veh:jeep-renegade-2015-latitude",
+        capturedAt: "2026-07-19T12:00:00.000Z",
+        source: "simulated",
+        dtcs: [],
+        pids: [{ pid: "ENGINE_LOAD", value: 20, unit: "%", timestamp: "2026-07-19T12:00:00.000Z" }],
+      },
+    ]);
+    renderDiagnosis();
+    expect(
+      await screen.findByRole("heading", { name: "What changed between scans" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("P0304")).toBeInTheDocument();
+    expect(screen.getByText(/ENGINE_LOAD: 40 % → 20 %/)).toBeInTheDocument();
+    expect(screen.getByText(/not proof it is gone/)).toBeInTheDocument();
+    expect(screen.queryByText(/vehicle is healthy/)).not.toBeInTheDocument();
+  });
+
+  it("says when the scan list fails instead of showing an empty comparison", async () => {
+    vi.mocked(api.listObservationBatches).mockRejectedValue(new Error("batches down"));
+    renderDiagnosis();
+    expect(await screen.findByText("Scans could not be loaded.")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "What changed between scans" })).toBeNull();
   });
 });

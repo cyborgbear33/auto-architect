@@ -22,6 +22,7 @@ Opportunity: After a verify drive, this console lists the new batches and the ca
 Evidence: Innova’s app page says “Easily view scans pre & post repair” (https://www.innova.com/pages/repairsolutions2-app). This repo has observation batches, drive sessions, and verify-after-repair, and no pre/post comparison in the UI or API.
 Fit note: The comparison is stored evidence, not a new fault class. It matches the rule that a claim shows why.
 Added: 2026-09-27 (kaizen-research: scanning Innova RepairSolutions 2)
+Shipped: 2026-09-27 on Diagnosis. See `.claude/kaizen/evidence/scan-compare-evidence.md`.
 
 ## Tier 2 — plausible, needs scoping
 

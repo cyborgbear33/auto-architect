@@ -13,6 +13,7 @@ import { KnowledgeGapPanel } from "../components/KnowledgeGapPanel.tsx";
 import { EmptyVehicleState, PageHeader, useSelectedVehicleId } from "../components/Layout.tsx";
 import { LearningCyclePanel } from "../components/LearningCyclePanel.tsx";
 import { fluentForClass } from "../components/NextActionConsole.tsx";
+import { ScanComparePanel } from "../components/ScanComparePanel.tsx";
 import { VehicleDossierStrip } from "../components/VehicleDossierStrip.tsx";
 import { WhatWorkedPanel } from "../components/WhatWorkedPanel.tsx";
 import { ApiError, api, queryKeys } from "../lib/api.ts";
@@ -182,6 +183,8 @@ function VehicleDiagnosis({ vehicleId }: { vehicleId: string }) {
       <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
         <EvidenceSourceBadge provenance={provenanceQ.data} />
       </div>
+
+      <ScanComparePanel vehicleId={vehicleId} />
 
       {(recognitionQ.isError || problemsQ.isError) && (
         <p role="alert" className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">

@@ -201,7 +201,10 @@ sit behind **Show the evidence**.
 
 ### Diagnosis
 
-Draft and the case list come first. Complaint chips appear only while a case can
+Draft and the case list come first. When two saved scans exist, Diagnosis sets the oldest
+snapshot beside the newest and lists codes and readings that differ. A drive session
+counts as one snapshot. A code missing from the later scan is not proof it is gone.
+Complaint chips appear only while a case can
 be drafted. Case filters appear only when more than one case exists. Clearing
 codes stays behind “Consider clearing codes,” and the hold text says why a clear
 is not the next step. What worked, recent activity, and what may go next follow
