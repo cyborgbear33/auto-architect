@@ -23,3 +23,15 @@ Effort: low
 Risk: low
 Dependencies: none
 Added: 2026-09-27 (kaizen-audit: Maintainability / Code Quality)
+
+## Feature research
+
+### Compare the scan before a repair with the scan after [apps/web-ui]
+Status: proposed
+Problem: After a verify drive, the console stores the new batches and the case timeline, but it does not set the opening scan next to the later one and show which codes and readings changed.
+Evidence: Innova RepairSolutions 2 saves scans and tells the operator to view them pre- and post-repair (https://www.innova.com/pages/repairsolutions2-app). This repo has observation batches, drive sessions, and verify-after-repair. A search of the UI and API finds no pre/post comparison.
+Expected value: The operator can see what the repair changed, from the two scans already on file, without treating a missing code as proof the vehicle is healthy.
+Effort: medium
+Risk: low
+Dependencies: none
+Added: 2026-09-27 (kaizen-research: Innova RepairSolutions 2)
