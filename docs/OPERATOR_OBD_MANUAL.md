@@ -35,11 +35,11 @@ curated meaning (dictionaries, cartridges, campaigns).
 
 ## 2. Reference hardware (this garage)
 
-| Item | Spec / note |
-|---|---|
-| Primary adapter | **OBDLink MX+** (Bluetooth ELM327-class; preferred) |
-| Host path | Linux Bluetooth → `/dev/rfcomm*` or USB serial → gateway CLI |
-| Software edge | `apps/obd-gateway` (`scan` / `watch`) → `POST …/observations` |
+| Item            | Spec / note                                                   |
+| --------------- | ------------------------------------------------------------- |
+| Primary adapter | **OBDLink MX+** (Bluetooth ELM327-class; preferred)           |
+| Host path       | Linux Bluetooth → `/dev/rfcomm*` or USB serial → gateway CLI  |
+| Software edge   | `apps/obd-gateway` (`scan` / `watch`) → `POST …/observations` |
 
 ### 2015 Jeep Renegade Latitude 2.4L — access adapter
 
@@ -68,17 +68,17 @@ chains, open unknowns) is
 
 ## 3. What a “full picture” means here
 
-| Layer | Useful for | Status today |
-|---|---|---|
-| Mode 01 live PIDs | Load, trims, temps, O2 voltages, … | Gateway polls a seed set; expandable |
-| Mode 02 freeze frame | Conditions when a DTC set | Gateway populates when ECU has a frame |
-| Mode 03 / 07 DTCs | Stored / pending codes + dictionary text | Primary path |
-| Mode 06 monitors | Catalyst / O2 / EVAP / EGR / … pass-fail | SAE-seed OBDMIDs when ECU supports |
-| Mode 0A permanent DTCs | Survived clear | Thin AT path (`obd_gateway.mode0a`); null → no invent |
-| Drive / watch sessions | Trends over a trip | `watch` + DriveSession when used |
-| Manual PIDs | Oil pressure/level (Jeep MultiAir path) | `--manual-pid` only |
-| Campaigns / TSBs | Known Jeep W80/W84 / TSB cards | Curated JSON, not from the bus |
-| OEM enhanced / UDS | Module dumps, bi-directional | **Out of scope** (see non-goals) |
+| Layer                  | Useful for                               | Status today                                          |
+| ---------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| Mode 01 live PIDs      | Load, trims, temps, O2 voltages, …       | Gateway polls a seed set; expandable                  |
+| Mode 02 freeze frame   | Conditions when a DTC set                | Gateway populates when ECU has a frame                |
+| Mode 03 / 07 DTCs      | Stored / pending codes + dictionary text | Primary path                                          |
+| Mode 06 monitors       | Catalyst / O2 / EVAP / EGR / … pass-fail | SAE-seed OBDMIDs when ECU supports                    |
+| Mode 0A permanent DTCs | Survived clear                           | Thin AT path (`obd_gateway.mode0a`); null → no invent |
+| Drive / watch sessions | Trends over a trip                       | `watch` + DriveSession when used                      |
+| Manual PIDs            | Oil pressure/level (Jeep MultiAir path)  | `--manual-pid` only                                   |
+| Campaigns / TSBs       | Known Jeep W80/W84 / TSB cards           | Curated JSON, not from the bus                        |
+| OEM enhanced / UDS     | Module dumps, bi-directional             | **Out of scope** (see non-goals)                      |
 
 Empty honest scan ≠ healthy. It means nothing was measured or reported.
 
@@ -87,16 +87,22 @@ Empty honest scan ≠ healthy. It means nothing was measured or reported.
 ## 4. Operator workflow (do this every time)
 
 1. **Start the API** (`pnpm dev:api` or Postgres variant if you want durable history).
+
 2. **Open the UI** and select the correct vehicle (Jeep vs Silverado).
+
 3. **Hardware**
+   
    - Jeep: plug gray adapter into the DLC, then MX+ into the gray adapter.
    - Silverado: MX+ into DLC (or your chosen extension).
    - Ignition ON (engine running preferred for many PIDs / monitors).
+
 4. **Pair / bind** Bluetooth if needed (see gateway README). Prefer
    `AUTO_OBD_PORT=/dev/rfcomm0` once bound.
-5. **Leave `AUTO_OBD_PROTOCOL` unset** unless you have proven a forced id.
-6. **Scan** with the **same** `--vehicle-id` as the UI:
 
+5. **Leave `AUTO_OBD_PROTOCOL` unset** unless you have proven a forced id.
+
+6. **Scan** with the **same** `--vehicle-id` as the UI:
+   
    ```bash
    cd apps/obd-gateway
    python -m obd_gateway --vehicle-id veh:jeep-renegade-2015-latitude scan
@@ -106,6 +112,7 @@ Empty honest scan ≠ healthy. It means nothing was measured or reported.
 
 7. **Refresh Dashboard / Diagnosis** — recognition, gauges, FF/Mode 06 panels,
    recommendations.
+
 8. Optional Jeep oil path: `--manual-pid OIL_PRESSURE_PSI=…` /
    `OIL_LEVEL_PCT=…` when the ECU does not expose those as Mode 01.
 
@@ -149,22 +156,29 @@ allow**, then deepen meaning in the ontology — without cloning AlfaOBD.
 ### Phase A — Prove the live pipe (S1)
 
 - [ ] Pair MX+ on Linux with the Jeep + gray adapter; document working
+  
       `AUTO_OBD_PORT` / quirks in a short note here or in the gateway README.
 - [x] Dashboard “Get evidence on file” includes copyable dry-run / live scan /
+  
       watch commands for the selected vehicle id (browser never invents live).
 - [ ] One-shot `scan` → Dashboard shows live/sim source badge, DTCs (with
+  
       dictionary text), gauges.
 - [ ] Confirm freeze frame and Mode 06 appear when the ECU has them (or note
+  
       “none this cycle” honestly).
 - [ ] Repeat a shorter smoke on the Silverado (auto-detect protocol).
 
 ### Phase B — Thorough Mode 01 mapping
 
 - [x] Run gateway `discover` (or simulate) → **Discovery** page shows support
+  
       vs ontology mapping (Phase B kickoff).
 - [ ] After a live Jeep session, log which PIDs in `STANDARD_PID_COMMANDS`
+  
       returned data vs unsupported.
 - [ ] Expand `DEFAULT_PIDS` / dictionary only for PIDs that actually help
+  
       cartridges or operator gauges (no vanity polling).
 - [ ] Keep units grounded in `pid-dictionary.json`.
 
@@ -172,27 +186,33 @@ allow**, then deepen meaning in the ontology — without cloning AlfaOBD.
 
 - [ ] Drive cycles until readiness / Mode 06 tests populate where possible.
 - [ ] Grow `mode06-dictionary.json` only with SAE/ISO OBDMID meaning (never
+  
       invent TID charts).
 - [x] Mode 01 PID $01 STATUS → `imStatus` on observation batches; Dashboard
+  
       I/M panel shows complete/incomplete monitors (not a smog certificate).
 
 ### Phase D — Freeze frame & permanence
 
 - [ ] Capture FF on real DTCs; verify ClassEvidence / report include them.
 - [x] Mode 0A permanent DTCs via thin AT path (`GET_PERMANENT_DTC`); clear
+  
       still gated — never invent permanence from empty Mode 0A.
 
 ### Phase E — Session-grade diagnostics
 
 - [ ] Prefer `watch` + DriveSession for drives; prune PID noise, keep
+  
       FF/Mode06/DTC evidence.
 - [ ] Use Diagnosis draft/solve + recommendations; record outcomes so
+  
       calibration can learn.
 
 ### Phase F — Meaning & OEM depth (off the bus)
 
 - [ ] Fill DTC/PID/Mode 06 dictionaries from J1979/J2012 (and cited TSBs).
 - [ ] Jeep MultiAir / campaigns: keep curated; verify enhanced P1xxx against
+  
       service literature (AlfaOBD may be a *verification* tool, not a required
       runtime dependency).
 - [ ] Silverado Vortec stub: only add GM-specific classes with cited sources.
@@ -213,12 +233,12 @@ After battery death/disconnect (or some module/radio work), FCA next-gen ECUs ca
 lose their handshake with the **BCM** (Proxi master). Classic symptoms: stuck in
 Park, flashing odometer, ABS/traction lights.
 
-| Step | What to do |
-|---|---|
-| Detect | Full-module enhanced scan (AlfaOBD/wiTECH). Note which ECUs report configuration-mismatch / Proxi faults (often TCM). Standard Mode 03 alone is not enough. |
-| Align | AlfaOBD → Jeep → Renegade → Body computer → **PROXI alignment** → Start → follow prompts (often key off → **gray adapter** + MX+ → key on → Finished) → start engine. |
-| Verify | Shift out of Park; odometer steady; mismatch DTCs gone on re-scan. |
-| Log | In Functions: **Start guided run** before/during; **Mark completed** / **failed** after so the Journal keeps a case trail. |
+| Step   | What to do                                                                                                                                                            |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Detect | Full-module enhanced scan (AlfaOBD/wiTECH). Note which ECUs report configuration-mismatch / Proxi faults (often TCM). Standard Mode 03 alone is not enough.           |
+| Align  | AlfaOBD → Jeep → Renegade → Body computer → **PROXI alignment** → Start → follow prompts (often key off → **gray adapter** + MX+ → key on → Finished) → start engine. |
+| Verify | Shift out of Park; odometer steady; mismatch DTCs gone on re-scan.                                                                                                    |
+| Log    | In Functions: **Start guided run** before/during; **Mark completed** / **failed** after so the Journal keeps a case trail.                                            |
 
 Auto-architect does **not** send Proxi commands on the standard OBD path. Full
 step text lives in `packages/ontology/special-procedures.json` and the Functions UI.
@@ -245,25 +265,25 @@ When you want the best picture before trusting recognition:
 
 ## 7. Troubleshooting (short)
 
-| Symptom | Try |
-|---|---|
-| Cannot connect | Ignition on; reseat gray adapter + MX+; re-bind rfcomm; `--verbose` |
-| Empty PIDs | Engine running; widen `--pids` only after a support check |
-| Wrong conclusions | Wrong `--vehicle-id`; simulated batch mistaken for live |
-| No Mode 06 / FF | ECU may not have data this cycle — not a gateway “healthy” claim |
-| Protocol errors (truck) | Clear forced protocol; allow auto-detect |
+| Symptom                                    | Try                                                                  |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| Cannot connect                             | Ignition on; reseat gray adapter + MX+; re-bind rfcomm; `--verbose`  |
+| Empty PIDs                                 | Engine running; widen `--pids` only after a support check            |
+| Wrong conclusions                          | Wrong `--vehicle-id`; simulated batch mistaken for live              |
+| No Mode 06 / FF                            | ECU may not have data this cycle — not a gateway “healthy” claim     |
+| Protocol errors (truck)                    | Clear forced protocol; allow auto-detect                             |
 | Stuck in Park / flashing odo after battery | Functions → Proxi; AlfaOBD + gray adapter — not gateway `scan` alone |
 
 ---
 
 ## 8. Where meaning lives (so the map stays honest)
 
-| Concern | Source of truth |
-|---|---|
-| Vehicle / engine family | `packages/ontology/vehicle-profiles.json` |
-| DTC / PID / Mode 06 text | `*-dictionary.json` |
-| Fault proof | Cartridges + LOGOS realize (API) |
-| Edge read rules | `OBD_EDGE_CONTRACT.md` + gateway |
+| Concern                  | Source of truth                           |
+| ------------------------ | ----------------------------------------- |
+| Vehicle / engine family  | `packages/ontology/vehicle-profiles.json` |
+| DTC / PID / Mode 06 text | `*-dictionary.json`                       |
+| Fault proof              | Cartridges + LOGOS realize (API)          |
+| Edge read rules          | `OBD_EDGE_CONTRACT.md` + gateway          |
 
 When tempted to add a flashy OEM screen: prefer a dictionary row, a cartridge
 rule, or a FUTURE_FEATURES item — not a one-off UI string.

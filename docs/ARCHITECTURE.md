@@ -111,13 +111,13 @@ the store. Handlers do not mutate state except via `ActionService`.
 
 ## 4. Ontology & multi-vehicle selection
 
-| File | Role |
-|---|---|
-| `packages/ontology/dl-ontology.json` | DL TBox: classes, roles, views |
+| File                                      | Role                                        |
+| ----------------------------------------- | ------------------------------------------- |
+| `packages/ontology/dl-ontology.json`      | DL TBox: classes, roles, views              |
 | `packages/ontology/vehicle-profiles.json` | Vehicle → engine family → view + cartridges |
-| `packages/ontology/dtc-dictionary.json` | Curated DTC → description / concept |
-| `packages/ontology/pid-dictionary.json` | Thin SAE J1979 seed: units + Mode 01 hex |
-| `packages/ontology/known-campaigns.json` | W80 / W84 / TSB 05047457A matcher inputs |
+| `packages/ontology/dtc-dictionary.json`   | Curated DTC → description / concept         |
+| `packages/ontology/pid-dictionary.json`   | Thin SAE J1979 seed: units + Mode 01 hex    |
+| `packages/ontology/known-campaigns.json`  | W80 / W84 / TSB 05047457A matcher inputs    |
 
 **Views:**
 
@@ -151,21 +151,21 @@ Catalog/cartridge parity is enforced by `pnpm lint:ontology` and
 
 ## 6. API services
 
-| Service | LOGOS primitive | Responsibility |
-|---|---|---|
-| `RecognitionService` | `realize` | Prove fault classes from observations; never synthesize "Healthy" |
-| `PolicyService` | `reason` | Safety holds (e.g. forbid clear-codes-and-drive) |
-| `SolverService` | `solve` | Rank diagnostic/repair actions |
-| `ForecastService` | `forecast` / trend helpers | Multi-signal trends; optional `sessionId` scope (F4); oil/LTFT/load → recognition |
-| `ActionService` | — | Sole mutation gate + `DecisionRecord` audit (+ knowledge-gap accept/dismiss) |
-| `ObservationService` | — | Ingest batches; provenance; live gauges; retention prune |
-| `DriveSessionService` | — | Start/end/list sessions; simulate upload path |
-| `ReportService` | — | Markdown + print HTML diagnostic reports; last session + Learning section (F10) |
-| `CampaignsService` | — | Match vehicle vs known recalls/TSBs |
-| `RecommendationService` | — | Shortlist from proven classes + matched campaigns/TSBs (R5) |
-| `LearningCycleService` | — | Compose LearningCycle read-model from problems/decisions/calibration (F9) |
-| `KnowledgeGapService` | — | Detect/upsert knowledge-gap proposals; export patch hints (F11) |
-| `VehicleService` | — | Profiles, engine families, view resolution |
+| Service                 | LOGOS primitive            | Responsibility                                                                    |
+| ----------------------- | -------------------------- | --------------------------------------------------------------------------------- |
+| `RecognitionService`    | `realize`                  | Prove fault classes from observations; never synthesize "Healthy"                 |
+| `PolicyService`         | `reason`                   | Safety holds (e.g. forbid clear-codes-and-drive)                                  |
+| `SolverService`         | `solve`                    | Rank diagnostic/repair actions                                                    |
+| `ForecastService`       | `forecast` / trend helpers | Multi-signal trends; optional `sessionId` scope (F4); oil/LTFT/load → recognition |
+| `ActionService`         | —                          | Sole mutation gate + `DecisionRecord` audit (+ knowledge-gap accept/dismiss)      |
+| `ObservationService`    | —                          | Ingest batches; provenance; live gauges; retention prune                          |
+| `DriveSessionService`   | —                          | Start/end/list sessions; simulate upload path                                     |
+| `ReportService`         | —                          | Markdown + print HTML diagnostic reports; last session + Learning section (F10)   |
+| `CampaignsService`      | —                          | Match vehicle vs known recalls/TSBs                                               |
+| `RecommendationService` | —                          | Shortlist from proven classes + matched campaigns/TSBs (R5)                       |
+| `LearningCycleService`  | —                          | Compose LearningCycle read-model from problems/decisions/calibration (F9)         |
+| `KnowledgeGapService`   | —                          | Detect/upsert knowledge-gap proposals; export patch hints (F11)                   |
+| `VehicleService`        | —                          | Profiles, engine families, view resolution                                        |
 
 **FOL atom sanitization:** LOGOS `reason` formula parsing rejects hyphens/colons
 in individual IDs. `PolicyService` uses `folSafeAtom` to rewrite
@@ -212,13 +212,13 @@ No auth today. No OpenAPI export yet (garden has it; auto deferred).
 
 Routes (`apps/web-ui/src/router.tsx`):
 
-| Path | Page |
-|---|---|
-| `/` | Dashboard — DTCs, recognition, oil trend, recommendations |
-| `/diagnosis` | Proven classes, draft/solve problems, safety-hold demo |
-| `/problems/$problemId` | Solution + ranked actions + log repair |
-| `/campaigns` | Recall / TSB matcher |
-| `/journal` | Decision records + JSON/CSV export & import |
+| Path                   | Page                                                      |
+| ---------------------- | --------------------------------------------------------- |
+| `/`                    | Dashboard — DTCs, recognition, oil trend, recommendations |
+| `/diagnosis`           | Proven classes, draft/solve problems, safety-hold demo    |
+| `/problems/$problemId` | Solution + ranked actions + log repair                    |
+| `/campaigns`           | Recall / TSB matcher                                      |
+| `/journal`             | Decision records + JSON/CSV export & import               |
 
 Stack conventions match garden: TanStack Query for server state; Redux for
 durable client UI (`selectedVehicleId`, `debugMode`). There is no shared

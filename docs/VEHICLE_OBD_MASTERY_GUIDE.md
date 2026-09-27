@@ -8,7 +8,7 @@ dealer/OEM tools._
 > **In-app:** select a vehicle → **Guide**. That page personalizes this curriculum
 > for the selected profile and offers Markdown download + printer-friendly Print.
 > This file is the shared source text the API fills with vehicle-specific blocks.
->
+> 
 > **Maintainers:** when you ship major vehicle-profile, ontology, cartridge,
 > scan/discover, or operator-workflow changes, refine this file (and
 > `MasteryGuideService` personalization if needed) in the same change. Triggers:
@@ -80,13 +80,13 @@ Vehicle DLC  →  (optional access adapter)  →  OBDLink MX+  →  host  →  o
 
 Ontology here is curated meaning, not “the car told us everything.”
 
-| Layer | Role |
-|---|---|
-| DTC dictionary | Human text + fault **concepts** for codes we seed |
-| PID dictionary | Units, Mode 01 hex, manual-only flags |
-| Mode 06 dictionary | OBDMID labels / concepts (never invent TID charts) |
-| Cartridges | Perception + framing rules for an engine family |
-| Campaigns / TSBs | Curated recalls & bulletins (not read from the bus) |
+| Layer              | Role                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| DTC dictionary     | Human text + fault **concepts** for codes we seed            |
+| PID dictionary     | Units, Mode 01 hex, manual-only flags                        |
+| Mode 06 dictionary | OBDMID labels / concepts (never invent TID charts)           |
+| Cartridges         | Perception + framing rules for an engine family              |
+| Campaigns / TSBs   | Curated recalls & bulletins (not read from the bus)          |
 | Special procedures | Guided OEM ops (e.g. Proxi) executed **outside** the gateway |
 
 ### Engine family → cartridges
@@ -96,10 +96,8 @@ families (misfire, lean, EVAP, …) may apply broadly; OEM depth is
 family-specific and must stay honest. The Jeep's MultiAir oil-starvation path
 has its own dedicated fault class; the Silverado's `gm-vortec-6.0-stub`
 cartridge instead re-frames two existing SAE-generic classes (knock sensor
-circuit, lean fuel trim) from two corroborated bulletins — 023A is 1999–2002
-and P0332 only (this profile is a 2003); 029A names rough idle and P0300, and
-only says it may apply to this LQ4. It does not yet cover every GM-specific
-failure mode on this engine family, only those two.
+circuit, lean fuel trim) with GM-specific diagnostic order — it does not yet
+cover every GM-specific failure mode on this engine family, only those two.
 The readable map of this truck — identity, the two GM cause chains, and what
 is still unknown — is
 [`silverado-2500hd-field-manual.html`](silverado-2500hd-field-manual.html).
@@ -159,12 +157,12 @@ Then open **Discovery** in the UI.
 
 ## 4. Scan & watch — gather evidence
 
-| Command | Use when |
-|---|---|
-| `scan` | Shop stop — one-shot DTCs, default PIDs, FF, Mode 06 |
-| `watch` | Drive logging — periodic PID batches into a DriveSession |
-| `--simulate` | Lab / CI / UI demos without hardware |
-| `--manual-pid` | Operator-entered values (e.g. Jeep oil pressure/level) |
+| Command        | Use when                                                 |
+| -------------- | -------------------------------------------------------- |
+| `scan`         | Shop stop — one-shot DTCs, default PIDs, FF, Mode 06     |
+| `watch`        | Drive logging — periodic PID batches into a DriveSession |
+| `--simulate`   | Lab / CI / UI demos without hardware                     |
+| `--manual-pid` | Operator-entered values (e.g. Jeep oil pressure/level)   |
 
 Always use the **same** `--vehicle-id` as the UI selection.
 
@@ -185,32 +183,14 @@ Gateway posts `Observation` batches. It never classifies faults itself.
 
 ## 5. Operate the console
 
-The sidebar groups pages by job: **Operate**, **Diagnose**, **Learn**, **Procedures**,
-**Reference**, **History**. On a phone or tablet, open **Menu** — the vehicle name
-stays visible in the top bar. Open **Menu** to switch vehicles. **Technical detail**
-(bottom of the menu) shows monitor ids, ranking scores, and undecided classes.
-
 ### Dashboard (Operate)
 
-Live condition first. The header has one primary action — the next step, the open
-case, or how to scan when nothing is classified yet. The dark card under it says
-why, including the codes that name that step. Guide, report, and refresh stay
-secondary. A pinned procedure stays visible. Live gauges stay up, with units and
-how old the reading is. The full code list, trends, recommendations, and import
-sit behind **Show the evidence**.
+Live condition: DTCs, gauges, freeze frame, Mode 06, recognition narration,
+recommendations, drive sessions.
 
 ### Diagnosis
 
-Draft and the case list come first. When two saved scans exist, Diagnosis sets the oldest
-snapshot beside the newest and lists codes and readings that differ. A drive session
-counts as one snapshot. A code missing from the later scan is not proof it is gone.
-When discovery read a 17-character VIN and the dossier is blank, Diagnosis offers
-to record that VIN. It does not save it until you do.
-Complaint chips appear only while a case can
-be drafted. Case filters appear only when more than one case exists. Clearing
-codes stays behind “Consider clearing codes,” and the hold text says why a clear
-is not the next step. What worked, recent activity, and what may go next follow
-under garage memory. None of that memory proves a new fault.
+Cases, policy safety holds, solve/draft, verify-after-repair, case timeline.
 
 ### Discovery
 
@@ -219,25 +199,7 @@ Capability forensics (this guide’s verification chapter).
 ### Functions
 
 Guided special procedures (Proxi, etc.). Execution is typically an external
-enhanced tool + MX+ — the app tracks the checklist and Journal trail. The open
-procedure shows the current step, what finishing it tells you, and what not to
-skip. Finished and later steps stay collapsed. Procedure ids stay behind
-Technical detail. Star a
-procedure you repeat; it stays at the top of Functions and on the Dashboard
-for any selected vehicle that has that procedure. A star is a shortcut, not
-proof of a fault.
-
-### Problems
-
-Reference lookup of the fault classes this app can name, plus inspection items a
-scan will not see. Filter by medium (air, electricity, mechanical, fluid — oil
-and coolant are fluid) or by inspection system (brakes, chassis). “Can follow
-from” and “can lead to” are other problems in the same catalog. Search, category
-filter, and sort are on the page. **Look up** on a proved class or an open case
-fills that search and, when the problem has one category, that filter. Recalls open
-from a match on the dossier. Discovery opens from Diagnosis when capability has
-not been recorded. A row is
-a definition, not a fault proved on the truck outside.
+enhanced tool + MX+ — the app tracks the checklist and Journal trail.
 
 ### Recalls & TSBs
 

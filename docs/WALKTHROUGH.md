@@ -43,14 +43,14 @@ observations. Prefer copying *patterns* from garden, not garden plant vocabulary
 
 > **Heuristics and LLMs may propose. The formal engine disposes.**
 
-| Layer | Allowed to… | Forbidden to… |
-|---|---|---|
+| Layer                        | Allowed to…                                        | Forbidden to…                                  |
+| ---------------------------- | -------------------------------------------------- | ---------------------------------------------- |
 | Cartridges / UI / future LLM | Suggest framing, candidate actions, playbook order | Self-certify a fault class or safety clearance |
-| LOGOS `realize` | Prove which fault classes follow from evidence | Invent membership from nothing |
-| LOGOS `reason` | Enforce safety policy (holds) | Be bypassed by a “just this once” UI path |
-| LOGOS `solve` | Rank next actions under constraints | Present guesses as calibrated probabilities |
-| `obd-gateway` | Capture and POST validated observations | Classify faults or call LOGOS |
-| `ActionService` | Mutate state + emit `DecisionRecord` | Be skipped by handlers or the UI |
+| LOGOS `realize`              | Prove which fault classes follow from evidence     | Invent membership from nothing                 |
+| LOGOS `reason`               | Enforce safety policy (holds)                      | Be bypassed by a “just this once” UI path      |
+| LOGOS `solve`                | Rank next actions under constraints                | Present guesses as calibrated probabilities    |
+| `obd-gateway`                | Capture and POST validated observations            | Classify faults or call LOGOS                  |
+| `ActionService`              | Mutate state + emit `DecisionRecord`               | Be skipped by handlers or the UI               |
 
 If the software cannot say *what was observed, which class is proven, what is
 allowed, and why something was ranked* — it is not semantic yet.
@@ -78,12 +78,12 @@ Full lesson + workshop: metalanguage
 
 Vehicles can be understood as interacting **media**:
 
-| Aspect | Roughly | Example proven classes |
-|---|---|---|
-| **Air** | Intake, combustion metering, EVAP, EGR, catalyst, O₂ | Lean/Rich, Evap*, Catalyst*, O2*, Egr* |
-| **Electricity** | Circuits, coils, injectors, heaters, sensors | *CircuitFault, IgnitionCoil*, O2Heater* |
-| **Mechanical** | Timing, correlation, load-driven events | MisfireUnderLoad, CamCrankCorrelationFault |
-| **Fluid** | Oil, coolant, electrohydraulic media | ChronicOilConsumption, Coolant*, MultiAirOilStarvation |
+| Aspect          | Roughly                                              | Example proven classes                                 |
+| --------------- | ---------------------------------------------------- | ------------------------------------------------------ |
+| **Air**         | Intake, combustion metering, EVAP, EGR, catalyst, O₂ | Lean/Rich, Evap*, Catalyst*, O2*, Egr*                 |
+| **Electricity** | Circuits, coils, injectors, heaters, sensors         | *CircuitFault, IgnitionCoil*, O2Heater*                |
+| **Mechanical**  | Timing, correlation, load-driven events              | MisfireUnderLoad, CamCrankCorrelationFault             |
+| **Fluid**       | Oil, coolant, electrohydraulic media                 | ChronicOilConsumption, Coolant*, MultiAirOilStarvation |
 
 Catalog: `packages/ontology/vehicle-system-aspects.json` (aspect summaries,
 per-medium `playbookGuidance`, per-class `playbookNotes`). UI chips + playbook
@@ -141,30 +141,30 @@ Below is the **operator journey** and the surfaces that support it.
 
 ### 3.2 Feature map by concern
 
-| Concern | What shipped | Where to look |
-|---|---|---|
-| Scanning | Simulate + live gateway path; sessions; retention; provenance badges | `obd-gateway`, Dashboard, `ObservationService` |
-| Analysis | Realize + narration + class evidence; DTC/PID/Mode 06 seeds | Recognition, ontology, cartridges |
-| Diagnosis under uncertainty | Outcome calibration; counterfactuals / disqualified UI | Solver, Diagnosis, ProblemDetail |
-| Recommendations | Class + campaign cards; accept/dismiss/convert | `RecommendationService` |
-| Problem tracking | Caseboard filters; verify-after-repair lifecycle | Diagnosis, ActionService |
-| History → better decisions | Trends, LearningCycle, knowledge-gap queue | Forecast, LearningCycle, KnowledgeGap |
-| Reporting | Markdown + print HTML; Learning section | ReportService, Journal |
-| Framing | AEMF aspect chips | `vehicle-system-aspects.json`, Diagnosis |
-| Multi-vehicle | Engine family → view + cartridges | `vehicle-profiles.json`, ADD_A_VEHICLE |
+| Concern                     | What shipped                                                         | Where to look                                  |
+| --------------------------- | -------------------------------------------------------------------- | ---------------------------------------------- |
+| Scanning                    | Simulate + live gateway path; sessions; retention; provenance badges | `obd-gateway`, Dashboard, `ObservationService` |
+| Analysis                    | Realize + narration + class evidence; DTC/PID/Mode 06 seeds          | Recognition, ontology, cartridges              |
+| Diagnosis under uncertainty | Outcome calibration; counterfactuals / disqualified UI               | Solver, Diagnosis, ProblemDetail               |
+| Recommendations             | Class + campaign cards; accept/dismiss/convert                       | `RecommendationService`                        |
+| Problem tracking            | Caseboard filters; verify-after-repair lifecycle                     | Diagnosis, ActionService                       |
+| History → better decisions  | Trends, LearningCycle, knowledge-gap queue                           | Forecast, LearningCycle, KnowledgeGap          |
+| Reporting                   | Markdown + print HTML; Learning section                              | ReportService, Journal                         |
+| Framing                     | AEMF aspect chips                                                    | `vehicle-system-aspects.json`, Diagnosis       |
+| Multi-vehicle               | Engine family → view + cartridges                                    | `vehicle-profiles.json`, ADD_A_VEHICLE         |
 
 ### 3.3 UI routes (mental model)
 
-| Path | Job |
-|---|---|
-| `/` Dashboard | At-a-glance next action + freshness + evidence + recognition + recs |
-| `/diagnosis` | Prove → draft → solve → policy → cycles / gaps |
-| `/problems/$id` | One case deeply (actions, verify, timeline) |
-| `/campaigns` | Recalls / TSBs |
-| `/journal` | Auditable decisions + export/import |
-| `/discovery` | What the ECU/adapter can report |
-| `/functions` | Guided special procedures (external tool) |
-| `/guide` | Mastery curriculum |
+| Path            | Job                                                                 |
+| --------------- | ------------------------------------------------------------------- |
+| `/` Dashboard   | At-a-glance next action + freshness + evidence + recognition + recs |
+| `/diagnosis`    | Prove → draft → solve → policy → cycles / gaps                      |
+| `/problems/$id` | One case deeply (actions, verify, timeline)                         |
+| `/campaigns`    | Recalls / TSBs                                                      |
+| `/journal`      | Auditable decisions + export/import                                 |
+| `/discovery`    | What the ECU/adapter can report                                     |
+| `/functions`    | Guided special procedures (external tool)                           |
+| `/guide`        | Mastery curriculum                                                  |
 
 Normative UX: [`ai/UX_GUIDELINES.md`](ai/UX_GUIDELINES.md) — evidence adjacent to
 every claim; prefer extending these pages over inventing nav.
@@ -221,14 +221,14 @@ handlers mutate only through `ActionService`.
 
 ### 4.3 Stack inventory
 
-| Piece | Tech |
-|---|---|
-| API | Fastify 5, Zod, TypeScript |
-| Store | Memory (dev/default) or Postgres + Drizzle |
-| UI | React 19, Vite, TanStack Router/Query, Redux Toolkit, Tailwind v4 |
-| Edge | Python 3, python-OBD, ELM327 / OBDLink MX+ |
-| Reasoner | LOGOS 0.2.x via `@seam/logos-bridge` |
-| Tooling | pnpm workspaces, Biome, Vitest, pytest, `pnpm healthcheck` |
+| Piece    | Tech                                                              |
+| -------- | ----------------------------------------------------------------- |
+| API      | Fastify 5, Zod, TypeScript                                        |
+| Store    | Memory (dev/default) or Postgres + Drizzle                        |
+| UI       | React 19, Vite, TanStack Router/Query, Redux Toolkit, Tailwind v4 |
+| Edge     | Python 3, python-OBD, ELM327 / OBDLink MX+                        |
+| Reasoner | LOGOS 0.2.x via `@seam/logos-bridge`                              |
+| Tooling  | pnpm workspaces, Biome, Vitest, pytest, `pnpm healthcheck`        |
 
 Env knobs (see AI_HANDOFF): `LOGOS_PYTHON_BIN`, `LOGOS_TRANSPORT`
 (`serve` \| `subprocess`), `STORAGE_DRIVER`, `DATABASE_URL`, `PORT`.
@@ -253,13 +253,13 @@ TBox rules: [`ai/ONTOLOGY_DEV_GUIDE.md`](ai/ONTOLOGY_DEV_GUIDE.md).
 
 ### 4.5 Critical engineering notes (already learned the hard way)
 
-| Issue | Mitigation |
-|---|---|
-| Node stdin → `logos … -` hangs on large payloads | Bridge writes a temp JSON file path |
-| Full-view `realize` + rich ABox hangs (disjunction explosion) | Recognition batches `classify` (size 4) under `scope:auto` |
-| FOL `reason` rejects hyphens/colons in IDs | `PolicyService` sanitizes atoms for reason only |
-| Unknown DTC Zod shapes | Use SAE-shaped codes for gap tests (e.g. `P0899`, not `P9999`) |
-| Knowledge gaps | Propose/export only — never auto-merge into `dl-ontology.json` |
+| Issue                                                         | Mitigation                                                     |
+| ------------------------------------------------------------- | -------------------------------------------------------------- |
+| Node stdin → `logos … -` hangs on large payloads              | Bridge writes a temp JSON file path                            |
+| Full-view `realize` + rich ABox hangs (disjunction explosion) | Recognition batches `classify` (size 4) under `scope:auto`     |
+| FOL `reason` rejects hyphens/colons in IDs                    | `PolicyService` sanitizes atoms for reason only                |
+| Unknown DTC Zod shapes                                        | Use SAE-shaped codes for gap tests (e.g. `P0899`, not `P9999`) |
+| Knowledge gaps                                                | Propose/export only — never auto-merge into `dl-ontology.json` |
 
 ### 4.6 Testing & definition of done
 
@@ -308,14 +308,14 @@ Fixture proof (small TBox, same logic):
 
 ## 6. How the pieces talk (contracts in one table)
 
-| From → To | Contract |
-|---|---|
-| Gateway → API | Zod-validated `Observation` batches; no classification |
-| API → LOGOS | `@auto/logos-bridge` camelCase → wire JSON → `realize`/`reason`/`solve`/`forecast` |
-| Ontology → API | DL JSON + registries; `classesForView`, AEMF, DTC/PID/Mode 06 lookups |
-| Cartridges → Recognition / framing | Perception ABox + problem drafts |
-| UI → API | `@auto/api-client` + queryKeys; mutations via `/api/actions/*` |
-| ActionService → Store | Problems, recommendations, decisions, lifecycle events |
+| From → To                          | Contract                                                                           |
+| ---------------------------------- | ---------------------------------------------------------------------------------- |
+| Gateway → API                      | Zod-validated `Observation` batches; no classification                             |
+| API → LOGOS                        | `@auto/logos-bridge` camelCase → wire JSON → `realize`/`reason`/`solve`/`forecast` |
+| Ontology → API                     | DL JSON + registries; `classesForView`, AEMF, DTC/PID/Mode 06 lookups              |
+| Cartridges → Recognition / framing | Perception ABox + problem drafts                                                   |
+| UI → API                           | `@auto/api-client` + queryKeys; mutations via `/api/actions/*`                     |
+| ActionService → Store              | Problems, recommendations, decisions, lifecycle events                             |
 
 Full surface list: [`ARCHITECTURE.md` §7](ARCHITECTURE.md#7-api-surface-current).
 
@@ -337,14 +337,14 @@ Full surface list: [`ARCHITECTURE.md` §7](ARCHITECTURE.md#7-api-surface-current
 
 ## 8. Reading path after this walkthrough
 
-| If you want… | Read |
-|---|---|
-| To start coding safely | [`AI_HANDOFF.md`](AI_HANDOFF.md) → [`ai/README_FOR_AI.md`](ai/README_FOR_AI.md) |
-| Exact service/API contracts | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
-| What to build next | [`FUTURE_FEATURES.md`](FUTURE_FEATURES.md) |
-| Shared LOGOS theory + workshop | [`LESSON_AGENT_DETERMINISTIC_APPS.md`](LESSON_AGENT_DETERMINISTIC_APPS.md) |
-| Hardware / Modes / Proxi | [`OPERATOR_OBD_MANUAL.md`](OPERATOR_OBD_MANUAL.md), [`ai/OBD_EDGE_CONTRACT.md`](ai/OBD_EDGE_CONTRACT.md) |
-| In-app curriculum | [`VEHICLE_OBD_MASTERY_GUIDE.md`](VEHICLE_OBD_MASTERY_GUIDE.md) |
+| If you want…                   | Read                                                                                                     |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| To start coding safely         | [`AI_HANDOFF.md`](AI_HANDOFF.md) → [`ai/README_FOR_AI.md`](ai/README_FOR_AI.md)                          |
+| Exact service/API contracts    | [`ARCHITECTURE.md`](ARCHITECTURE.md)                                                                     |
+| What to build next             | [`FUTURE_FEATURES.md`](FUTURE_FEATURES.md)                                                               |
+| Shared LOGOS theory + workshop | [`LESSON_AGENT_DETERMINISTIC_APPS.md`](LESSON_AGENT_DETERMINISTIC_APPS.md)                               |
+| Hardware / Modes / Proxi       | [`OPERATOR_OBD_MANUAL.md`](OPERATOR_OBD_MANUAL.md), [`ai/OBD_EDGE_CONTRACT.md`](ai/OBD_EDGE_CONTRACT.md) |
+| In-app curriculum              | [`VEHICLE_OBD_MASTERY_GUIDE.md`](VEHICLE_OBD_MASTERY_GUIDE.md)                                           |
 
 ---
 
