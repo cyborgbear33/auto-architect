@@ -56,6 +56,7 @@ pnpm healthcheck --full      # complete DoD (+ gateway + UI build)
 # or discrete:
 pnpm -r typecheck            # every TS package/app
 pnpm lint                    # Biome format/lint
+pnpm test                    # same as pnpm -r test (each package keeps its own Vitest config)
 pnpm -r test                 # every TS package/app (vitest)
 pnpm obd-gateway:test        # Python (pytest)
 pnpm lint:ontology           # LOGOS well-formedness + catalog/cartridge parity (hard-fails; requires LOGOS)

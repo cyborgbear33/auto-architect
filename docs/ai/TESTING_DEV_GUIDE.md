@@ -8,7 +8,8 @@ pnpm healthcheck --full      # complete DoD (+ gateway + UI build)
 pnpm healthcheck --fast      # alias for sanity
 pnpm -r typecheck
 pnpm lint                    # Biome check
-pnpm -r test                 # all TS packages/apps (vitest)
+pnpm test                    # same as the next line — do not run Vitest from the repo root
+pnpm -r test                 # all TS packages/apps (vitest; web-ui keeps its jsdom config)
 pnpm lint:ontology           # LOGOS well-formedness + narrow catalog/cartridge parity
 pnpm lint:ontology --wellformed-only   # logos ontology --json only (healthcheck uses this)
 pnpm lint:ontology --check   # soft-skip well-formedness if logos missing; still run parity

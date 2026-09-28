@@ -20,4 +20,6 @@ The 2026-09-27 documentation item shipped: [discover VIN wording](evidence/disco
 
 The 2026-09-27 usability item shipped: [choose which scans to compare](evidence/scan-pair-evidence.md).
 
+The 2026-09-27 developer-experience item shipped: [root test command](evidence/root-test-command-evidence.md).
+
 No open entries.
