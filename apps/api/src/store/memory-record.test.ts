@@ -14,6 +14,7 @@ describe("memory observation record", () => {
       make: "Chevrolet",
       model: "Silverado",
       year: 2003,
+      trim: null,
       engineFamily: "gm-gen3-lq4",
     });
     const times = Array.from({ length: 200 }, (_, i) => {
